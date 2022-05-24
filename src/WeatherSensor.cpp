@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// WeatherSensor.ino
+// WeatherSensor.cpp
 //
 // Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver 
 // based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
@@ -7,6 +7,7 @@
 // https://github.com/matthias-bs/WeatherSensor
 //
 // Based on:
+// ---------
 // Bresser5in1-CC1101 by Sean Siford (https://github.com/seaniefs/Bresser5in1-CC1101)
 // RadioLib by Jan Gromeš (https://github.com/jgromes/RadioLib)
 // rtl433 by Benjamin Larsson (https://github.com/merbanan/rtl_433) 
@@ -41,26 +42,30 @@
 // History:
 //
 // 20220523 Created from https://github.com/matthias-bs/Bresser5in1-CC1101
+// 20220524 Moved code to class WeatherSensor
+//
 //
 // ToDo: 
-// - Turn code into a proper library
+// -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "WeatherSensor.h"
 
+#if defined(USE_CC1101)
+static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_GDO0, RADIOLIB_NC, PIN_RECEIVER_GDO2);
+#endif
+#if defined(USE_SX1276)
+static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_DIO0, PIN_RECEIVER_RESET, PIN_RECEIVER_DIO1);
+#endif
 
-WeatherSensor::WeatherSensor(Module* mod): Module(mod) {
+
+WeatherSensor::WeatherSensor() {
     
 }
-    #ifdef USE_CC1101
-        //radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_GDO0, RADIOLIB_NC, PIN_RECEIVER_GDO2);
-    #endif
-    #ifdef USE_SX1276
-        //radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_DIO0, PIN_RECEIVER_RESET, PIN_RECEIVER_DIO1);
-    #endif
 
-WeatherSensor::begin(void) {
+
+int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     Serial.print(RECEIVER_CHIP);
@@ -72,7 +77,7 @@ WeatherSensor::begin(void) {
     // output power:                        10 dBm
     // preamble length:                     40 bits
     #ifdef USE_CC1101
-        int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
+        int state = begin(868.3, 8.21, 57.136417, 270, 10, 32);
     #else
         int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
     #endif
@@ -121,59 +126,65 @@ WeatherSensor::begin(void) {
     Serial.println(" Setup complete - awaiting incoming messages...");   
 }
 
-/*
-// Board   SCK   MOSI  MISO
-// ESP8266 D5    D7    D6
-// ESP32   D18   D23   D19
 
-#define PIN_CC1101_CS       27
-#define PIN_CC1101_GDO0     21
-#define PIN_CC1101_GDO2     33
-#define PIN_RECEIVER_CS     27
-#define PIN_RECEIVER_DIO0   21
-#define PIN_RECEIVER_DIO1   33
-#define PIN_RECEIVER_RESET  32
+uint8_t WeatherSensor::getData(unsigned timeout, bool complete)
+{
+    
+}
 
-#if (defined(USE_CC1101) and defined(USE_SX1276))
-    #error "Either USE_CC1101 OR USE_SX1276 must be defined!"
-#endif
+bool WeatherSensor::getMessage(void)
+{
+    bool decode_ok = false;
+    uint8_t recvData[27];
+    int state = radio.receive(recvData, 27);
+    
+    if (state == RADIOLIB_ERR_NONE) {
+        // Verify last syncword is 1st byte of payload (see setSyncWord() above)
+        if (recvData[0] == 0xD4) {
+            #ifdef _DEBUG_MODE_
+                // print the data of the packet
+                Serial.print(RECEIVER_CHIP);
+                Serial.print(" Data:\t\t");
+                for(int i = 0 ; i < sizeof(recvData) ; i++) {
+                    Serial.printf(" %02X", recvData[i]);
+                }
+                Serial.println();
 
-#if defined(USE_CC1101)
-    #define RECEIVER_CHIP F("[CC1101]")
-    CC1101 radio = new Module(PIN_CC1101_CS, PIN_CC1101_GDO0, RADIOLIB_NC, PIN_CC1101_GDO2);
-#elif defined(USE_SX1276)
-    #define RECEIVER_CHIP F("[SX1276]")
-    SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_DIO0, PIN_RECEIVER_RESET, PIN_RECEIVER_DIO1);
-#else
-    #error "Either USE_CC1101 or USE_SX1276 must be defined!"
-#endif
+                Serial.print(RECEIVER_CHIP);
+                Serial.printf(" R [0x%02X] RSSI: %f\n", recvData[0], radio.getRSSI());
+            #endif
 
-typedef enum DecodeStatus {
-    DECODE_OK, DECODE_PAR_ERR, DECODE_CHK_ERR, DECODE_DIG_ERR
-} DecodeStatus;
+            #ifdef _DEBUG_MODE_
+                printRawdata(&recvData[1], sizeof(recvData));
+            #endif
 
-struct WeatherData_S {
-    uint8_t  s_type;               // only 6-in1
-    uint32_t sensor_id;            // 5-in-1: 1 byte / 6-in-1: 4 bytes
-    uint8_t  chan;                 // only 6-in-1
-    bool     temp_ok;              // only 6-in-1
-    float    temp_c;
-    int      humidity;
-    bool     uv_ok;                // only 6-in-1
-    float    uv;                   // only 6-in-1
-    bool     wind_ok;              // only 6-in-1
-    float    wind_direction_deg;
-    float    wind_gust_meter_sec;
-    float    wind_avg_meter_sec;
-    bool     rain_ok;              // only 6-in-1
-    float    rain_mm;
-    bool     battery_ok;
-    bool     moisture_ok;          // only 6-in-1
-    int      moisture;             // only 6-in-1
-};
+            #ifdef BRESSER_6_IN_1
+                decode_ok = (decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
+            #else
+                decode_ok = (decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
+          
+                // Fixed set of data for 5-in-1 sensor
+                temp_ok     = true;
+                uv_ok       = false;
+                wind_ok     = true;
+                rain_ok     = true;
+                moisture_ok = false;
+            #endif
+        } // if (recvData[0] == 0xD4)
+        else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
+            #ifdef _DEBUG_MODE_
+                Serial.print("T");
+            #endif
+        } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
+        else {
+            // some other error occurred
+            Serial.print(RECEIVER_CHIP);
+            Serial.printf(" Receive failed - failed, code %d\n", state);
+        }
+    } // if (state == RADIOLIB_ERR_NONE)
+    return decode_ok;
+}
 
-typedef struct WeatherData_S WeatherData;
-*/
 
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
@@ -297,6 +308,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 }
 #endif
 
+
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_6in1.c
 //
@@ -401,10 +413,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     // temperature, humidity, shared with rain counter, only if valid BCD digits
     temp_ok  = msg[12] <= 0x99 && (msg[13] & 0xf0) <= 0x90;
     int temp_raw   = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-    float temp_c   = temp_raw * 0.1f;
+    float temp     = temp_raw * 0.1f;
     if (temp_raw > 600)
-        temp_c = (temp_raw - 1000) * 0.1f;
-    temp_c   = temp_c;
+        temp = (temp_raw - 1000) * 0.1f;
+    temp_c   = temp;
     humidity = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
     // apparently ff0(1) if not available
@@ -446,173 +458,3 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     return DECODE_OK;
 }
 #endif
-
-/*
-void setup() {    
-    Serial.begin(115200);
-
-    // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
-    // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
-    Serial.print(RECEIVER_CHIP);
-    Serial.println(" Initializing ... ");
-    // carrier frequency:                   868.3 MHz
-    // bit rate:                            8.22 kbps
-    // frequency deviation:                 57.136417 kHz
-    // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276)
-    // output power:                        10 dBm
-    // preamble length:                     40 bits
-    #ifdef USE_CC1101
-        int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
-    #else
-        int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
-    #endif
-    if (state == RADIOLIB_ERR_NONE) {
-        Serial.println("success!");
-        state = radio.setCrcFiltering(false);
-        if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error disabling crc filtering: [%d]\n", state);
-            
-            while (true)
-                ;
-        }
-        state = radio.fixedPacketLengthMode(27);
-        if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error setting fixed packet length: [%d]\n", state);
-            while (true)
-                ;
-        }
-        // Preamble: AA AA AA AA AA
-        // Sync is: 2D D4 
-        // Preamble 40 bits but the CC1101 doesn't allow us to set that
-        // so we use a preamble of 32 bits and then use the sync as AA 2D
-        // which then uses the last byte of the preamble - we recieve the last sync byte
-        // as the 1st byte of the payload.
-        #ifdef USE_CC1101
-            state = radio.setSyncWord(0xAA, 0x2D, 0, false);
-        #else
-            uint8_t sync_word[] = {0xAA, 0x2D};
-            state = radio.setSyncWord(sync_word, 2);
-        #endif
-        if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error setting sync words: [%d]\n", state);
-            while (true)
-                ;
-        }
-    } else {
-        Serial.print(RECEIVER_CHIP);
-        Serial.printf(" Error initialising: [%d]\n", state);
-        while (true)
-            ;
-    }
-    Serial.print(RECEIVER_CHIP);
-    Serial.println(" Setup complete - awaiting incoming messages...");
-}
-
-#ifdef _DEBUG_MODE_
-void printRawdata(uint8_t *msg, uint8_t msgSize) {
-    Serial.println("Raw Data:");
-    for (uint8_t p = 0 ; p < msgSize ; p++) {
-        Serial.printf("%02X ", msg[p]);
-    }
-    Serial.printf("\n");
-}
-#endif
-
-void loop() {
-    uint8_t recvData[27];
-    int state = radio.receive(recvData, 27);
-    
-    if (state == RADIOLIB_ERR_NONE) {
-        // Verify last syncword is 1st byte of payload (see above)
-        if (recvData[0] == 0xD4) {
-            #ifdef _DEBUG_MODE_
-                // print the data of the packet
-                Serial.print(RECEIVER_CHIP);
-                Serial.print(" Data:\t\t");
-                for(int i = 0 ; i < sizeof(recvData) ; i++) {
-                    Serial.printf(" %02X", recvData[i]);
-                }
-                Serial.println();
-
-                Serial.print(RECEIVER_CHIP);
-                Serial.printf(" R [0x%02X] RSSI: %f\n", recvData[0], radio.getRSSI());
-            #endif
-
-            // Decode the information - skip the last sync byte we use to check the data is OK
-            WeatherData weatherData = { 0 };
-
-            #ifdef _DEBUG_MODE_
-                printRawdata(&recvData[1], sizeof(recvData));
-            #endif
-
-            #ifdef BRESSER_6_IN_1
-                bool decode_ok = (decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1, &weatherData) == DECODE_OK);
-            #else
-                bool decode_ok = (decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1, &weatherData) == DECODE_OK);
-          
-                // Fixed set of data for 5-in-1 sensor
-                weatherData.temp_ok     = true;
-                weatherData.uv_ok       = false;
-                weatherData.wind_ok     = true;
-                weatherData.rain_ok     = true;
-                weatherData.moisture_ok = false;
-            #endif
-          
-            if (decode_ok) {
-                const float METERS_SEC_TO_MPH = 2.237;
-                printf("Id: [%8X] Battery: [%s] ",
-                    weatherData.sensor_id,
-                    weatherData.battery_ok ? "OK " : "Low");
-                #ifdef BRESSER_6_IN_1
-                    printf("Ch: [%d] ", weatherData.chan);
-                #endif
-                if (weatherData.temp_ok) {
-                    printf("Temp: [%5.1fC] Hum: [%3d%%] ",
-                        weatherData.temp_c,
-                        weatherData.humidity);
-                } else {
-                    printf("Temp: [---.-C] Hum: [---%%] ");
-                }
-                if (weatherData.wind_ok) {
-                    printf("Wind max: [%4.1fm/s] Wind avg: [%4.1fm/s] Wind dir: [%5.1fdeg] ",
-                         weatherData.wind_gust_meter_sec,
-                         weatherData.wind_avg_meter_sec,
-                         weatherData.wind_direction_deg);
-                } else {
-                    printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] ");
-                }
-                if (weatherData.rain_ok) {
-                    printf("Rain: [%7.1fmm] ",  
-                        weatherData.rain_mm);
-                } else {
-                    printf("Rain: [-----.-mm] "); 
-                }
-                if (weatherData.moisture_ok) {
-                    printf("Moisture: [%2d%%]",
-                        weatherData.moisture);
-                }
-                printf("\n");
-            } // if (decode_ok)
-            else {
-                #ifdef _DEBUG_MODE_
-                    Serial.print(RECEIVER_CHIP);
-                    Serial.printf(" R [0x%02X] RSSI: %f\n", recvData[0], radio.getRSSI());
-                #endif
-            }
-        } // if (recvData[0] == 0xD4)
-        else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
-            #ifdef _DEBUG_MODE_
-                Serial.print("T");
-            #endif
-        } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
-        else {
-            // some other error occurred
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Receive failed - failed, code %d\n", state);
-        }
-    } // if (state == RADIOLIB_ERR_NONE)
-} // loop()
-*/

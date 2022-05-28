@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
 **Debug Log**
 If applicable, add log file to help explain your problem.
 
-** Embedded Device (please complete the following information):**
+**Embedded Device (please complete the following information):**
  - Board: [brand/model/version] 
  - Arduino Version: [e.g. 1.0.6]
  - Library Version [e.g. 22]

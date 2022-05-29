@@ -123,7 +123,9 @@ int16_t WeatherSensor::begin(void) {
             ;
     }
     Serial.print(RECEIVER_CHIP);
-    Serial.println(" Setup complete - awaiting incoming messages...");   
+    Serial.println(" Setup complete - awaiting incoming messages...");
+    
+    return state;
 }
 
 

@@ -71,7 +71,7 @@
 
 
 // Enable LED indicating successful data reception
-//#define LED_EN
+#define LED_EN
 
 // LED pin
 #define LED_GPIO 2
@@ -82,21 +82,14 @@
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL  300000  // sleep interval [ms]
-#define SLEEP_EN        true   // enable sleep mode (see notes above!)
+#define SLEEP_EN        true    // enable sleep mode (see notes above!)
 
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
 
-// Print misc debug output
-//#define _DEBUG_MODE_
-
-// Enable RadioLib internal debug messages
-//#define RADIOLIB_DEBUG
-
 
 #include <Arduino.h>
-#include <RadioLib.h>
 
 #if defined(ESP32)
     #include <WiFi.h>
@@ -108,25 +101,17 @@
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
+#include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
-#if defined(ESP32)
-    #define PIN_CC1101_CS   5
-    #define PIN_CC1101_GDO0 27
-    #define PIN_CC1101_GDO2 4
-#elif defined(ESP8266)
-    #define PIN_CC1101_CS   15
-    #define PIN_CC1101_GDO0 4
-    #define PIN_CC1101_GDO2 5
-#endif
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20220527";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20220529";
 
 //enable only one of these below, disabling both is fine too.
 // #define CHECK_CA_ROOT
 // #define CHECK_PUB_KEY
 // Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
-#define CHECK_FINGERPRINT
+// #define CHECK_FINGERPRINT
 ////--------------------------////
 
 #include "secrets.h"
@@ -199,7 +184,7 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20220527";
     #endif
 #endif
 
-WeatherSensor weatherSensor(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RESET, PIN_RECEIVER_GPIO);
+WeatherSensor weatherSensor;
 
 
 // MQTT topics
@@ -380,16 +365,15 @@ void publishWeatherdata(bool complete)
 
 
 //
-// Publish CC1101 radio receiver info as JSON string via MQTT
+// Publish radio receiver info as JSON string via MQTT
 // - RSSI: Received Signal Strength Indication
-// - LQI:  Link Quality Indicator
 //
 void publishRadio(void)
 {
     DynamicJsonDocument payload(PAYLOAD_SIZE);
     char mqtt_payload[PAYLOAD_SIZE];
     
-    payload["rssi"] = weatherSensor.moisture;
+    payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
     Serial.println(mqtt_payload);
     client.publish(MQTT_PUB_RADIO, &mqtt_payload[0], false, 0);
@@ -466,9 +450,8 @@ void loop() {
     #ifdef _DEBUG_MQTT_
         decode_ok = genWeatherdata();
     #else
-
-        // Attempt to receive entire data set with timeout of 30s and callback function
-        decode_ok = weatherSensor.getData(30000, true, &clientLoopWrapper);
+        // Attempt to receive entire data set with timeout of 48s
+        decode_ok = weatherSensor.getData(48000, true, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN

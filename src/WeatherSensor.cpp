@@ -528,8 +528,9 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
         int wavg_raw                  = (msg[9] >> 4) * 100 + (msg[9] & 0x0f) * 10 + (msg[8] & 0x0f);
         wind_avg_meter_sec_fp1  = wavg_raw;
         wind_avg_meter_sec      = wavg_raw * 0.1f;
-        wind_direction_deg_fp1  = ((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4);
-        wind_direction_deg      = wind_direction_deg * 1.0f;
+        int wind_dir_raw        = ((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4);
+        wind_direction_deg_fp1  = wind_dir_raw * 10; 
+        wind_direction_deg      = wind_dir_raw * 1.0f;
     }
 
     // rain counter, inverted 3 bytes BCD, shared with temp/hum, only if valid digits

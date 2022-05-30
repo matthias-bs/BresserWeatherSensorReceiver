@@ -43,6 +43,9 @@
 //
 // 20220523 Created from https://github.com/matthias-bs/Bresser5in1-CC1101
 // 20220524 Moved code to class WeatherSensor
+// 20220526 Implemented getData(), changed debug output to macros,
+//          changed radio transceiver instance to member variable of WeatherSensor
+//          (with initialization of 'Module' from WeatherSensor's constructor parameters)
 //
 //
 // ToDo: 
@@ -53,23 +56,17 @@
 #include "WeatherSensor.h"
 
 #if defined(USE_CC1101)
-static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_GDO0, RADIOLIB_NC, PIN_RECEIVER_GDO2);
+    static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
 #endif
 #if defined(USE_SX1276)
-static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_DIO0, PIN_RECEIVER_RESET, PIN_RECEIVER_DIO1);
+    static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
-
-
-WeatherSensor::WeatherSensor() {
-    
-}
-
 
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
-    Serial.print(RECEIVER_CHIP);
-    Serial.println(" Initializing ... ");
+    DEBUG_PRINT(RECEIVER_CHIP);
+    DEBUG_PRINTLN(" Initializing ... ");
     // carrier frequency:                   868.3 MHz
     // bit rate:                            8.22 kbps
     // frequency deviation:                 57.136417 kHz
@@ -77,24 +74,27 @@ int16_t WeatherSensor::begin(void) {
     // output power:                        10 dBm
     // preamble length:                     40 bits
     #ifdef USE_CC1101
-        int state = begin(868.3, 8.21, 57.136417, 270, 10, 32);
+        int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
     #else
         int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
     #endif
     if (state == RADIOLIB_ERR_NONE) {
-        Serial.println("success!");
+        DEBUG_PRINTLN("success!");
         state = radio.setCrcFiltering(false);
         if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error disabling crc filtering: [%d]\n", state);
-            
+            DEBUG_PRINT(RECEIVER_CHIP);
+            DEBUG_PRINT(" Error disabling crc filtering: [");
+            DEBUG_PRINT(state);
+            DEBUG_PRINTLN("]");
             while (true)
                 ;
         }
         state = radio.fixedPacketLengthMode(27);
         if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error setting fixed packet length: [%d]\n", state);
+            DEBUG_PRINT(RECEIVER_CHIP);
+            DEBUG_PRINT(" Error setting fixed packet length: [");
+            DEBUG_PRINT(state);
+            DEBUG_PRINTLN("]");
             while (true)
                 ;
         }
@@ -111,49 +111,102 @@ int16_t WeatherSensor::begin(void) {
             state = radio.setSyncWord(sync_word, 2);
         #endif
         if (state != RADIOLIB_ERR_NONE) {
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Error setting sync words: [%d]\n", state);
+            DEBUG_PRINT(RECEIVER_CHIP);
+            DEBUG_PRINT(" Error setting sync words: [");
+            DEBUG_PRINT(state);
+            DEBUG_PRINTLN("]");
             while (true)
                 ;
         }
     } else {
-        Serial.print(RECEIVER_CHIP);
-        Serial.printf(" Error initialising: [%d]\n", state);
+        DEBUG_PRINT(RECEIVER_CHIP);
+        DEBUG_PRINT(" Error initialising: [");
+        DEBUG_PRINT(state);
+        DEBUG_PRINTLN("]");
         while (true)
             ;
     }
-    Serial.print(RECEIVER_CHIP);
-    Serial.println(" Setup complete - awaiting incoming messages...");
+    DEBUG_PRINT(RECEIVER_CHIP);
+    DEBUG_PRINTLN(" Setup complete - awaiting incoming messages...");
+    rssi = radio.getRSSI();
     
     return state;
 }
 
 
-uint8_t WeatherSensor::getData(unsigned timeout, bool complete)
+bool WeatherSensor::getData(uint32_t timeout, bool complete, void (*func)())
 {
+    const uint32_t timestamp = millis();
+    bool decode_ok = false;
+    bool saved_temp_ok = false;
+    bool saved_rain_ok = false;
     
+    while ((millis() - timestamp) < timeout) { 
+        decode_ok = getMessage();
+    
+        // Callback function (see https://www.geeksforgeeks.org/callbacks-in-c/)
+        if (func) {
+            (*func)();
+        }
+        
+        // BRESSER_6_IN_1 message contains either temperature OR rain data
+        // Save what has already been sent
+        if (decode_ok) {
+            if (!complete) {
+                // Incomplete data data is sufficient
+                return true;
+            }
+            if (temp_ok) {
+                saved_temp_ok = true;
+            }
+            if (rain_ok) {
+                saved_rain_ok = true;
+            }
+            if (saved_temp_ok && saved_rain_ok) {
+                // Data complete
+                return true;
+            }
+        } // if (decode_ok)
+    } //  while ((millis() - timestamp) < timeout)
+    
+    // Timeout
+    return false;
 }
+
 
 bool WeatherSensor::getMessage(void)
 {
     bool decode_ok = false;
     uint8_t recvData[27];
+    
+    // Receive data
+    //     1. flush RX buffer
+    //     2. switch to RX mode
+    //     3. wait for expected RX packet or timeout [~500us in this configuration]
+    //     4. flush RX buffer
+    //     5. switch to standby
     int state = radio.receive(recvData, 27);
+    rssi = radio.getRSSI();
     
     if (state == RADIOLIB_ERR_NONE) {
         // Verify last syncword is 1st byte of payload (see setSyncWord() above)
         if (recvData[0] == 0xD4) {
             #ifdef _DEBUG_MODE_
                 // print the data of the packet
-                Serial.print(RECEIVER_CHIP);
-                Serial.print(" Data:\t\t");
+                DEBUG_PRINT(RECEIVER_CHIP);
+                DEBUG_PRINT(" Data:\t\t");
                 for(int i = 0 ; i < sizeof(recvData) ; i++) {
-                    Serial.printf(" %02X", recvData[i]);
+                    DEBUG_PRINT((recvData[0] < 16) ? " 0" : " ");
+                    DEBUG_PRINT(recvData[i], HEX);
                 }
-                Serial.println();
+                DEBUG_PRINTLN();
 
-                Serial.print(RECEIVER_CHIP);
-                Serial.printf(" R [0x%02X] RSSI: %f\n", recvData[0], radio.getRSSI());
+                DEBUG_PRINT(RECEIVER_CHIP);
+                DEBUG_PRINT(" R [");
+                DEBUG_PRINT((recvData[0] < 16) ? "0" : "");
+                DEBUG_PRINT(recvData[0], HEX);
+                DEBUG_PRINT("] RSSI: ");
+                DEBUG_PRINTLN(radio.getRSSI(), 1);
             #endif
 
             #ifdef _DEBUG_MODE_
@@ -175,18 +228,40 @@ bool WeatherSensor::getMessage(void)
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
             #ifdef _DEBUG_MODE_
-                Serial.print("T");
+                DEBUG_PRINT("T");
             #endif
         } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
         else {
             // some other error occurred
-            Serial.print(RECEIVER_CHIP);
-            Serial.printf(" Receive failed - failed, code %d\n", state);
+            DEBUG_PRINT(RECEIVER_CHIP);
+            DEBUG_PRINT(" Receive failed - code: ");
+            DEBUG_PRINTLN(state);
         }
     } // if (state == RADIOLIB_ERR_NONE)
+    
     return decode_ok;
 }
 
+//
+// Generate sample data for testing
+//
+bool WeatherSensor::genMessage(void)
+{
+    sensor_id               = 0xff;
+    temp_c                  = 22.2f;
+    humidity                = 55;
+    wind_direction_deg      = 111.1;
+    wind_direction_deg_fp1  = 1111;
+    wind_gust_meter_sec     = 4.4f;
+    wind_gust_meter_sec_fp1 = 44;
+    wind_avg_meter_sec      = 3.3f;
+    wind_avg_meter_sec_fp1  = 33;
+    rain_mm                 = 9.9f;
+    battery_ok              = true;
+    rssi                    = 88.8;
+
+    return true;
+}
 
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
@@ -261,7 +336,8 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
     // First 13 bytes need to match inverse of last 13 bytes
     for (unsigned col = 0; col < msgSize / 2; ++col) {
         if ((msg[col] ^ msg[col + 13]) != 0xff) {
-            Serial.printf("%s: Parity wrong at %u\n", __func__, col);
+            DEBUG_PRINT("Parity wrong at column ");
+            DEBUG_PRINTLN(col);
             return DECODE_PAR_ERR;
         }
     }
@@ -279,8 +355,14 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
     }
 
     if (bitsSet != expectedBitsSet) {
-       Serial.printf("%s: Checksum wrong actual [%02X] != expected [%02X]\n", __func__, bitsSet, expectedBitsSet);
-       return DECODE_CHK_ERR;
+        DEBUG_PRINT("Checksum wrong - actual [");
+        DEBUG_PRINT((bitsSet < 16) ? "0" : "");
+        DEBUG_PRINT(bitsSet, HEX);
+        DEBUG_PRINT("] != [");
+        DEBUG_PRINT((expectedBits < 16) ? "0" : "");
+        DEBUG_PRINT(expectedBitsSet, HEX);
+        DEBUG_PRINTLN("]");
+        return DECODE_CHK_ERR;
     }
 
     sensor_id = msg[14];
@@ -389,10 +471,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     int digest  = lfsr_digest16(&msg[2], 15, 0x8810, 0x5412);
     if (chkdgst != digest) {
         //decoder_logf(decoder, 2, __func__, "Digest check failed %04x vs %04x", chkdgst, digest);
-        Serial.print("Digest check failed - ");
-        Serial.print(chkdgst, HEX);
-        Serial.print(" vs ");
-        Serial.println(digest, HEX);
+        DEBUG_PRINT("Digest check failed - ");
+        DEBUG_PRINT(chkdgst, HEX);
+        DEBUG_PRINT(" vs ");
+        DEBUG_PRINTLN(digest, HEX);
         return DECODE_DIG_ERR;
     }
     // Checksum, add with carry
@@ -400,10 +482,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     int sum    = add_bytes(&msg[2], 16); // msg[2] to msg[17]
     if ((sum & 0xff) != 0xff) {
         //decoder_logf(decoder, 2, __func__, "Checksum failed %04x vs %04x", chksum, sum);
-        Serial.print("Checksum failed - ");
-        Serial.print(chksum, HEX);
-        Serial.print(" vs ");
-        Serial.println(sum, HEX);
+        DEBUG_PRINT("Checksum failed - ");
+        DEBUG_PRINT(chksum, HEX);
+        DEBUG_PRINT(" vs ");
+        DEBUG_PRINTLN(sum, HEX);
         return DECODE_CHK_ERR;
     }
 
@@ -411,20 +493,24 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     s_type     = (msg[6] >> 4); // 1: weather station, 2: indoor?, 4: soil probe
     battery_ok = (msg[6] >> 3) & 1;
     chan       = (msg[6] & 0x7);
-
+    
     // temperature, humidity, shared with rain counter, only if valid BCD digits
     temp_ok  = msg[12] <= 0x99 && (msg[13] & 0xf0) <= 0x90;
-    int temp_raw   = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-    float temp     = temp_raw * 0.1f;
-    if (temp_raw > 600)
-        temp = (temp_raw - 1000) * 0.1f;
-    temp_c   = temp;
-    humidity = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
-
+    if (temp_ok) {
+        int temp_raw   = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
+        float temp   = temp_raw * 0.1f;
+        if (temp_raw > 600)
+            temp = (temp_raw - 1000) * 0.1f;
+    
+        temp_c   = temp;
+        humidity = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+    }
     // apparently ff0(1) if not available
     uv_ok  = msg[15] <= 0x99 && (msg[16] & 0xf0) <= 0x90;
-    int uv_raw = ((msg[15] & 0xf0) >> 4) * 100 + (msg[15] & 0x0f) * 10 + ((msg[16] & 0xf0) >> 4);
-    uv   = uv_raw * 0.1f;
+    if (uv_ok) {
+        int uv_raw = ((msg[15] & 0xf0) >> 4) * 100 + (msg[15] & 0x0f) * 10 + ((msg[16] & 0xf0) >> 4);
+        uv   = uv_raw * 0.1f;
+    }
     int flags  = (msg[16] & 0x0f); // looks like some flags, not sure
 
     //int unk_ok  = (msg[16] & 0xf0) == 0xf0;
@@ -435,28 +521,81 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     msg[8] ^= 0xff;
     msg[9] ^= 0xff;
     wind_ok = (msg[7] <= 0x99) && (msg[8] <= 0x99) && (msg[9] <= 0x99);
-
-    int gust_raw              = (msg[7] >> 4) * 100 + (msg[7] & 0x0f) * 10 + (msg[8] >> 4);
-    wind_gust_meter_sec = gust_raw * 0.1f;
-    int wavg_raw              = (msg[9] >> 4) * 100 + (msg[9] & 0x0f) * 10 + (msg[8] & 0x0f);
-    wind_avg_meter_sec  = wavg_raw * 0.1f;
-    wind_direction_deg  = (((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4)) * 1.0f;
+    if (wind_ok) {
+        int gust_raw                  = (msg[7] >> 4) * 100 + (msg[7] & 0x0f) * 10 + (msg[8] >> 4);
+        wind_gust_meter_sec_fp1 = gust_raw;
+        wind_gust_meter_sec     = gust_raw * 0.1f;
+        int wavg_raw                  = (msg[9] >> 4) * 100 + (msg[9] & 0x0f) * 10 + (msg[8] & 0x0f);
+        wind_avg_meter_sec_fp1  = wavg_raw;
+        wind_avg_meter_sec      = wavg_raw * 0.1f;
+        wind_direction_deg_fp1  = ((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4);
+        wind_direction_deg      = wind_direction_deg * 1.0f;
+    }
 
     // rain counter, inverted 3 bytes BCD, shared with temp/hum, only if valid digits
     msg[12] ^= 0xff;
     msg[13] ^= 0xff;
     msg[14] ^= 0xff;
     rain_ok   = msg[12] <= 0x99 && msg[13] <= 0x99 && msg[14] <= 0x99;
-    int rain_raw    = (msg[12] >> 4) * 100000 + (msg[12] & 0x0f) * 10000
-            + (msg[13] >> 4) * 1000 + (msg[13] & 0x0f) * 100
-            + (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
-    rain_mm   = rain_raw * 0.1f;
-
+    if (rain_ok) {
+        int rain_raw    = (msg[12] >> 4) * 100000 + (msg[12] & 0x0f) * 10000
+                + (msg[13] >> 4) * 1000 + (msg[13] & 0x0f) * 100
+                + (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+        rain_mm   = rain_raw * 0.1f;
+    }
     moisture_ok = false;
     if (s_type == 4 && temp_ok && humidity >= 1 && humidity <= 16) {
         moisture_ok = true;
-        moisture = moisture_map[humidity - 1];
+        if (moisture_ok) {
+            moisture = moisture_map[humidity - 1];
+        }
     }
     return DECODE_OK;
+
 }
 #endif
+
+//
+// Convert wind speed from meters per second to Beaufort
+// [https://en.wikipedia.org/wiki/Beaufort_scale]
+//
+uint8_t WeatherSensor::windspeed_ms_to_bft(float ms)
+{
+  if (ms < 5.5) {
+    // 0..3 Bft
+    if (ms < 0.9) {
+      return 0;
+    } else if (ms < 1.6) {
+      return 1;
+    } else if (ms < 3.4) {
+      return 2;
+    } else {
+      return 3;
+    }
+  } else if (ms < 17.2) { 
+    // 4..7 Bft
+    if (ms < 8) {
+      return 4;
+    } else if (ms < 10.8) {
+      return 5;
+    } else if (ms < 13.9) {
+      return 6;
+    } else {
+      return 7;
+    }
+  } else {
+    // 8..12 Bft
+    if (ms < 20.8) {
+      return 8;
+    } else if (ms < 24.5) {
+      return 9;
+    } else if (ms < 28.5) {
+      return 10;
+    } else if (ms < 32.7) {
+      return 11;
+    } else {
+      return 12;
+    }
+  }
+}
+

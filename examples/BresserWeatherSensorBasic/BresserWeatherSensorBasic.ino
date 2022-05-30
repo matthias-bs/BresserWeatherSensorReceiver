@@ -50,10 +50,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
+#include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
 
-WeatherSensor weatherSensor(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RESET, PIN_RECEIVER_GPIO);
+WeatherSensor weatherSensor;
 
 
 void setup() {    
@@ -72,38 +73,38 @@ void loop()
     
     if (decode_ok) {
         const float METERS_SEC_TO_MPH = 2.237;
-        printf("Id: [%8X] Battery: [%s] ",
+        Serial.printf("Id: [%8X] Battery: [%s] ",
             weatherSensor.sensor_id,
             weatherSensor.battery_ok ? "OK " : "Low");
         #ifdef BRESSER_6_IN_1
-            printf("Ch: [%d] ", weatherSensor.chan);
+            Serial.printf("Ch: [%d] ", weatherSensor.chan);
         #endif
         if (weatherSensor.temp_ok) {
-            printf("Temp: [%5.1fC] Hum: [%3d%%] ",
+            Serial.printf("Temp: [%5.1fC] Hum: [%3d%%] ",
                 weatherSensor.temp_c,
                 weatherSensor.humidity);
         } else {
-            printf("Temp: [---.-C] Hum: [---%%] ");
+            Serial.printf("Temp: [---.-C] Hum: [---%%] ");
         }
         if (weatherSensor.wind_ok) {
-            printf("Wind max: [%4.1fm/s] Wind avg: [%4.1fm/s] Wind dir: [%5.1fdeg] ",
+            Serial.printf("Wind max: [%4.1fm/s] Wind avg: [%4.1fm/s] Wind dir: [%5.1fdeg] ",
                     weatherSensor.wind_gust_meter_sec,
                     weatherSensor.wind_avg_meter_sec,
                     weatherSensor.wind_direction_deg);
         } else {
-            printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] ");
+            Serial.printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] ");
         }
         if (weatherSensor.rain_ok) {
-            printf("Rain: [%7.1fmm] ",  
+            Serial.printf("Rain: [%7.1fmm] ",  
                 weatherSensor.rain_mm);
         } else {
-            printf("Rain: [-----.-mm] "); 
+            Serial.printf("Rain: [-----.-mm] "); 
         }
         if (weatherSensor.moisture_ok) {
-            printf("Moisture: [%2d%%]",
+            Serial.printf("Moisture: [%2d%%] ",
                 weatherSensor.moisture);
         }
-        printf("\n");
+        Serial.printf("RSSI: [%4.1fdBm]\n", weatherSensor.rssi);
     }
     delay(100);
 } // loop()

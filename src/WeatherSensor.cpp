@@ -137,12 +137,15 @@ int16_t WeatherSensor::begin(void) {
 bool WeatherSensor::getData(uint32_t timeout, bool complete, void (*func)())
 {
     const uint32_t timestamp = millis();
-    bool decode_ok = false;
     bool saved_temp_ok = false;
     bool saved_rain_ok = false;
+    bool decode_status = false;
+    
+    // Reset status flag 
+    data_ok = false;
     
     while ((millis() - timestamp) < timeout) { 
-        decode_ok = getMessage();
+        decode_status = getMessage();
     
         // Callback function (see https://www.geeksforgeeks.org/callbacks-in-c/)
         if (func) {
@@ -151,10 +154,10 @@ bool WeatherSensor::getData(uint32_t timeout, bool complete, void (*func)())
         
         // BRESSER_6_IN_1 message contains either temperature OR rain data
         // Save what has already been sent
-        if (decode_ok) {
+        if (decode_status) {
             if (!complete) {
                 // Incomplete data data is sufficient
-                return true;
+                return data_ok = true;
             }
             if (temp_ok) {
                 saved_temp_ok = true;
@@ -164,9 +167,9 @@ bool WeatherSensor::getData(uint32_t timeout, bool complete, void (*func)())
             }
             if (saved_temp_ok && saved_rain_ok) {
                 // Data complete
-                return true;
+                return data_ok = true;
             }
-        } // if (decode_ok)
+        } // if (decode_status)
     } //  while ((millis() - timestamp) < timeout)
     
     // Timeout
@@ -176,8 +179,10 @@ bool WeatherSensor::getData(uint32_t timeout, bool complete, void (*func)())
 
 bool WeatherSensor::getMessage(void)
 {
-    bool decode_ok = false;
     uint8_t recvData[27];
+    
+    // reset status flag
+    message_ok = false;
     
     // Receive data
     //     1. flush RX buffer
@@ -214,9 +219,9 @@ bool WeatherSensor::getMessage(void)
             #endif
 
             #ifdef BRESSER_6_IN_1
-                decode_ok = (decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
+                message_ok = (decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
             #else
-                decode_ok = (decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
+                message_ok = (decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1) == DECODE_OK);
           
                 // Fixed set of data for 5-in-1 sensor
                 temp_ok     = true;
@@ -239,7 +244,7 @@ bool WeatherSensor::getMessage(void)
         }
     } // if (state == RADIOLIB_ERR_NONE)
     
-    return decode_ok;
+    return message_ok;
 }
 
 //
@@ -260,6 +265,8 @@ bool WeatherSensor::genMessage(void)
     battery_ok              = true;
     rssi                    = 88.8;
 
+    message_ok = true;
+    data_ok    = true;
     return true;
 }
 

@@ -187,6 +187,8 @@ class WeatherSensor {
         bool     battery_ok = false;   // !> battery o.k.
         bool     moisture_ok = false;  // !> moisture o.k. (only 6-in-1)
         int      moisture;             // !> moisture in % (only 6-in-1)
+        bool     message_ok;           // !> status of last getMessage() call (set to 'true' by genMessage() call)
+        bool     data_ok;              // !> status of last getData() call    (set to 'true' by genMessage() call)
         float    rssi;                 // !> received signal strength indicator in dBm
 
         

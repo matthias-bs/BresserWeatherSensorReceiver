@@ -382,13 +382,16 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 
     humidity = (msg[22] & 0x0f) + ((msg[22] & 0xf0) >> 4) * 10;
 
-    wind_direction_deg = ((msg[17] & 0xf0) >> 4) * 22.5f;
+    wind_direction_deg     = ((msg[17] & 0xf0) >> 4) * 22.5f;
+    wind_direction_deg_fp1 = wind_direction_deg * 10; 
 
     int gust_raw = ((msg[17] & 0x0f) << 8) + msg[16];
-    wind_gust_meter_sec = gust_raw * 0.1f;
+    wind_gust_meter_sec_fp1 = gust_raw;
+    wind_gust_meter_sec     = gust_raw * 0.1f;
 
     int wind_raw = (msg[18] & 0x0f) + ((msg[18] & 0xf0) >> 4) * 10 + (msg[19] & 0x0f) * 100;
-    wind_avg_meter_sec = wind_raw * 0.1f;
+    wind_avg_meter_sec_fp1 = wind_raw;
+    wind_avg_meter_sec     = wind_raw * 0.1f;
 
     int rain_raw = (msg[23] & 0x0f) + ((msg[23] & 0xf0) >> 4) * 10 + (msg[24] & 0x0f) * 100;
     rain_mm = rain_raw * 0.1f;

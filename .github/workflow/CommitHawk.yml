@@ -17,5 +17,5 @@ jobs:
     - name: CommitHawk
       uses: jesalg/commit-hawk-action@v1.1
       with:
-        slack_webhook_url: 'https://hooks.slack.com/services/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'
+        slack_webhook_url: 'https://matthias-bs.slack.com/services/B03R3DDSZ9Q'
         slack_message: 'Contents of merbanan/rtl_433/*/bresser_?in1.c were changed'

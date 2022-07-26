@@ -6,6 +6,7 @@ on:
     paths:
       - '/src/devices/bresser_5in1.c'
       - '/src/devices/bresser_6in1.c'
+      - 'src/devices/auriol_4ld5661.c'
 
 jobs:
   hawk:

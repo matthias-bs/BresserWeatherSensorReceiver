@@ -3,6 +3,7 @@
 #define BRESSER_6_IN_1
 
 // Select type of receiver module
+// (RFM95W: USE_SX1276)
 //#define USE_CC1101
 #define USE_SX1276
 

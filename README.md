@@ -63,11 +63,13 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 * Antenna
 
 **Note:**
-The RFM95W supports FSK modulation an thus can be used to receive the weather sensor data.
+The RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
 
-### Antennas and RF Connectors
+## Antennas and RF Connectors
 
-The required antenna depends on the signal path between weather sensor and CC1101 receiver or RFM95W transceiver and LoRaWAN gateway, respectively. Some options are:
+The required antenna depends on the signal path between weather sensor and CC1101 or RFM95W receiver. 
+
+Some options are:
 * wire antenna
 * spring antenna (helical wire coil)
 * rubber antenna

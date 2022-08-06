@@ -53,3 +53,37 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 * use a [2.0mm to 2.54 adapter PCB](https://www.amazon.de/Lazmin-1-27MM-2-54MM-Adapter-Platten-Brett-drahtlose-default/dp/B07V873N52)
 
 **Note 2: Make sure to use the 868MHz version!**
+
+## Adafruit RFM95W LoRa Radio Transceiver Breakout
+
+**Note: Make sure to use the 868MHz version!**
+* [ADA3072](https://www.adafruit.com/product/3072) - 868/915 MHz version
+* [ADA3073](https://www.adafruit.com/product/3073) - 433 MHz version
+* RF connector
+* Antenna
+
+**Note:**
+The RFM95W supports FSK modulation an thus can be used to receive the weather sensor data.
+
+### Antennas and RF Connectors
+
+The required antenna depends on the signal path between weather sensor and CC1101 receiver or RFM95W transceiver and LoRaWAN gateway, respectively. Some options are:
+* wire antenna
+* spring antenna (helical wire coil)
+* rubber antenna
+
+See [Adafruit Tutorial - Antenna Options](https://learn.adafruit.com/adafruit-feather-32u4-radio-with-lora-radio-module/antenna-options) for wire antenna lengths and uFL connector soldering.
+
+The [Data Alliance](https://www.data-alliance.net/mhf-series-mhf1-mhf2-mhf3-mhf4/) website helped to sort out my RF connector confusion:
+
+> Applications of MHF Connectors & Cables
+>
+> The MHF series of RF micro-connectors (mating heights listed below are the maximum):
+> * MHF1 (also known as MHF) has a Mating Height of 2.5mm
+> * MHF2 has a Mating Height of 2.1mm
+> * MHF3 has a Mating Height of 1.6mm
+> * MHF4 has a Mating Height of 1.2mm
+>
+> MHF3 connector is compatible with a W.FL connector while MHF2 connector is equivalent of U.FL connector. The MHF4 cable connector is the smallest while MHF1 connector is the largest which is comparable to a U.FL connector.
+
+Personally I prefer the SMA connector over the uFL connector -  but be aware of the (usual) male/female connector types and the normal/reverse polarity types. See [SMA vs RP-SMA what is the difference?](https://forum.digikey.com/t/sma-vs-rp-sma-what-is-the-difference/550) by Digikey.

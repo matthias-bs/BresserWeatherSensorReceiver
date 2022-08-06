@@ -11,7 +11,7 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. Select 
 
 Configure the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276` in `WeatherSensor.h`.
 
-## Examples
+## SW Examples
 ### [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT)
 
 MQTT publications:
@@ -33,3 +33,7 @@ $ via LWT
 **Dashboard with [IoT MQTT Panel](https://snrlab.in/iot/iot-mqtt-panel-user-guide) (Example)**
 
 ![IoTMQTTPanel_Bresser_5-in-1](https://user-images.githubusercontent.com/83612361/158457786-516467f9-2eec-4726-a9bd-36e9dc9eec5c.png)
+
+# HW Examples
+
+

@@ -48,4 +48,24 @@ float calcheatindex(float celsius, float humidity);
  * \returns perceptive temperature in °C
  */
 float perceptive_temperature(float celsius, float windspeed, float humidity);
+
+/*!
+ * \brief Convert wind direction from Degrees to text (N, NNE, NE, ...)
+ *
+ * \param dir Wind direction in degrees
+ * \param buf buffer for result (4 characters required)
+ * 
+ * \returns pointer to buffer
+ */
+char * winddir_flt_to_str(float dir, char * buf);
+
+/*!
+ * \brief Converts wind speed from Meters per Second to Beaufort.
+ * 
+ * \param ms Wind speed in m/s.
+ * 
+ * \returns Wind speed in bft.
+*/        
+uint8_t windspeed_ms_to_bft(float ms);
+
 #endif

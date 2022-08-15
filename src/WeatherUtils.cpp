@@ -1,8 +1,78 @@
 #include <math.h>
+#include <string>
+#include <string.h>
 #include "WeatherUtils.h"
 
+// Mapping of wind direction in degrees to text
+// Note: add your localization as desired
+const std::string COMPASS_POINTS[17] = {
+    "N", "NNE", "NE", "ENE", 
+    "E", "ESE", "SE", "SSE",
+    "S", "SSW", "SW", "WSW",
+    "W", "WNW", "NW", "NNW",
+    "N"
+};
+
 /*
+ * Convert wind direction from Degrees to text (N, NNE, NE, ...)
+ */
+char * winddir_flt_to_str(float dir, char * buf)
+{
+    std::string point = COMPASS_POINTS[(int)((dir + 11.25)/22.5)];
+    strncpy(buf, point.c_str(), sizeof(buf-1));
+    buf[point.length()] = '\0';
+    
+    return buf;
+};
+
+//
+// Convert wind speed from meters per second to Beaufort
+// [https://en.wikipedia.org/wiki/Beaufort_scale]
+//
+uint8_t windspeed_ms_to_bft(float ms)
+{
+  if (ms < 5.5) {
+    // 0..3 Bft
+    if (ms < 0.9) {
+      return 0;
+    } else if (ms < 1.6) {
+      return 1;
+    } else if (ms < 3.4) {
+      return 2;
+    } else {
+      return 3;
+    }
+  } else if (ms < 17.2) { 
+    // 4..7 Bft
+    if (ms < 8) {
+      return 4;
+    } else if (ms < 10.8) {
+      return 5;
+    } else if (ms < 13.9) {
+      return 6;
+    } else {
+      return 7;
+    }
+  } else {
+    // 8..12 Bft
+    if (ms < 20.8) {
+      return 8;
+    } else if (ms < 24.5) {
+      return 9;
+    } else if (ms < 28.5) {
+      return 10;
+    } else if (ms < 32.7) {
+      return 11;
+    } else {
+      return 12;
+    }
+  }
+}
+
+/*
+ * ------------------------------------------------------------------------------------------------
  * From https://www.brunweb.de/wetterstation-berechnungen/
+ * ------------------------------------------------------------------------------------------------
  */
 
 /*

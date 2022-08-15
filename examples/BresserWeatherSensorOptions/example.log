@@ -1,0 +1,147 @@
+16:31:35.893 -> 1 -- Flags: (none)
+16:31:35.893 -> --------------------------------------------------------------
+16:31:35.893 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.1C] Hum: [ 95%] Wind max: [ 0.0m/s] Wind avg: [ 0.0m/s] Wind dir: [ 90.0deg] Rain: [-----.-mm] Moisture: [--%] RSSI: [ -88.5dBm]
+16:31:52.300 -> 
+16:31:52.300 -> 2 -- Flags: DATA_COMPLETE
+16:31:52.300 -> --------------------------------------------------------------
+16:31:52.300 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 28.1C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -54.0dBm]
+16:32:37.314 -> 
+16:32:37.314 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:32:37.314 -> ----------------------------------------------------------------
+16:32:37.314 -> Sensor timeout
+16:33:22.429 -> 
+16:33:22.429 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:33:22.462 -> -------------------------------------------------------------
+16:33:22.462 -> Sensor timeout
+16:34:07.481 -> 
+16:34:07.481 -> 5 -- Flags: DATA_ALL_SLOTS
+16:34:07.481 -> --------------------------------------------------------------
+16:34:07.514 -> Sensor timeout
+16:34:11.890 -> 
+16:34:11.890 -> 1 -- Flags: (none)
+16:34:11.890 -> --------------------------------------------------------------
+16:34:11.890 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 0.8m/s] Wind avg: [ 0.8m/s] Wind dir: [ 97.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -90.0dBm]
+16:34:52.668 -> 
+16:34:52.668 -> 2 -- Flags: DATA_COMPLETE
+16:34:52.668 -> --------------------------------------------------------------
+16:34:52.668 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 0.7m/s] Wind avg: [ 0.7m/s] Wind dir: [ 97.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -92.5dBm]
+16:34:52.701 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 28.0C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:35:35.898 -> 
+16:35:35.898 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:35:35.898 -> ----------------------------------------------------------------
+16:35:35.898 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.3C] Hum: [ 95%] Wind max: [ 1.6m/s] Wind avg: [ 1.4m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -93.5dBm]
+16:35:52.804 -> 
+16:35:52.804 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:35:52.804 -> -------------------------------------------------------------
+16:35:52.804 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 1.2m/s] Wind avg: [ 1.2m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -95.5dBm]
+16:35:52.804 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 28.0C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -54.0dBm]
+16:36:37.987 -> 
+16:36:37.987 -> 5 -- Flags: DATA_ALL_SLOTS
+16:36:37.987 -> --------------------------------------------------------------
+16:36:37.987 -> Sensor timeout
+16:36:47.896 -> 
+16:36:47.896 -> 1 -- Flags: (none)
+16:36:47.896 -> --------------------------------------------------------------
+16:36:47.896 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.4C] Hum: [ 95%] Wind max: [ 1.1m/s] Wind avg: [ 1.1m/s] Wind dir: [247.0deg] Rain: [-----.-mm] Moisture: [--%] RSSI: [ -95.5dBm]
+16:37:32.947 -> 
+16:37:32.947 -> 2 -- Flags: DATA_COMPLETE
+16:37:32.947 -> --------------------------------------------------------------
+16:37:32.947 -> Sensor timeout
+16:37:53.034 -> 
+16:37:53.034 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:37:53.067 -> ----------------------------------------------------------------
+16:37:53.067 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 0.7m/s] Wind avg: [ 0.7m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -91.0dBm]
+16:37:53.067 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 28.0C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:38:35.869 -> 
+16:38:35.869 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:38:35.869 -> -------------------------------------------------------------
+16:38:35.869 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.5C] Hum: [ 94%] Wind max: [ 0.9m/s] Wind avg: [ 0.9m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -95.5dBm]
+16:38:59.868 -> 
+16:38:59.868 -> 5 -- Flags: DATA_ALL_SLOTS
+16:38:59.868 -> --------------------------------------------------------------
+16:38:59.868 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.6C] Hum: [ 94%] Wind max: [ 0.9m/s] Wind avg: [ 0.9m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -88.0dBm]
+16:38:59.901 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 28.0C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:39:11.868 -> 
+16:39:11.868 -> 1 -- Flags: (none)
+16:39:11.868 -> --------------------------------------------------------------
+16:39:11.868 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.6C] Hum: [ 94%] Wind max: [ 1.2m/s] Wind avg: [ 1.2m/s] Wind dir: [247.0deg] Rain: [-----.-mm] Moisture: [--%] RSSI: [ -89.0dBm]
+16:39:35.868 -> 
+16:39:35.868 -> 2 -- Flags: DATA_COMPLETE
+16:39:35.868 -> --------------------------------------------------------------
+16:39:35.868 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.6C] Hum: [ 94%] Wind max: [ 1.0m/s] Wind avg: [ 1.0m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -89.5dBm]
+16:39:53.305 -> 
+16:39:53.305 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:39:53.305 -> ----------------------------------------------------------------
+16:39:53.305 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 1.3m/s] Wind avg: [ 1.3m/s] Wind dir: [247.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -91.0dBm]
+16:39:53.338 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.9C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:40:35.870 -> 
+16:40:35.870 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:40:35.870 -> -------------------------------------------------------------
+16:40:35.870 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 19.7C] Hum: [ 94%] Wind max: [ 1.0m/s] Wind avg: [ 1.0m/s] Wind dir: [246.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -93.0dBm]
+16:41:20.923 -> 
+16:41:20.923 -> 5 -- Flags: DATA_ALL_SLOTS
+16:41:20.923 -> --------------------------------------------------------------
+16:41:20.956 -> Sensor timeout
+16:41:47.876 -> 
+16:41:47.876 -> 1 -- Flags: (none)
+16:41:47.876 -> --------------------------------------------------------------
+16:41:47.876 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 1.1m/s] Wind avg: [ 1.1m/s] Wind dir: [246.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -90.5dBm]
+16:42:32.922 -> 
+16:42:32.922 -> 2 -- Flags: DATA_COMPLETE
+16:42:32.922 -> --------------------------------------------------------------
+16:42:32.922 -> Sensor timeout
+16:43:18.046 -> 
+16:43:18.046 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:43:18.046 -> ----------------------------------------------------------------
+16:43:18.046 -> Sensor timeout
+16:43:53.813 -> 
+16:43:53.813 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:43:53.813 -> -------------------------------------------------------------
+16:43:53.813 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 1.1m/s] Wind avg: [ 1.1m/s] Wind dir: [246.0deg] Rain: [  374.8mm] Moisture: [--%] RSSI: [ -93.0dBm]
+16:43:53.813 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.5C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:44:38.927 -> 
+16:44:38.927 -> 5 -- Flags: DATA_ALL_SLOTS
+16:44:38.927 -> --------------------------------------------------------------
+16:44:38.927 -> Sensor timeout
+16:44:53.943 -> 
+16:44:53.943 -> 1 -- Flags: (none)
+16:44:53.943 -> --------------------------------------------------------------
+16:44:53.943 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.3C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:45:35.878 -> 
+16:45:35.878 -> 2 -- Flags: DATA_COMPLETE
+16:45:35.878 -> --------------------------------------------------------------
+16:45:35.878 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 20.1C] Hum: [ 93%] Wind max: [ 1.1m/s] Wind avg: [ 1.1m/s] Wind dir: [250.0deg] Rain: [  375.2mm] Moisture: [--%] RSSI: [ -90.0dBm]
+16:45:54.045 -> 
+16:45:54.045 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:45:54.045 -> ----------------------------------------------------------------
+16:45:54.078 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [---.-C] Hum: [---%] Wind max: [ 1.2m/s] Wind avg: [ 1.2m/s] Wind dir: [250.0deg] Rain: [  375.2mm] Moisture: [--%] RSSI: [ -94.0dBm]
+16:45:54.078 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.3C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:46:11.847 -> 
+16:46:11.847 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:46:11.847 -> -------------------------------------------------------------
+16:46:11.880 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 20.1C] Hum: [ 93%] Wind max: [ 1.6m/s] Wind avg: [ 1.5m/s] Wind dir: [251.0deg] Rain: [  375.2mm] Moisture: [--%] RSSI: [ -89.5dBm]
+16:46:56.931 -> 
+16:46:56.931 -> 5 -- Flags: DATA_ALL_SLOTS
+16:46:56.931 -> --------------------------------------------------------------
+16:46:56.931 -> Sensor timeout
+16:47:11.846 -> 
+16:47:11.846 -> 1 -- Flags: (none)
+16:47:11.846 -> --------------------------------------------------------------
+16:47:11.879 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 20.1C] Hum: [ 93%] Wind max: [ 1.3m/s] Wind avg: [ 1.3m/s] Wind dir: [250.0deg] Rain: [-----.-mm] Moisture: [--%] RSSI: [ -91.5dBm]
+16:47:47.847 -> 
+16:47:47.847 -> 2 -- Flags: DATA_COMPLETE
+16:47:47.847 -> --------------------------------------------------------------
+16:47:47.847 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 20.2C] Hum: [ 93%] Wind max: [ 1.0m/s] Wind avg: [ 1.0m/s] Wind dir: [250.0deg] Rain: [  375.2mm] Moisture: [--%] RSSI: [ -90.5dBm]
+16:47:54.311 -> 
+16:47:54.311 -> 3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER
+16:47:54.311 -> ----------------------------------------------------------------
+16:47:54.311 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.2C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]
+16:48:39.393 -> 
+16:48:39.393 -> 4 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_SOIL
+16:48:39.393 -> -------------------------------------------------------------
+16:48:39.426 -> Sensor timeout
+16:48:59.839 -> 
+16:48:59.839 -> 5 -- Flags: DATA_ALL_SLOTS
+16:48:59.839 -> --------------------------------------------------------------
+16:48:59.872 -> Id: [39582376] Typ: [1] Battery: [OK ] Ch: [0] Temp: [ 20.2C] Hum: [ 93%] Wind max: [ 0.9m/s] Wind avg: [ 0.9m/s] Wind dir: [250.0deg] Rain: [  375.2mm] Moisture: [--%] RSSI: [ -92.0dBm]
+16:48:59.872 -> Id: [83750871] Typ: [4] Battery: [OK ] Ch: [1] Temp: [ 27.2C] Hum: [---%] Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] Rain: [-----.-mm] Moisture: [ 0%] RSSI: [ -53.5dBm]

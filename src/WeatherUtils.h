@@ -36,7 +36,7 @@ float calcwindchill(float celsius, float windspeed);
 float calcheatindex(float celsius, float humidity);
 
 /*!
- * \brief Calculate perceptive temperature (feels-like temperature)
+ * \brief Calculate perceived temperature (feels-like temperature)
  * 
  * Apply windchill or heat index depending on current data or
  * just return the real temperature.
@@ -45,9 +45,9 @@ float calcheatindex(float celsius, float humidity);
  * \param windspeed wind speed in km/h
  * \param humidity relative humidity in %
  * 
- * \returns perceptive temperature in °C
+ * \returns perceived temperature in °C
  */
-float perceptive_temperature(float celsius, float windspeed, float humidity);
+float perceived_temperature(float celsius, float windspeed, float humidity);
 
 /*!
  * \brief Convert wind direction from Degrees to text (N, NNE, NE, ...)

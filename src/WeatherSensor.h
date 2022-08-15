@@ -43,9 +43,9 @@
 //
 // 20220523 Created from https://github.com/matthias-bs/Bresser5in1-CC1101
 // 20220524 Moved code to class WeatherSensor
-// 20220526 Implemented getData(), changed debug output to macros,
-//          changed radio transceiver instance to member variable of WeatherSensor
-//          (with initialization of 'Module' from WeatherSensor's constructor parameters)
+// 20220526 Implemented getData(), changed debug output to macros
+// 20220815 Added support of multiple sensors
+//          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
 //
 // ToDo: 
 // -
@@ -59,11 +59,9 @@
 #include "WeatherSensorCfg.h"
 #include <RadioLib.h>
 
-#if (defined(BRESSER_5_IN_1) and defined(BRESSER_6_IN_1))
-    #error "Either BRESSER_5_IN_1 OR BRESSER_6_IN_1 must be defined!"
-#endif
+
 #if (not(defined(BRESSER_5_IN_1)) and not(defined(BRESSER_6_IN_1)))
-    #error "Either BRESSER_5_IN_1 or BRESSER_6_IN_1 must be defined!"
+    #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 must be defined!"
 #endif
 
 #if (defined(USE_CC1101) and defined(USE_SX1276))
@@ -88,9 +86,36 @@
 #endif
 
 
+// Sensor Types
+// 1 - Weather Station
+// 2 - Indoor?
+// 4 - Soil Moisture Sensor
+// 9 - Professional Rain Gauge (5-in-1 decoder)
+// ? - Thermo-/Hygro-Sensor
+// ? - Air Quality Sensor
+// ? - Water Leakage Sensor
+// ? - Pool Thermometer
+// ? - Lightning Sensor
+#define SENSOR_TYPE_WEATHER     1 // Weather Station
+#define SENSOR_TYPE_SOIL        4 // Soil Temperature and Moisture (from 6-in-1 decoder)
+#define SENSOR_TYPE_RAIN        9 // Professional Rain Gauge (from 5-in-1 decoder)
+
+
+// Flags for controlling completion of reception in getData()
+#define DATA_COMPLETE           0x1     // only completed slots (as opposed to partially filled) 
+#define DATA_TYPE               0x2     // at least one slot with specific sensor type
+#define DATA_ALL_SLOTS          0x8     // all slots completed
+
+// Radio message decoding status
 typedef enum DecodeStatus {
-    DECODE_OK, DECODE_PAR_ERR, DECODE_CHK_ERR, DECODE_DIG_ERR
+    DECODE_INVALID, DECODE_OK, DECODE_PAR_ERR, DECODE_CHK_ERR, DECODE_DIG_ERR, DECODE_SKIP, DECODE_FULL
 } DecodeStatus;
+
+// Mapping of sensor IDs to names
+typedef struct SensorMap {
+    uint32_t        id;
+    std::string     name;
+} SensorMap;
 
 
 /*!
@@ -125,75 +150,121 @@ class WeatherSensor {
 
         \param timeout timeout in ms.
 
-        \param complete false: Returns after successful reception of first message receiving. (default)
-                        true:  Returns after reception of complete data set.
+        \param flags    DATA_COMPLETE / DATA_TYPE / DATA_ALL_SLOTS
+        
+        \param type     sensor type (combined with FLAGS==DATA_TYPE)
 
         \param func     Callback function for each loop iteration. (default: NULL)
                         
         \returns false: Timeout occurred.
                  true:  Reception (according to parammeter 'complete') succesful. 
         */
-        bool    getData(uint32_t timeout, bool complete = false, void (*func)() = NULL);
+        bool    getData(uint32_t timeout, uint8_t flags = 0, uint8_t type = 0, void (*func)() = NULL);
         
         
         /*!
         \brief Tries to receive radio message (non-blocking) and to decode it.
         Timeout occurs after a multitude of expected time-on-air.
 
-        \returns false: Decoding failed or receive timeout occurred.
-                 true:  Reception and decoding succesful. 
+        \returns DecodeStatus 
         */        
-        bool    getMessage(void);
+        DecodeStatus    getMessage(void);
+        
+        
+        struct Sensor {
+            uint32_t sensor_id;            // !> sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
+            uint8_t  s_type;               // !> sensor type (only 6-in1)
+            uint8_t  chan;                 // !> channel (only 6-in-1)
+            bool     valid;                // !> data valid (but not necessarily complete)
+            bool     complete;             // !> FIXME status of last getData() call    (set to 'true' by genMessage() call)
+            bool     temp_ok = false;      // !> temperature o.k. (only 6-in-1)
+            bool     humidity_ok = false;  // !> humidity o.k.
+            bool     uv_ok = false;        // !> uv radiation o.k. (only 6-in-1)
+            bool     wind_ok = false;      // !> wind speed/direction o.k. (only 6-in-1)
+            bool     rain_ok = false;      // !> rain gauge level o.k.
+            bool     battery_ok = false;   // !> battery o.k.
+            bool     moisture_ok = false;  // !> moisture o.k. (only 6-in-1)
+            float    temp_c;               // !> temperature in degC
+            float    uv;                   // !> uv radiation (only 6-in-1)
+            float    rain_mm;              // !> rain gauge level in mm
+            #ifdef WIND_DATA_FLOATINGPOINT
+            float    wind_direction_deg;   // !> wind direction in deg
+            float    wind_gust_meter_sec;  // !> wind speed (gusts) in m/s
+            float    wind_avg_meter_sec;   // !> wind speed (avg)   in m/s
+            #endif
+            #ifdef WIND_DATA_FIXEDPOINT
+            // For LoRa_Serialization:
+            //   fixed point integer with 1 decimal -
+            //   saves two bytes compared to "RawFloat"
+            uint16_t wind_direction_deg_fp1;  // !> wind direction in deg (fixed point int w. 1 decimal)
+            uint16_t wind_gust_meter_sec_fp1; // !> wind speed (gusts) in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_avg_meter_sec_fp1;  // !> wind speed (avg)   in m/s (fixed point int w. 1 decimal)
+            #endif
+            uint8_t  humidity;             // !> humidity in %
+            uint8_t  moisture;             // !> moisture in % (only 6-in-1)
+            float    rssi;                 // !> received signal strength indicator in dBm
+        };
+        
+        typedef struct Sensor sensor_t;
+        sensor_t sensor[NUM_SENSORS];      // !> sensor data array
+        float    rssi;                     // !> received signal strength indicator in dBm
         
         
         /*!
-        \brief Tries to receive radio message (non-blocking) and to decode it.
-        Timeout occurs after a multitude of expected time-on-air.
+        \brief Generates data otherwise received and decoded from a radio message.
 
         \returns Always true (for compatibility with getMessage())
         */        
-        bool    genMessage(void);
+        bool    genMessage(int i, uint32_t id = 0xff, uint8_t type = 1, uint8_t channel = 0);
+
         
+         /*!
+        \brief Clear sensor data
+        
+        If the <type> is not specified, all slots are cleared. If <type> is specified,
+        only slots containing data of the given sensor type are cleared.
+        
+        \param type Sensor type
+        */
+        void clearSlots(uint8_t type = 0xFF)
+        {
+            for (int i=0; i< NUM_SENSORS; i++) {
+                if ((type == 0xFF) || (sensor[i].s_type == type)) {
+                    sensor[i].valid       = false;
+                    sensor[i].complete    = false;
+                    sensor[i].temp_ok     = false;
+                    sensor[i].humidity_ok = false;
+                    sensor[i].uv_ok       = false;
+                    sensor[i].wind_ok     = false;
+                    sensor[i].rain_ok     = false;
+                    sensor[i].moisture_ok = false;
+                }
+            }
+        };
+
+    private:
+        struct Sensor *pData; // !> pointer to slot in sensor data array
         
         /*!
-        \brief Converts wind speed from Meters per Second to Beaufort.
-
-        \param ms Wind speed in m/s.
+         * \brief Find slot in sensor data array
+         * 
+         * 1. The current sensor ID is checked against the exclude-list (sensor_ids_exc).
+         *    If there is a match, the current message is skipped.
+         * 
+         * 2. If the include-list (sensor_ids_inc) is not empty, the current ID is checked
+         *    against it. If there is NO match, the current message is skipped.
+         * 
+         * 3. Either an existing slot with the same ID as the current message is updated
+         *    or a free slot (if any) is selected.
+         * 
+         * \param id Sensor ID from current message
+         * 
+         * \returns Pointer to slot in sensor data array or NULL if ID is not wanted or 
+         *          no free slot is available.
+         */
+        int findSlot(uint32_t id, DecodeStatus * status);
         
-        \returns Wind speed in bft.
-        */        
-        uint8_t windspeed_ms_to_bft(float ms);
         
-        uint8_t  s_type;               // !> sensor type (only 6-in1)
-        uint32_t sensor_id;            // !> sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
-        uint8_t  chan;                 // !> channel (only 6-in-1)
-        bool     temp_ok = false;      // !> temperature o.k. (only 6-in-1)
-        float    temp_c;               // !> temperature in degC
-        int      humidity;             // !> humidity in %
-        bool     uv_ok = false;        // !> uv radiation o.k. (only 6-in-1)
-        float    uv;                   // !> uv radiation (only 6-in-1)
-        bool     wind_ok = false;      // !> wind speed/direction o.k. (only 6-in-1)
-        float    wind_direction_deg;   // !> wind direction in deg
-        float    wind_gust_meter_sec;  // !> wind speed (gusts) in m/s
-        float    wind_avg_meter_sec;   // !> wind speed (avg)   in m/s
-        // For LoRa_Serialization:
-        //   fixed point integer with 1 decimal -
-        //   saves two bytes compared to "RawFloat"
-        uint16_t wind_direction_deg_fp1;  // !> wind direction in deg (fixed point int w. 1 decimal)
-        uint16_t wind_gust_meter_sec_fp1; // !> wind speed (gusts) in m/s (fixed point int w. 1 decimal)
-        uint16_t wind_avg_meter_sec_fp1;  // !> wind speed (avg)   in m/s (fixed point int w. 1 decimal)
-        bool     rain_ok = false;      // !> rain gauge level o.k.
-        float    rain_mm;              // !> rain gauge level in mm
-        bool     battery_ok = false;   // !> battery o.k.
-        bool     moisture_ok = false;  // !> moisture o.k. (only 6-in-1)
-        int      moisture;             // !> moisture in % (only 6-in-1)
-        bool     message_ok;           // !> status of last getMessage() call (set to 'true' by genMessage() call)
-        bool     data_ok;              // !> status of last getData() call    (set to 'true' by genMessage() call)
-        float    rssi;                 // !> received signal strength indicator in dBm
-
-        
-    private:
-
         #ifdef BRESSER_5_IN_1
             /*!
             \brief Decode BRESSER_5_IN_1 message.
@@ -242,7 +313,7 @@ class WeatherSensor {
             \brief Print raw message payload as hex byte values.
             */   
             void printRawdata(uint8_t *msg, uint8_t msgSize) {
-                DEBUG_PRINT(F("Raw Data:"));
+                DEBUG_PRINT(F("Raw Data: "));
                 for (uint8_t p = 0 ; p < msgSize ; p++) {
                     if (msg[p] < 16) {
                         DEBUG_PRINT("0");

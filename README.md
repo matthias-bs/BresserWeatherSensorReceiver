@@ -1,7 +1,7 @@
 # BresserWeatherSensorReceiver
 Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W
 
-The Bresser 5-in-1 Weather Stations seem to use two different protocols. Select the appropriate decoder by (un-)commenting `#define BRESSER_5_IN_1` or `#define BRESSER_6_IN_1` in `WeatherSensor.h`.
+The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, the 6-in-1 decoder is tried. If this fails, the 5-in-1 decoder is tried.
 
 | Model         | Decoder Function                |
 | ------------- | ------------------------------- |
@@ -16,11 +16,11 @@ Configure the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX127
 
 MQTT publications:
 
-`<base_topic>/data`    sensor data as JSON string - see `publishWeatherdata()`
+`<base_topic>/data/<ID|name>`    sensor data as JSON string - see `publishWeatherdata()`
      
-`<base_topic>/radio`   CC1101 radio transceiver info as JSON string - see `publishRadio()`
+`<base_topic>/radio`             CC1101 radio transceiver info as JSON string - see `publishRadio()`
      
-`<base_topic>/status`  "online"|"offline"|"dead"$
+`<base_topic>/status`            "online"|"offline"|"dead"$
 
 $ via LWT
 

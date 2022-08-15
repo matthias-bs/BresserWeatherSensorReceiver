@@ -1,24 +1,38 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // BresserWeatherSensorMQTT.ino
 //
-// Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver based on CC1101 or SX1276/RFM95W 
-// and ESP32/ESP8266 - provides data via secure MQTT
+// Example for BresserWeatherSensorReceiver - 
+// this is finally a useful application.
 //
-// https://github.com/matthias-bs/BresserWeatherSensorLib
+// At startup, first a WiFi connection and then a connection to the MQTT broker is established.
+// (Edit secrets.h accordingly!)
 //
-// Based on:
-// Bresser5in1-CC1101 by Sean Siford (https://github.com/seaniefs/Bresser5in1-CC1101)
-// RadioLib by Jan Gromeš (https://github.com/jgromes/RadioLib)
-// arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
-// ArduinoJson by Benoit Blanchon (https://arduinojson.org)
+// Then receiving data of all sensors (as defined in NUM_SENSORS, see WeatherSensorCfg.h) 
+// is tried periodically.
+// If successful, sensor data is published as MQTT messages, one message per sensor.
+// If the sensor ID can be mapped to a name (edit sensor_map[]), this name is used as the 
+// MQTT topic, otherwise the ID is used.
+// From the sensor data, some additional data is calculated and published with the 'extra' topic.
+//
+// The data topics are published at an interval of >DATA_INTERVAL.
+// The 'status' and the 'radio' topics are published at an interval of STATUS_INTERVAL.
+//
+// If sleep mode is enabled (SLEEP_EN), the device goes into deep sleep mode after data has 
+// been published. If AWAKE_TIMEOUT is reached befor data has been published, deep sleep is 
+// entered, too. After SLEEP_INTERVAL, the controller is restarted.
+// 
+//
+// https://github.com/matthias-bs/BresserWeatherSensorReceiver
+//
 //
 // MQTT subscriptions:
 //     - none -
 //
 // MQTT publications:               
-//     <base_topic>/data    sensor data as JSON string - see publishWeatherdata()
-//     <base_topic>/radio   CC1101 radion transceiver info as JSON string - see publishRadio()
-//     <base_topic>/status  "online"|"offline"|"dead"$
+//     <base_topic>/data/<ID|Name>  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/extra           calculated data
+//     <base_topic>/radio           CC1101 radio transceiver info as JSON string - see publishRadio()
+//     <base_topic>/status          "online"|"offline"|"dead"$
 //
 // $ via LWT
 //
@@ -57,10 +71,15 @@
 // 20220517 Improved sleep mode
 //          Added status LED option
 // 20220527 Changed to use BresserWeatherSensorLib
+// 20220810 Changed to modified WeatherSensor class; fixed Soil Moisture Sensor Handling
+// 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
+//          Changed hostname to append chhip ID
+//          Added calculation of additional information using WeatherUtils.h/.cpp
 //
 // ToDo:
 // 
 // - check option CHECK_CA_ROOT
+// - fix non-secure MQTT (issues #3 and #4)
 //
 // Notes:
 //
@@ -78,6 +97,8 @@
 
 // User specific options
 #define PAYLOAD_SIZE    200     // maximum MQTT message size
+#define TOPIC_SIZE      40      // maximum MQTT topic size
+#define RX_TIMEOUT      60000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
@@ -88,6 +109,8 @@
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
 
+// Generate sensor data to test collecting data from multiple sources
+//#define GEN_SENSOR_DATA
 
 #include <Arduino.h>
 
@@ -103,9 +126,15 @@
 #include <time.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "WeatherUtils.h"
 
+const char sketch_id[] = "BresserWeatherSensorMQTT 20220815";
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20220529";
+// Map sensor IDs to Names
+SensorMap sensor_map[NUM_SENSORS] = {
+    {0x39582376, "WeatherSensor"},
+    {0x83750871, "SoilMoisture-1"}
+};
 
 //enable only one of these below, disabling both is fine too.
 // #define CHECK_CA_ROOT
@@ -121,6 +150,7 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20220529";
     const char pass[] = "WiFiPassword";
 
     #define HOSTNAME "hostname"
+    #define APPEND_CHIP_ID
 
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
     const int  MQTT_PORT = 8883;
@@ -162,7 +192,7 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20220529";
     #endif
 
     #ifdef CHECK_PUB_KEY
-    // Extracted by: openssl x509 -pubkey -noout -in ca.crt
+    // Extracted by: openssl x509 -pubkey -noout -in fullchain.pem
     static const char pubkey[] PROGMEM = R"KEY(
     -----BEGIN PUBLIC KEY-----
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -179,7 +209,7 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20220529";
     #endif
 
     #ifdef CHECK_FINGERPRINT
-    // Extracted by: openssl x509 -fingerprint -in ca.crt
+    // Extracted by: openssl x509 -fingerprint -in fillchain.pem
     static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
     #endif
 #endif
@@ -188,10 +218,16 @@ WeatherSensor weatherSensor;
 
 
 // MQTT topics
-const char MQTT_PUB_STATUS[]      = HOSTNAME "/status";
-const char MQTT_PUB_RADIO[]       = HOSTNAME "/radio";
-const char MQTT_PUB_DATA[]        = HOSTNAME "/data";
+const char MQTT_PUB_STATUS[]      = "/status";
+const char MQTT_PUB_RADIO[]       = "/radio";
+const char MQTT_PUB_DATA[]        = "/data";
+const char MQTT_PUB_EXTRA[]       = "/extra";
 
+char mqttPubStatus[40];
+char mqttPubRadio[40];
+char mqttPubData[40];
+char mqttPubExtra[40];
+char Hostname[20];
 
 //////////////////////////////////////////////////////
 
@@ -322,45 +358,100 @@ void messageReceived(String &topic, String &payload)
 void publishWeatherdata(bool complete)
 {
     DynamicJsonDocument payload(PAYLOAD_SIZE);
-    char mqtt_payload[PAYLOAD_SIZE];
-    char sensor_id[11];
+    char mqtt_payload[PAYLOAD_SIZE];  // sensor data
+    char mqtt_payload2[PAYLOAD_SIZE]; // calculated extra data
+    char mqtt_topic[TOPIC_SIZE];
 
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
     // Therefore the JSON string is created manually. 
-    
-    // Example:
-    // {"sensor_id":"0x12345678","ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
-    sprintf(mqtt_payload, "{\"sensor_id\": %8X", weatherSensor.sensor_id);
-    #ifdef BRESSER_6_IN_1
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"ch:\":%d", weatherSensor.chan);
-    #endif
-    sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"battery_ok\":%d", weatherSensor.battery_ok ? 1 : 0);
-    if (weatherSensor.temp_ok || complete) {
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"temp_c\":%.1f", weatherSensor.temp_c);
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"humidity\":%d", weatherSensor.humidity);
-    }
-    if (weatherSensor.wind_ok || complete) {
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust\":%.1f", weatherSensor.wind_gust_meter_sec);
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg\":%.1f", weatherSensor.wind_avg_meter_sec);
-        #ifdef BFT_EN
-            sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust_bft\":%d", windspeed_ms_to_bft(weatherSensor.wind_gust_meter_sec));
-            sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg_bft\":%d", windspeed_ms_to_bft(weatherSensor.wind_avg_meter_sec));        
-        #endif
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_dir\":%.1f", weatherSensor.wind_direction_deg);
-    }
-    if (weatherSensor.uv_ok) {
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"uv\":%.1f,", weatherSensor.uv);
-    }
-    if (weatherSensor.rain_ok || complete) {
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.rain_mm);
-    }
-    if (weatherSensor.moisture_ok) {
-        sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.moisture);
-    }
-    sprintf(&mqtt_payload[strlen(mqtt_payload)], "}");
-    Serial.println(mqtt_payload);
-    client.publish(MQTT_PUB_DATA, &mqtt_payload[0], false, 0);
+
+    for (int i=0; i<NUM_SENSORS; i++) {
+      // Reset string buffers
+      mqtt_payload[0]  = '\0';
+      mqtt_payload2[0] = '\0';
+      
+      if (!weatherSensor.sensor[i].valid)
+          continue;
+          
+      // Example:
+      // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
+      sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "{");
+      //sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%08X,", weatherSensor.sensor[i].id);
+      #ifdef BRESSER_6_IN_1
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"ch\":%d,", weatherSensor.sensor[i].chan);
+      #endif
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"battery_ok\":%d", weatherSensor.sensor[i].battery_ok ? 1 : 0);
+      if (weatherSensor.sensor[i].temp_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"temp_c\":%.1f", weatherSensor.sensor[i].temp_c);
+      }
+      if (weatherSensor.sensor[i].humidity_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"humidity\":%d", weatherSensor.sensor[i].humidity);
+      }
+      if (weatherSensor.sensor[i].wind_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust\":%.1f", weatherSensor.sensor[i].wind_gust_meter_sec);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg\":%.1f", weatherSensor.sensor[i].wind_avg_meter_sec);
+          #ifdef BFT_EN
+              sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust_bft\":%d", 
+                windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
+              sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg_bft\":%d", 
+                windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));        
+          #endif
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_dir\":%.1f", weatherSensor.sensor[i].wind_direction_deg);
+      }
+      if (weatherSensor.sensor[i].wind_ok) {
+          char buf[4];
+          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "\"wind_dir_txt\":\"%s\"", 
+            winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf));
+          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"wind_gust_bft\":%d", 
+            windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
+          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"wind_avg_bft\":%d", 
+            windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));          
+      }
+      if ((weatherSensor.sensor[i].temp_ok) && (weatherSensor.sensor[i].humidity_ok)) {
+        sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"dewpoint_c\":%.1f", 
+          calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity));
+        
+        if (weatherSensor.sensor[i].wind_ok) {
+          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"perceived_temp_c\":%.1f", 
+            perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity)); 
+        }
+      }
+      if (weatherSensor.sensor[i].uv_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"uv\":%.1f", weatherSensor.sensor[i].uv);
+      }
+      if (weatherSensor.sensor[i].rain_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.sensor[i].rain_mm);
+      }
+      if (weatherSensor.sensor[i].moisture_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);
+      }
+
+      // sensor data
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "}");
+      Serial.println(mqtt_payload);
+
+      // extra data
+      sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "}");
+      Serial.println(mqtt_payload2);
+
+      // Try to map sensor ID to name to make MQTT topic explanatory
+      for (int n=0; n<NUM_SENSORS; n++) {
+        if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%s", mqttPubData, sensor_map[n].name.c_str());
+          break;
+        }
+        else {
+          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%8X", mqttPubData, weatherSensor.sensor[i].sensor_id);
+        }
+      }
+      client.publish(mqtt_topic, &mqtt_payload[0], false, 0);
+
+      if (strlen(mqtt_payload2) > 2) {
+        client.publish(mqttPubExtra, mqtt_payload2, false, 0);
+      }
+    } // for (int i=0; i<NUM_SENSORS; i++)
 }
 
 
@@ -376,7 +467,7 @@ void publishRadio(void)
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
     Serial.println(mqtt_payload);
-    client.publish(MQTT_PUB_RADIO, &mqtt_payload[0], false, 0);
+    client.publish(mqttPubRadio, &mqtt_payload[0], false, 0);
     payload.clear();
 }
 
@@ -399,6 +490,20 @@ void setup() {
         pinMode(LED_GPIO, OUTPUT);
         digitalWrite(LED_GPIO, HIGH);
     #endif
+
+    strncpy(Hostname, HOSTNAME, 20);
+    #ifdef APPEND_CHIP_ID
+      uint32_t chipId;
+      for (int i=0; i<17; i=i+8) {
+        chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+      }
+      snprintf(&Hostname[strlen(Hostname)], 20, "-%08X", chipId);  
+   #endif
+   
+   snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);
+   snprintf(mqttPubRadio,  40, "%s%s", Hostname, MQTT_PUB_RADIO);
+   snprintf(mqttPubData,   40, "%s%s", Hostname, MQTT_PUB_DATA);
+   snprintf(mqttPubExtra,   40, "%s%s", Hostname, MQTT_PUB_EXTRA);
 }
 
 
@@ -442,16 +547,23 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        client.publish(MQTT_PUB_STATUS, "online");
+        client.publish(mqttPubStatus, "online");
         publishRadio();
     }
 
     bool decode_ok = false;
     #ifdef _DEBUG_MQTT_
-        decode_ok = genWeatherdata();
+        decode_ok = genWeatherdata(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
     #else
-        // Attempt to receive entire data set with timeout of 48s
-        decode_ok = weatherSensor.getData(48000, true, &clientLoopWrapper);
+        // Clear sensor data buffer
+        weatherSensor.clearSlots();
+
+        #ifdef GEN_SENSOR_DATA
+            weatherSensor.genMessage(1 /* slot */, 0xdeadbeef /* ID */, 1 /* type */, 7 /* channel */);
+        #endif
+        
+        // Attempt to receive entire data set with timeout of <xx> s
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_ALL_SLOTS, 0, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN
@@ -466,7 +578,7 @@ void loop() {
     if (millis() - lastMillis > DATA_INTERVAL) { 
         lastMillis = millis();
         if (decode_ok)
-            publishWeatherdata(true);
+            publishWeatherdata(false);
     }
 
     bool force_sleep = millis() > AWAKE_TIMEOUT;
@@ -476,14 +588,13 @@ void loop() {
         #ifdef _DEBUG_MODE_
             if (force_sleep) {
                 Serial.println(F("Awake time-out!"));
-                Serial.printf("temp_ok: %d, rain_ok: %d\n", weatherSensor.temp_ok, weatherSensor.rain_ok);
             } else {
                 Serial.println(F("Data forwarding completed.")); 
             }
         #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL); 
         Serial.flush();
-        client.publish(MQTT_PUB_STATUS, "offline", true /* retained */, 0 /* qos */);
+        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();
         client.loop();
         #ifdef LED_EN

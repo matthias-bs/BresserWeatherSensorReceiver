@@ -24,14 +24,17 @@
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
-//
+// Based on:
+// arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
+// ArduinoJson by Benoit Blanchon (https://arduinojson.org)
+
 // MQTT subscriptions:
 //     - none -
 //
 // MQTT publications:               
 //     <base_topic>/data/<ID|Name>  sensor data as JSON string - see publishWeatherdata()
 //     <base_topic>/extra           calculated data
-//     <base_topic>/radio           CC1101 radio transceiver info as JSON string - see publishRadio()
+//     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
 //
 // $ via LWT
@@ -149,11 +152,11 @@ SensorMap sensor_map[NUM_SENSORS] = {
     const char ssid[] = "WiFiSSID";
     const char pass[] = "WiFiPassword";
 
-    #define HOSTNAME "hostname"
+    #define HOSTNAME "ESPWeather"
     #define APPEND_CHIP_ID
 
+    #define    MQTT_PORT     8883 // checked by pre-processor!
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const int  MQTT_PORT = 8883;
     const char MQTT_USER[] = ""; // leave blank if no credentials used
     const char MQTT_PASS[] = ""; // leave blank if no credentials used
 
@@ -223,11 +226,11 @@ const char MQTT_PUB_RADIO[]       = "/radio";
 const char MQTT_PUB_DATA[]        = "/data";
 const char MQTT_PUB_EXTRA[]       = "/extra";
 
-char mqttPubStatus[40];
-char mqttPubRadio[40];
-char mqttPubData[40];
-char mqttPubExtra[40];
-char Hostname[20];
+char mqttPubStatus[50];
+char mqttPubRadio[50];
+char mqttPubData[50];
+char mqttPubExtra[50];
+char Hostname[30];
 
 //////////////////////////////////////////////////////
 
@@ -239,7 +242,11 @@ char Hostname[20];
 #if defined(ESP32)
     WiFiClientSecure net;
 #elif defined(ESP8266)
-    BearSSL::WiFiClientSecure net;
+   #if (MQTT_PORT == 1883) {
+     WiFiClient net; // use none SSL connection
+   #else
+     BearSSL::WiFiClientSecure net;
+   #endif
 #endif
 
 //
@@ -253,16 +260,16 @@ uint32_t statusPublishPreviousMillis = 0;
 time_t now;
 
 void publishWeatherdata(bool complete = false);
-void mqtt_connect();
+void mqtt_connect(void);
 
 //
 // Setup WiFi in Station Mode
 //
-void mqtt_setup()
+void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
-    WiFi.hostname(HOSTNAME);
+    WiFi.hostname(Hostname);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
@@ -301,14 +308,16 @@ void mqtt_setup()
         net.setFingerprint(fp);
     #endif
     #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
-        net.setInsecure();
+        if (MQTT_PORT != 1883) {
+            net.setInsecure();
+        }
     #endif
 
     client.begin(MQTT_HOST, MQTT_PORT, net);
     
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
-    client.setWill(MQTT_PUB_STATUS, "dead", true /* retained*/, 1 /* qos */);
+    client.setWill(mqttPubStatus, "dead", true /* retained*/, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -316,7 +325,7 @@ void mqtt_setup()
 //
 // (Re-)Connect to WLAN and connect MQTT broker
 //
-void mqtt_connect()
+void mqtt_connect(void)
 {
     Serial.print(F("Checking wifi..."));
     while (WiFi.status() != WL_CONNECTED)
@@ -326,7 +335,7 @@ void mqtt_connect()
     }
 
     Serial.print(F("\nMQTT connecting... "));
-    while (!client.connect(HOSTNAME, MQTT_USER, MQTT_PASS))
+    while (!client.connect(Hostname, MQTT_USER, MQTT_PASS))
     {
         Serial.print(".");
         delay(1000);
@@ -334,7 +343,8 @@ void mqtt_connect()
 
     Serial.println(F("connected!"));
     //client.subscribe(MQTT_SUB_IN);
-    client.publish(MQTT_PUB_STATUS, "online");
+    Serial.printf("%s: %s\n", mqttPubStatus, "online");
+    client.publish(mqttPubStatus, "online");
 }
 
 
@@ -357,7 +367,6 @@ void messageReceived(String &topic, String &payload)
 */
 void publishWeatherdata(bool complete)
 {
-    DynamicJsonDocument payload(PAYLOAD_SIZE);
     char mqtt_payload[PAYLOAD_SIZE];  // sensor data
     char mqtt_payload2[PAYLOAD_SIZE]; // calculated extra data
     char mqtt_topic[TOPIC_SIZE];
@@ -378,11 +387,11 @@ void publishWeatherdata(bool complete)
       // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
       sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "{");
-      //sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%08X,", weatherSensor.sensor[i].id);
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%08X", weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"ch\":%d,", weatherSensor.sensor[i].chan);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"ch\":%d", weatherSensor.sensor[i].chan);
       #endif
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"battery_ok\":%d", weatherSensor.sensor[i].battery_ok ? 1 : 0);
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"battery_ok\":%d", weatherSensor.sensor[i].battery_ok ? 1 : 0);
       if (weatherSensor.sensor[i].temp_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"temp_c\":%.1f", weatherSensor.sensor[i].temp_c);
       }
@@ -392,12 +401,6 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].wind_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust\":%.1f", weatherSensor.sensor[i].wind_gust_meter_sec);
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg\":%.1f", weatherSensor.sensor[i].wind_avg_meter_sec);
-          #ifdef BFT_EN
-              sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust_bft\":%d", 
-                windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
-              sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg_bft\":%d", 
-                windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));        
-          #endif
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_dir\":%.1f", weatherSensor.sensor[i].wind_direction_deg);
       }
       if (weatherSensor.sensor[i].wind_ok) {
@@ -427,15 +430,9 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);
       }
-
-      // sensor data
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "}");
-      Serial.println(mqtt_payload);
-
-      // extra data
       sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "}");
-      Serial.println(mqtt_payload2);
-
+      
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
@@ -446,9 +443,14 @@ void publishWeatherdata(bool complete)
           snprintf(mqtt_topic, TOPIC_SIZE, "%s/%8X", mqttPubData, weatherSensor.sensor[i].sensor_id);
         }
       }
-      client.publish(mqtt_topic, &mqtt_payload[0], false, 0);
+      
+      // sensor data
+      Serial.printf("%s: %s\n", mqtt_topic, mqtt_payload);
+      client.publish(mqtt_topic, mqtt_payload, false, 0);
 
+      // extra data
       if (strlen(mqtt_payload2) > 2) {
+        Serial.printf("%s: %s\n", mqttPubExtra, mqtt_payload2);
         client.publish(mqttPubExtra, mqtt_payload2, false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
@@ -466,8 +468,8 @@ void publishRadio(void)
     
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.println(mqtt_payload);
-    client.publish(mqttPubRadio, &mqtt_payload[0], false, 0);
+    Serial.printf("%s: %s\n", mqttPubRadio, mqtt_payload);
+    client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
 
@@ -482,28 +484,29 @@ void setup() {
     Serial.println(sketch_id);
     Serial.println();
 
-    mqtt_setup();
-    weatherSensor.begin();
-    
     #ifdef LED_EN
-        // Configure LED output pins
-        pinMode(LED_GPIO, OUTPUT);
-        digitalWrite(LED_GPIO, HIGH);
+      // Configure LED output pins
+      pinMode(LED_GPIO, OUTPUT);
+      digitalWrite(LED_GPIO, HIGH);
     #endif
 
     strncpy(Hostname, HOSTNAME, 20);
     #ifdef APPEND_CHIP_ID
+      // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ChipID/GetChipID/GetChipID.ino
       uint32_t chipId;
       for (int i=0; i<17; i=i+8) {
         chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
       }
       snprintf(&Hostname[strlen(Hostname)], 20, "-%08X", chipId);  
-   #endif
-   
-   snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);
-   snprintf(mqttPubRadio,  40, "%s%s", Hostname, MQTT_PUB_RADIO);
-   snprintf(mqttPubData,   40, "%s%s", Hostname, MQTT_PUB_DATA);
-   snprintf(mqttPubExtra,   40, "%s%s", Hostname, MQTT_PUB_EXTRA);
+    #endif
+
+    snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);
+    snprintf(mqttPubRadio,  40, "%s%s", Hostname, MQTT_PUB_RADIO);
+    snprintf(mqttPubData,   40, "%s%s", Hostname, MQTT_PUB_DATA);
+    snprintf(mqttPubExtra,  40, "%s%s", Hostname, MQTT_PUB_EXTRA);
+
+    mqtt_setup();
+    weatherSensor.begin();
 }
 
 
@@ -547,6 +550,7 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
+        Serial.printf("%s: %s\n", mqttPubStatus, "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -594,6 +598,7 @@ void loop() {
         #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL); 
         Serial.flush();
+        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();
         client.loop();

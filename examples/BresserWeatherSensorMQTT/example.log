@@ -1,0 +1,29 @@
+
+BresserWeatherSensorMQTT 20220815
+
+Attempting to connect to SSID: ******...connected!
+Checking wifi...
+MQTT connecting... connected!
+ESPWeather-804767B4/status: online
+ESPWeather-804767B4/data/WeatherSensor: {"id":39582376,"ch":0,"battery_ok":1,"temp_c":27.4,"humidity":47,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":262.0,"uv":0.0,"rain":375.2}
+ESPWeather-804767B4/extra: {"wind_dir_txt":"W","wind_gust_bft":1,"wind_avg_bft":1,"dewpoint_c":15.1,"perceived_temp_c":27.6}
+ESPWeather-804767B4/data/SoilMoisture-1: {"id":83750871,"ch":1,"battery_ok":1,"temp_c":27.5,"moisture":0}
+Sleeping for 300000 ms
+ESPWeather-804767B4/status: offline
+[...]
+
+BresserWeatherSensorMQTT 20220815
+
+Attempting to connect to SSID: ******...connected!
+Checking wifi...
+MQTT connecting... connected!
+ESPWeather-804767B4/status: online
+ESPWeather-804767B4/status: online
+ESPWeather-804767B4/radio: {"rssi":-104}
+ESPWeather-804767B4/status: online
+ESPWeather-804767B4/radio: {"rssi":-104}
+ESPWeather-804767B4/data/WeatherSensor: {"id":39582376,"ch":0,"battery_ok":1,"temp_c":27.5,"humidity":48,"wind_gust":0.9,"wind_avg":0.9,"wind_dir":264.0,"uv":0.0,"rain":375.2}
+ESPWeather-804767B4/extra: {"wind_dir_txt":"W","wind_gust_bft":1,"wind_avg_bft":1,"dewpoint_c":15.5,"perceived_temp_c":27.8}
+ESPWeather-804767B4/data/SoilMoisture-1: {"id":83750871,"ch":1,"battery_ok":1,"temp_c":27.5,"moisture":0}
+Sleeping for 300000 ms
+ESPWeather-804767B4/status: offline

@@ -324,6 +324,7 @@ void mqtt_connect(void)
 
     Serial.println(F("connected!"));
     //client.subscribe(MQTT_SUB_IN);
+    Serial.printf("%s: %s\n", mqttPubStatus, "online");
     client.publish(mqttPubStatus, "online");
 }
 
@@ -358,36 +359,40 @@ void publishWeatherdata(void)
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
     // Therefore the JSON string is created manually. 
-      
+    
     // domoticz virtual wind sensor
-    sprintf(domo_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", 
-       DOMO_WIND_IDX, weatherSensor.sensor[i].wind_direction_deg);
-    char buf[4];
-    sprintf(&domo_payload[strlen(domo_payload)], ";%s", winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf));
-    sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_avg_meter_sec *10);
-    sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_gust_meter_sec *10);
-    sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
-    sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
-    sprintf(&domo_payload[strlen(domo_payload)], "\"}");
-        
+    if (weatherSensor.sensor[i].wind_ok && weatherSensor.sensor[i].temp_ok) {
+      sprintf(domo_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", 
+         DOMO_WIND_IDX, weatherSensor.sensor[i].wind_direction_deg);
+      char buf[4];
+      sprintf(&domo_payload[strlen(domo_payload)], ";%s", winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf));
+      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_avg_meter_sec *10);
+      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_gust_meter_sec *10);
+      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
+      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
+      sprintf(&domo_payload[strlen(domo_payload)], "\"}");
+      Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo_payload);
+      client.publish(MQTT_PUB_DOMO, domo_payload, false, 0);      
+    }
+    
     // domoticz virtual rain sensor
-    sprintf(domo2_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", 
-      DOMO_RAIN_IDX, weatherSensor.sensor[i].rain_mm *100);
-    sprintf(&domo2_payload[strlen(domo2_payload)], ";%.1f", weatherSensor.sensor[i].rain_mm);
-    sprintf(&domo2_payload[strlen(domo2_payload)], "\"}");
-     
+    if (weatherSensor.sensor[i].rain_ok) {
+      sprintf(domo2_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", 
+        DOMO_RAIN_IDX, weatherSensor.sensor[i].rain_mm *100);
+      sprintf(&domo2_payload[strlen(domo2_payload)], ";%.1f", weatherSensor.sensor[i].rain_mm);
+      sprintf(&domo2_payload[strlen(domo2_payload)], "\"}");
+      Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload);
+      client.publish(MQTT_PUB_DOMO, domo2_payload, false, 0);
+    }
+
     // domoticz virtual temp & humidity sensor
-    sprintf(domo3_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", DOMO_TH_IDX, weatherSensor.sensor[i].temp_c);
-    sprintf(&domo3_payload[strlen(domo3_payload)], ";%d", weatherSensor.sensor[i].humidity);
-    sprintf(&domo3_payload[strlen(domo3_payload)], ";0\"}");
-    
-    Serial.println(domo_payload);
-    Serial.println(domo2_payload);
-    Serial.println(domo3_payload);
-    
-    client.publish(MQTT_PUB_DOMO, domo_payload, false,0);
-    client.publish(MQTT_PUB_DOMO, domo2_payload, false,0);
-    client.publish(MQTT_PUB_DOMO, domo3_payload, false,0);
+    if (weatherSensor.sensor[i].temp_ok && weatherSensor.sensor[i].humidity_ok) {
+      sprintf(domo3_payload, "{\"idx\":%d,\"nvalue\":0,\"svalue\":\"%.1f", DOMO_TH_IDX, weatherSensor.sensor[i].temp_c);
+      sprintf(&domo3_payload[strlen(domo3_payload)], ";%d", weatherSensor.sensor[i].humidity);
+      sprintf(&domo3_payload[strlen(domo3_payload)], ";0\"}");
+      Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo3_payload);
+      client.publish(MQTT_PUB_DOMO, domo3_payload, false, 0);
+    }
 }
 
 
@@ -402,7 +407,7 @@ void publishRadio(void)
     
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.println(mqtt_payload);
+    Serial.printf("%s: %s\n", mqttPubRadio, mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -483,6 +488,7 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
+        Serial.printf("%s: %s\n", mqttPubStatus, "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -525,6 +531,7 @@ void loop() {
             }
         #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL); 
+        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();

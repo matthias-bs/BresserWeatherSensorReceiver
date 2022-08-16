@@ -358,7 +358,7 @@ void publishWeatherdata(void)
 
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
-    // Therefore the JSON string is created manually. 
+    // Therefore the JSON string is created manually.
     
     // domoticz virtual wind sensor
     if (weatherSensor.sensor[i].wind_ok && weatherSensor.sensor[i].temp_ok) {
@@ -430,13 +430,14 @@ void setup() {
     #endif
 
     strncpy(Hostname, HOSTNAME, 20);
-    #ifdef APPEND_CHIP_ID
-      // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ChipID/GetChipID/GetChipID.ino
-      uint32_t chipId;
-      for (int i=0; i<17; i=i+8) {
-        chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-      }
-      snprintf(&Hostname[strlen(Hostname)], 20, "-%08X", chipId);  
+    #if defined(APPEND_CHIP_ID) && defined(ESP32)
+        uint32_t chipId = 0;
+        for(int i=0; i<17; i=i+8) {
+            chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+        }
+        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", chipId);
+    #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
+        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
     snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);

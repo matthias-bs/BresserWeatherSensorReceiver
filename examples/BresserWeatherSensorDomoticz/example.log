@@ -1,0 +1,29 @@
+
+BresserWeatherSensorDomoticz 20220815
+
+Attempting to connect to SSID: ******...connected!
+Checking wifi...
+MQTT connecting... connected!
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/radio: {"rssi":-100}
+domoticz/in: {"idx":877,"nvalue":0,"svalue":"300.0;WNW;6.0;6.0;26.2;26.2"}
+domoticz/in: {"idx":878,"nvalue":0,"svalue":"37520.0;375.2"}
+domoticz/in: {"idx":876,"nvalue":0,"svalue":"26.2;53;0"}
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/radio: {"rssi":-91.5}
+domoticz/in: {"idx":877,"nvalue":0,"svalue":"256.0;WSW;13.0;13.0;26.2;26.2"}
+domoticz/in: {"idx":878,"nvalue":0,"svalue":"37520.0;375.2"}
+domoticz/in: {"idx":876,"nvalue":0,"svalue":"26.2;52;0"}
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/radio: {"rssi":-94.5}
+domoticz/in: {"idx":877,"nvalue":0,"svalue":"252.0;WSW;10.0;10.0;26.2;26.2"}
+domoticz/in: {"idx":878,"nvalue":0,"svalue":"37520.0;375.2"}
+domoticz/in: {"idx":876,"nvalue":0,"svalue":"26.2;52;0"}
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/radio: {"rssi":-62.5}
+domoticz/in: {"idx":877,"nvalue":0,"svalue":"184.0;S;9.0;9.0;26.2;26.2"}
+domoticz/in: {"idx":878,"nvalue":0,"svalue":"37520.0;375.2"}
+domoticz/in: {"idx":876,"nvalue":0,"svalue":"26.2;51;0"}
+BresserDomo-804767B4/status: online
+BresserDomo-804767B4/radio: {"rssi":-89}

@@ -221,7 +221,7 @@ char Hostname[30];
 #if defined(ESP32)
     WiFiClientSecure net;
 #elif defined(ESP8266)
-   #if (MQTT_PORT == 1883) {
+   #if (MQTT_PORT == 1883)
      WiFiClient net; // use none SSL connection
    #else
      BearSSL::WiFiClientSecure net;

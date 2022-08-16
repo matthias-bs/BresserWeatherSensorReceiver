@@ -56,6 +56,7 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
+#include <string>
 #include "WeatherSensorCfg.h"
 #include <RadioLib.h>
 

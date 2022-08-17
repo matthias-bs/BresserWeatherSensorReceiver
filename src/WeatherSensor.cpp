@@ -368,6 +368,33 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
 
 
 //
+// Find required sensor data by ID
+//
+int WeatherSensor::findId(uint32_t id)
+{
+    for (int i=0; i<NUM_SENSORS; i++) {
+        if (sensor[i].valid && (sensor[i].sensor_id == id))
+            return i;
+    }
+    return -1;
+}
+        
+        
+//
+// Find required sensor data by type and (optionally) channel
+//
+int WeatherSensor::findType(uint8_t type, uint8_t ch)
+{
+    for (int i=0; i<NUM_SENSORS; i++) {
+        if (sensor[i].valid && (sensor[i].s_type == type) && 
+            ((ch == 0xFF) || (sensor[i].chan = ch)))
+            return i;
+    }
+    return -1;
+}
+
+
+//
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
 //
 uint16_t WeatherSensor::lfsr_digest16(uint8_t const message[], unsigned bytes, uint16_t gen, uint16_t key)
@@ -464,7 +491,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
         DEBUG_PRINT((bitsSet < 16) ? "0" : "");
         DEBUG_PRINT(bitsSet, HEX);
         DEBUG_PRINT("] != [");
-        DEBUG_PRINT((expectedBits < 16) ? "0" : "");
+        DEBUG_PRINT((expectedBitsSet < 16) ? "0" : "");
         DEBUG_PRINT(expectedBitsSet, HEX);
         DEBUG_PRINTLN("]");
         return DECODE_CHK_ERR;

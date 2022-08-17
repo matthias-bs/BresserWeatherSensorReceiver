@@ -88,16 +88,18 @@
 
 
 // Sensor Types
-// 1 - Weather Station
+// 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
+// 1 - Weather Station          6-in-1; PN 7002585
 // 2 - Indoor?
-// 4 - Soil Moisture Sensor
-// 9 - Professional Rain Gauge (5-in-1 decoder)
+// 4 - Soil Moisture Sensor     6-in-1; PN 7009972
+// 9 - Professional Rain Gauge  (5-in-1 decoder)
 // ? - Thermo-/Hygro-Sensor
 // ? - Air Quality Sensor
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
 // ? - Lightning Sensor
-#define SENSOR_TYPE_WEATHER     1 // Weather Station
+#define SENSOR_TYPE_WEATHER0    0 // Weather Station 
+#define SENSOR_TYPE_WEATHER1    1 // Weather Station
 #define SENSOR_TYPE_SOIL        4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_RAIN        9 // Professional Rain Gauge (from 5-in-1 decoder)
 
@@ -243,6 +245,26 @@ class WeatherSensor {
             }
         };
 
+        /*!
+         * Find slot of required data set by ID
+         * 
+         * \param id    sensor ID
+         * 
+         * \returns     slot (or -1 if not found)
+         */
+        int findId(uint32_t id);
+        
+        
+        /*!
+         * Find slot of required data set by type and (optionally) channel
+         * 
+         * \param type      sensor type
+         * \param channel   sensor channel (0xFF: don't care)
+         * 
+         * \returns         slot (or -1 if not found)
+         */        
+        int findType(uint8_t type, uint8_t channel = 0xFF);
+        
     private:
         struct Sensor *pData; // !> pointer to slot in sensor data array
         

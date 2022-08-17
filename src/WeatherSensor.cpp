@@ -788,7 +788,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].valid    = true;
     
     // Weather station data is split into two separate messages
-    sensor[slot].complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER) && sensor[slot].temp_ok && sensor[slot].rain_ok) || (sensor[slot].s_type != SENSOR_TYPE_WEATHER);  
+    sensor[slot].complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].temp_ok && sensor[slot].rain_ok) || (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);  
     
     // Save rssi to sensor specific data set
     sensor[slot].rssi = rssi;

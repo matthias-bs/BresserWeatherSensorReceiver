@@ -151,10 +151,10 @@ void loop()
     // finish only if data is complete.
     // (Data can be distributed across multiple radio messages.)
     weatherSensor.clearSlots();
-    decode_ok = weatherSensor.getData(TIMEOUT, DATA_TYPE | DATA_COMPLETE, SENSOR_TYPE_WEATHER);
+    decode_ok = weatherSensor.getData(TIMEOUT, DATA_TYPE | DATA_COMPLETE, SENSOR_TYPE_WEATHER1);
 
     Serial.println();
-    Serial.println("3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER");
+    Serial.println("3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER1");
     Serial.println("----------------------------------------------------------------");
     if (!decode_ok) {
       Serial.printf("Sensor timeout\n");

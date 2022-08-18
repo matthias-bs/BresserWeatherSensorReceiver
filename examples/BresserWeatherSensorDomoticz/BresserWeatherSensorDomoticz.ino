@@ -504,7 +504,7 @@ void loop() {
         weatherSensor.clearSlots();
 
         // Attempt to receive entire data set with timeout of RX_TIMEOUT
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_TYPE | DATA_COMPLETE, SENSOR_TYPE_WEATHER, &clientLoopWrapper);
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_TYPE | DATA_COMPLETE, SENSOR_TYPE_WEATHER1, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN

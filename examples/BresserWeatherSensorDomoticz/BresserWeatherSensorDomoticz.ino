@@ -369,7 +369,9 @@ void publishWeatherdata(void)
       sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_avg_meter_sec *10);
       sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].wind_gust_meter_sec *10);
       sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
-      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", weatherSensor.sensor[i].temp_c);
+      sprintf(&domo_payload[strlen(domo_payload)], ";%.1f", perceived_temperature(weatherSensor.sensor[i].temp_c,
+                                                                                  weatherSensor.sensor[i].wind_avg_meter_sec,
+                                                                                  weatherSensor.sensor[i].humidity));
       sprintf(&domo_payload[strlen(domo_payload)], "\"}");
       Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo_payload);
       client.publish(MQTT_PUB_DOMO, domo_payload, false, 0);      

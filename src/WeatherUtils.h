@@ -36,6 +36,16 @@ float calcwindchill(float celsius, float windspeed);
 float calcheatindex(float celsius, float humidity);
 
 /*!
+ * \brief Calculate Humidex
+ * 
+ * \param temperature air temperature in °C
+ * \param humidity relative humidity in %
+ * 
+ * \returns Humidex
+ */
+float calchumidex(float temperature, float humidity);
+
+/*!
  * \brief Calculate perceived temperature (feels-like temperature)
  * 
  * Apply windchill or heat index depending on current data or

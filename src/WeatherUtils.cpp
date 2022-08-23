@@ -136,6 +136,17 @@ float calcheatindex(float celsius, float humidity) {
   return (-8.784695 + 1.61139411 * celsius + 2.338549 * humidity - 0.14611605 * celsius * humidity - 0.012308094 * celsius * celsius - 0.016424828 * humidity * humidity + 0.002211732 * celsius * celsius * humidity + 0.00072546 * celsius * humidity * humidity - 0.000003582 * celsius * celsius * humidity * humidity);
 }
 
+/*
+ * Source:  https://myscope.net/hitzeindex-gefuehle-temperatur/
+ *
+ *          Valid for Valid for temperatures >= 27°C and humidity >=40%
+ */
+float calchumidex(float temperature, float humidity) {
+  float e = (6.112 * pow(10,(7.5 * temperature/(237.7 + temperature))) * humidity/100); //vapor pressure
+  float humidex = temperature + 0.55555555 * (e - 10.0); //humidex
+  return humidex;
+}
+
 float perceived_temperature(float celsius, float windspeed, float humidity)
 {
     if ((celsius <= 10) && (windspeed * 3.6 > 4.8)) {

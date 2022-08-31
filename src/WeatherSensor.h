@@ -175,42 +175,42 @@ class WeatherSensor {
         
         
         struct Sensor {
-            uint32_t sensor_id;            // !> sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
-            uint8_t  s_type;               // !> sensor type (only 6-in1)
-            uint8_t  chan;                 // !> channel (only 6-in-1)
-            bool     valid;                // !> data valid (but not necessarily complete)
-            bool     complete;             // !> FIXME status of last getData() call    (set to 'true' by genMessage() call)
-            bool     temp_ok = false;      // !> temperature o.k. (only 6-in-1)
-            bool     humidity_ok = false;  // !> humidity o.k.
-            bool     uv_ok = false;        // !> uv radiation o.k. (only 6-in-1)
-            bool     wind_ok = false;      // !> wind speed/direction o.k. (only 6-in-1)
-            bool     rain_ok = false;      // !> rain gauge level o.k.
-            bool     battery_ok = false;   // !> battery o.k.
-            bool     moisture_ok = false;  // !> moisture o.k. (only 6-in-1)
-            float    temp_c;               // !> temperature in degC
-            float    uv;                   // !> uv radiation (only 6-in-1)
-            float    rain_mm;              // !> rain gauge level in mm
+            uint32_t sensor_id;            ///< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
+            uint8_t  s_type;               //!< sensor type (only 6-in1)
+            uint8_t  chan;                 //!< channel (only 6-in-1)
+            bool     valid;                //!< data valid (but not necessarily complete)
+            bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
+            bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
+            bool     humidity_ok = false;  //!< humidity o.k.
+            bool     uv_ok = false;        //!< uv radiation o.k. (only 6-in-1)
+            bool     wind_ok = false;      //!< wind speed/direction o.k. (only 6-in-1)
+            bool     rain_ok = false;      //!< rain gauge level o.k.
+            bool     battery_ok = false;   //!< battery o.k.
+            bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
+            float    temp_c;               //!< temperature in degC
+            float    uv;                   //!< uv radiation (only 6-in-1)
+            float    rain_mm;              //!< rain gauge level in mm
             #ifdef WIND_DATA_FLOATINGPOINT
-            float    wind_direction_deg;   // !> wind direction in deg
-            float    wind_gust_meter_sec;  // !> wind speed (gusts) in m/s
-            float    wind_avg_meter_sec;   // !> wind speed (avg)   in m/s
+            float    wind_direction_deg;   //!< wind direction in deg
+            float    wind_gust_meter_sec;  //!< wind speed (gusts) in m/s
+            float    wind_avg_meter_sec;   //!< wind speed (avg)   in m/s
             #endif
             #ifdef WIND_DATA_FIXEDPOINT
             // For LoRa_Serialization:
             //   fixed point integer with 1 decimal -
             //   saves two bytes compared to "RawFloat"
-            uint16_t wind_direction_deg_fp1;  // !> wind direction in deg (fixed point int w. 1 decimal)
-            uint16_t wind_gust_meter_sec_fp1; // !> wind speed (gusts) in m/s (fixed point int w. 1 decimal)
-            uint16_t wind_avg_meter_sec_fp1;  // !> wind speed (avg)   in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_direction_deg_fp1;  //!< wind direction in deg (fixed point int w. 1 decimal)
+            uint16_t wind_gust_meter_sec_fp1; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_avg_meter_sec_fp1;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
             #endif
-            uint8_t  humidity;             // !> humidity in %
-            uint8_t  moisture;             // !> moisture in % (only 6-in-1)
-            float    rssi;                 // !> received signal strength indicator in dBm
+            uint8_t  humidity;             //!< humidity in %
+            uint8_t  moisture;             //!< moisture in % (only 6-in-1)
+            float    rssi;                 //!< received signal strength indicator in dBm
         };
         
         typedef struct Sensor sensor_t;
-        sensor_t sensor[NUM_SENSORS];      // !> sensor data array
-        float    rssi;                     // !> received signal strength indicator in dBm
+        sensor_t sensor[NUM_SENSORS];      //!< sensor data array
+        float    rssi;                     //!< received signal strength indicator in dBm
         
         
         /*!
@@ -224,7 +224,7 @@ class WeatherSensor {
          /*!
         \brief Clear sensor data
         
-        If the <type> is not specified, all slots are cleared. If <type> is specified,
+        If 'type' is not specified, all slots are cleared. If 'type' is specified,
         only slots containing data of the given sensor type are cleared.
         
         \param type Sensor type
@@ -266,7 +266,7 @@ class WeatherSensor {
         int findType(uint8_t type, uint8_t channel = 0xFF);
         
     private:
-        struct Sensor *pData; // !> pointer to slot in sensor data array
+        struct Sensor *pData; //!< pointer to slot in sensor data array
         
         /*!
          * \brief Find slot in sensor data array

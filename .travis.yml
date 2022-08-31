@@ -1,5 +1,4 @@
-root:
-  os: linux
+os: linux
 language: ruby
 dist: bionic
 git:
@@ -23,4 +22,5 @@ deploy:
   local_dir: doc/html
   verbose: true
   on:
-    branch: master
+    branch: gh-pages
+    

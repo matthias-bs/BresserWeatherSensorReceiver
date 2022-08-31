@@ -1,11 +1,17 @@
 compile:
-  libraries: ~
+  libraries:
+    - arduino-mqtt
+    - RadioLib
+    - lora-serialization
   platforms:
     - esp32
     - esp8266
 
 unittest:
-  libraries: ~
+  libraries:
+    - arduino-mqtt
+    - RadioLib
+    - lora-serialization
   platforms:
     - esp32
     - esp8266

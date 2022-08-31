@@ -116,7 +116,7 @@ typedef enum DecodeStatus {
 
 
 /*!
- * \typedef SensorMap
+ * \struct SensorMap
  * 
  * \brief Mapping of sensor IDs to names
  */

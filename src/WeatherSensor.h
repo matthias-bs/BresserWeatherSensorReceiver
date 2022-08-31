@@ -116,7 +116,9 @@ typedef enum DecodeStatus {
 
 
 /*!
- * \typedef SensorMap Mapping of sensor IDs to names
+ * \typedef SensorMap
+ * 
+ * \brief Mapping of sensor IDs to names
  */
 typedef struct SensorMap {
     uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
@@ -177,7 +179,9 @@ class WeatherSensor {
         DecodeStatus    getMessage(void);
         
         /**
-         * \struct Sensor sensor data and status flags
+         * \struct Sensor 
+         * 
+         * \brief sensor data and status flags
          */
         struct Sensor {
             uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)

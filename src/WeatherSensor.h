@@ -61,11 +61,11 @@
 #include <RadioLib.h>
 
 
-#if (not(defined(BRESSER_5_IN_1)) and not(defined(BRESSER_6_IN_1)))
+#if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 must be defined!"
 #endif
 
-#if (defined(USE_CC1101) and defined(USE_SX1276))
+#if ( defined(USE_CC1101) && defined(USE_SX1276) )
     #error "Either USE_CC1101 OR USE_SX1276 must be defined!"
 #endif
 

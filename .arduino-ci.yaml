@@ -2,7 +2,7 @@ compile:
   libraries:
     - mqtt
     - RadioLib
-    - LoRa Serialization
+    - ArduinoJson
   platforms:
     - esp32
     - esp8266
@@ -11,7 +11,7 @@ unittest:
   libraries:
     - mqtt
     - RadioLib
-    - LoRa Serialization
+    - ArduinoJson
   platforms:
     - esp32
     - esp8266

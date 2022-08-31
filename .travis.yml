@@ -1,4 +1,5 @@
-sudo: false
+root:
+  os: linux
 language: ruby
 dist: bionic
 git:
@@ -15,11 +16,11 @@ script:
    - bundle exec arduino_ci_remote.rb
    - doxygen doc/Doxyfile
 deploy:
+  strategy: git
   provider: pages
-  skip-cleanup: true
-  github-token: $GITHUB_TOKEN
-  keep-history: false
-  local-dir: doc/html
+  token: $GITHUB_TOKEN
+  keep_history: false
+  local_dir: doc/html
   verbose: true
   on:
     branch: master

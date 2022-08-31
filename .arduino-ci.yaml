@@ -1,6 +1,6 @@
 compile:
   libraries:
-    - arduino-mqtt
+    - mqtt
     - RadioLib
     - lora-serialization
   platforms:
@@ -9,7 +9,7 @@ compile:
 
 unittest:
   libraries:
-    - arduino-mqtt
+    - mqtt
     - RadioLib
     - lora-serialization
   platforms:

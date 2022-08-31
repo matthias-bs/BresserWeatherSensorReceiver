@@ -22,5 +22,4 @@ deploy:
   local_dir: doc/html
   verbose: true
   on:
-    branch: gh-pages
-    
+    branch: main

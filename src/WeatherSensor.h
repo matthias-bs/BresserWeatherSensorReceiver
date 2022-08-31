@@ -114,10 +114,13 @@ typedef enum DecodeStatus {
     DECODE_INVALID, DECODE_OK, DECODE_PAR_ERR, DECODE_CHK_ERR, DECODE_DIG_ERR, DECODE_SKIP, DECODE_FULL
 } DecodeStatus;
 
-// Mapping of sensor IDs to names
+
+/*!
+ * \typedef SensorMap Mapping of sensor IDs to names
+ */
 typedef struct SensorMap {
-    uint32_t        id;
-    std::string     name;
+    uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
+    std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
 
 
@@ -173,9 +176,11 @@ class WeatherSensor {
         */        
         DecodeStatus    getMessage(void);
         
-        
+        /**
+         * \struct Sensor sensor data and status flags
+         */
         struct Sensor {
-            uint32_t sensor_id;            ///< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
+            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
             uint8_t  s_type;               //!< sensor type (only 6-in1)
             uint8_t  chan;                 //!< channel (only 6-in-1)
             bool     valid;                //!< data valid (but not necessarily complete)
@@ -208,7 +213,7 @@ class WeatherSensor {
             float    rssi;                 //!< received signal strength indicator in dBm
         };
         
-        typedef struct Sensor sensor_t;
+        typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
         sensor_t sensor[NUM_SENSORS];      //!< sensor data array
         float    rssi;                     //!< received signal strength indicator in dBm
         

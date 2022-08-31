@@ -82,7 +82,6 @@ void loop()
     }
     for (int i=0; i<NUM_SENSORS; i++) {
         if (weatherSensor.sensor[i].valid) {
-            const float METERS_SEC_TO_MPH = 2.237;
             Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
                 weatherSensor.sensor[i].sensor_id,
                 weatherSensor.sensor[i].s_type,

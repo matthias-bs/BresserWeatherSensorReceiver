@@ -677,7 +677,8 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
         return DECODE_DIG_ERR;
     }
     // Checksum, add with carry
-    int chksum = msg[17];
+    // unused...
+    //int chksum = msg[17];
     int sum    = add_bytes(&msg[2], 16); // msg[2] to msg[17]
     if ((sum & 0xff) != 0xff) {
         //decoder_logf(decoder, 2, __func__, "Checksum failed %04x vs %04x", chksum, sum);
@@ -699,7 +700,8 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     if (status != DECODE_OK)
         return status;
     
-    int startup = (msg[6] >> 3) & 1; // s.a. #1214
+    // unused...
+    //int startup = (msg[6] >> 3) & 1; // s.a. #1214
     
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
@@ -724,7 +726,8 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
         int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
             sensor[slot].uv = uv_raw * 0.1f;
     }
-    int flags  = (msg[16] & 0x0f); // looks like some flags, not sure
+    // unused...
+    //int flags  = (msg[16] & 0x0f); // looks like some flags, not sure
 
     //int unk_ok  = (msg[16] & 0xf0) == 0xf0;
     //int unk_raw = ((msg[15] & 0xf0) >> 4) * 10 + (msg[15] & 0x0f);

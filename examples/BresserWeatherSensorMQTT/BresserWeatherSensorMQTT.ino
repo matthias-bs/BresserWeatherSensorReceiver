@@ -76,7 +76,7 @@
 // 20220527 Changed to use BresserWeatherSensorLib
 // 20220810 Changed to modified WeatherSensor class; fixed Soil Moisture Sensor Handling
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
-//          Changed hostname to append chhip ID
+//          Changed hostname to append chip ID
 //          Added calculation of additional information using WeatherUtils.h/.cpp
 //
 // ToDo:
@@ -99,9 +99,10 @@
 #define LED_GPIO 2
 
 // User specific options
-#define PAYLOAD_SIZE    200     // maximum MQTT message size
-#define TOPIC_SIZE      40      // maximum MQTT topic size
-#define RX_TIMEOUT      60000   // sensor receive timeout [ms]
+#define TIMEZONE        1       // UTC + TIMEZONE
+#define PAYLOAD_SIZE    255     // maximum MQTT message size
+#define TOPIC_SIZE      50      // maximum MQTT topic size
+#define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
@@ -130,6 +131,7 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
+#include "RainGauge.h"
 
 const char sketch_id[] = "BresserWeatherSensorMQTT 20220815";
 
@@ -218,7 +220,7 @@ SensorMap sensor_map[NUM_SENSORS] = {
 #endif
 
 WeatherSensor weatherSensor;
-
+RainGauge     rainGauge;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[]      = "/status";
@@ -279,9 +281,8 @@ void mqtt_setup(void)
     }
     Serial.println(F("connected!"));
     
-    /*
     Serial.print("Setting time using SNTP ");
-    configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+    configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
     now = time(nullptr);
     while (now < 1510592825)
     {
@@ -293,8 +294,7 @@ void mqtt_setup(void)
     struct tm timeinfo;
     gmtime_r(&now, &timeinfo);
     Serial.print("Current time: ");
-    Serial.print(asctime(&timeinfo));
-    */
+    Serial.println(asctime(&timeinfo));
 
     #ifdef CHECK_CA_ROOT
         BearSSL::X509List cert(digicert);
@@ -382,7 +382,13 @@ void publishWeatherdata(bool complete)
       
       if (!weatherSensor.sensor[i].valid)
           continue;
-          
+
+      if (weatherSensor.sensor[i].rain_ok) {
+          struct tm timeinfo;
+          gmtime_r(&now, &timeinfo);
+          rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
+      }
+      
       // Example:
       // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
@@ -426,6 +432,9 @@ void publishWeatherdata(bool complete)
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.sensor[i].rain_mm);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay(weatherSensor.sensor[i].rain_mm));
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek(weatherSensor.sensor[i].rain_mm));
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth(weatherSensor.sensor[i].rain_mm));
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);

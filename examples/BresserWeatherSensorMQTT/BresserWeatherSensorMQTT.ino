@@ -219,7 +219,6 @@ SensorMap sensor_map[NUM_SENSORS] = {
 #endif
 
 WeatherSensor weatherSensor;
-RainGauge     rainGauge;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[]      = "/status";
@@ -385,7 +384,7 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].rain_ok) {
           struct tm timeinfo;
           gmtime_r(&now, &timeinfo);
-          rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
+          //rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
       }
       
       // Example:
@@ -431,9 +430,9 @@ void publishWeatherdata(bool complete)
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.sensor[i].rain_mm);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay(weatherSensor.sensor[i].rain_mm));
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek(weatherSensor.sensor[i].rain_mm));
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth(weatherSensor.sensor[i].rain_mm));
+          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay(weatherSensor.sensor[i].rain_mm));
+          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek(weatherSensor.sensor[i].rain_mm));
+          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth(weatherSensor.sensor[i].rain_mm));
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);

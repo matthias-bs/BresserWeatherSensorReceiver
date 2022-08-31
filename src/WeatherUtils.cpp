@@ -83,8 +83,8 @@ uint8_t windspeed_ms_to_bft(float ms)
  */
 float calcdewpoint(float celsius, float humidity)
 {
-  float a;
-  float b;
+  float a = 0;
+  float b = 0;
   
   if (celsius >= 0) {
     a = 7.5;

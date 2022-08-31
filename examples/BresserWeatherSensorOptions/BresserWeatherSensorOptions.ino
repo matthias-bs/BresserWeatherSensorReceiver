@@ -57,7 +57,6 @@ void print_data(void)
     if (!weatherSensor.sensor[i].valid)
       continue;
       
-    const float METERS_SEC_TO_MPH = 2.237;
     Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
         weatherSensor.sensor[i].sensor_id,
         weatherSensor.sensor[i].s_type,
@@ -155,7 +154,7 @@ void loop()
 
     Serial.println();
     Serial.println("3 -- Flags: DATA_TYPE | DATA_COMPLETE, Type: SENSOR_TYPE_WEATHER1");
-    Serial.println("----------------------------------------------------------------");
+    Serial.println("-----------------------------------------------------------------");
     if (!decode_ok) {
       Serial.printf("Sensor timeout\n");
     } else {

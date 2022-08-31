@@ -131,6 +131,7 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
+//#include "RainGauge.h"
 
 const char sketch_id[] = "BresserWeatherSensorMQTT 20220815";
 
@@ -219,6 +220,7 @@ SensorMap sensor_map[NUM_SENSORS] = {
 #endif
 
 WeatherSensor weatherSensor;
+//RainGauge rainGauge;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[]      = "/status";

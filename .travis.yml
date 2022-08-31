@@ -1,0 +1,25 @@
+sudo: false
+language: ruby
+dist: bionic
+git:
+  depth: false
+  quiet: true
+# Blacklist
+branches:
+  except:
+    - gh-pages
+before_install:
+  - sudo apt-get install -y doxygen graphviz
+script:
+   - bundle install
+   - bundle exec arduino_ci_remote.rb
+   - doxygen doc/Doxyfile
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  local-dir: doc/html
+  verbose: true
+  on:
+    branch: master

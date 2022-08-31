@@ -1,0 +1,11 @@
+compile:
+  libraries: ~
+  platforms:
+    - esp32
+    - esp8266
+
+unittest:
+  libraries: ~
+  platforms:
+    - esp32
+    - esp8266

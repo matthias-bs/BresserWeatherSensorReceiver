@@ -101,7 +101,7 @@
 // User specific options
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
-#define TOPIC_SIZE      50      // maximum MQTT topic size
+#define TOPIC_SIZE      60      // maximum MQTT topic size
 #define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]

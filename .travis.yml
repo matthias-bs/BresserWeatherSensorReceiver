@@ -14,12 +14,12 @@ script:
    - bundle install
    - bundle exec arduino_ci_remote.rb
    - doxygen doc/Doxyfile
-deploy:
-  provider: pages
-  strategy: git
-  token: $GITHUB_TOKEN
-  keep_history: false
-  local_dir: doc/html
-  verbose: true
-  on:
-    branch: main
+#deploy:
+#  provider: pages
+#  strategy: git
+#  token: $GITHUB_TOKEN
+#  keep_history: false
+#  local_dir: doc/html
+#  verbose: true
+#  on:
+#    branch: main

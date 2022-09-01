@@ -1,31 +1,36 @@
-####################################################
-# Syntax Coloring Map For BresserWeatherSensorLib
-####################################################
+#######################################################
+# Syntax Coloring Map For BresserWeatherSensorReceiver
+#######################################################
 
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
-
-WeatherSensor	KEYWORD1
-
+DecodeStatus	              KEYWORD1
+WeatherSensor	              KEYWORD1
+SensorMap	                  KEYWORD1
+sensor_t                    KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
 begin                       KEYWORD2
-getData     	            KEYWORD2
+getData     	              KEYWORD2
 getMessage                  KEYWORD2
 genMessage                  KEYWORD2
 windspeed_ms_to_bft         KEYWORD2
 decodeBresser5In1Payload    KEYWORD2
 decodeBresser6In1Payload    KEYWORD2
-
+clearSlots                  KEYWORD2
+findId                      KEYWORD2
+findType                    KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
 #######################################
 
+NUM_SENSORS                 LITERAL1
+_DEBUG_MODE_                LITERAL1
 BRESSER_5_IN_1              LITERAL1
 BRESSER_6_IN_1	            LITERAL1
 USE_CC1101                  LITERAL1
@@ -34,3 +39,18 @@ PIN_RECEIVER_CS             LITERAL1
 PIN_RECEIVER_IRQ            LITERAL1    
 PIN_RECEIVER_GPIO           LITERAL1
 PIN_RECEIVER_RESET          LITERAL1
+SENSOR_TYPE_WEATHER0        LITERAL1
+SENSOR_TYPE_WEATHER1        LITERAL1
+SENSOR_TYPE_SOIL            LITERAL1
+SENSOR_TYPE_RAIN            LITERAL1
+DATA_COMPLETE               LITERAL1
+DATA_TYPE                   LITERAL1
+DATA_ALL_SLOTS              LITERAL1
+DECODE_INVALID              LITERAL1
+DECODE_OK                   LITERAL1
+DECODE_PAR_ERR              LITERAL1
+DECODE_CHK_ERR              LITERAL1
+DECODE_DIG_ERR              LITERAL1
+DECODE_SKIP                 LITERAL1
+DECODE_FULL                 LITERAL1
+

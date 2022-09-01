@@ -15,8 +15,8 @@ script:
    - bundle exec arduino_ci_remote.rb
    - doxygen doc/Doxyfile
 deploy:
-  strategy: git
   provider: pages
+  strategy: git
   github-token: $GITHUB_TOKEN
   keep_history: false
   local_dir: doc/html

@@ -1,0 +1,96 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// TestRainGauge.cpp
+//
+// CppUTest unit tests for RainGauge - real world test cases
+// Test data from https://data.world/datagov-uk/37334c93-4584-452a-b0f0-1be9e22edacd -
+// Pottery Fields rain gauge rainfall data
+//
+// https://github.com/matthias-bs/BresserWeatherSensorReceiver
+//
+//
+// created: 09/2022
+//
+//
+// MIT License
+//
+// Copyright (c) 2022 Matthias Prinke
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+//
+// History:
+//
+// 20220912 Created
+//
+// ToDo: 
+// -
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include "CppUTest/TestHarness.h"
+
+#define TOLERANCE 0.05
+#include "RainGauge.h"
+
+
+#if defined(_DEBUG_CIRCULAR_BUFFER_)
+    #define DEBUG_CB() { rainGauge.printCircularBuffer(); }
+
+#else
+  #define DEBUG_CB() {}
+#endif
+
+
+
+static RainGauge rainGauge;
+
+/**
+ * \example
+ * struct tm tm;
+ * time_t t;
+ * strptime("6 Dec 2001 12:33:45", "%d %b %Y %H:%M:%S", &tm);
+ * tm.tm_isdst = -1;      // Not set by strptime(); tells mktime()
+ *                        // to determine whether daylight saving time
+ *                        // is in effect
+ * t = mktime(&tm);
+ */
+
+static void setTime(const char *time, tm &tm, time_t &ts)
+{
+  strptime(time, "%Y-%m-%d %H:%M", &tm);
+  ts = mktime(&tm);
+}
+
+TEST_GROUP(TestRainGaugePotteryFields) {
+  void setup() {
+      rainGauge.reset();
+  }
+
+  void teardown() {
+  }
+};
+
+
+/*
+ * Test rainfall during past hour (no rain gauge overflow)
+ */
+TEST(TestRainGaugePotteryFields, Test_PotteryFields) {
+  tm        tm;
+  time_t    ts;
+
+  printf("< PotteryFields >\n");

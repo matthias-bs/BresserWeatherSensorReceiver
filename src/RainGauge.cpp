@@ -49,6 +49,13 @@
 const int SECONDS_PER_HOUR = 3600;
 const int SECONDS_PER_DAY  = 86400;
 
+#ifndef RTC_DATA_ATTR
+   #define RTC_DATA_ATTR static
+#endif
+#if defined(SLEEP_EN) && !defined(ESP32)
+   #error "RainGauge with SLEEP_EN only supported on ESP32!"
+#endif
+
 // TODO Remove the separate variables
 // The following variables are stored in the ESP32's RTC RAM -
 // their values are retained after a Sleep Reset.

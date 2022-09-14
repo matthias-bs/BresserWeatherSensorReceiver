@@ -83,6 +83,13 @@ RTC_DATA_ATTR float     rainPrev;
 RTC_DATA_ATTR uint16_t  rainOvf = 0;
 */
 
+/**
+ * \typedef nvData_t
+ *
+ * \brief Data structure for rain statistics to be stored in non-volatile memory
+ *
+ * On ESP32, this data is stored in the RTC RAM. 
+ */
 typedef struct {
     /* rainfall during past hour - circular buffer */
     uint32_t  tsBuf[RAINGAUGE_BUF_SIZE];
@@ -107,18 +114,23 @@ typedef struct {
     uint16_t  rainOvf; // number of rain gauge overflows
 } nvData_t;
 
+
 RTC_DATA_ATTR nvData_t nvData = {
    .tsBuf = {0},
    .rainBuf = {0}, 
    .head = 0,
    .tail = 0,
    .tsDayBegin = 0xFF,
+   .rainDayBegin = 0,
    .tsWeekBegin = 0xFF,
+   .rainWeekBegin = 0,
    .wdayPrev = 0xFF,
    .tsMonthBegin = 0xFF,
+   .rainMonthBegin = 0,
    .rainPrev = 0,
    .rainOvf = 0
 };
+
 
 /**
  * \verbatim

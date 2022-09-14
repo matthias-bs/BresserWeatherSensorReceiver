@@ -4,7 +4,7 @@
 // Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver 
 // based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
 //
-// https://github.com/matthias-bs/WeatherSensor
+// https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
 // Based on:
 // ---------
@@ -47,6 +47,7 @@
 // 20220731 Updated decodeBresser5In1Payload()/decodeBresser6In1Payload() from rtl_433 project
 // 20220815 Added support of multiple sensors
 //          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
+// 20220905 Improved code quality and added Doxygen comments
 //
 // ToDo: 
 // -
@@ -655,6 +656,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 //  DECODE_CHK_ERR - Checksum Error
 #ifdef BRESSER_6_IN_1
 DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSize) {
+    (void)msgSize; // unused parameter - kept for consistency with other decoders; avoid warning
     int const moisture_map[] = {0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99}; // scale is 20/3
     
     // Per-message status flags

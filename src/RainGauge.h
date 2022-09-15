@@ -96,7 +96,7 @@ public:
     /**
      * Initialize circular buffer for hourly (past 60 minutes) rainfall
      */
-    void  begin(tm t, float rain);
+    void  init(tm t, float rain);
     
     
     /**

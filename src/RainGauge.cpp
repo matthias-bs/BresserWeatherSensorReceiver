@@ -207,11 +207,13 @@ RainGauge::reset(void)
     nvData.wdayPrev       = 0xFF;
     nvData.rainPrev       = 0;
     nvData.rainOvf        = 0;
+    nvData.head           = 0;
+    nvData.tail           = 0;
     rainCurr              = 0;
 }
 
 void
-RainGauge::begin(tm t, float rain)
+RainGauge::init(tm t, float rain)
 {
     // Seconds since midnight
     uint32_t ts = timeStamp(t);
@@ -223,7 +225,7 @@ RainGauge::begin(tm t, float rain)
     }
     nvData.head = 0;
     nvData.tail = 0;
-    nvData.tsDayBegin = 0xFF;
+    nvData.tsDayBegin = t.tm_wday;
 }
 
 uint32_t
@@ -259,7 +261,17 @@ RainGauge::update(tm t, float rain, float raingaugeMax)
     nvData.rainPrev = rain;
     
     rainCurr = (nvData.rainOvf * raingaugeMax) + rain;
-    
+
+    // Check if no saved data is available yet
+    if (nvData.wdayPrev == 0xFF) {
+        // Save day of week to allow detection of new week
+        nvData.wdayPrev = t.tm_wday;
+
+        // Init tail of circular buffer
+        nvData.tsBuf[nvData.tail]   = ts;
+        nvData.rainBuf[nvData.tail] = (uint16_t)(rainCurr * 10);
+    }
+
     // Remove stale entries
     uint32_t ts_cmp;
     while (!(nvData.tail == nvData.head)) {
@@ -280,14 +292,7 @@ RainGauge::update(tm t, float rain, float raingaugeMax)
     nvData.head = (head_tmp == nvData.tail) ? nvData.head : head_tmp;
     nvData.tsBuf[nvData.head]   = ts;
     nvData.rainBuf[nvData.head] = (uint16_t)(rainCurr * 10);
-    
-
-    // Check if no saved data is available yet
-    if (nvData.wdayPrev == 0xFF) {
-        // Save day of week to allow detection of new week
-        nvData.wdayPrev = t.tm_wday;
-    }
-        
+            
     // Check if day of the week has changed
     // or no saved data is available yet
     if ((t.tm_wday != nvData.tsDayBegin) || 

@@ -48,6 +48,7 @@
 // 20220815 Added support of multiple sensors
 //          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
 // 20220905 Improved code quality and added Doxygen comments
+// 20221003 Fixed humidity decoding in decodeBresser5In1Payload()
 //
 // ToDo: 
 // -
@@ -546,13 +547,13 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
         sensor[slot].rain_mm *= 2.5;
         
         // Rain Gauge has no humidity (according to description) and no wind sensor (obviously)
-        sensor[slot].humidity = false;
-        sensor[slot].wind_ok  = false;
+        sensor[slot].humidity_ok = false;
+        sensor[slot].wind_ok     = false;
         
     }
     else {
-        sensor[slot].humidity = true;
-        sensor[slot].wind_ok  = true;
+        sensor[slot].humidity_ok = true;
+        sensor[slot].wind_ok     = true;
     }
     
     sensor[slot].temp_ok      = true;

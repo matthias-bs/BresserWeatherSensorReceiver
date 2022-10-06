@@ -118,9 +118,9 @@
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL  300000  // sleep interval [ms]
-#define SLEEP_EN        false    // enable sleep mode (see notes above!)
-//#define USE_SECUREWIFI          // use secure WIFI
-#define USE_WIFI                // use non-secure WIFI
+#define SLEEP_EN        true    // enable sleep mode (see notes above!)
+#define USE_SECUREWIFI          // use secure WIFI
+//#define USE_WIFI              // use non-secure WIFI
 
 #if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
     #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
@@ -397,7 +397,7 @@ void publishWeatherdata(bool complete)
 {
     char mqtt_payload[PAYLOAD_SIZE];  // sensor data
     char mqtt_payload2[PAYLOAD_SIZE]; // calculated extra data
-    char mqtt_topic[TOPIC_SIZE];
+    char mqtt_topic[TOPIC_SIZE+31];   // add space for ID/name
 
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
@@ -473,7 +473,7 @@ void publishWeatherdata(bool complete)
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%s", mqttPubData, sensor_map[n].name.c_str());
+          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%30s", mqttPubData, sensor_map[n].name.c_str());
           break;
         }
         else {

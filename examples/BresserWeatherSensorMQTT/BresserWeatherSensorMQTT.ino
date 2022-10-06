@@ -18,7 +18,7 @@
 // The 'status' and the 'radio' topics are published at an interval of STATUS_INTERVAL.
 //
 // If sleep mode is enabled (SLEEP_EN), the device goes into deep sleep mode after data has 
-// been published. If AWAKE_TIMEOUT is reached befor data has been published, deep sleep is 
+// been published. If AWAKE_TIMEOUT is reached before data has been published, deep sleep is 
 // entered, too. After SLEEP_INTERVAL, the controller is restarted.
 // 
 //
@@ -78,16 +78,26 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 //          Changed hostname to append chip ID
 //          Added calculation of additional information using WeatherUtils.h/.cpp
+// 20221006 Modified secure/non-secure client implementation
+//          Modified string buffer size definitons
+//          Added rain gauge statistics
+//          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
+//          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
 //
 // ToDo:
 // 
-// - check option CHECK_CA_ROOT
-// - fix non-secure MQTT (issues #3 and #4)
+// - 
 //
 // Notes:
 //
 // - To enable wakeup from deep sleep on ESP8266, GPIO16 (D0) must be connected to RST!
 //   Add a jumper to remove this connection for programming!
+// - MQTT code based on https://github.com/256dpi/arduino-mqtt 
+// - For secure MQTT (TLS server verifycation, check the following examples:
+//   - ESP32:   
+//     https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
+//   - ESP8288: 
+//     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/BearSSL_Validation/BearSSL_Validation.ino
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -102,14 +112,20 @@
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size
+#define HOSTNAME_SIZE   30      // maximum hostname size
 #define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL  300000  // sleep interval [ms]
-#define SLEEP_EN        true    // enable sleep mode (see notes above!)
+#define SLEEP_EN        false    // enable sleep mode (see notes above!)
+//#define USE_SECUREWIFI          // use secure WIFI
+#define USE_WIFI                // use non-secure WIFI
 
-
+#if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
+    #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
+#endif
+ 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
 
@@ -119,21 +135,26 @@
 #include <Arduino.h>
 
 #if defined(ESP32)
-    #include <WiFi.h>
+    #if defined(USE_WIFI)
+        #include <WiFi.h>
+    #elif defined(USE_SECUREWIFI)
+        #include <WiFiClientSecure.h>
+    #endif
 #elif defined(ESP8266)
     #include <ESP8266WiFi.h>
 #endif
 
-#include <WiFiClientSecure.h>
+
+
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
-//#include "RainGauge.h"
+#include "RainGauge.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20220815";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20221006";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -220,7 +241,7 @@ SensorMap sensor_map[NUM_SENSORS] = {
 #endif
 
 WeatherSensor weatherSensor;
-//RainGauge rainGauge;
+RainGauge     rainGauge;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[]      = "/status";
@@ -228,11 +249,11 @@ const char MQTT_PUB_RADIO[]       = "/radio";
 const char MQTT_PUB_DATA[]        = "/data";
 const char MQTT_PUB_EXTRA[]       = "/extra";
 
-char mqttPubStatus[50];
-char mqttPubRadio[50];
-char mqttPubData[50];
-char mqttPubExtra[50];
-char Hostname[30];
+char mqttPubStatus[TOPIC_SIZE];
+char mqttPubRadio[TOPIC_SIZE];
+char mqttPubData[TOPIC_SIZE];
+char mqttPubExtra[TOPIC_SIZE];
+char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
 
@@ -242,15 +263,20 @@ char Hostname[30];
 
 // Generate WiFi network instance
 #if defined(ESP32)
-    WiFiClientSecure net;
+    #if defined(USE_WIFI)
+        WiFiClient net;
+    #elif defined(USE_SECUREWIFI)
+        WiFiClientSecure net;
+    #endif
 #elif defined(ESP8266)
-   #if (MQTT_PORT == 1883)
-     WiFiClient net; // use none SSL connection
-   #else
-     BearSSL::WiFiClientSecure net;
-   #endif
+    #if defined(USE_WIFI)
+        WiFiClient net;
+    #elif defined(USE_SECUREWIFI)
+        BearSSL::WiFiClientSecure net;
+    #endif    
 #endif
 
+     
 //
 // Generate MQTT client instance
 // N.B.: Default message buffer size is too small!
@@ -281,38 +307,40 @@ void mqtt_setup(void)
     }
     Serial.println(F("connected!"));
     
-    Serial.print("Setting time using SNTP ");
-    configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
-    now = time(nullptr);
-    while (now < 1510592825)
-    {
-        delay(500);
-        Serial.print(".");
+
+    #ifdef USE_SECUREWIFI
+        // Note: TLS security needs correct time
+        Serial.print("Setting time using SNTP ");
+        configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
         now = time(nullptr);
-    }
-    Serial.println("done!");
-    struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
-    Serial.print("Current time: ");
-    Serial.println(asctime(&timeinfo));
-
-    #ifdef CHECK_CA_ROOT
-        BearSSL::X509List cert(digicert);
-        net.setTrustAnchors(&cert);
-    #endif
-    #ifdef CHECK_PUB_KEY
-        BearSSL::PublicKey key(pubkey);
-        net.setKnownKey(&key);
-    #endif
-    #ifdef CHECK_FINGERPRINT
-        net.setFingerprint(fp);
-    #endif
-    #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
-        if (MQTT_PORT != 1883) {
-            net.setInsecure();
+        while (now < 1510592825)
+        {
+            delay(500);
+            Serial.print(".");
+            now = time(nullptr);
         }
-    #endif
+        Serial.println("done!");
+        struct tm timeinfo;
+        gmtime_r(&now, &timeinfo);
+        Serial.print("Current time: ");
+        Serial.println(asctime(&timeinfo));
 
+        #ifdef CHECK_CA_ROOT
+            BearSSL::X509List cert(digicert);
+            net.setTrustAnchors(&cert);
+        #endif
+        #ifdef CHECK_PUB_KEY
+            BearSSL::PublicKey key(pubkey);
+            net.setKnownKey(&key);
+        #endif
+        #ifdef CHECK_FINGERPRINT
+            net.setFingerprint(fp);
+        #endif
+        #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+            // do not verify tls certificate
+            net.setInsecure();
+        #endif
+    #endif
     client.begin(MQTT_HOST, MQTT_PORT, net);
     
     // set up MQTT receive callback (if required)
@@ -386,7 +414,7 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].rain_ok) {
           struct tm timeinfo;
           gmtime_r(&now, &timeinfo);
-          //rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
+          rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
       }
       
       // Example:
@@ -432,9 +460,9 @@ void publishWeatherdata(bool complete)
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.sensor[i].rain_mm);
-          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay(weatherSensor.sensor[i].rain_mm));
-          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek(weatherSensor.sensor[i].rain_mm));
-          //sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth(weatherSensor.sensor[i].rain_mm));
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay());
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek());
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth());
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);
@@ -505,15 +533,15 @@ void setup() {
         for(int i=0; i<17; i=i+8) {
             chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
         }
-        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", chipId);
+        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
     #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", ESP.getChipId() & 0xFFFFFF);
+        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
-    snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);
-    snprintf(mqttPubRadio,  40, "%s%s", Hostname, MQTT_PUB_RADIO);
-    snprintf(mqttPubData,   40, "%s%s", Hostname, MQTT_PUB_DATA);
-    snprintf(mqttPubExtra,  40, "%s%s", Hostname, MQTT_PUB_EXTRA);
+    snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
+    snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
+    snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
+    snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
 
     mqtt_setup();
     weatherSensor.begin();
@@ -576,8 +604,8 @@ void loop() {
             weatherSensor.genMessage(1 /* slot */, 0xdeadbeef /* ID */, 1 /* type */, 7 /* channel */);
         #endif
         
-        // Attempt to receive entire data set with timeout of <xx> s
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_ALL_SLOTS, 0, &clientLoopWrapper);
+        // Attempt to receive data set with timeout of <xx> s
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_COMPLETE, 0, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN

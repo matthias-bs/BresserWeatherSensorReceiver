@@ -58,7 +58,7 @@ jobs:
             # ESP8266
             echo "::set-output name=options:::xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K"
             echo "::set-output name=index-url::--additional-urls http://arduino.esp8266.com/stable/package_esp8266com_index.json"
-            echo "::set-output name=skip-pattern::(HTTP|MQTT).*ino"
+            #echo "::set-output name=skip-pattern::(HTTP|MQTT).*ino"
 
           fi
 

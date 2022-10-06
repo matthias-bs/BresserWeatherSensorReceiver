@@ -473,7 +473,7 @@ void publishWeatherdata(bool complete)
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%s", mqttPubData, sensor_map[n].name.substr(0, 30).c_str());
+          snprintf(mqtt_topic, TOPIC_SIZE+31, "%s/%s", mqttPubData, sensor_map[n].name.substr(0, 30).c_str());
           break;
         }
         else {

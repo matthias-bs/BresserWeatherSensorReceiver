@@ -9,7 +9,7 @@
 // At startup, first a WiFi connection and then a connection to the MQTT broker is established.
 // (Edit secrets.h accordingly!)
 //
-// Then receiving a complete set of data from a weather sensors is tried periodically.
+// Then receiving a complete set of data from a weather sensor is tried periodically.
 // If successful, sensor data is published as an MQTT message.
 // From the sensor data, some additional data is calculated and included in the message.
 //
@@ -17,7 +17,7 @@
 // The 'status' and the 'radio' topics are published at an interval of STATUS_INTERVAL.
 //
 // If sleep mode is enabled (SLEEP_EN), the device goes into deep sleep mode after data has 
-// been published. If AWAKE_TIMEOUT is reached befor data has been published, deep sleep is 
+// been published. If AWAKE_TIMEOUT is reached before data has been published, deep sleep is 
 // entered, too. After SLEEP_INTERVAL, the controller is restarted.
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
@@ -64,15 +64,23 @@
 // History:
 //
 // 20220815 Created from BresserWeatherSensorMQTT
+// 20221006 Modified secure/non-secure client implementation
+//          Modified string buffer size handling
 //
 // ToDo:
 // 
-// - check option CHECK_CA_ROOT
+// - 
 //
 // Notes:
 //
 // - To enable wakeup from deep sleep on ESP8266, GPIO16 (D0) must be connected to RST!
 //   Add a jumper to remove this connection for programming!
+// - MQTT code based on https://github.com/256dpi/arduino-mqtt 
+// - For secure MQTT (TLS server verifycation, check the following examples:
+//   - ESP32:   
+//     https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
+//   - ESP8288: 
+//     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/BearSSL_Validation/BearSSL_Validation.ino
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -88,14 +96,22 @@
 #define DOMO_WIND_IDX   877     // IDX of Domoticz virtual wind sensor
 #define DOMO_RAIN_IDX   878     // IDX of Domoticz virtual rain sensor
 #define DOMO_TH_IDX     876     // IDX of Domoticz virtual temperature/humidity sensor
+#define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    256     // maximum MQTT message size
-#define TOPIC_SIZE      40      // maximum MQTT topic size
+#define TOPIC_SIZE      50      // maximum MQTT topic size
+#define HOSTNAME_SIZE   30      // maximum hostname size
 #define RX_TIMEOUT      60000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL  300000  // sleep interval [ms]
 #define SLEEP_EN        false   // enable sleep mode (see notes above!)
+#define USE_SECUREWIFI          // use secure WIFI
+//#define USE_WIFI              // use non-secure WIFI
+
+#if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
+    #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
+#endif
 
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
@@ -105,12 +121,15 @@
 #include <Arduino.h>
 
 #if defined(ESP32)
-    #include <WiFi.h>
+    #if defined(USE_WIFI)
+        #include <WiFi.h>
+    #elif defined(USE_SECUREWIFI)
+        #include <WiFiClientSecure.h>
+    #endif
 #elif defined(ESP8266)
     #include <ESP8266WiFi.h>
 #endif
 
-#include <WiFiClientSecure.h>
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
@@ -119,7 +138,7 @@
 #include "WeatherUtils.h"
 
 
-const char sketch_id[] = "BresserWeatherSensorDomoticz 20220815";
+const char sketch_id[] = "BresserWeatherSensorDomoticz 20221006";
 
 //enable only one of these below, disabling both is fine too.
 // #define CHECK_CA_ROOT
@@ -207,9 +226,9 @@ const char MQTT_PUB_STATUS[]      = "/status";
 const char MQTT_PUB_RADIO[]       = "/radio";
 const char MQTT_PUB_DOMO[]        = "domoticz/in"; //mqtt plugin for domoticz needed
 
-char mqttPubStatus[50];
-char mqttPubRadio[50];
-char Hostname[30];
+char mqttPubStatus[TOPIC_SIZE];
+char mqttPubRadio[TOPIC_SIZE];
+char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
 
@@ -219,14 +238,19 @@ char Hostname[30];
 
 // Generate WiFi network instance
 #if defined(ESP32)
+    #if defined(USE_WIFI)
+        WiFiClient net;
+    #elif defined(USE_SECUREWIFI)
     WiFiClientSecure net;
+    #endif
 #elif defined(ESP8266)
-   #if (MQTT_PORT == 1883)
-     WiFiClient net; // use none SSL connection
-   #else
+    #if defined(USE_WIFI)
+        WiFiClient net;
+    #elif defined(USE_SECUREWIFI)
      BearSSL::WiFiClientSecure net;
    #endif
 #endif
+
 
 //
 // Generate MQTT client instance
@@ -244,7 +268,7 @@ void mqtt_connect(void);
 //
 // Setup WiFi in Station Mode
 //
-void mqtt_setup()
+void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
@@ -258,38 +282,38 @@ void mqtt_setup()
     }
     Serial.println(F("connected!"));
     
-    /*
-    Serial.print("Setting time using SNTP ");
-    configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-    now = time(nullptr);
-    while (now < 1510592825)
-    {
-        delay(500);
-        Serial.print(".");
+    #ifdef USE_SECUREWIFI
+        // Note: TLS security needs correct time
+        Serial.print("Setting time using SNTP ");
+        configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
         now = time(nullptr);
-    }
-    Serial.println("done!");
-    struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
-    Serial.print("Current time: ");
-    Serial.print(asctime(&timeinfo));
-    */
+        while (now < 1510592825)
+        {
+            delay(500);
+            Serial.print(".");
+            now = time(nullptr);
+        }
+        Serial.println("done!");
+        struct tm timeinfo;
+        gmtime_r(&now, &timeinfo);
+        Serial.print("Current time: ");
+        Serial.println(asctime(&timeinfo));
 
-    #ifdef CHECK_CA_ROOT
-        BearSSL::X509List cert(digicert);
-        net.setTrustAnchors(&cert);
-    #endif
-    #ifdef CHECK_PUB_KEY
-        BearSSL::PublicKey key(pubkey);
-        net.setKnownKey(&key);
-    #endif
-    #ifdef CHECK_FINGERPRINT
-        net.setFingerprint(fp);
-    #endif
-    #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
-       if (MQTT_PORT != 1883) {
-         net.setInsecure();
-       }
+        #ifdef CHECK_CA_ROOT
+            BearSSL::X509List cert(digicert);
+            net.setTrustAnchors(&cert);
+        #endif
+        #ifdef CHECK_PUB_KEY
+            BearSSL::PublicKey key(pubkey);
+            net.setKnownKey(&key);
+        #endif
+        #ifdef CHECK_FINGERPRINT
+            net.setFingerprint(fp);
+        #endif
+        #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+            // do not verify tls certificate
+            net.setInsecure();
+        #endif
     #endif
 
     client.begin(MQTT_HOST, MQTT_PORT, net);
@@ -437,13 +461,13 @@ void setup() {
         for(int i=0; i<17; i=i+8) {
             chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
         }
-        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", chipId);
+        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
     #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-        snprintf(&Hostname[strlen(Hostname)], 20, "-%06X", ESP.getChipId() & 0xFFFFFF);
+        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
-    snprintf(mqttPubStatus, 40, "%s%s", Hostname, MQTT_PUB_STATUS);
-    snprintf(mqttPubRadio,  40, "%s%s", Hostname, MQTT_PUB_RADIO);
+    snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
+    snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
 
     mqtt_setup();
 

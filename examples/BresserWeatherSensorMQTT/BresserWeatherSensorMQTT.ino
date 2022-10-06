@@ -477,7 +477,7 @@ void publishWeatherdata(bool complete)
           break;
         }
         else {
-          snprintf(mqtt_topic, TOPIC_SIZE, "%s/%8X", mqttPubData, weatherSensor.sensor[i].sensor_id);
+          snprintf(mqtt_topic, TOPIC_SIZE+31, "%s/%8X", mqttPubData, weatherSensor.sensor[i].sensor_id);
         }
       }
       

@@ -95,7 +95,7 @@ TEST(TestRainGaugePotteryFields, Test_PotteryFields) {
   printf("< PotteryFields >\n");
   // 2013-06-12 00:00 -> 0; H: 0; D: 0; W: 0; M: 0
   setTime("2013-06-12 00:00", tm, ts);
-  rainGauge.begin(tm, 0);
+  rainGauge.init(tm, 0);
   rainGauge.update(tm, 0);
   DEBUG_CB();
   DOUBLES_EQUAL(    0.0, rainGauge.pastHour(),     TOLERANCE);

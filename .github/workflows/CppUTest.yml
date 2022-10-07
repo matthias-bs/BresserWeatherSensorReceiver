@@ -31,13 +31,13 @@ jobs:
           #sudo apt-get install build-essential gcc g++ bison flex perl python3 libxml2-dev zlib1g-dev default-jre doxygen graphviz
           sudo apt-get install cpputest lcov
         
-      # Runs all unit tests
-      - name: Run unit tests
-        run: |
-          cd test
-          make
+      ## Runs all unit tests
+      #- name: Run unit tests
+      #  run: |
+      #    cd test
+      #    make
 
-      # C
+      # Runs all units tests with coverage report
       - name: Run unit tests with coverage report
         run: |
           cd test

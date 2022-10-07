@@ -56,32 +56,6 @@ const int SECONDS_PER_DAY  = 86400;
    #error "RainGauge with SLEEP_EN only supported on ESP32!"
 #endif
 
-// TODO Remove the separate variables
-// The following variables are stored in the ESP32's RTC RAM -
-// their values are retained after a Sleep Reset.
-//RTC_DATA_ATTR tm        tsDayBegin   = {0};
-//RTC_DATA_ATTR tm        tsWeekBegin  = {0};
-//RTC_DATA_ATTR tm        tsMonthBegin = {0};
-// -- 15 bytes
-/*
-RTC_DATA_ATTR uint8_t   tsDayBegin = 0xFF;
-RTC_DATA_ATTR float     rainDayBegin;
-RTC_DATA_ATTR uint8_t   tsWeekBegin = 0xFF;
-RTC_DATA_ATTR float     rainWeekBegin;
-RTC_DATA_ATTR uint8_t   tsMonthBegin = 0xFF;
-RTC_DATA_ATTR float     rainMonthBegin;
-//   n x 8
-// + n x 2
-// => 220 bytes
-RTC_DATA_ATTR time_t    tsBuf[RAINGAUGE_BUF_SIZE];
-RTC_DATA_ATTR uint16_t  rainBuf[RAINGAUGE_BUF_SIZE];
-// -- 9 bytes
-RTC_DATA_ATTR uint8_t   head;
-RTC_DATA_ATTR uint8_t   tail;
-RTC_DATA_ATTR uint8_t   wdayPrev;
-RTC_DATA_ATTR float     rainPrev;
-RTC_DATA_ATTR uint16_t  rainOvf = 0;
-*/
 
 /**
  * \typedef nvData_t

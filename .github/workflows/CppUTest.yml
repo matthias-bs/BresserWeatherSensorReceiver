@@ -42,3 +42,9 @@ jobs:
         run: |
           cd test
           make lcov
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: lcov.info
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          

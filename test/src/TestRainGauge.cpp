@@ -195,7 +195,7 @@ TEST(TestRainGaugeHour, Test_RainHour) {
   printf("< RainHour >\n");
   
   setTime("2022-09-06 8:00", tm, ts);
-  rainGauge.begin(tm, rainSensor=10.0);
+  rainGauge.update(tm, rainSensor=10.0);
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:06", tm, ts);
@@ -272,7 +272,7 @@ TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
   printf("< RainHourShort >\n");
   
   setTime("2022-09-11 15:00", tm, ts);
-  rainGauge.begin(tm, rainSensor=10.0);
+  rainGauge.update(tm, rainSensor=10.0);
   DEBUG_CB();
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
@@ -361,7 +361,7 @@ TEST(TestRainGaugeHourLongInterval, Test_RainHourLong) {
   printf("< RainHourLong >\n");
   
   setTime("2022-09-11 15:00", tm, ts);
-  rainGauge.begin(tm, rainSensor=10.0);
+  rainGauge.update(tm, rainSensor=10.0);
   DEBUG_CB();
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
@@ -435,7 +435,7 @@ TEST(TestRainGaugeHourExtremeInterval, Test_RainHourExtreme) {
   printf("< RainHourExtreme >\n");
   
   setTime("2022-09-11 15:00", tm, ts);
-  rainGauge.begin(tm, rainSensor=10.0);
+  rainGauge.update(tm, rainSensor=10.0);
   DEBUG_CB();
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
@@ -702,7 +702,7 @@ TEST(TestRainGaugeHourOv, Test_RainHourOv) {
   printf("< RainHourOv >\n");
   
   setTime("2022-09-06 8:00", tm, ts);
-  rainGauge.begin(tm, 10.0);
+  rainGauge.update(tm, 10.0);
   DEBUG_CB();
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
@@ -779,7 +779,7 @@ TEST(TestRainGaugeHourOvMidnight, Test_RainHourOvMidnight) {
   printf("< RainHourOvMidnight >\n");
   
   setTime("2022-09-06 23:00", tm, ts);
-  rainGauge.begin(tm, 10.0);
+  rainGauge.update(tm, 10.0);
   DEBUG_CB();
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 

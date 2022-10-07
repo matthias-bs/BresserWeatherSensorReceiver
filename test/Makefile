@@ -15,7 +15,7 @@ UNITTEST_MAKEFILE_FILTER ?= *
 UNITTEST_MAKEFILES := $(wildcard $(UNITTEST_MAKEFILES_DIR)/Makefile_$(UNITTEST_MAKEFILE_FILTER))
 
 export UNITTEST_EXTRA_INC_PATHS += \
-  -I$(PROJECT_ROOT_DIR) \
+  -I$(PROJECT_ROOT_DIR)/src \
   -I$(UNITTEST_ROOT)/header_overrides
 
 # Run the test on all Makesfiles found

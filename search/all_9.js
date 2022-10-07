@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['s_5ftype_19',['s_type',['../struct_weather_sensor_1_1_sensor.html#aabf3f23ee4b7db05580765f7ce392838',1,'WeatherSensor::Sensor']]],
-  ['sensor_20',['Sensor',['../struct_weather_sensor_1_1_sensor.html',1,'WeatherSensor::Sensor'],['../class_weather_sensor.html#ac3edc5eaae93e8289f0267d56fa0a44a',1,'WeatherSensor::sensor()']]],
-  ['sensor_5fid_21',['sensor_id',['../struct_weather_sensor_1_1_sensor.html#abbf124d4f3f1792ff596b7dd03b9cd94',1,'WeatherSensor::Sensor']]],
-  ['sensor_5ft_22',['sensor_t',['../class_weather_sensor.html#ae38bcb7791c9c49d5f23c150d4517dc4',1,'WeatherSensor']]],
-  ['sensormap_23',['SensorMap',['../struct_sensor_map.html',1,'']]]
+  ['rain_5fmm_22',['rain_mm',['../struct_weather_sensor_1_1_sensor.html#aea1c5facf8df55b7e58c0d9ce572152a',1,'WeatherSensor::Sensor']]],
+  ['rain_5fok_23',['rain_ok',['../struct_weather_sensor_1_1_sensor.html#ae2e073d69e22bdcaa59a60c1b8189016',1,'WeatherSensor::Sensor']]],
+  ['raingauge_24',['RainGauge',['../class_rain_gauge.html',1,'']]],
+  ['reset_25',['reset',['../class_rain_gauge.html#ad625c2e0aa39f69cd93cabf4f39c5ab6',1,'RainGauge']]],
+  ['rssi_26',['rssi',['../struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1',1,'WeatherSensor::Sensor::rssi()'],['../class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e',1,'WeatherSensor::rssi()']]]
 ];

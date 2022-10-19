@@ -95,6 +95,11 @@ The [Data Alliance](https://www.data-alliance.net/mhf-series-mhf1-mhf2-mhf3-mhf4
 
 Personally I prefer the SMA connector over the uFL connector -  but be aware of the (usual) male/female connector types and the normal/reverse polarity types. See [SMA vs RP-SMA what is the difference?](https://forum.digikey.com/t/sma-vs-rp-sma-what-is-the-difference/550) by Digikey.
 
+## Software Build Tutorial
+
+Issue https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/12#issuecomment-1284508006
+
+
 ## Source Documentation
 
 https://matthias-bs.github.io/BresserWeatherSensorReceiver/

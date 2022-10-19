@@ -57,7 +57,7 @@
 
 #include <Arduino.h>
 #include <string>
-#include "BresserWeatherSensorCfg.h"
+#include <BresserWeatherSensorCfg.h>
 #include <RadioLib.h>
 
 

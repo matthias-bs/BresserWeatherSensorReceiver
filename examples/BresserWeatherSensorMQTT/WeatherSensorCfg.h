@@ -2,7 +2,7 @@
 #define WEATHER_SENSOR_CFG_H
 
 // Number of sensors to be received
-#define NUM_SENSORS 2
+#define NUM_SENSORS 1
 
 // Use pinning for LoRaWAN Node 
 #define LORAWAN_NODE
@@ -23,8 +23,8 @@ uint32_t const sensor_ids_inc[] = {};
 #define BRESSER_6_IN_1
 
 // Select type of receiver module
-//#define USE_CC1101
-#define USE_SX1276
+#define USE_CC1101
+//#define USE_SX1276
 
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT

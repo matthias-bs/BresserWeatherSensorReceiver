@@ -158,8 +158,8 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20221006";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
-    {0x39582376, "WeatherSensor"},
-    {0x83750871, "SoilMoisture-1"}
+    {0x39582376, "WeatherSensor"}
+    //,{0x83750871, "SoilMoisture-1"}
 };
 
 //enable only one of these below, disabling both is fine too.

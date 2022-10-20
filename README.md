@@ -77,6 +77,8 @@ Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeathe
 
 ![Bresser5in1_CC1101_D1-Mini](https://user-images.githubusercontent.com/83612361/158458191-b5cabad3-3515-45d0-98e3-94b0fa13b8ef.jpg)
 
+[Pinout ESP8266 WeMos D1-Mini with cc1101](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/ESP8266_WeMos_D1-Mini_pinout_cc1101_v2.pdf)
+
 ### CC1101
 
 [Texas Instruments CC1101 Product Page](https://www.ti.com/product/CC1101)

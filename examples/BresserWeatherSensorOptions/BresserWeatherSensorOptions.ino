@@ -42,7 +42,7 @@
 
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
-#include <WeatherSensor.h>
+#include "WeatherSensor.h"
 
 // Set TIMEOUT to a relative small value to see the behaviour of different options -
 // depending on the timing of sensor transmission, start of getData() call and selected option,

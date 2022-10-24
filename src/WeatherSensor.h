@@ -4,7 +4,9 @@
 // Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver 
 // based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
 //
-// https://github.com/matthias-bs/Bresser_Weather_Sensor_Receiver
+// https://github.com/matthias-bs/BresserWeatherSensorReceiver
+//
+// NOTE: Application/hardware specific configurations should be made in WeatherSensorCfg.h!
 //
 // Based on:
 // ---------
@@ -57,34 +59,7 @@
 
 #include <Arduino.h>
 #include <string>
-#include "WeatherSensorCfg.h"
 #include <RadioLib.h>
-
-
-#if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) )
-    #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 must be defined!"
-#endif
-
-#if ( defined(USE_CC1101) && defined(USE_SX1276) )
-    #error "Either USE_CC1101 OR USE_SX1276 must be defined!"
-#endif
-
-#if defined(USE_CC1101)
-    #define RECEIVER_CHIP F("[CC1101]")
-#elif defined(USE_SX1276)
-    #define RECEIVER_CHIP F("[SX1276]")
-#else
-    #error "Either USE_CC1101 or USE_SX1276 must be defined!"
-#endif
-
-#define DEBUG_PORT Serial
-#if defined(_DEBUG_MODE_)
-    #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
-    #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
-#else
-  #define DEBUG_PRINT(...) {}
-  #define DEBUG_PRINTLN(...) {}
-#endif
 
 
 // Sensor Types

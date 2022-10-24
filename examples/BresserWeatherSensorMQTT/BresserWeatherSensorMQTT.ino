@@ -83,6 +83,7 @@
 //          Added rain gauge statistics
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
+// 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 //
 // ToDo:
 // 
@@ -101,14 +102,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <Arduino.h>
 
-// Enable LED indicating successful data reception
-#define LED_EN
-
-// LED pin
-#define LED_GPIO 2
-
-// User specific options
+// BEGIN User specific options
+#define LED_EN                  // Enable LED indicating successful data reception
+#define LED_GPIO        2       // LED pin
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size
@@ -122,9 +120,6 @@
 #define USE_SECUREWIFI          // use secure WIFI
 //#define USE_WIFI              // use non-secure WIFI
 
-#if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
-    #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
-#endif
  
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
@@ -132,7 +127,11 @@
 // Generate sensor data to test collecting data from multiple sources
 //#define GEN_SENSOR_DATA
 
-#include <Arduino.h>
+// END User specific configuration
+
+#if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
+    #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
+#endif
 
 #if defined(ESP32)
     #if defined(USE_WIFI)
@@ -145,7 +144,6 @@
 #endif
 
 
-
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
@@ -154,7 +152,7 @@
 #include "WeatherUtils.h"
 #include "RainGauge.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20221006";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20221024";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -634,9 +632,9 @@ void loop() {
                 Serial.println(F("Data forwarding completed.")); 
             }
         #endif
-        Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL); 
-        Serial.flush();
+        Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
         Serial.printf("%s: %s\n", mqttPubStatus, "offline");
+        Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();
         client.loop();

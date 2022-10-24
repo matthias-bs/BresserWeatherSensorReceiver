@@ -17,11 +17,5 @@ var struct_weather_sensor_1_1_sensor =
     [ "uv", "struct_weather_sensor_1_1_sensor.html#af1fd284df9f4171542a075c18e9eee9a", null ],
     [ "uv_ok", "struct_weather_sensor_1_1_sensor.html#acfc5d072c1059334b3320b4a5da0b5c4", null ],
     [ "valid", "struct_weather_sensor_1_1_sensor.html#ae28084d05f7e81b1c3a1b2cff859315a", null ],
-    [ "wind_avg_meter_sec", "struct_weather_sensor_1_1_sensor.html#a17f9c68c3b3ed29bd45c9c94c529bdb8", null ],
-    [ "wind_avg_meter_sec_fp1", "struct_weather_sensor_1_1_sensor.html#ab9e98da0f9c3d6afedab308afb4b7a88", null ],
-    [ "wind_direction_deg", "struct_weather_sensor_1_1_sensor.html#a470d5b3beebbd850ec1cb19cdf499b50", null ],
-    [ "wind_direction_deg_fp1", "struct_weather_sensor_1_1_sensor.html#a84179b88792595d6b58fabbc271bb7c9", null ],
-    [ "wind_gust_meter_sec", "struct_weather_sensor_1_1_sensor.html#a125ccdb479dcd064e772a1233d0c4f67", null ],
-    [ "wind_gust_meter_sec_fp1", "struct_weather_sensor_1_1_sensor.html#ab3e28edee777715e007aaebfc0a49e53", null ],
     [ "wind_ok", "struct_weather_sensor_1_1_sensor.html#af370cd7be58dc4ee21592e6354947ba1", null ]
 ];

@@ -77,6 +77,15 @@ $ via LWT
 
 ![IoTMQTTPanel_Bresser_5-in-1](https://user-images.githubusercontent.com/83612361/158457786-516467f9-2eec-4726-a9bd-36e9dc9eec5c.png)
 
+### [BresserWeatherSensorMQTTCustom](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTCustom)
+
+Customized version of the example [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/b7fd70517c97d66d371561958c0493d3dab2aabf/examples/BresserWeatherSensorMQTT/BresserWeatherSensorMQTT.ino)
+
+The file [BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTCustom/src/WeatherSensorCfg.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/b7fd70517c97d66d371561958c0493d3dab2aabf/examples/BresserWeatherSensorMQTTCustom/src/WeatherSensorCfg.h) has been customized 
+(from [BresserWeatherSensorReceiver/src/WeatherSensorCfg.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/b7fd70517c97d66d371561958c0493d3dab2aabf/src/WeatherSensorCfg.h).
+
+See [examples/BresserWeatherSensorMQTTCustom/Readme.md](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTTCustom/Readme.md) for details.
+
 ### [BresserWeatherSensorDomoticz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorDomoticz)
 
 Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT). Provides sensor data as MQTT messages via WiFi to Domoticz (https://domoticz.com/) (MQTT plugin for Domoticz required). The MQTT topics are designed for using with Domticz virtual sensors (see https://www.domoticz.com/wiki/Managing_Devices#Temperature and https://www.domoticz.com/wiki/Managing_Devices#Weather).

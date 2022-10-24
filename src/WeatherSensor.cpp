@@ -49,13 +49,15 @@
 //          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
 // 20220905 Improved code quality and added Doxygen comments
 // 20221003 Fixed humidity decoding in decodeBresser5In1Payload()
+// 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 //
 // ToDo: 
 // -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "WeatherSensor.h"
+#include <WeatherSensorCfg.h>
+#include <WeatherSensor.h>
 
 #if defined(USE_CC1101)
     static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);

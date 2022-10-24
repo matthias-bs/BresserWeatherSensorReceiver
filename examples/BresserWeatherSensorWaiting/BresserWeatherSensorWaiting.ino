@@ -48,7 +48,7 @@
 
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
-#include <WeatherSensor.h>
+#include "WeatherSensor.h"
 
 WeatherSensor weatherSensor;
 

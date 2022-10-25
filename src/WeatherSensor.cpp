@@ -238,7 +238,8 @@ DecodeStatus WeatherSensor::getMessage(void)
                 decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
             #endif
             #ifdef BRESSER_5_IN_1
-                if (decode_res == DECODE_PAR_ERR ||
+                if (decode_res == DECODE_INVALID ||
+                    decode_res == DECODE_PAR_ERR ||
                     decode_res == DECODE_CHK_ERR || 
                     decode_res == DECODE_DIG_ERR) {
                     decode_res = decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1);

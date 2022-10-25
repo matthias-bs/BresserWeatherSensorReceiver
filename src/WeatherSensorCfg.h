@@ -46,6 +46,8 @@
 
 #include <Arduino.h>
 
+//#define _DEBUG_MODE_          // Enable debug output (serial console)
+
 #define NUM_SENSORS     1       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
@@ -96,9 +98,6 @@ uint32_t const sensor_ids_inc[] = {};
   #define DEBUG_PRINT(...) {}
   #define DEBUG_PRINTLN(...) {}
 #endif
-
-
-//#define _DEBUG_MODE_
 
 // Arduino default SPI pins
 //

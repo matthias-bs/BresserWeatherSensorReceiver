@@ -46,11 +46,11 @@
 #if !defined(WEATHER_SENSOR_CFG_H)
 #define WEATHER_SENSOR_CFG_H
 
-// Number of sensors to be received
-#define NUM_SENSORS 2
+//#define _DEBUG_MODE_          // Enable debug output (serial console)
 
-// Use pinning for LoRaWAN Node 
-//#define LORAWAN_NODE
+#define NUM_SENSORS 1           // Number of sensors to be received
+
+//#define LORAWAN_NODE          // Use pinning for LoRaWAN Node 
 
 
 // List of sensor IDs to be excluded - can be empty

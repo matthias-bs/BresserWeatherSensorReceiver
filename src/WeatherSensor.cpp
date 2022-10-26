@@ -56,8 +56,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <WeatherSensorCfg.h>
-#include <WeatherSensor.h>
+#include "WeatherSensorCfg.h"
+#include "WeatherSensor.h"
 
 #if defined(USE_CC1101)
     static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);

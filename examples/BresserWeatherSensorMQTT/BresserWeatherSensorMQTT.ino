@@ -169,17 +169,22 @@ SensorMap sensor_map[NUM_SENSORS] = {
 
 #include "secrets.h"
 
-#ifndef SECRET
+#ifndef SECRETS
+    // Optionally copy everything between BEGIN secrets / END secrets to secrets.h
+    // Otherwise, leave secrets.h as an empty file and edit the contents below.
+
+    // BEGIN secrets
+    #define SECRETS
     const char ssid[] = "WiFiSSID";
     const char pass[] = "WiFiPassword";
 
     #define HOSTNAME "ESPWeather"
     #define APPEND_CHIP_ID
 
-    #define    MQTT_PORT     8883 // checked by pre-processor!
+    const int  MQTT_PORT   = 8883; // typically 8883 with TLS / 1883 without TLS 
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = ""; // leave blank if no credentials used
-    const char MQTT_PASS[] = ""; // leave blank if no credentials used
+    const char MQTT_USER[] = "";   // leave blank if no credentials used
+    const char MQTT_PASS[] = "";   // leave blank if no credentials used
 
     #ifdef CHECK_CA_ROOT
     static const char digicert[] PROGMEM = R"EOF(
@@ -236,6 +241,7 @@ SensorMap sensor_map[NUM_SENSORS] = {
     // Extracted by: openssl x509 -fingerprint -in fillchain.pem
     static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
     #endif
+    // END secrets
 #endif
 
 WeatherSensor weatherSensor;

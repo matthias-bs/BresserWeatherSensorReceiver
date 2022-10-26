@@ -169,8 +169,6 @@ SensorMap sensor_map[NUM_SENSORS] = {
 
 #include "secrets.h"
 
-#include "secrets.h"
-
 #ifndef SECRETS
     // Optionally copy everything between BEGIN secrets / END secrets to secrets.h
     // Otherwise, leave secrets.h as an empty file and edit the contents below.

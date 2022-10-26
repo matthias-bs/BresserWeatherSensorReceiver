@@ -149,17 +149,22 @@ const char sketch_id[] = "BresserWeatherSensorDomoticz 20221006";
 
 #include "secrets.h"
 
-#ifndef SECRET
+#ifndef SECRETS
+    // Optionally copy everything between BEGIN secrets / END secrets to secrets.h
+    // Otherwise, leave secrets.h as an empty file and edit the contents below.
+
+    // BEGIN secrets
+    #define SECRETS
     const char ssid[] = "SSID";
     const char pass[] = "password";
 
     #define HOSTNAME "BresserDomo"
     #define APPEND_CHIP_ID
 
-    #define MQTT_PORT        8883 // checked by pre-processor!
+    const int  MQTT_PORT   = 8883; // typically 8883 with TLS / 1883 without TLS 
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = ""; // leave blank if no credentials used
-    const char MQTT_PASS[] = ""; // leave blank if no credentials used
+    const char MQTT_USER[] = "";   // leave blank if no credentials used
+    const char MQTT_PASS[] = "";   // leave blank if no credentials used
 
     #ifdef CHECK_CA_ROOT
     static const char digicert[] PROGMEM = R"EOF(

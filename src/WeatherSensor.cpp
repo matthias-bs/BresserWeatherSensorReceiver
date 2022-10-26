@@ -675,7 +675,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     int chkdgst = (msg[0] << 8) | msg[1];
     int digest  = lfsr_digest16(&msg[2], 15, 0x8810, 0x5412);
     if (chkdgst != digest) {
-        //decoder_logf(decoder, 2, __func__, "Digest check failed %04x vs %04x", chkdgst, digest);
         DEBUG_PRINT("Digest check failed - ");
         DEBUG_PRINT(chkdgst, HEX);
         DEBUG_PRINT(" vs ");
@@ -683,15 +682,9 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
         return DECODE_DIG_ERR;
     }
     // Checksum, add with carry
-    // unused...
-    //int chksum = msg[17];
     int sum    = add_bytes(&msg[2], 16); // msg[2] to msg[17]
     if ((sum & 0xff) != 0xff) {
-        //decoder_logf(decoder, 2, __func__, "Checksum failed %04x vs %04x", chksum, sum);
-        DEBUG_PRINT("Checksum failed - ");
-        DEBUG_PRINT(chksum, HEX);
-        DEBUG_PRINT(" vs ");
-        DEBUG_PRINTLN(sum, HEX);
+        DEBUG_PRINTLN("Checksum failed");
         return DECODE_CHK_ERR;
     }
 

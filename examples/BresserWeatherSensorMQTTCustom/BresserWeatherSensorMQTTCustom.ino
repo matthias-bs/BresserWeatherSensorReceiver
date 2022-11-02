@@ -424,7 +424,7 @@ void publishWeatherdata(bool complete)
       // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
       sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "{");
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%08X", weatherSensor.sensor[i].sensor_id);
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":\"%08X\"", weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"ch\":%d", weatherSensor.sensor[i].chan);
       #endif

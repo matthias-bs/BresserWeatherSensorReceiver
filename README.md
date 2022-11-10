@@ -120,6 +120,8 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 * RF connector
 * Antenna
 
+See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://learn.adafruit.com/adafruit-rfm69hcw-and-rfm96-rfm95-rfm98-lora-packet-padio-breakouts/pinouts).
+
 **Note:**
 The RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
 

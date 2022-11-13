@@ -858,7 +858,7 @@ TEST(TestRainGaugeDailyOv, Test_RainDailyOv) {
   tm        tm;
   time_t    ts;
   float     rainSensor;
-  float     rainDaily;
+  float     rainDaily = 0.0;
 
   printf("< RainDailyOv >\n");
 

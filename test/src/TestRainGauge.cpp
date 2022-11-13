@@ -42,7 +42,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#define TOLERANCE 0.05
+#define TOLERANCE 0.1
 #include "RainGauge.h"
 
 //#define _DEBUG_CIRCULAR_BUFFER_

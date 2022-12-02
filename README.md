@@ -14,6 +14,7 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, 
 | 7902510..12   | Weather | decodeBresser**5In1**Payload()  |
 | 7002585       | Weather | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer | ?                    |
+| 7009972       | Soil Moisture/Temperature | decodeBresser**6In1**Payload() |
 
 Configure the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276` in `WeatherSensorCfg.h`.
 

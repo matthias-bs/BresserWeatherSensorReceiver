@@ -684,7 +684,9 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     }
     // Checksum, add with carry
     // unused...
-    //int chksum = msg[17];
+    #ifdef _DEBUG_MODE_
+        int chksum = msg[17];
+    #endif
     int sum    = add_bytes(&msg[2], 16); // msg[2] to msg[17]
     if ((sum & 0xff) != 0xff) {
         //decoder_logf(decoder, 2, __func__, "Checksum failed %04x vs %04x", chksum, sum);

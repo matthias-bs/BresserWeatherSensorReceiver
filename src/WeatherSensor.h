@@ -48,6 +48,7 @@
 // 20220526 Implemented getData(), changed debug output to macros
 // 20220815 Added support of multiple sensors
 //          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
+// 20221207 Added SENSOR_TYPE_THERMO_HYGRO
 //
 // ToDo: 
 // -
@@ -65,18 +66,18 @@
 // Sensor Types
 // 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
 // 1 - Weather Station          6-in-1; PN 7002585
-// 2 - Indoor?
+// 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
 // 4 - Soil Moisture Sensor     6-in-1; PN 7009972
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
-// ? - Thermo-/Hygro-Sensor
 // ? - Air Quality Sensor
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
 // ? - Lightning Sensor
-#define SENSOR_TYPE_WEATHER0    0 // Weather Station 
-#define SENSOR_TYPE_WEATHER1    1 // Weather Station
-#define SENSOR_TYPE_SOIL        4 // Soil Temperature and Moisture (from 6-in-1 decoder)
-#define SENSOR_TYPE_RAIN        9 // Professional Rain Gauge (from 5-in-1 decoder)
+#define SENSOR_TYPE_WEATHER0        0 // Weather Station 
+#define SENSOR_TYPE_WEATHER1        1 // Weather Station
+#define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
+#define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
+#define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 
 
 // Flags for controlling completion of reception in getData()

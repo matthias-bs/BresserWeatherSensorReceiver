@@ -84,6 +84,7 @@
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
+// 20221210 Fixed setting hostname for ESP8266
 //
 // ToDo:
 // 

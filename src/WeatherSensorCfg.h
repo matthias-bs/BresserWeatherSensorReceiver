@@ -66,6 +66,9 @@ uint32_t const sensor_ids_inc[] = {};
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
 //#define TTGO_LORA32
 
+// Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
+//#define ADAFRUIT_FEATHER_ESP32S2
+
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT
 #define WIND_DATA_FIXEDPOINT
@@ -131,6 +134,17 @@ uint32_t const sensor_ids_inc[] = {};
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
+#elif defined(ADAFRUIT_FEATHER_ESP32S2)
+    #define PIN_RECEIVER_CS   6
+    
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  5
+    
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 11
+    
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  9
 #elif defined(ESP32)
     #define PIN_RECEIVER_CS   27
     

@@ -300,8 +300,15 @@ void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
-    WiFi.hostname(Hostname);
-    WiFi.mode(WIFI_STA);
+    // Setting hostname on ESP8266 and ESP32 differs
+    // see matthias-bs/BresserWeatherSensorReceiver/issues/19
+    #if defined(ESP8266)
+        WiFi.mode(WIFI_STA);
+        WiFi.hostname(Hostname);
+    #else
+        WiFi.hostname(Hostname);
+        WiFi.mode(WIFI_STA);
+    #endif
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
     {

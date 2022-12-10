@@ -114,6 +114,19 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 
 **Note 2: Make sure to use the 868MHz version!**
 
+## Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
+
+**Note: Make sure to use the 868MHz version!**
+* [ADA3231](https://www.adafruit.com/product/3231) - Adafruit LoRa Radio FeatherWing - RFM95W 900 MHz - RadioFruit
+* [ADA3232](https://www.adafruit.com/product/3232) - Adafruit LoRa Radio FeatherWing - RFM95W 433 MHz - RadioFruit
+* [ADA4769](https://www.adafruit.com/product/4769) - FeatherS2 - ESP32-S2 Feather Development Board
+
+Solder-Bridges on the Module/Wing:
+* E to IRQ
+* D to CS
+* C to RST
+* A to DI01
+
 ## Adafruit RFM95W LoRa Radio Transceiver Breakout
 
 **Note: Make sure to use the 868MHz version!**

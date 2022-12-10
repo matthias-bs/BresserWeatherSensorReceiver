@@ -84,6 +84,7 @@
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
+// 20221210 Fixed setting hostname for ESP8266
 //
 // ToDo:
 // 
@@ -301,8 +302,15 @@ void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
-    WiFi.hostname(Hostname);
-    WiFi.mode(WIFI_STA);
+    // Setting hostname on ESP8266 and ESP32 differs
+    // see matthias-bs/BresserWeatherSensorReceiver/issues/19
+    #if defined(ESP8266)
+        WiFi.mode(WIFI_STA);
+        WiFi.hostname(Hostname);
+    #else
+        WiFi.hostname(Hostname);
+        WiFi.mode(WIFI_STA);
+    #endif
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
     {

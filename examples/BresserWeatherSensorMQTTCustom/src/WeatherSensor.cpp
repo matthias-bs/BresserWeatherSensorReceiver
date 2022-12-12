@@ -766,7 +766,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     msg[12] ^= 0xff;
     msg[13] ^= 0xff;
     msg[14] ^= 0xff;
-    rain_ok = msg[12] <= 0x99 && msg[13] <= 0x99 && msg[14] <= 0x99;
+    rain_ok = msg[12] <= 0x65 && msg[13] <= 0x99 && msg[14] <= 0x99;
     if (rain_ok) {
         int rain_raw     = (msg[12] >> 4) * 100000 + (msg[12] & 0x0f) * 10000
                          + (msg[13] >> 4) * 1000 + (msg[13] & 0x0f) * 100

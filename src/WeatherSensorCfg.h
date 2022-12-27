@@ -104,6 +104,14 @@
 
 #define NUM_SENSORS     1       // Number of sensors to be received
 
+// List of sensor IDs to be excluded - can be empty
+#define SENSOR_IDS_EXC {}
+//#define SENSOR_IDS_EXC { 0x39582376 }
+
+// List of sensor IDs to be included - if empty, handle all available sensors
+#define SENSOR_IDS_INC {}
+//#define SENSOR_IDS_INC { 0x83750871 }
+
 // Use pinning for LoRaWAN Node 
 #define LORAWAN_NODE
 

@@ -86,7 +86,7 @@ int16_t WeatherSensor::begin(void) {
         log_d("success!");
         state = radio.setCrcFiltering(false);
         if (state != RADIOLIB_ERR_NONE) {
-            ESP_LOGE("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
+            log_e("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
             while (true)
                 ;
         }
@@ -203,7 +203,7 @@ DecodeStatus WeatherSensor::getMessage(void)
                 char buf[128];
                 *buf = '\0';
                 // print the data of the packet
-                for(int i = 0 ; i < sizeof(recvData) ; i++) {
+                for(size_t i = 0 ; i < sizeof(recvData) ; i++) {
                     sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
                 }
                 log_v("%s Data:\t\t %s", RECEIVER_CHIP, buf);

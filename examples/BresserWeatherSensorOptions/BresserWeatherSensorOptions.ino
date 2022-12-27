@@ -34,6 +34,7 @@
 // History:
 //
 // 20220815 Created
+// 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
 // ToDo: 
 // - 
@@ -105,6 +106,7 @@ void print_data(void)
 
 void setup() {    
     Serial.begin(115200);
+    Serial.setDebugOutput(true);
 
     weatherSensor.begin();
 }

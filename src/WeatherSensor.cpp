@@ -67,6 +67,13 @@
     static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
 
+
+// List of sensor IDs to be excluded - can be empty
+extern uint32_t const sensor_ids_exc[];
+
+// List of sensor IDs to be included - if empty, handle all available sensors
+extern uint32_t const sensor_ids_inc[];
+
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud

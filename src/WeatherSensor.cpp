@@ -50,6 +50,7 @@
 // 20220905 Improved code quality and added Doxygen comments
 // 20221003 Fixed humidity decoding in decodeBresser5In1Payload()
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
+// 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
 // ToDo: 
 // -
@@ -69,8 +70,7 @@
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
-    DEBUG_PRINT(RECEIVER_CHIP);
-    DEBUG_PRINTLN(" Initializing ... ");
+    log_d("%s Initializing ... ", RECEIVER_CHIP);
     // carrier frequency:                   868.3 MHz
     // bit rate:                            8.22 kbps
     // frequency deviation:                 57.136417 kHz
@@ -83,22 +83,16 @@ int16_t WeatherSensor::begin(void) {
         int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
     #endif
     if (state == RADIOLIB_ERR_NONE) {
-        DEBUG_PRINTLN("success!");
+        log_d("success!");
         state = radio.setCrcFiltering(false);
         if (state != RADIOLIB_ERR_NONE) {
-            DEBUG_PRINT(RECEIVER_CHIP);
-            DEBUG_PRINT(" Error disabling crc filtering: [");
-            DEBUG_PRINT(state);
-            DEBUG_PRINTLN("]");
+            ESP_LOGE("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
             while (true)
                 ;
         }
         state = radio.fixedPacketLengthMode(27);
         if (state != RADIOLIB_ERR_NONE) {
-            DEBUG_PRINT(RECEIVER_CHIP);
-            DEBUG_PRINT(" Error setting fixed packet length: [");
-            DEBUG_PRINT(state);
-            DEBUG_PRINTLN("]");
+            log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
             while (true)
                 ;
         }
@@ -115,23 +109,16 @@ int16_t WeatherSensor::begin(void) {
             state = radio.setSyncWord(sync_word, 2);
         #endif
         if (state != RADIOLIB_ERR_NONE) {
-            DEBUG_PRINT(RECEIVER_CHIP);
-            DEBUG_PRINT(" Error setting sync words: [");
-            DEBUG_PRINT(state);
-            DEBUG_PRINTLN("]");
+            log_e("%s Error setting sync words: [%d]", RECEIVER_CHIP, state);
             while (true)
                 ;
         }
     } else {
-        DEBUG_PRINT(RECEIVER_CHIP);
-        DEBUG_PRINT(" Error initialising: [");
-        DEBUG_PRINT(state);
-        DEBUG_PRINTLN("]");
+        log_e("%s Error initialising: [%d]", RECEIVER_CHIP, state);
         while (true)
             ;
     }
-    DEBUG_PRINT(RECEIVER_CHIP);
-    DEBUG_PRINTLN(" Setup complete - awaiting incoming messages...");
+    log_d("%s Setup complete - awaiting incoming messages...", RECEIVER_CHIP);
     rssi = radio.getRSSI();
     
     return state;
@@ -212,28 +199,17 @@ DecodeStatus WeatherSensor::getMessage(void)
     if (state == RADIOLIB_ERR_NONE) {
         // Verify last syncword is 1st byte of payload (see setSyncWord() above)
         if (recvData[0] == 0xD4) {
-            #ifdef _DEBUG_MODE_
+            #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+                char buf[128];
+                *buf = '\0';
                 // print the data of the packet
-                DEBUG_PRINT(RECEIVER_CHIP);
-                DEBUG_PRINT(" Data:\t\t");
                 for(int i = 0 ; i < sizeof(recvData) ; i++) {
-                    DEBUG_PRINT((recvData[0] < 16) ? " 0" : " ");
-                    DEBUG_PRINT(recvData[i], HEX);
+                    sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
                 }
-                DEBUG_PRINTLN();
-
-                DEBUG_PRINT(RECEIVER_CHIP);
-                DEBUG_PRINT(" R [");
-                DEBUG_PRINT((recvData[0] < 16) ? "0" : "");
-                DEBUG_PRINT(recvData[0], HEX);
-                DEBUG_PRINT("] RSSI: ");
-                DEBUG_PRINTLN(radio.getRSSI(), 1);
+                log_v("%s Data:\t\t %s", RECEIVER_CHIP, buf);
             #endif
-
-            #ifdef _DEBUG_MODE_
-                printRawdata(&recvData[1], sizeof(recvData));
-            #endif
-
+            log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
+            
             #ifdef BRESSER_6_IN_1
                 decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
             #endif
@@ -247,18 +223,13 @@ DecodeStatus WeatherSensor::getMessage(void)
             #endif
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
-            #ifdef _DEBUG_MODE_
-                DEBUG_PRINT("T");
-            #endif
+            log_v("T");
         } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
         else {
             // some other error occurred
-            DEBUG_PRINT(RECEIVER_CHIP);
-            DEBUG_PRINT(" Receive failed - code: ");
-            DEBUG_PRINTLN(state);
+            log_d("%s Receive failed: [%d]", RECEIVER_CHIP, state);
         }
     } // if (state == RADIOLIB_ERR_NONE)
-    
     
     return decode_res;
 }
@@ -302,15 +273,14 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t type, uint8_t channel
 int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
 {
      
-    //DEBUG_PRINT("find_slot(): ID=");
-    //DEBUG_PRINTLN(id, HEX);
+    log_v("find_slot(): ID=%08X", id);
     
     // Skip sensors from exclude-list (if any)
     uint8_t n_exc = sizeof(sensor_ids_exc)/4;
     if (n_exc != 0) {
        for (int i=0; i<n_exc; i++) {
            if (id == sensor_ids_exc[i]) {
-               //DEBUG_PRINTLN("In Exclude-List, skipping!");
+               log_v("In Exclude-List, skipping!");
                *status = DECODE_SKIP;
                return -1;
            }
@@ -328,7 +298,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
             }
         }
         if (!found) {
-            //DEBUG_PRINTLN("Not in Include-List, skipping!");
+            log_v("Not in Include-List, skipping!");
             *status = DECODE_SKIP;
             return -1;
         }
@@ -351,20 +321,18 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
     
     if (update_slot > -1) {
         // Update slot
-        //DEBUG_PRINT("find_slot(): Updating slot #");
-        //DEBUG_PRINTLN(update_slot);
+        log_v("find_slot(): Updating slot #%d", update_slot);
         *status = DECODE_OK;
         return update_slot;
     }
     else if (free_slot > -1) {
         // Store to free slot
-        //DEBUG_PRINT("find_slot(): Storing into slot #");
-        //DEBUG_PRINTLN(free_slot);        
+        log_v("find_slot(): Storing into slot #%d", free_slot);
         *status = DECODE_OK;
         return free_slot;
     }
     else {
-        //DEBUG_PRINTLN("find_slot(): No slot left");
+        log_v("find_slot(): No slot left");
         // No slot left
         *status = DECODE_FULL;
         return -1;
@@ -473,8 +441,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
     // First 13 bytes need to match inverse of last 13 bytes
     for (unsigned col = 0; col < msgSize / 2; ++col) {
         if ((msg[col] ^ msg[col + 13]) != 0xff) {
-            DEBUG_PRINT("Parity wrong at column ");
-            DEBUG_PRINTLN(col);
+            log_d("Parity wrong at column %d", col);
             return DECODE_PAR_ERR;
         }
     }
@@ -492,13 +459,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
     }
 
     if (bitsSet != expectedBitsSet) {
-        DEBUG_PRINT("Checksum wrong - actual [");
-        DEBUG_PRINT((bitsSet < 16) ? "0" : "");
-        DEBUG_PRINT(bitsSet, HEX);
-        DEBUG_PRINT("] != [");
-        DEBUG_PRINT((expectedBitsSet < 16) ? "0" : "");
-        DEBUG_PRINT(expectedBitsSet, HEX);
-        DEBUG_PRINTLN("]");
+        log_d("Checksum wrong - actual [%02X] != [%02X]", bitsSet, expectedBitsSet);
         return DECODE_CHK_ERR;
     }
 
@@ -675,16 +636,13 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     int chkdgst = (msg[0] << 8) | msg[1];
     int digest  = lfsr_digest16(&msg[2], 15, 0x8810, 0x5412);
     if (chkdgst != digest) {
-        DEBUG_PRINT("Digest check failed - ");
-        DEBUG_PRINT(chkdgst, HEX);
-        DEBUG_PRINT(" vs ");
-        DEBUG_PRINTLN(digest, HEX);
+        log_d("Digest check failed - [%02X] != [%02X]", chkdgst, digest);
         return DECODE_DIG_ERR;
     }
     // Checksum, add with carry
     int sum    = add_bytes(&msg[2], 16); // msg[2] to msg[17]
     if ((sum & 0xff) != 0xff) {
-        DEBUG_PRINTLN("Checksum failed");
+        log_d("Checksum failed");
         return DECODE_CHK_ERR;
     }
 
@@ -798,6 +756,3 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     return DECODE_OK;
 }
 #endif
-
-
-

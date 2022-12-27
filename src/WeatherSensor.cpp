@@ -69,10 +69,10 @@
 
 
 // List of sensor IDs to be excluded - can be empty
-extern uint32_t const sensor_ids_exc[];
+uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-extern uint32_t const sensor_ids_inc[];
+uint32_t const sensor_ids_inc[] = SENSOR_IDS_INC;
 
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445

@@ -131,12 +131,12 @@
 int const num_sensors = 1;
 
 // List of sensor IDs to be excluded - can be empty
-uint32_t const sensor_ids_exc[] = {};
+//uint32_t const sensor_ids_exc[] = {};
 //uint32_t const sensor_ids_exc[] = { 0x39582376 };
 
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-uint32_t const sensor_ids_inc[] = {};
+//uint32_t const sensor_ids_inc[] = {};
 //uint32_t const sensor_ids_inc[] = { 0x83750871 };
 
 // END User specific configuration

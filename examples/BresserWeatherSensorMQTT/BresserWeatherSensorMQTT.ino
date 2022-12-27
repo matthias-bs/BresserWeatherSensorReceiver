@@ -159,6 +159,7 @@ uint32_t const sensor_ids_inc[] = {};
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
+#include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
 #include "RainGauge.h"

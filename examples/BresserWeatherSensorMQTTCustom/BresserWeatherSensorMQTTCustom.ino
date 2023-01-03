@@ -27,7 +27,7 @@
 // Based on:
 // arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
-
+//
 // MQTT subscriptions:
 //     - none -
 //
@@ -600,7 +600,7 @@ void loop() {
 
     bool decode_ok = false;
     #ifdef _DEBUG_MQTT_
-        decode_ok = genWeatherdata(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
+        decode_ok = weatherSensor.genMessage(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
     #else
         // Clear sensor data buffer
         weatherSensor.clearSlots();

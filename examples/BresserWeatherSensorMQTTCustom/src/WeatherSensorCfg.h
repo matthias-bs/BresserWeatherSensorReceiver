@@ -114,7 +114,7 @@
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // Use pinning for LoRaWAN Node 
-#define LORAWAN_NODE
+//#define LORAWAN_NODE
 
 // Use pinning for TTGO ESP32 boards with integrated RF tranceiver (SX1276)
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*

@@ -83,8 +83,7 @@
 //          Added rain gauge statistics
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
-// 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
-// 20221210 Fixed setting hostname for ESP8266
+// 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
 // ToDo:
 // 
@@ -108,6 +107,7 @@
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO        2       // LED pin
+#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size
@@ -127,6 +127,8 @@
 
 // Generate sensor data to test collecting data from multiple sources
 //#define GEN_SENSOR_DATA
+
+int const num_sensors = 1;
 
 // END User specific configuration
 
@@ -170,22 +172,17 @@ SensorMap sensor_map[NUM_SENSORS] = {
 
 #include "secrets.h"
 
-#ifndef SECRETS
-    // Optionally copy everything between BEGIN secrets / END secrets to secrets.h
-    // Otherwise, leave secrets.h as an empty file and edit the contents below.
-
-    // BEGIN secrets
-    #define SECRETS
+#ifndef SECRET
     const char ssid[] = "WiFiSSID";
     const char pass[] = "WiFiPassword";
 
     #define HOSTNAME "ESPWeather"
     #define APPEND_CHIP_ID
 
-    const int  MQTT_PORT   = 8883; // typically 8883 with TLS / 1883 without TLS 
+    #define    MQTT_PORT     8883 // checked by pre-processor!
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = "";   // leave blank if no credentials used
-    const char MQTT_PASS[] = "";   // leave blank if no credentials used
+    const char MQTT_USER[] = ""; // leave blank if no credentials used
+    const char MQTT_PASS[] = ""; // leave blank if no credentials used
 
     #ifdef CHECK_CA_ROOT
     static const char digicert[] PROGMEM = R"EOF(
@@ -242,7 +239,6 @@ SensorMap sensor_map[NUM_SENSORS] = {
     // Extracted by: openssl x509 -fingerprint -in fillchain.pem
     static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
     #endif
-    // END secrets
 #endif
 
 WeatherSensor weatherSensor;
@@ -302,15 +298,8 @@ void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
-    // Setting hostname on ESP8266 and ESP32 differs
-    // see matthias-bs/BresserWeatherSensorReceiver/issues/19
-    #if defined(ESP8266)
-        WiFi.mode(WIFI_STA);
-        WiFi.hostname(Hostname);
-    #else
-        WiFi.hostname(Hostname);
-        WiFi.mode(WIFI_STA);
-    #endif
+    WiFi.hostname(Hostname);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -433,7 +422,7 @@ void publishWeatherdata(bool complete)
       // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
       sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "{");
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":\"%08X\"", weatherSensor.sensor[i].sensor_id);
+      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%08X", weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"ch\":%d", weatherSensor.sensor[i].chan);
       #endif
@@ -528,6 +517,7 @@ void publishRadio(void)
 //
 void setup() {
     Serial.begin(115200);
+    Serial.setDebugOutput(true);
     Serial.println();
     Serial.println();
     Serial.println(sketch_id);

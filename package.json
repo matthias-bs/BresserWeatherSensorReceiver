@@ -22,6 +22,6 @@
     "RadioLib": "jgromes/RadioLib#semver:^5.5.0",
     "lora-serialization": "thesolarnomad/lora-serialization#semver:^3.1.0",
     "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.0"
-    "ArduinoJson": "bblanchon/ArduinoJson#semver:^6.19.4"
+    "ArduinoJson": "bblanchon/ArduinoJson#semver:^6.20.0"
   }
 }

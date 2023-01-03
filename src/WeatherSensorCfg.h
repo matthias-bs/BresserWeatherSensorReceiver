@@ -46,18 +46,71 @@
 
 #include <Arduino.h>
 
+// Replacement for
+// https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
+// on ESP8266
+//
+// NOTE:
+// DEBUG_ESP_PORT is set in Arduino IDE:
+// Tools->Debug port: "<None>|<Serial>|<Serial1>"
+#if defined(ESP8266)
+    #define ARDUHAL_LOG_LEVEL_NONE      0
+    #define ARDUHAL_LOG_LEVEL_ERROR     1
+    #define ARDUHAL_LOG_LEVEL_WARN      2
+    #define ARDUHAL_LOG_LEVEL_INFO      3
+    #define ARDUHAL_LOG_LEVEL_DEBUG     4
+    #define ARDUHAL_LOG_LEVEL_VERBOSE   5
+    
+    // Set desired level here!
+    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
+
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
+        #define log_e(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+     #else
+        #define log_e(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
+        #define log_w(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+     #else
+        #define log_w(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
+        #define log_i(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+     #else
+        #define log_i(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
+        #define log_d(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+     #else
+        #define log_d(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
+        #define log_v(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+     #else
+        #define log_v(...) {}
+     #endif
+     
+#endif
+
 //#define _DEBUG_MODE_          // Enable debug output (serial console)
+#define DEBUG_PORT Serial
+#if defined(_DEBUG_MODE_)
+    #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
+    #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
+#else
+  #define DEBUG_PRINT(...) {}
+  #define DEBUG_PRINTLN(...) {}
+#endif
 
 #define NUM_SENSORS     1       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
-uint32_t const sensor_ids_exc[] = {};
-//uint32_t const sensor_ids_exc[] = { 0x39582376 };
-
+#define SENSOR_IDS_EXC {}
+//#define SENSOR_IDS_EXC { 0x39582376 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-uint32_t const sensor_ids_inc[] = {};
-//uint32_t const sensor_ids_inc[] = { 0x83750871 };
+#define SENSOR_IDS_INC {}
+//#define SENSOR_IDS_INC { 0x83750871 }
 
 // Use pinning for LoRaWAN Node 
 #define LORAWAN_NODE
@@ -90,21 +143,13 @@ uint32_t const sensor_ids_inc[] = {};
 #endif
 
 #if defined(USE_CC1101)
-    #define RECEIVER_CHIP F("[CC1101]")
+    #define RECEIVER_CHIP "[CC1101]"
 #elif defined(USE_SX1276)
-    #define RECEIVER_CHIP F("[SX1276]")
+    #define RECEIVER_CHIP "[SX1276]"
 #else
     #error "Either USE_CC1101 or USE_SX1276 must be defined!"
 #endif
 
-#define DEBUG_PORT Serial
-#if defined(_DEBUG_MODE_)
-    #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
-    #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
-#else
-  #define DEBUG_PRINT(...) {}
-  #define DEBUG_PRINTLN(...) {}
-#endif
 
 // Arduino default SPI pins
 //

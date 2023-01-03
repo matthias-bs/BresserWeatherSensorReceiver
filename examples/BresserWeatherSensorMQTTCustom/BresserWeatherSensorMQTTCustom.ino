@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTT.ino
+// BresserWeatherSensorMQTTCustom.ino
 //
 // Example for BresserWeatherSensorReceiver - 
 // this is finally a useful application.
@@ -84,7 +84,7 @@
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
-// 20221210 Fixed setting hostname for ESP8266
+// 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
 // ToDo:
 // 
@@ -301,15 +301,8 @@ void mqtt_setup(void)
 {
     Serial.print(F("Attempting to connect to SSID: "));
     Serial.print(ssid);
-    // Setting hostname on ESP8266 and ESP32 differs
-    // see matthias-bs/BresserWeatherSensorReceiver/issues/19
-    #if defined(ESP8266)
-        WiFi.mode(WIFI_STA);
-        WiFi.hostname(Hostname);
-    #else
-        WiFi.hostname(Hostname);
-        WiFi.mode(WIFI_STA);
-    #endif
+    WiFi.hostname(Hostname);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -527,6 +520,7 @@ void publishRadio(void)
 //
 void setup() {
     Serial.begin(115200);
+    Serial.setDebugOutput(true);
     Serial.println();
     Serial.println();
     Serial.println(sketch_id);
@@ -638,13 +632,11 @@ void loop() {
 
     // Go to sleep only after complete set of data has been sent
     if (SLEEP_EN && (decode_ok || force_sleep)) {
-        #ifdef _DEBUG_MODE_
-            if (force_sleep) {
-                Serial.println(F("Awake time-out!"));
-            } else {
-                Serial.println(F("Data forwarding completed.")); 
-            }
-        #endif
+        if (force_sleep) {
+            log_d("Awake time-out!");
+        } else {
+            log_d("Data forwarding completed."); 
+        }
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
         Serial.printf("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();

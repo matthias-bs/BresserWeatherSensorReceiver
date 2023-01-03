@@ -43,6 +43,7 @@
 // 20220524 Moved code to class WeatherSensor
 // 20220810 Changed to modified WeatherSensor class; fixed Soil Moisture Sensor Handling
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
+// 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
 // ToDo: 
 // - 
@@ -59,6 +60,7 @@ WeatherSensor weatherSensor;
 
 void setup() {    
     Serial.begin(115200);
+    Serial.setDebugOutput(true);
 
     weatherSensor.begin();
 }

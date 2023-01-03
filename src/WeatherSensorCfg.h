@@ -65,27 +65,27 @@
     #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
 
     #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
-        #define log_e(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); }
+        #define log_e(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
      #else
         #define log_e(...) {}
      #endif
     #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
-        #define log_w(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); }
+        #define log_w(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
      #else
         #define log_w(...) {}
      #endif
     #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
-        #define log_i(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); }
+        #define log_i(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
      #else
         #define log_i(...) {}
      #endif
     #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
-        #define log_d(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); }
+        #define log_d(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
      #else
         #define log_d(...) {}
      #endif
     #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
-        #define log_v(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); }
+        #define log_v(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
      #else
         #define log_v(...) {}
      #endif

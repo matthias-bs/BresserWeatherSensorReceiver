@@ -172,7 +172,7 @@ SensorMap sensor_map[NUM_SENSORS] = {
 
 #include "secrets.h"
 
-#ifndef SECRET
+#ifndef SECRETS
     const char ssid[] = "WiFiSSID";
     const char pass[] = "WiFiPassword";
 

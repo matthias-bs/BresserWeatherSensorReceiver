@@ -167,7 +167,7 @@ Personally I prefer the SMA connector over the uFL connector -  but be aware of 
 
 ## Software Build Tutorial
 
-See issue https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/12#issuecomment-1284508006
+See [BUILD](BUILD.md)
 
 
 ## Source Documentation

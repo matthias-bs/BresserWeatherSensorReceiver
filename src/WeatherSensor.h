@@ -49,6 +49,7 @@
 // 20220815 Added support of multiple sensors
 //          Moved windspeed_ms_to_bft() to WeatherUtils.h/.cpp
 // 20221207 Added SENSOR_TYPE_THERMO_HYGRO
+// 20220110 Added WEATHER0_RAIN_OV/WEATHER1_RAIN_OV
 //
 // ToDo: 
 // -
@@ -80,10 +81,16 @@
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 
 
+// Sensor specific rain gauge overflow threshold (mm)
+#define WEATHER0_RAIN_OV          1000
+#define WEATHER1_RAIN_OV        100000
+
+
 // Flags for controlling completion of reception in getData()
 #define DATA_COMPLETE           0x1     // only completed slots (as opposed to partially filled) 
 #define DATA_TYPE               0x2     // at least one slot with specific sensor type
 #define DATA_ALL_SLOTS          0x8     // all slots completed
+
 
 // Radio message decoding status
 typedef enum DecodeStatus {

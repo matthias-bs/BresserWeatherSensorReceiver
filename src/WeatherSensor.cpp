@@ -51,6 +51,7 @@
 // 20221003 Fixed humidity decoding in decodeBresser5In1Payload()
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
+// 20230111 Added additional digit for rain gauge in 5in1-decoder (maximum is now 999.9mm)
 //
 // ToDo: 
 // -

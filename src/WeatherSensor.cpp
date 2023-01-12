@@ -214,7 +214,7 @@ DecodeStatus WeatherSensor::getMessage(void)
                 for(size_t i = 0 ; i < sizeof(recvData) ; i++) {
                     sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
                 }
-                log_v("%s Data:\t\t %s", RECEIVER_CHIP, buf);
+                log_v("%s Data: %s", RECEIVER_CHIP, buf);
             #endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
             

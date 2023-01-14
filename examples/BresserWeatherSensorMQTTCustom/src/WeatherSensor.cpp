@@ -51,6 +51,7 @@
 // 20221003 Fixed humidity decoding in decodeBresser5In1Payload()
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
+// 20230111 Added additional digit for rain gauge in 5in1-decoder (maximum is now 999.9mm)
 //
 // ToDo: 
 // -
@@ -417,7 +418,7 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
 //
 // Example input data:
 //   EA EC 7F EB 5F EE EF FA FE 76 BB FA FF 15 13 80 14 A0 11 10 05 01 89 44 05 00
-//   CC CC CC CC CC CC CC CC CC CC CC CC CC uu II SS GG DG WW  W TT  T HH RR  R Bt
+//   CC CC CC CC CC CC CC CC CC CC CC CC CC uu II SS GG DG WW  W TT  T HH RR RR Bt
 // - C = Check, inverted data of 13 byte further
 // - uu = checksum (number/count of set bits within bytes 14-25)
 // - I = station ID (maybe)
@@ -427,7 +428,7 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
 // - T = temperature in 1/10 °C, BCD coded, TTxT = 1203 => 31.2 °C
 // - t = temperature sign, minus if unequal 0
 // - H = humidity in percent, BCD coded, HH = 23 => 23 %
-// - R = rain in mm, BCD coded, RRxR = 1203 => 31.2 mm
+// - R = rain in mm, BCD coded, RRRR = 1203 => 031.2 mm
 // - B = Battery. 0=Ok, 8=Low.
 // - S = sensor type, only low nibble used, 0x9 for Bresser Professional Rain Gauge
 //
@@ -507,7 +508,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].wind_avg_meter_sec_fp1  = wind_raw;
 #endif
     
-    int rain_raw = (msg[23] & 0x0f) + ((msg[23] & 0xf0) >> 4) * 10 + (msg[24] & 0x0f) * 100;
+    int rain_raw = (msg[23] & 0x0f) + ((msg[23] & 0xf0) >> 4) * 10 + (msg[24] & 0x0f) * 100 + ((msg[24] & 0xf0) >> 4) * 1000;
     sensor[slot].rain_mm = rain_raw * 0.1f;
 
     sensor[slot].battery_ok = (msg[25] & 0x80) ? false : true;

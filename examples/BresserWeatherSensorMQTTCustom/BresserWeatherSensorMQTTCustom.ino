@@ -85,6 +85,7 @@
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
+// 20230114 Fixed rain gauge update
 //
 // ToDo:
 // 
@@ -418,7 +419,7 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].rain_ok) {
           struct tm timeinfo;
           gmtime_r(&now, &timeinfo);
-          rainGauge.update(timeinfo, now, weatherSensor.sensor[i].rain_mm);
+          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm);
       }
       
       // Example:

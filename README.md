@@ -29,8 +29,8 @@ See `WeatherSensorCfg.h` for configuration options.
    | Define                   | Radio Module    | Configuration                                                    |
    | ------------------------ | --------------- | ---------------------------------------------------------------- |
    | LORAWAN_NODE             | SX1276 (RFM95W) | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
-   | TTGO_LORA32              | SX1276          | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32)             |
-   | ADAFRUIT_FEATHER_ESP32S2 | SX1276          | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
+   | TTGO_LORA32              | SX1276 (RFM95W) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32)             |
+   | ADAFRUIT_FEATHER_ESP32S2 | SX1276 (RFM95W) | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
    | ESP32                    | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
    | ESP8266                  | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
 

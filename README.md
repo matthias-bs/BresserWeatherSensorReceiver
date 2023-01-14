@@ -22,15 +22,17 @@ See `WeatherSensorCfg.h` for configuration options.
 
 * Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
 
+  SX1276 is compatible to RFM95W.
+
 * Set the I/O pinning according to your hardware
 
-   | Define                   | Configuration                                                    |
-   | ------------------------ | ---------------------------------------------------------------- |
-   | LORAWAN_NODE             | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
-   | TTGO_LORA32              | |
-   | ADAFRUIT_FEATHER_ESP32S2 | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing) |
-   | ESP32                    | generic, used for ESP32 boards if none of the above is defined    |
-   | ESP8266                  | generic, used for ESP8266 boards if none of the above is defined |
+   | Define                   | Radio Module    | Configuration                                                    |
+   | ------------------------ | --------------- | ---------------------------------------------------------------- |
+   | LORAWAN_NODE             | SX1276 (RFM95W) | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
+   | TTGO_LORA32              | SX1276          | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32)             |
+   | ADAFRUIT_FEATHER_ESP32S2 | SX1276          | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
+   | ESP32                    | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
+   | ESP8266                  | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
 
 * Data from multiple sensors can be received by setting `NUM_SENSORS` to an appropriate value in `WeatherSensorCfg.h`.
 

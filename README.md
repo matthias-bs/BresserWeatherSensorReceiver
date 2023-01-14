@@ -22,6 +22,16 @@ See `WeatherSensorCfg.h` for configuration options.
 
 * Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
 
+* Set the I/O pinning according to your hardware
+
+   | Define                   | Configuration                                                    |
+   | ------------------------ | ---------------------------------------------------------------- |
+   | LORAWAN_NODE             | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
+   | TTGO_LORA32              | |
+   | ADAFRUIT_FEATHER_ESP32S2 | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing) |
+   | ESP32                    | generic, used for ESP32 boards if none of the above is defined    |
+   | ESP8266                  | generic, used for ESP8266 boards if none of the above is defined |
+
 * Data from multiple sensors can be received by setting `NUM_SENSORS` to an appropriate value in `WeatherSensorCfg.h`.
 
    e.g. `#define NUM_SENSORS 1`

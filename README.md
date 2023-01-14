@@ -16,7 +16,24 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, 
 | 7009999       | Thermo-/Hygrometer | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature | decodeBresser**6In1**Payload() |
 
-Configure the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276` in `WeatherSensorCfg.h`.
+## Configuration
+
+See `WeatherSensorCfg.h` for configuration options.
+
+* Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
+
+* Data from multiple sensors can be received by setting `NUM_SENSORS` to an appropriate value in `WeatherSensorCfg.h`.
+
+   e.g. `#define NUM_SENSORS 1`
+
+* The sensors to be handled can be configured by two ways:
+   * Add any unwanted sensor IDs to the exclude list `SENSOR_IDS_EXC`
+
+     e.g. `#define SENSOR_IDS_EXC { 0x39582376 }`
+  
+   * Specify the wanted sensors explicitly in the include list `SENSOR_IDS_EXC` - if empty, all sensors will be used
+
+     e.g. `#define SENSOR_IDS_INC { 0x83750871 }`
 
 ## SW Examples
 

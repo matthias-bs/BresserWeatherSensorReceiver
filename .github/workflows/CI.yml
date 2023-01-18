@@ -15,16 +15,12 @@ jobs:
         board:
           - "esp32:esp32:esp32:DebugLevel=None"
           - "esp32:esp32:esp32:DebugLevel=Verbose"
-          - esp8266:esp8266:generic
-        #loglevel:
-        #  - LOG_LEVEL_NONE
-        #  - LOG_LEVEL_VERBOSE
-          
+          - "esp8266:esp8266:generic"
 
     runs-on: ubuntu-latest
     name: ${{ matrix.board }}
     env:
-      run-build: ${{ (matrix.board == 'esp32:esp32:esp32') || (matrix.board == 'esp8266:esp8266:generic') || contains(github.event.head_commit.message, 'CI_BUILD_ALL') || contains(github.event.head_commit.message, 'Bump version to') || contains(github.event.head_commit.message, format('{0}', matrix.board)) }}
+      run-build: ${{ contains(matrix.board, 'esp32:esp32') || (matrix.board == 'esp8266:esp8266:generic') || contains(github.event.head_commit.message, 'CI_BUILD_ALL') || contains(github.event.head_commit.message, 'Bump version to') || contains(github.event.head_commit.message, format('{0}', matrix.board)) }}
 
     steps:
       - name: Install arduino-cli

@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         board:
-          - "esp32:esp32:esp32": DebugLevel=none
-          - "esp32:esp32:esp32": DebugLevel=verbose
+          - "esp32:esp32:esp32:DebugLevel=none"
+          - "esp32:esp32:esp32:DebugLevel=verbose"
           - esp8266:esp8266:generic
         #loglevel:
         #  - LOG_LEVEL_NONE
@@ -108,7 +108,7 @@ jobs:
             else
               # build sketch
               echo -e "\n\033[1;33mBuilding ${example##*/} ... \033[0m";
-              arduino-cli compile --libraries /home/runner/work/BresserWeatherSensorReceiver ${{ steps.prep.outputs.logdef }} --fqbn ${{ matrix.board }}${{ steps.prep.outputs.options }} $example --warnings=${{ steps.prep.outputs.warnings }}
+              arduino-cli compile --libraries /home/runner/work/BresserWeatherSensorReceiver --fqbn ${{ matrix.board }}${{ steps.prep.outputs.options }} $example --warnings=${{ steps.prep.outputs.warnings }}
               if [ $? -ne 0 ]; then
                 echo -e "\033[1;31m${example##*/} build FAILED\033[0m\n";
                 exit 1;

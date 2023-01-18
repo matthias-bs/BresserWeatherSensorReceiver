@@ -13,11 +13,12 @@ jobs:
     strategy:
       matrix:
         board:
-          - esp32:esp32:esp32
+          - "esp32:esp32:esp32": DebugLevel=none
+          - "esp32:esp32:esp32": DebugLevel=verbose
           - esp8266:esp8266:generic
-        loglevel:
-          - LOG_LEVEL_NONE
-          - LOG_LEVEL_VERBOSE
+        #loglevel:
+        #  - LOG_LEVEL_NONE
+        #  - LOG_LEVEL_VERBOSE
           
 
     runs-on: ubuntu-latest

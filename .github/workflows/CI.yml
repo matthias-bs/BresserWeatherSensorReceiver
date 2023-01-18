@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         board:
-          - "esp32:esp32:esp32:DebugLevel=None"
-          - "esp32:esp32:esp32:DebugLevel=Verbose"
+          - "esp32:esp32:esp32:DebugLevel=0"
+          - "esp32:esp32:esp32:DebugLevel=5"
           - "esp8266:esp8266:generic"
 
     runs-on: ubuntu-latest

@@ -13,8 +13,8 @@ jobs:
     strategy:
       matrix:
         board:
-          - "esp32:esp32:esp32:DebugLevel=none"
-          - "esp32:esp32:esp32:DebugLevel=verbose"
+          - "esp32:esp32:esp32:CoreDebugLevel=None"
+          - "esp32:esp32:esp32:CoreDebugLevel=Verbose"
           - esp8266:esp8266:generic
         #loglevel:
         #  - LOG_LEVEL_NONE

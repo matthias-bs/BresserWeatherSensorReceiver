@@ -51,12 +51,12 @@ jobs:
           echo "::set-output name=skip-pattern::''"
           echo "::set-output name=warnings::'all'"
           
-          if [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_NONE') }}" == "true" ]]; then
-            echo "::set-output name=logdef::--build-property "build.extra_flags=\"-DCORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_NONE\"
-
-          elif [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_VERBOSE') }}" == "true" ]]; then
-            echo "::set-output name=logdef::--build-property "build.extra_flags=\"-DCORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_VERBOSE\"
-          fi
+          #if [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_NONE') }}" == "true" ]]; then
+          #  echo "::set-output name=logdef::--build-property "build.extra_flags=\"-DCORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_NONE\"
+          #
+          #elif [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_VERBOSE') }}" == "true" ]]; then
+          #  echo "::set-output name=logdef::--build-property "build.extra_flags=\"-DCORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_VERBOSE\"
+          #fi
 
           # platform-dependent settings - extra board options, board index URLs, skip patterns etc.
           if [[ "${{ contains(matrix.board, 'esp32:esp32') }}" == "true" ]]; then

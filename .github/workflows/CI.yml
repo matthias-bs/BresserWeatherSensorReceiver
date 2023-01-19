@@ -15,8 +15,8 @@ jobs:
         board:
           - "esp32:esp32:esp32:DebugLevel=none"
           - "esp32:esp32:esp32:DebugLevel=verbose"
-          - "esp8266:esp8266:generic:debug=disabled"
-          - "esp8266:esp8266:generic:debug=serial"
+          - "esp8266:esp8266:generic:dbg=disabled"
+          - "esp8266:esp8266:generic:dbg=serial"
 
     runs-on: ubuntu-latest
     name: ${{ matrix.board }}

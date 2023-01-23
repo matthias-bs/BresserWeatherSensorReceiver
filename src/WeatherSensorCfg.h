@@ -46,13 +46,66 @@
 
 #include <Arduino.h>
 
-// Replacement for
-// https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
-// on ESP8266
+// ------------------------------------------------------------------------------------------------
+// --- Board ---
+// ------------------------------------------------------------------------------------------------
+// Use pinning for LoRaWAN Node 
+#define LORAWAN_NODE
+
+// LILIGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
+// See pin definitions in
+// https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
 //
-// NOTE:
-// DEBUG_ESP_PORT is set in Arduino IDE:
-// Tools->Debug port: "<None>|<Serial>|<Serial1>"
+// This define is set by selecting "TTGO LoRa32-OLED" in the Arduino IDE:
+//#define ARDUINO_TTGO_LoRa32_V1
+
+#if defined(ARDUINO_TTGO_LoRa32_V1)
+    #define USE_SX1276
+#endif
+
+// Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
+//#define ADAFRUIT_FEATHER_ESP32S2
+
+
+// ------------------------------------------------------------------------------------------------
+// --- Radio Transceiver ---
+// ------------------------------------------------------------------------------------------------
+// Select type of receiver module
+#if ( !defined(USE_CC1101) && !defined(USE_SX1276) )
+    //#define USE_CC1101
+    #define USE_SX1276
+#endif
+
+
+// ------------------------------------------------------------------------------------------------
+// --- Weather Sensors ---
+// ------------------------------------------------------------------------------------------------
+#define NUM_SENSORS     1       // Number of sensors to be received
+
+// List of sensor IDs to be excluded - can be empty
+#define SENSOR_IDS_EXC {}
+//#define SENSOR_IDS_EXC { 0x39582376 }
+
+// List of sensor IDs to be included - if empty, handle all available sensors
+#define SENSOR_IDS_INC {}
+//#define SENSOR_IDS_INC { 0x83750871 }
+
+
+// ------------------------------------------------------------------------------------------------
+// --- Debug Logging Output ---
+// ------------------------------------------------------------------------------------------------
+// - ESP32:
+//   CORE_DEBUG_LEVEL is set in Adruino IDE:
+//   Tools->Core Debug Level: "<None>|<Error>|<Warning>|<Info>|<Debug>|<Verbose>" 
+//   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
+//
+// - ESP8266:
+//   DEBUG_ESP_PORT is set in Arduino IDE:
+//   Tools->Debug port: "<None>|<Serial>|<Serial1>"
+//
+//   Replacement for
+//   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
+//   on ESP8266:
 #if defined(ESP8266)
     #define ARDUHAL_LOG_LEVEL_NONE      0
     #define ARDUHAL_LOG_LEVEL_ERROR     1
@@ -102,26 +155,6 @@
   #define DEBUG_PRINTLN(...) {}
 #endif
 
-#define NUM_SENSORS     1       // Number of sensors to be received
-
-// List of sensor IDs to be excluded - can be empty
-#define SENSOR_IDS_EXC {}
-//#define SENSOR_IDS_EXC { 0x39582376 }
-
-// List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
-//#define SENSOR_IDS_INC { 0x83750871 }
-
-// Use pinning for LoRaWAN Node 
-#define LORAWAN_NODE
-
-// Use pinning for TTGO ESP32 boards with integrated RF tranceiver (SX1276)
-// https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
-//#define TTGO_LORA32
-
-// Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
-//#define ADAFRUIT_FEATHER_ESP32S2
-
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT
 #define WIND_DATA_FIXEDPOINT
@@ -129,10 +162,6 @@
 // Select appropriate sensor message format(s)
 #define BRESSER_5_IN_1
 #define BRESSER_6_IN_1
-
-// Select type of receiver module
-//#define USE_CC1101
-#define USE_SX1276
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 must be defined!"
@@ -167,7 +196,7 @@
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  12
-#elif defined(TTGO_LORA32)
+#elif defined(ARDUINO_TTGO_LoRa32_V1)
     #define PIN_RECEIVER_CS   LORA_CS
     
     // CC1101: GDO0 / RFM95W/SX127x: G0

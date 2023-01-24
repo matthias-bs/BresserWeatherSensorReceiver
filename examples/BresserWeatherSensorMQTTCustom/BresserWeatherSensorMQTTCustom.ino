@@ -86,6 +86,7 @@
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230114 Fixed rain gauge update
+// 20230124 Improved WiFi connection robustness
 //
 // ToDo:
 // 
@@ -118,6 +119,8 @@
 #define DATA_INTERVAL   15000   // MQTT data message interval [ms]
 #define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL  300000  // sleep interval [ms]
+#define WIFI_RETRIES    10      // WiFi connection retries
+#define WIFI_DELAY      1000    // Delay between connection attempts [ms]
 #define SLEEP_EN        true    // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI          // use secure WIFI
 //#define USE_WIFI              // use non-secure WIFI
@@ -295,6 +298,24 @@ time_t now;
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
 
+
+//
+// Wait for WiFi connection
+//
+void wifi_wait(int wifi_retries, int wifi_delay)
+{
+    int count = 0;
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(wifi_delay);
+        if (++count == wifi_retries) {
+            Serial.printf("WiFi connection timed out, will restart after %d s\n", SLEEP_INTERVAL/1000);
+            ESP.deepSleep(SLEEP_INTERVAL * 1000);
+        }
+    }
+}
+
+
 //
 // Setup WiFi in Station Mode
 //
@@ -305,11 +326,7 @@ void mqtt_setup(void)
     WiFi.hostname(Hostname);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(1000);
-    }
+    wifi_wait(WIFI_RETRIES, WIFI_DELAY);
     Serial.println(F("connected!"));
     
 
@@ -361,11 +378,7 @@ void mqtt_setup(void)
 void mqtt_connect(void)
 {
     Serial.print(F("Checking wifi..."));
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(1000);
-    }
+    wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
     Serial.print(F("\nMQTT connecting... "));
     while (!client.connect(Hostname, MQTT_USER, MQTT_PASS))

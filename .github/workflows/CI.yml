@@ -37,7 +37,7 @@ jobs:
 
       - name: Get platform name
         if: ${{ env.run-build == 'true' }}
-        uses: jungwinter/split@v1
+        uses: jungwinter/split@v2
         id: split
         with:
           msg: ${{ matrix.board }}

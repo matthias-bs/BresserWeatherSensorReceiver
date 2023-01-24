@@ -41,7 +41,7 @@ jobs:
         id: split
         with:
           msg: ${{ matrix.board }}
-          seperator: ':'
+          separator: ':'
 
       - name: Prepare platform-specific settings
         if: ${{ env.run-build == 'true' }}

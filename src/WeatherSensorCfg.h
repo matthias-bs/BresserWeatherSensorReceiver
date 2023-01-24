@@ -34,7 +34,7 @@
 // SOFTWARE.
 //
 // History:
-//
+// 20230124 Added some default settings based on selected boards in Arduino IDE
 //
 // ToDo: 
 // -
@@ -50,7 +50,7 @@
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
 // Use pinning for LoRaWAN Node 
-#define LORAWAN_NODE
+
 
 // LILIGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
 // See pin definitions in
@@ -59,18 +59,38 @@
 // This define is set by selecting "TTGO LoRa32-OLED" in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V1
 
-#if defined(ARDUINO_TTGO_LoRa32_V1)
-    #define USE_SX1276
-#endif
-
-// Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
+// Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
+// https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
+//
+// This define is set by selecting "Adafruit Feather ESP32-S2" in the Arduino IDE:
 //#define ADAFRUIT_FEATHER_ESP32S2
+
+// DFRobot Firebeetle32
+// https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
+//
+// This define (not very specific...) is set by selecting "FireBeetle-ESP32" in the Arduino IDE:
+//#define ARDUINO_ESP32_DEV
+
+#if defined(ARDUINO_TTGO_LoRa32_V1)
+    #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
+    #define USE_SX1276
+    
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
+    #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used"
+    #define USE_SX1276
+    
+#elif defined(ARDUINO_ESP32_DEV)
+    #pragma message("Generic ESP32; assuming this is the LoRa_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
+    #define LORAWAN_NODE
+    #define USE_SX1276
+
+#endif
 
 
 // ------------------------------------------------------------------------------------------------
 // --- Radio Transceiver ---
 // ------------------------------------------------------------------------------------------------
-// Select type of receiver module
+// Select type of receiver module (if not yet defined based on the assumptions above)
 #if ( !defined(USE_CC1101) && !defined(USE_SX1276) )
     //#define USE_CC1101
     #define USE_SX1276
@@ -186,6 +206,7 @@
 // ESP8266 D5    D7    D6
 // ESP32   D18   D23   D19
 #if defined(LORAWAN_NODE)
+    // Use pinning for LoRaWAN_Node (https://github.com/matthias-bs/LoRaWAN_Node) 
     #define PIN_RECEIVER_CS   14
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -196,7 +217,9 @@
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  12
+
 #elif defined(ARDUINO_TTGO_LoRa32_V1)
+    // Use pinning for LILIGY TTGO LoRa32-OLED
     #define PIN_RECEIVER_CS   LORA_CS
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -208,7 +231,9 @@
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
+    
 #elif defined(ADAFRUIT_FEATHER_ESP32S2)
+    // Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
     #define PIN_RECEIVER_CS   6
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -219,7 +244,9 @@
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  9
+
 #elif defined(ESP32)
+    // Generic pinning for ESP32 development boards
     #define PIN_RECEIVER_CS   27
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -232,6 +259,7 @@
     #define PIN_RECEIVER_RST  32
 
 #elif defined(ESP8266)
+    // Generic pinning for ESP8266 development boards (e.g. LOLIN/WEMOS D1 mini)
     #define PIN_RECEIVER_CS   15
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -243,5 +271,10 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  2
 #endif
+
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+#pragma message("Receiver chip: " RECEIVER_CHIP)
+#pragma message("Pin config: RST->" STR(PIN_RECEIVER_RST) ", CS->" STR(PIN_RECEIVER_CS) ", GD0/G0/IRQ->" STR(PIN_RECEIVER_IRQ) ", GDO2/G1/GPIO->" STR(PIN_RECEIVER_GPIO) )
 
 #endif

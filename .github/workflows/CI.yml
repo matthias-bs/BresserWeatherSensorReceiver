@@ -51,8 +51,8 @@ jobs:
           # common settings - no extra options, skip nothing, all warnings
           echo "::set-output name=options::"
           echo "::set-output name=logdef::"
-          echo "::set-output name=skip-pattern::''"
-          echo "::set-output name=warnings::'all'"
+          echo "skip-pattern=''" >> $GITHUB_OUTPUT
+          echo "warnings='all'" >> $GITHUB_OUTPUT
           
           #if [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_NONE') }}" == "true" ]]; then
           #  echo "::set-output name=logdef::--build-property "build.extra_flags=\"-DCORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_NONE\"

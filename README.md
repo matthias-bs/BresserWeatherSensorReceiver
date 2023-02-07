@@ -26,13 +26,14 @@ See `WeatherSensorCfg.h` for configuration options.
 
 * Set the I/O pinning according to your hardware
 
-   | Define                   | Radio Module    | Configuration                                                    |
-   | ------------------------ | --------------- | ---------------------------------------------------------------- |
-   | LORAWAN_NODE             | SX1276 (RFM95W) | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
-   | TTGO_LORA32              | SX1276 (RFM95W) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32)             |
-   | ADAFRUIT_FEATHER_ESP32S2 | SX1276 (RFM95W) | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
-   | ESP32                    | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
-   | ESP8266                  | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
+   | Define                     | Radio Module    | Configuration                                                    |
+   | -------------------------- | --------------- | ---------------------------------------------------------------- |
+   | LORAWAN_NODE               | SX1276 (RFM95W) | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
+   | ARDUINO_TTGO_LORA32_V1     | SX1276 (HPD13A) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1   |
+   | ARDUINO_TTGO_LoRa32_v21new | SX1276 (HPD13A) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 |
+   | ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
+   | ESP32                      | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
+   | ESP8266                    | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
 
 * Data from multiple sensors can be received by setting `NUM_SENSORS` to an appropriate value in `WeatherSensorCfg.h`.
 

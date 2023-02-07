@@ -35,7 +35,7 @@
 //
 // History:
 // 20230124 Added some default settings based on selected boards in Arduino IDE
-// 20230207 Added pin definitions for TTGO_LoRa32_v21new
+// 20230207 Added pin definitions for ARDUINO_TTGO_LoRa32_v21new
 //
 // ToDo: 
 // -
@@ -81,7 +81,7 @@
     #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(TTGO_LoRa32_v21new)
+#elif defined(ARDUINO_TTGO_LoRa32_v21new)
     #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
     #define USE_SX1276
 
@@ -242,7 +242,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(TTGO_LoRa32_v21new)
+#elif defined(ARDUINO_TTGO_LoRa32_v21new)
     // Use pinning for LILIGO TTGO LoRa32-OLED V2.1 (1.6.1)
     #define PIN_RECEIVER_CS   LORA_CS
 

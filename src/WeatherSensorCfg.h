@@ -35,6 +35,7 @@
 //
 // History:
 // 20230124 Added some default settings based on selected boards in Arduino IDE
+// 20230207 Added pin definitions for TTGO_LoRa32_v21new
 //
 // ToDo: 
 // -
@@ -56,8 +57,13 @@
 // See pin definitions in
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
 //
-// This define is set by selecting "TTGO LoRa32-OLED" in the Arduino IDE:
+// This define is set by selecting "Board: TTGO LoRa32-OLED" / "Board Revision: TTGO LoRa32 V1 (No TFCard)"
+// in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V1
+
+// This define is set by selecting "Board: TTGO LoRa32-OLED" / "Board Revision: TTGO LoRa32 V2.1 (1.6.1)"
+// in the Arduino IDE:
+//#define ARDUINO_TTGO_LoRa32_V21new
 
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
@@ -74,7 +80,11 @@
 #if defined(ARDUINO_TTGO_LoRa32_V1)
     #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
     #define USE_SX1276
-    
+
+#elif defined(TTGO_LoRa32_v21new)
+    #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
+    #define USE_SX1276
+
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used"
     #define USE_SX1276
@@ -219,7 +229,7 @@
     #define PIN_RECEIVER_RST  12
 
 #elif defined(ARDUINO_TTGO_LoRa32_V1)
-    // Use pinning for LILIGY TTGO LoRa32-OLED
+    // Use pinning for LILIGO TTGO LoRa32-OLED
     #define PIN_RECEIVER_CS   LORA_CS
     
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -231,7 +241,20 @@
     
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
-    
+
+#elif defined(TTGO_LoRa32_v21new)
+    // Use pinning for LILIGO TTGO LoRa32-OLED V2.1 (1.6.1)
+    #define PIN_RECEIVER_CS   LORA_CS
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  LORA_IRQ
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO LORA_D1
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  LORA_RST
+
 #elif defined(ADAFRUIT_FEATHER_ESP32S2)
     // Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
     #define PIN_RECEIVER_CS   6

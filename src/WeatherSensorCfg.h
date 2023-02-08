@@ -36,6 +36,7 @@
 // History:
 // 20230124 Added some default settings based on selected boards in Arduino IDE
 // 20230207 Added pin definitions for ARDUINO_TTGO_LoRa32_v21new
+// 20230208 Added pin definitions for ARDUINO_TTGO_LoRa32_V2
 //
 // ToDo: 
 // -
@@ -56,10 +57,16 @@
 // LILIGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
 // See pin definitions in
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
-//
+// and
+// https://www.thethingsnetwork.org/forum/t/big-esp32-sx127x-topic-part-2/11973
+
 // This define is set by selecting "Board: TTGO LoRa32-OLED" / "Board Revision: TTGO LoRa32 V1 (No TFCard)"
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V1
+
+// This define is set by selecting "Board: TTGO LoRa32-OLED" / "Board Revision: TTGO LoRa32 V2"
+// in the Arduino IDE:
+//#define ARDUINO_TTGO_LoRa32_V2
 
 // This define is set by selecting "Board: TTGO LoRa32-OLED" / "Board Revision: TTGO LoRa32 V2.1 (1.6.1)"
 // in the Arduino IDE:
@@ -79,6 +86,11 @@
 
 #if defined(ARDUINO_TTGO_LoRa32_V1)
     #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
+    #define USE_SX1276
+
+#elif defined(ARDUINO_TTGO_LoRa32_V2)
+    #pragma message("ARDUINO_TTGO_LoRa32_V2 defined; using on-board transceiver")
+    #pragma message("LoRa DIO1 must be wired to GPIO33 manually!")
     #define USE_SX1276
 
 #elif defined(ARDUINO_TTGO_LoRa32_v21new)
@@ -228,7 +240,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  12
 
-#elif defined(ARDUINO_TTGO_LoRa32_V1)
+#elif defined(ARDUINO_TTGO_LoRa32_V1) || defined(ARDUINO_TTGO_LoRa32_V2)
     // Use pinning for LILIGO TTGO LoRa32-OLED
     #define PIN_RECEIVER_CS   LORA_CS
     

@@ -18,16 +18,30 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, 
 
 ## Configuration
 
-### Configuration by Selecting a supported Board in the Arduino IDE
+### Configuration by selecting a supported Board in the Arduino IDE
 
-   | Setup                                                          | Board              | Board Revision               | Define                 | Notes    |
-   | -------------------------------------------------------------- | ------------------ | ---------------------------- | ---------------------- | ------- |
-   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | -   |
-   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | Wire DIO1 to GPIO33 |
-   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new | - |
-   | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      | "FireBeetle-ESP32" | n.a.                       | ARDUINO_ESP32_DEV -> LORAWAN_NODE     |        |
-   | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ADAFRUIT_FEATHER_ESP32S2   | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
-   
+By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based in this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of you choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
+
+If you are not using the Arduino IDE, you can use the defines in the table below with your specific tool chain to get the same result.
+
+If this is not what you need, you have to switch to **Manual Configuration**
+
+   | Setup                                                          | Board              | Board Revision               | Define                 | Radio Module | Notes    |
+   | -------------------------------------------------------------- | ------------------ | ---------------------------- | ---------------------- | -------- | ------- |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
+   | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      | "FireBeetle-ESP32" | n.a.                       | ARDUINO_ESP32_DEV -> LORAWAN_NODE     | SX1276 (RFM95W) |        |
+   | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
+
+
+The preprosessor will provide some output regarding the selected configuration if enabled in the Preferences ("Verbose Output"), e.g. 
+```
+ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used
+[...]
+Receiver chip: [SX1276]
+Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
+```
 
 ### Manual Configuration
 
@@ -35,16 +49,12 @@ See `WeatherSensorCfg.h` for configuration options.
 
 * Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
 
-  SX1276 is compatible to RFM95W.
+  SX1276 is compatible to RFM95W and HPD13A.
 
 * Set the I/O pinning according to your hardware
 
    | Define                     | Radio Module    | Configuration                                                    |
    | -------------------------- | --------------- | ---------------------------------------------------------------- |
-   | LORAWAN_NODE               | SX1276 (RFM95W) | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      |
-   | ARDUINO_TTGO_LORA32_V1     | SX1276 (HPD13A) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1   |
-   | ARDUINO_TTGO_LoRa32_v21new | SX1276 (HPD13A) | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 |
-   | ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)   |
    | ESP32                      | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
    | ESP8266                    | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
 

@@ -98,7 +98,7 @@
     #define USE_SX1276
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
-    #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used"
+    #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     
 #elif defined(ARDUINO_ESP32_DEV)

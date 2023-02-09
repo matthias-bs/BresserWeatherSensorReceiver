@@ -18,6 +18,19 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, 
 
 ## Configuration
 
+### Configuration by Selecting a supported Board in the Arduino IDE
+
+   | Setup                                                          | Board              | Board Revision               | Define                 | Notes    |
+   | -------------------------------------------------------------- | ------------------ | ---------------------------- | ---------------------- | ------- |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | -   |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | Wire DIO1 to GPIO33 |
+   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new | - |
+   | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      | "FireBeetle-ESP32" | n.a.                       | ARDUINO_ESP32_DEV -> LORAWAN_NODE     |        |
+   | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ADAFRUIT_FEATHER_ESP32S2   | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
+   
+
+### Manual Configuration
+
 See `WeatherSensorCfg.h` for configuration options.
 
 * Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.

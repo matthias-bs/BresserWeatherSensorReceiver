@@ -28,7 +28,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
 
    | Setup                                                          | Board              | Board Revision               | Define                 | Radio Module | Notes    |
    | -------------------------------------------------------------- | ------------------ | ---------------------------- | ---------------------- | -------- | ------- |
-   | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
+   | [LILYGO®TTGO-LORA32](https://github.com/Xinyuan-LilyGo/TTGO-LoRa-Series) V1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
    | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32](https://github.com/LilyGO/TTGO-LORA32) V2.1 | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
    | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      | "FireBeetle-ESP32" | n.a.                       | ARDUINO_ESP32_DEV -> LORAWAN_NODE     | SX1276 (RFM95W) |        |

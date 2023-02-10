@@ -76,7 +76,7 @@
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
 //
 // This define is set by selecting "Adafruit Feather ESP32-S2" in the Arduino IDE:
-//#define ADAFRUIT_FEATHER_ESP32S2
+//#define ARDUINO_ADAFRUIT_FEATHER_ESP32S2
 
 // DFRobot Firebeetle32
 // https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
@@ -267,7 +267,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ADAFRUIT_FEATHER_ESP32S2)
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     // Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
     #define PIN_RECEIVER_CS   6
     

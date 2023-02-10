@@ -17,8 +17,12 @@ jobs:
           - esp32:esp32:esp32:DebugLevel=verbose
           - esp32:esp32:firebeetle32
           - esp32:esp32:ttgo-lora32:Revision=TTGO_LoRa32_V1
+          - esp32:esp32:ttgo-lora32:Revision=TTGO_LoRa32_V2
+          - esp32:esp32:ttgo-lora32:Revision=TTGO_LoRa32_v21new
+          - esp32:esp32:adafruit_feather_esp32s2
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
+          
 
 
     runs-on: ubuntu-latest

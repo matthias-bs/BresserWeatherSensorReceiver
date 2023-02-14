@@ -52,6 +52,7 @@
 // 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230111 Added additional digit for rain gauge in 5in1-decoder (maximum is now 999.9mm)
+// 20230114 Modified decodeBresser6In1Payload() to distinguish msg type based on 'flags' (msg[16])
 //
 // ToDo: 
 // -
@@ -657,6 +658,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     uint32_t id_tmp   = ((uint32_t)msg[2] << 24) | (msg[3] << 16) | (msg[4] << 8) | (msg[5]);
     uint8_t  type_tmp = (msg[6] >> 4); // 1: weather station, 2: indoor?, 4: soil probe
     uint8_t  chan_tmp = (msg[6] & 0x7);
+    uint8_t  flags    = (msg[16] & 0x0f);
     DecodeStatus status;
     
     // Find appropriate slot in sensor data array and update <status>
@@ -673,26 +675,24 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].chan        = chan_tmp; 
     
     
-    // temperature, humidity, shared with rain counter, only if valid BCD digits
-    temp_ok  = humidity_ok = msg[12] <= 0x99 && (msg[13] & 0xf0) <= 0x90;
+    // temperature, humidity(, uv) - shared with rain counter
+    temp_ok = humidity_ok = (flags == 0);
     if (temp_ok) {
+        bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-        float temp     = temp_raw * 0.1f;
-        if (temp_raw > 600)
-            temp = (temp_raw - 1000) * 0.1f;
+        float temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
     
         sensor[slot].temp_c      = temp;
         sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
         sensor[slot].humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+        
+        // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
+        uv_ok  = (~msg[15] & 0xff) <= 0x99 && (~msg[16] & 0xf0) <= 0x90;
+        if (uv_ok) {
+            int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
+                sensor[slot].uv = uv_raw * 0.1f;
+        }
     }
-    // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
-    uv_ok  = (msg[16] & 0x0f) == 0 && (~msg[15] & 0xff) <= 0x99 && (~msg[16] & 0xf0) <= 0x90;
-    if (uv_ok) {
-        int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
-            sensor[slot].uv = uv_raw * 0.1f;
-    }
-    // unused...
-    //int flags  = (msg[16] & 0x0f); // looks like some flags, not sure
 
     //int unk_ok  = (msg[16] & 0xf0) == 0xf0;
     //int unk_raw = ((msg[15] & 0xf0) >> 4) * 10 + (msg[15] & 0x0f);
@@ -719,11 +719,12 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
 #endif
     }
 
-    // rain counter, inverted 3 bytes BCD, shared with temp/hum, only if valid digits
+    // rain counter, inverted 3 bytes BCD - shared with temp/hum
     msg[12] ^= 0xff;
     msg[13] ^= 0xff;
     msg[14] ^= 0xff;
-    rain_ok = msg[12] <= 0x65 && msg[13] <= 0x99 && msg[14] <= 0x99;
+    
+    rain_ok = (flags == 1) && (type_tmp == 1);
     if (rain_ok) {
         int rain_raw     = (msg[12] >> 4) * 100000 + (msg[12] & 0x0f) * 10000
                          + (msg[13] >> 4) * 1000 + (msg[13] & 0x0f) * 100
@@ -752,6 +753,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].wind_ok     |= wind_ok;
     sensor[slot].rain_ok     |= rain_ok;
     sensor[slot].moisture_ok |= moisture_ok;
+    log_d("Msg flags - Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
     
     sensor[slot].valid    = true;
     

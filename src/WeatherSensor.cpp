@@ -753,7 +753,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].wind_ok     |= wind_ok;
     sensor[slot].rain_ok     |= rain_ok;
     sensor[slot].moisture_ok |= moisture_ok;
-    log_d("Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
+    log_d("Msg flags - Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
     
     sensor[slot].valid    = true;
     

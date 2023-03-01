@@ -12,9 +12,9 @@ In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL
 
 ![image](https://user-images.githubusercontent.com/17797704/222125713-37b62781-ad60-4aac-be30-7230bb8e9d42.png)
 
-**TO BE FIXED**: Light and UV are not working. The result for rain is also strange.
+**TO BE FIXED**: Light and UV are not working. Also RSSI. The result for rain is also strange.
 
-As soon as I fixed these bugs (light, UV and rain) and I clean the code, I will submit a pull request to the upstream repo to include the new decoder.
+As soon as these bugs (light, UV, rain and RSSI) are fixed and the code is cleaned, I will submit a pull request to the upstream repo to include the new decoder.
 
 ---
 

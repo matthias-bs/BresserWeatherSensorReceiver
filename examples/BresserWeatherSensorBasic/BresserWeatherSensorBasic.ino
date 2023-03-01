@@ -62,6 +62,8 @@ void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
+    Serial.printf("Starting execution...\n");
+
     weatherSensor.begin();
 }
 
@@ -71,14 +73,24 @@ void loop()
     // This example uses only a single slot in the sensor data array
     int const i=0;
 
+//    Serial.printf("Hola (2)");
+
     // Clear all sensor data
     weatherSensor.clearSlots();
+
+//    Serial.printf("Hola (3)");
     
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
     int decode_status = weatherSensor.getMessage();
-    
-    if (decode_status == DECODE_OK) {
+
+//    Serial.printf("Hola (4)");
+
+/*    if (decode_status != DECODE_INVALID) {
+      Serial.printf("Decode status: %d\n", decode_status);
+    }
+*/
+    if (decode_status == DECODE_OK || decode_status == DECODE_PAR_ERR) {
     
       Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
           weatherSensor.sensor[i].sensor_id,
@@ -120,6 +132,20 @@ void loop()
       }
       else {
           Serial.printf("Moisture: [--%%] ");
+      }
+      if (weatherSensor.sensor[i].uv_ok) {
+          Serial.printf("UV index: [%3d%%] ",
+              weatherSensor.sensor[i].uv);
+      }
+      else {
+          Serial.printf("UV index: [---%%] ");
+      }
+      if (weatherSensor.sensor[i].light_ok) {
+          Serial.printf("Light (lux): [%3d%%] ",
+              weatherSensor.sensor[i].light_lux);
+      }
+      else {
+          Serial.printf("Light (lux): [---%%] ");
       }
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)

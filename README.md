@@ -16,7 +16,7 @@ As soon as the code is cleaned, I will submit a pull request to the upstream rep
 
 ## Example with a [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
 
-![image](https://user-images.githubusercontent.com/17797704/222195713-f71ca2b5-7c04-4335-9949-6b04f8d06e16.png)
+<img src="https://user-images.githubusercontent.com/17797704/222195713-f71ca2b5-7c04-4335-9949-6b04f8d06e16.png" width="384">
 
 ![image](https://user-images.githubusercontent.com/17797704/222195769-a4d3f21b-f1aa-469d-8801-ab7936e1ff70.png)
 

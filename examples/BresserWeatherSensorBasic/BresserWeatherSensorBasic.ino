@@ -134,18 +134,18 @@ void loop()
           Serial.printf("Moisture: [--%%] ");
       }
       if (weatherSensor.sensor[i].uv_ok) {
-          Serial.printf("UV index: [%3d%%] ",
+          Serial.printf("UV index: [%1.1f] ",
               weatherSensor.sensor[i].uv);
       }
       else {
-          Serial.printf("UV index: [---%%] ");
+          Serial.printf("UV index: [-.-%%] ");
       }
       if (weatherSensor.sensor[i].light_ok) {
-          Serial.printf("Light (lux): [%3d%%] ",
-              weatherSensor.sensor[i].light_lux);
+          Serial.printf("Light (Klux): [%2.1fKlux] ",
+              weatherSensor.sensor[i].light_klx);
       }
       else {
-          Serial.printf("Light (lux): [---%%] ");
+          Serial.printf("Light (lux): [--.-Klux] ");
       }
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)

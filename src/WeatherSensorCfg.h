@@ -202,8 +202,8 @@
 #define WIND_DATA_FIXEDPOINT
 
 // Select appropriate sensor message format(s)
-//#define BRESSER_5_IN_1
-//#define BRESSER_6_IN_1
+#define BRESSER_5_IN_1
+#define BRESSER_6_IN_1
 #define BRESSER_7_IN_1
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )

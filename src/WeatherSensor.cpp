@@ -64,7 +64,7 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
-//#define JNA_DEBUG
+#define JNA_DEBUG
 
 #if defined(USE_CC1101)
     static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
@@ -232,6 +232,9 @@ DecodeStatus WeatherSensor::getMessage(void)
             printf("\n");
 #endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
+#ifdef JNA_DEBUG
+            printf("%s R [%02X] RSSI: %0.1f\n", RECEIVER_CHIP, recvData[0], rssi);
+#endif
 
             #ifdef BRESSER_7_IN_1
                 decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
@@ -826,7 +829,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
       uint8_t tmp = msg[i];
       msg[i] ^= 0xaa;
 #ifdef JNA_DEBUG
-      printf("previous msg[%d]=%x, new msg[%d]=%x\n", i, tmp, i, msg[i]);
+      //printf("previous msg[%d]=%x, new msg[%d]=%x\n", i, tmp, i, msg[i]);
 #endif
   }
 
@@ -877,8 +880,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   int wdir     = (msg[4] >> 4) * 100 + (msg[4] & 0x0f) * 10 + (msg[5] >> 4);
   int wgst_raw = (msg[7] >> 4) * 100 + (msg[7] & 0x0f) * 10 + (msg[8] >> 4);
   int wavg_raw = (msg[8] & 0x0f) * 100 + (msg[9] >> 4) * 10 + (msg[9] & 0x0f);
-  int rain_raw = (msg[10] >> 4) * 100000 + (msg[10] & 0x0f) * 10000 + (msg[11] >> 4) * 1000
-          + (msg[11] & 0x0f) * 100 + (msg[12] >> 4) * 10 + (msg[12] & 0x0f) * 1; // 6 digits
+  //int rain_raw = (msg[10] >> 4) * 100000 + (msg[10] & 0x0f) * 10000 + (msg[11] >> 4) * 1000 + (msg[11] & 0x0f) * 100 + (msg[12] >> 4) * 10 + (msg[12] & 0x0f) * 1; // 6 digits
+  int rain_raw = (msg[10] >> 4) * 1000 + (msg[10] & 0x0f) * 100 + (msg[11] >> 4) * 10 + (msg[11] & 0x0f) * 1; // 4 digits
   float rain_mm = rain_raw * 0.1f;
   int temp_raw = (msg[14] >> 4) * 100 + (msg[14] & 0x0f) * 10 + (msg[15] >> 4);
   float temp_c = temp_raw * 0.1f;
@@ -887,8 +890,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   if (temp_raw > 600)
       temp_c = (temp_raw - 1000) * 0.1f;
   int humidity = (msg[16] >> 4) * 10 + (msg[16] & 0x0f);
-  int lght_raw = (msg[17] >> 4) * 100000 + (msg[17] & 0x0f) * 10000 + (msg[18] >> 4) * 1000
-          + (msg[18] & 0x0f) * 100 + (msg[19] >> 4) * 10 + (msg[19] & 0x0f);
+  int lght_raw = (msg[17] >> 4) * 100000 + (msg[17] & 0x0f) * 10000 + (msg[18] >> 4) * 1000 + (msg[18] & 0x0f) * 100 + (msg[19] >> 4) * 10 + (msg[19] & 0x0f);
   int uv_raw =   (msg[20] >> 4) * 100 + (msg[20] & 0x0f) * 10 + (msg[21] >> 4);
 
   float light_klx = lght_raw * 0.001f; // TODO: remove this
@@ -939,6 +941,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].light_lux   = light_lux;
   sensor[slot].uv          = uv_index;
   sensor[slot].battery_ok  = !battery_low;
+  sensor[slot].rssi        = rssi;
 
   /* clang-format off */
 /*  data = data_make(

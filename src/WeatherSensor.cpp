@@ -64,8 +64,6 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
-#define JNA_DEBUG
-
 #if defined(USE_CC1101)
     static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
 #endif
@@ -212,9 +210,6 @@ DecodeStatus WeatherSensor::getMessage(void)
     if (state == RADIOLIB_ERR_NONE) {
         // Verify last syncword is 1st byte of payload (see setSyncWord() above)
         if (recvData[0] == 0xD4) {
-#ifdef JNA_DEBUG
-            printf("Received preamble: beginning of preamble (AA AA AA AA), sync word (AA 2D) and the first byte (D4)\n");
-#endif
             #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
                 char buf[128];
                 *buf = '\0';
@@ -223,18 +218,7 @@ DecodeStatus WeatherSensor::getMessage(void)
                 }
                 log_v("%s Data: %s", RECEIVER_CHIP, buf);
             #endif
-#ifdef JNA_DEBUG
-            // print the data of the packet
-            printf("Received data: ");
-            for(size_t i = 1 ; i < sizeof(recvData) ; i++) {
-                printf("%x ", recvData[i] & 0xff);
-            }
-            printf("\n");
-#endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
-#ifdef JNA_DEBUG
-            printf("%s R [%02X] RSSI: %0.1f\n", RECEIVER_CHIP, recvData[0], rssi);
-#endif
 
             #ifdef BRESSER_7_IN_1
                 decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
@@ -819,41 +803,21 @@ First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final 
 #ifdef BRESSER_7_IN_1
 DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize) {
 
-#ifdef JNA_DEBUG
   if (msg[21] == 0x00) {
-      printf("DECODE_FAIL_SANITY !!!\n");
+      log_e("DECODE_FAIL_SANITY !!!");
   }
-#endif
   // data whitening
   for (unsigned i = 0; i < msgSize; ++i) {
       uint8_t tmp = msg[i];
       msg[i] ^= 0xaa;
-#ifdef JNA_DEBUG
-      //printf("previous msg[%d]=%x, new msg[%d]=%x\n", i, tmp, i, msg[i]);
-#endif
   }
-
-#ifdef JNA_DEBUG
-  printf("MSG size: %d\nMSG: ", msgSize);
-  for (int i=0; i<msgSize; i++) {
-    printf("%02x", msg[i] & 0xff);
-  }
-  printf("\n");
-#endif
 
   // LFSR-16 digest, generator 0x8810 key 0xba95 final xor 0x6df1
   int chkdgst = (msg[0] << 8) | msg[1];
   //int digest  = lfsr_digest16(&msg[2], 15, 0x8810, 0x5412); // bresser_6in1
   int digest  = lfsr_digest16(&msg[2], 23, 0x8810, 0xba95); // bresser_7in1
-#ifdef JNA_DEBUG
-  printf("chkdgst: %02x\n", chkdgst);
-  printf("digest: %02x\n", digest);
-#endif
   if ((chkdgst ^ digest) != 0x6df1) { // bresser_7in1
       log_d("Digest check failed - [%02X] Vs [%02X] (%02X)", chkdgst, digest, chkdgst ^ digest); // bresser_7in1
-#ifdef JNA_DEBUG
-      printf("Digest check failed : %02x, %02x, %02x\n", chkdgst, digest, chkdgst ^ digest);
-#endif
       return DECODE_DIG_ERR;
   }
 
@@ -863,16 +827,10 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   }
 
   int id_tmp   = (msg[2] << 8) | (msg[3]);
-#ifdef JNA_DEBUG
-  printf("id_tmp: %02x\n", id_tmp);
-#endif
   DecodeStatus status;
 
   // Find appropriate slot in sensor data array and update <status>
   int slot = findSlot(id_tmp, &status);
-#ifdef JNA_DEBUG
-  printf("status: %02x\n", status);
-#endif
 
 //  if (status != DECODE_OK)
 //      return status;
@@ -896,23 +854,6 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   float light_klx = lght_raw * 0.001f; // TODO: remove this
   float light_lux = lght_raw;
   float uv_index = uv_raw * 0.1f;
-
-#ifdef JNA_DEBUG
-  printf("wdir:        %d\n", wdir);
-  printf("wgst_raw:    %d\n", wgst_raw);
-  printf("wavg_raw:    %d\n", wavg_raw);
-  printf("rain_raw:    %d\n", rain_raw);
-  printf("temp_raw:    %d\n", temp_raw);
-  printf("temp_c:      %f\n", temp_c);
-  printf("flags:       %d\n", flags);
-  printf("battery_low: %d\n", battery_low);
-  printf("humidity:    %d\n", humidity);
-  printf("lght_raw:    %d\n", lght_raw);
-  printf("uv_raw:      %d\n", uv_raw);
-  printf("light_klx:   %f\n", light_klx);
-  printf("light_lux:   %f\n", light_lux);
-  printf("uv_index:    %f\n", uv_index);
-#endif
 
   // The RTL_433 decoder does not include any field to verify that these data
   // are ok, so we are assuming that they are ok if the decode status is ok.

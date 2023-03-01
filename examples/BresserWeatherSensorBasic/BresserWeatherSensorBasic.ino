@@ -73,23 +73,13 @@ void loop()
     // This example uses only a single slot in the sensor data array
     int const i=0;
 
-//    Serial.printf("Hola (2)");
-
     // Clear all sensor data
     weatherSensor.clearSlots();
 
-//    Serial.printf("Hola (3)");
-    
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
     int decode_status = weatherSensor.getMessage();
 
-//    Serial.printf("Hola (4)");
-
-/*    if (decode_status != DECODE_INVALID) {
-      Serial.printf("Decode status: %d\n", decode_status);
-    }
-*/
     if (decode_status == DECODE_OK || decode_status == DECODE_PAR_ERR) {
     
       Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",

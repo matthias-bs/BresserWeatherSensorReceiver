@@ -21,6 +21,8 @@ As soon as the code is cleaned, I will submit a pull request to the upstream rep
 ![image](https://user-images.githubusercontent.com/17797704/222195769-a4d3f21b-f1aa-469d-8801-ab7936e1ff70.png)
 
 ---
+You can find below the README of the original repo.
+---
 
 # BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->

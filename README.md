@@ -1,3 +1,19 @@
+# BresserWeatherSensorReceiver with Bresser 7-in-1 decoder
+
+This repository is based on [matthias-bs' BresserWeatherSensorReceiver repo](https://github.com/matthias-bs/BresserWeatherSensorReceiver). Its main addition is to include the Bresser 7-in-1 decoder, since matthias-bs' repo only includes the decoders for Bresser 5-in-1/6-in-1.
+
+Tested with:
+- [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
+- [BRESSER professional 7-in-1 Wi-Fi Weather Station with Light Intensity and UV Measurement Function](https://www.bresser.de/en/Weather-Time/Weather-Center/BRESSER-professional-7-in-1-Wi-Fi-Weather-Station-with-Light-Intensity-and-UV-Measurement-Function.html)
+
+These stations also includes a light sensor, compared to the 6-in-1 weather stations. The microcontroller was a [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/), which has an SX1276 LoRa chip with the same pinout than the TTGO LoRa32-OLED v2.1.6 board (already supported by mattias-bs' repo and selected as the board in the Arduino IDE).
+
+In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL_433](https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c) adapted to this repository (similar to the work done by mattias-bs for the Bresser 5-in-1 and 6-in-1 decoders).
+
+As soon as I clean the code, I will submit a pull request to the upstream repo to include the new decoder.
+
+---
+
 # BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->
 [![CppUTest](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml)

@@ -10,8 +10,18 @@ These stations also includes a light sensor, compared to the 6-in-1 weather stat
 
 In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL_433](https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c) adapted to this repository (similar to the work done by mattias-bs for the Bresser 5-in-1 and 6-in-1 decoders).
 
-As soon as I clean the code, I will submit a pull request to the upstream repo to include the new decoder.
+**TO BE CHECKED**: The value for rain is incorrect in the RTL_433 tool. It shows 7.2 mm in a sunny day without rain (0.0 mm in the display). The Bresser 7-in-1 decoder employs 3 bytes, as the 6-in-1 decoder. However, the 5-in-1 decoder only employs 2 bytes. Using the first two bytes (msg[10] and msg[11]) the result is 0.0 mm, as it should be. This has to be tested once it is rainning (my weather station is not easily accessible).
 
+As soon as the code is cleaned, I will submit a pull request to the upstream repo to include the new decoder.
+
+## Example with a [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
+
+<img src="https://user-images.githubusercontent.com/17797704/222195713-f71ca2b5-7c04-4335-9949-6b04f8d06e16.png" width="384">
+
+![image](https://user-images.githubusercontent.com/17797704/222195769-a4d3f21b-f1aa-469d-8801-ab7936e1ff70.png)
+
+---
+You can find below the README of the original repo.
 ---
 
 # BresserWeatherSensorReceiver

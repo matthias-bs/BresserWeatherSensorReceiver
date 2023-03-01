@@ -10,7 +10,11 @@ These stations also includes a light sensor, compared to the 6-in-1 weather stat
 
 In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL_433](https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c) adapted to this repository (similar to the work done by mattias-bs for the Bresser 5-in-1 and 6-in-1 decoders).
 
-As soon as I clean the code, I will submit a pull request to the upstream repo to include the new decoder.
+![image](https://user-images.githubusercontent.com/17797704/222125713-37b62781-ad60-4aac-be30-7230bb8e9d42.png)
+
+**TO BE FIXED**: Light and UV are not working. The result for rain is also strange.
+
+As soon as I fixed these bugs (light, UV and rain) and I clean the code, I will submit a pull request to the upstream repo to include the new decoder.
 
 ---
 

@@ -1,12 +1,44 @@
+# BresserWeatherSensorReceiver with Bresser 7-in-1 decoder
+
+This repository is based on [matthias-bs' BresserWeatherSensorReceiver repo](https://github.com/matthias-bs/BresserWeatherSensorReceiver). Its main addition is to include the Bresser 7-in-1 decoder, since matthias-bs' repo only includes the decoders for Bresser 5-in-1/6-in-1.
+
+Tested with the `BresserWeatherSensorBasic.ino` example and with the following equipment:
+- [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
+- [BRESSER professional 7-in-1 Wi-Fi Weather Station with Light Intensity and UV Measurement Function](https://www.bresser.de/en/Weather-Time/Weather-Center/BRESSER-professional-7-in-1-Wi-Fi-Weather-Station-with-Light-Intensity-and-UV-Measurement-Function.html). Data available at [Weather Underground](https://www.wunderground.com/dashboard/pws/IGRANA86), [Weather Cloud](https://app.weathercloud.net/d4424986045#current) and [AWEKAS](https://stationsweb.awekas.at/index.php?id=27737).
+
+These stations also includes a light sensor, compared to the 6-in-1 weather stations. The microcontroller was a [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/), which has an SX1276 LoRa chip with the same pinout than the TTGO LoRa32-OLED v2.1.6 board (already supported by mattias-bs' repo and selected as the board in the Arduino IDE).
+
+In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL_433](https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c) adapted to this repository (similar to the work done by mattias-bs for the Bresser 5-in-1 and 6-in-1 decoders).
+
+**TO BE CHECKED**: The value for rain is incorrect in the RTL_433 tool. It shows 7.2 mm in a sunny day without rain (0.0 mm in the display). The Bresser 7-in-1 decoder employs 3 bytes, as the 6-in-1 decoder. However, the 5-in-1 decoder only employs 2 bytes. Using the first two bytes (msg[10] and msg[11]) the result is 0.0 mm, as it should be. This has to be tested once it is rainning (my weather station is not easily accessible).
+
+As soon as the code is cleaned, I will submit a pull request to the upstream repo to include the new decoder.
+
+## Example with a [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
+
+<img src="https://user-images.githubusercontent.com/17797704/222539637-6bba56e6-e20b-474c-8229-e61a5b199a2c.png" width="384">
+
+![image](https://user-images.githubusercontent.com/17797704/222539809-b47126ac-325f-493c-9a34-5310eac34d75.png)
+
+## Example with a [BRESSER professional 7-in-1 Wi-Fi Weather Station with Light Intensity and UV Measurement Function](https://www.bresser.de/en/Weather-Time/Weather-Center/BRESSER-professional-7-in-1-Wi-Fi-Weather-Station-with-Light-Intensity-and-UV-Measurement-Function.html)
+
+<img src="https://user-images.githubusercontent.com/17797704/222445129-3bb9ef83-785b-44b3-a460-8177400c067e.png" width="384">
+
+![image](https://user-images.githubusercontent.com/17797704/222444791-03e4de29-71d9-454a-a23b-e7c39dc7e63d.png)
+
+---
+You can find below the README of the original repo.
+---
+
 # BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->
 [![CppUTest](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml)
 [![GitHub release](https://img.shields.io/github/release/matthias-bs/BresserWeatherSensorReceiver?maxAge=3600)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/LICENSE)
 
-Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W
+Bresser 5-in-1/6-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W
 
-The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, the 7-in-1 decoder is tried. If this fails, the 6-in-1 decoder is tried. If this fails, the 5-in-1 decoder is tried.
+The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, the 6-in-1 decoder is tried. If this fails, the 5-in-1 decoder is tried.
 
 | Model         | Sensor Type | Decoder Function                |
 | ------------- | ----------- | ------------------------------- |
@@ -15,7 +47,6 @@ The Bresser 5-in-1 Weather Stations seem to use two different protocols. First, 
 | 7002585       | Weather | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature | decodeBresser**6In1**Payload() |
-| 7003600000000 and WSX3001000000 | Weather | decodeBresser**7In1**Payload()  |
 
 ## Configuration
 
@@ -32,7 +63,6 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®TTGO-LORA32 V1](https://github.com/Xinyuan-LilyGo/TTGO-LoRa-Series) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
    | [LILYGO®TTGO-LORA32 V2](https://github.com/LilyGO/TTGO-LORA32) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32 V2.1](http://www.lilygo.cn/prod_view.aspx?TypeId=50060&Id=1271&FId=t3:50060:3) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
-   | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick" | "Heltec Wireless Stick" | Wireless_Stick |  SX1276 | - |
    | [LoRaWAN_Node](https://github.com/matthias-bs/LoRaWAN_Node)      | "FireBeetle-ESP32" | n.a.                       | ARDUINO_ESP32_DEV -> LORAWAN_NODE     | SX1276 (RFM95W) |        |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
 

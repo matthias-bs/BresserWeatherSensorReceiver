@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // BresserWeatherSensorWaiting.ino
 //
-// Example for BresserWeatherSensorReceiver - 
+// Example for BresserWeatherSensorReceiver -
 // Using getData() for reception of at least one complete data set from a sensor.
 //
 // getData() blocks until the data has been received or a timeout occurs.
@@ -15,17 +15,17 @@
 // MIT License
 //
 // Copyright (c) 2022 Matthias Prinke
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -42,8 +42,8 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
-// ToDo: 
-// - 
+// ToDo:
+// -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +54,7 @@
 WeatherSensor weatherSensor;
 
 
-void setup() {    
+void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
@@ -62,16 +62,16 @@ void setup() {
 }
 
 
-void loop() 
-{    
+void loop()
+{
     // Clear all sensor data
     weatherSensor.clearSlots();
-  
+
     // Attempt to receive entire data set with timeout of <xx> s
-    // Try to receive at least one complete set of data, even if 
+    // Try to receive at least one complete set of data, even if
     // data is distributed across multiple radio messages.
     bool decode_ok = weatherSensor.getData(60000, DATA_COMPLETE);
-    
+
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");
     }
@@ -106,10 +106,10 @@ void loop()
                 Serial.printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] ");
             }
             if (weatherSensor.sensor[i].rain_ok) {
-                Serial.printf("Rain: [%7.1fmm] ",  
+                Serial.printf("Rain: [%7.1fmm] ",
                     weatherSensor.sensor[i].rain_mm);
             } else {
-                Serial.printf("Rain: [-----.-mm] "); 
+                Serial.printf("Rain: [-----.-mm] ");
             }
             if (weatherSensor.sensor[i].moisture_ok) {
                 Serial.printf("Moisture: [%2d%%] ",
@@ -118,6 +118,24 @@ void loop()
             else {
                 Serial.printf("Moisture: [--%%] ");
             }
+            #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+            if (weatherSensor.sensor[i].uv_ok) {
+                Serial.printf("UV index: [%1.1f] ",
+                    weatherSensor.sensor[i].uv);
+            }
+            else {
+                Serial.printf("UV index: [-.-%%] ");
+            }
+            #endif
+            #ifdef BRESSER_7_IN_1
+            if (weatherSensor.sensor[i].light_ok) {
+                Serial.printf("Light (Klux): [%2.1fKlux] ",
+                    weatherSensor.sensor[i].light_klx);
+            }
+            else {
+                Serial.printf("Light (lux): [--.-Klux] ");
+            }
+            #endif
             Serial.printf("RSSI: [%6.1fdBm]\n", weatherSensor.sensor[i].rssi);
         }
     }

@@ -123,6 +123,7 @@ void loop()
       else {
           Serial.printf("Moisture: [--%%] ");
       }
+      #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
       if (weatherSensor.sensor[i].uv_ok) {
           Serial.printf("UV index: [%1.1f] ",
               weatherSensor.sensor[i].uv);
@@ -130,6 +131,8 @@ void loop()
       else {
           Serial.printf("UV index: [-.-%%] ");
       }
+      #endif
+      #ifdef BRESSER_7_IN_1
       if (weatherSensor.sensor[i].light_ok) {
           Serial.printf("Light (Klux): [%2.1fKlux] ",
               weatherSensor.sensor[i].light_klx);
@@ -137,6 +140,7 @@ void loop()
       else {
           Serial.printf("Light (lux): [--.-Klux] ");
       }
+      #endif      
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)
     delay(100);

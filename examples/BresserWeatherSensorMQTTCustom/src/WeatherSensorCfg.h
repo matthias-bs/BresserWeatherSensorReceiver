@@ -102,7 +102,7 @@
     #define USE_SX1276
     
 #elif defined(ARDUINO_ESP32_DEV)
-    #pragma message("Generic ESP32; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
+    #pragma message("Generic ESP32; assuming this is the LoRa_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
     #define LORAWAN_NODE
     #define USE_SX1276
 

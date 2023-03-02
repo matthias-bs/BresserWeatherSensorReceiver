@@ -16,9 +16,9 @@ As soon as the code is cleaned, I will submit a pull request to the upstream rep
 
 ## Example with a [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
 
-<img src="https://user-images.githubusercontent.com/17797704/222195713-f71ca2b5-7c04-4335-9949-6b04f8d06e16.png" width="384">
+<img src="https://user-images.githubusercontent.com/17797704/222539637-6bba56e6-e20b-474c-8229-e61a5b199a2c.png" width="384">
 
-![image](https://user-images.githubusercontent.com/17797704/222195769-a4d3f21b-f1aa-469d-8801-ab7936e1ff70.png)
+![image](https://user-images.githubusercontent.com/17797704/222539809-b47126ac-325f-493c-9a34-5310eac34d75.png)
 
 ## Example with a [BRESSER professional 7-in-1 Wi-Fi Weather Station with Light Intensity and UV Measurement Function](https://www.bresser.de/en/Weather-Time/Weather-Center/BRESSER-professional-7-in-1-Wi-Fi-Weather-Station-with-Light-Intensity-and-UV-Measurement-Function.html)
 

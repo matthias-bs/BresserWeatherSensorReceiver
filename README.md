@@ -20,6 +20,12 @@ As soon as the code is cleaned, I will submit a pull request to the upstream rep
 
 ![image](https://user-images.githubusercontent.com/17797704/222195769-a4d3f21b-f1aa-469d-8801-ab7936e1ff70.png)
 
+## Example with a [BRESSER professional 7-in-1 Wi-Fi Weather Station with Light Intensity and UV Measurement Function](https://www.bresser.de/en/Weather-Time/Weather-Center/BRESSER-professional-7-in-1-Wi-Fi-Weather-Station-with-Light-Intensity-and-UV-Measurement-Function.html)
+
+<img src="https://user-images.githubusercontent.com/17797704/222445129-3bb9ef83-785b-44b3-a460-8177400c067e.png" width="384">
+
+![image](https://user-images.githubusercontent.com/17797704/222444791-03e4de29-71d9-454a-a23b-e7c39dc7e63d.png)
+
 ---
 You can find below the README of the original repo.
 ---

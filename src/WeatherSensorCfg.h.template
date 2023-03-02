@@ -37,6 +37,7 @@
 // 20230124 Added some default settings based on selected boards in Arduino IDE
 // 20230207 Added pin definitions for ARDUINO_TTGO_LoRa32_v21new
 // 20230208 Added pin definitions for ARDUINO_TTGO_LoRa32_V2
+// 20230301 Added pin definitions for Wireless_Stick (from Heltec)
 //
 // ToDo:
 // -
@@ -72,6 +73,10 @@
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V21new
 
+// This define is set by selecting "Board: Heltec Wireless Stick"
+// in the Arduino IDE:
+//#define Wireless_Stick
+
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
 //
@@ -95,6 +100,10 @@
 
 #elif defined(ARDUINO_TTGO_LoRa32_v21new)
     #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
+    #define USE_SX1276
+
+#elif defined(Wireless_Stick)
+    #pragma message("Wireless_Stick defined; using on-board transceiver")
     #define USE_SX1276
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -267,6 +276,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
+
+#elif defined(Wireless_Stick)
+    // Use pinning for Heltec Wireless Stick
+    #define PIN_RECEIVER_CS   SS
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  DIO0
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO DIO1
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  RST_LoRa
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     // Use pinning for Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232

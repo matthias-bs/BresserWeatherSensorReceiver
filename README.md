@@ -12,7 +12,7 @@ In order to include the Bresser 7-in-1 decoder, I employed the [decoder from RTL
 
 **TO BE CHECKED**: The value for rain is incorrect in the RTL_433 tool. It shows 7.2 mm in a sunny day without rain (0.0 mm in the display). The Bresser 7-in-1 decoder employs 3 bytes, as the 6-in-1 decoder. However, the 5-in-1 decoder only employs 2 bytes. Using the first two bytes (msg[10] and msg[11]) the result is 0.0 mm, as it should be. This has to be tested once it is rainning (my weather station is not easily accessible).
 
-As soon as the code is cleaned, I will submit a pull request to the upstream repo to include the new decoder.
+A pull request has been submitted to the upstream repo with the new decoder.
 
 ## Example with a [BRESSER 7-in-1 ClimateConnect Tuya Smart Home Weather Station](https://www.bresser.de/en/Weather-Time/BRESSER-7-in-1-ClimateConnect-Tuya-Smart-Home-Weather-Station.html)
 

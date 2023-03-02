@@ -26,6 +26,14 @@ A pull request has been submitted to the upstream repo with the new decoder.
 
 ![image](https://user-images.githubusercontent.com/17797704/222444791-03e4de29-71d9-454a-a23b-e7c39dc7e63d.png)
 
+## Sending data with LoRaWAN
+
+Using the script `BresserWeatherSensorBasicLoRaWAN.ino` in the `examples` directory, you can send the weather information using LoRaWAN. In this way, the weather station becomes a LoRaWAN-enabled device.
+
+**NOTE**: Remember to configure properly the file `[Arduino directory]\libraries\MCCI_LoRaWAN_LMIC_library\project_config` (e.g. to use 868 MHz) as commented in https://github.com/mcci-catena/arduino-lmic#configuration.
+
+[**TO BE FINISHED**]
+
 ---
 You can find below the README of the original repo.
 ---

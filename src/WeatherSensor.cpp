@@ -646,7 +646,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     // Per-message status flags
     bool temp_ok     = false;
     bool humidity_ok = false;
-    bool light_ok    = false;
     bool uv_ok       = false;
     bool wind_ok     = false;
     bool rain_ok     = false;
@@ -808,7 +807,6 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   }
   // data whitening
   for (unsigned i = 0; i < msgSize; ++i) {
-      uint8_t tmp = msg[i];
       msg[i] ^= 0xaa;
   }
 

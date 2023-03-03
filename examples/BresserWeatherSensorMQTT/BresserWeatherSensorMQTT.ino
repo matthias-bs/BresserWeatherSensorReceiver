@@ -99,7 +99,7 @@
 // - For secure MQTT (TLS server verifycation, check the following examples:
 //   - ESP32:   
 //     https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
-//   - ESP8288: 
+//   - ESP8266: 
 //     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/BearSSL_Validation/BearSSL_Validation.ino
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -161,7 +161,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">// This define is set by selecting &quot;Board: Heltec Wireless Stick&quot;</span></div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">// in the Arduino IDE:</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">//#define Wireless_Stick</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">//#define ARDUINO_heltec_wireless_stick</span></div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">// Adafruit Feather ESP32S2 with RFM95W &quot;FeatherWing&quot; ADA3232</span></div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">// https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h</span></div>
@@ -188,8 +188,8 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="preprocessor">    #pragma message(&quot;ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver&quot;</span>)</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">    #define USE_SX1276</span></div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#elif defined(Wireless_Stick)</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">    #pragma message(&quot;Wireless_Stick defined; using on-board transceiver&quot;</span>)</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_heltec_wireless_stick)</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="preprocessor">    #pragma message(&quot;ARDUINO_heltec_wireless_stick defined; using on-board transceiver&quot;</span>)</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="preprocessor">    #define USE_SX1276</span></div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)</span></div>
@@ -364,7 +364,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;    <span class="comment">// RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC</span></div>
 <div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_RST  LORA_RST</span></div>
 <div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160; </div>
-<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="preprocessor">#elif defined(Wireless_Stick)</span></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_heltec_wireless_stick)</span></div>
 <div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    <span class="comment">// Use pinning for Heltec Wireless Stick</span></div>
 <div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_CS   SS</span></div>
 <div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160; </div>

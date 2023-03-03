@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['pasthour_21',['pastHour',['../class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc',1,'RainGauge']]]
+  ['name_22',['name',['../struct_sensor_map.html#a67056237cfe5029dfebc682216edc524',1,'SensorMap']]],
+  ['nvdata_5ft_23',['nvData_t',['../structnv_data__t.html',1,'']]]
 ];

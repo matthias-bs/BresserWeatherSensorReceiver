@@ -231,6 +231,7 @@ class WeatherSensor {
                     sensor[i].valid       = false;
                     sensor[i].complete    = false;
                     sensor[i].temp_ok     = false;
+                    sensor[i].light_ok    = false;
                     sensor[i].humidity_ok = false;
                     sensor[i].uv_ok       = false;
                     sensor[i].wind_ok     = false;

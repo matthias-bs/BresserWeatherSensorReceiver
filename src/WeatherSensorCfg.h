@@ -75,7 +75,7 @@
 
 // This define is set by selecting "Board: Heltec Wireless Stick"
 // in the Arduino IDE:
-//#define Wireless_Stick
+//#define ARDUINO_heltec_wireless_stick
 
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
@@ -102,8 +102,8 @@
     #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(Wireless_Stick)
-    #pragma message("Wireless_Stick defined; using on-board transceiver")
+#elif defined(ARDUINO_heltec_wireless_stick)
+    #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
     #define USE_SX1276
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -278,7 +278,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(Wireless_Stick)
+#elif defined(ARDUINO_heltec_wireless_stick)
     // Use pinning for Heltec Wireless Stick
     #define PIN_RECEIVER_CS   SS
 

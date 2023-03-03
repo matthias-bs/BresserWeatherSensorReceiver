@@ -62,6 +62,8 @@ void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
+    Serial.printf("Starting execution...\n");
+
     weatherSensor.begin();
 }
 
@@ -73,12 +75,12 @@ void loop()
 
     // Clear all sensor data
     weatherSensor.clearSlots();
-    
+
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
     int decode_status = weatherSensor.getMessage();
-    
-    if (decode_status == DECODE_OK) {
+
+    if (decode_status == DECODE_OK || decode_status == DECODE_PAR_ERR) {
     
       Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
           weatherSensor.sensor[i].sensor_id,
@@ -121,6 +123,24 @@ void loop()
       else {
           Serial.printf("Moisture: [--%%] ");
       }
+      #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+      if (weatherSensor.sensor[i].uv_ok) {
+          Serial.printf("UV index: [%1.1f] ",
+              weatherSensor.sensor[i].uv);
+      }
+      else {
+          Serial.printf("UV index: [-.-%%] ");
+      }
+      #endif
+      #ifdef BRESSER_7_IN_1
+      if (weatherSensor.sensor[i].light_ok) {
+          Serial.printf("Light (Klux): [%2.1fKlux] ",
+              weatherSensor.sensor[i].light_klx);
+      }
+      else {
+          Serial.printf("Light (lux): [--.-Klux] ");
+      }
+      #endif      
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)
     delay(100);

@@ -2,7 +2,7 @@
 // BresserWeatherSensorOptions.ino
 //
 // Example for BresserWeatherSensorReceiver - Test getData() options
-// 
+//
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
 //
@@ -12,17 +12,17 @@
 // MIT License
 //
 // Copyright (c) 2022 Matthias Prinke
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -36,8 +36,8 @@
 // 20220815 Created
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 //
-// ToDo: 
-// - 
+// ToDo:
+// -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +49,7 @@
 // depending on the timing of sensor transmission, start of getData() call and selected option,
 // getData() may succeed or encounter a timeout.
 // For practical use, set TIMEOUT large enough that getData() will succeed in most cases.
-#define TIMEOUT 45000 // Timeout in ms 
+#define TIMEOUT 45000 // Timeout in ms
 
 WeatherSensor weatherSensor;
 
@@ -58,7 +58,7 @@ void print_data(void)
   for (int i=0; i<NUM_SENSORS; i++) {
     if (!weatherSensor.sensor[i].valid)
       continue;
-      
+
     Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
         weatherSensor.sensor[i].sensor_id,
         weatherSensor.sensor[i].s_type,
@@ -88,10 +88,10 @@ void print_data(void)
         Serial.printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] ");
     }
     if (weatherSensor.sensor[i].rain_ok) {
-        Serial.printf("Rain: [%7.1fmm] ",  
+        Serial.printf("Rain: [%7.1fmm] ",
             weatherSensor.sensor[i].rain_mm);
     } else {
-        Serial.printf("Rain: [-----.-mm] "); 
+        Serial.printf("Rain: [-----.-mm] ");
     }
     if (weatherSensor.sensor[i].moisture_ok) {
         Serial.printf("Moisture: [%2d%%] ",
@@ -100,11 +100,29 @@ void print_data(void)
     else {
         Serial.printf("Moisture: [--%%] ");
     }
+    #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+    if (weatherSensor.sensor[i].uv_ok) {
+        Serial.printf("UV index: [%1.1f] ",
+            weatherSensor.sensor[i].uv);
+    }
+    else {
+        Serial.printf("UV index: [-.-%%] ");
+    }
+    #endif
+    #ifdef BRESSER_7_IN_1
+    if (weatherSensor.sensor[i].light_ok) {
+        Serial.printf("Light (Klux): [%2.1fKlux] ",
+            weatherSensor.sensor[i].light_klx);
+    }
+    else {
+        Serial.printf("Light (lux): [--.-Klux] ");
+    }
+    #endif
     Serial.printf("RSSI: [%6.1fdBm]\n", weatherSensor.sensor[i].rssi);
   } // for (int i=0; i<NUM_SENSORS; i++)
 } // void print_data(void)
 
-void setup() {    
+void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
@@ -112,15 +130,15 @@ void setup() {
 }
 
 
-void loop() 
-{    
+void loop()
+{
     bool decode_ok;
-    
+
     // Clear all sensor data
     weatherSensor.clearSlots();
-  
+
     // Try to receive data from at least one sensor,
-    // finish even if data is incomplete. 
+    // finish even if data is incomplete.
     // (Data can be distributed across multiple radio messages.)
     decode_ok = weatherSensor.getData(TIMEOUT);
 
@@ -132,9 +150,9 @@ void loop()
     } else {
       print_data();
     }
-    
-    
-    // Try to receive data from at least one sensor, 
+
+
+    // Try to receive data from at least one sensor,
     // finish only if data is complete.
     // (Data can be distributed across multiple radio messages.)
     weatherSensor.clearSlots();
@@ -149,7 +167,7 @@ void loop()
       print_data();
     }
 
-    // Try to receive data from (at least) one specific sensor type, 
+    // Try to receive data from (at least) one specific sensor type,
     // finish only if data is complete.
     // (Data can be distributed across multiple radio messages.)
     weatherSensor.clearSlots();
@@ -164,7 +182,7 @@ void loop()
       print_data();
     }
 
-    // Try to receive data from (at least) one specific sensor type, 
+    // Try to receive data from (at least) one specific sensor type,
     // finish only if data is complete.
     // (Data can be distributed across multiple radio messages.)
     weatherSensor.clearSlots();
@@ -179,7 +197,7 @@ void loop()
       print_data();
     }
 
-    // Try to receive data from all (NUM_SENSORS) sensors, 
+    // Try to receive data from all (NUM_SENSORS) sensors,
     // finish only if data is complete.
     // (Data can be distributed across multiple radio messages.)
     weatherSensor.clearSlots();
@@ -193,6 +211,6 @@ void loop()
     } else {
       print_data();
     }
-        
+
     delay(100);
 } // loop()

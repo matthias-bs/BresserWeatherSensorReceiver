@@ -174,12 +174,15 @@ class WeatherSensor {
             bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
             bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
             bool     humidity_ok = false;  //!< humidity o.k.
+            bool     light_ok = false;     //!< light o.k. (only 7-in-1)
             bool     uv_ok = false;        //!< uv radiation o.k. (only 6-in-1)
             bool     wind_ok = false;      //!< wind speed/direction o.k. (only 6-in-1)
             bool     rain_ok = false;      //!< rain gauge level o.k.
             bool     battery_ok = false;   //!< battery o.k.
             bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
             float    temp_c;               //!< temperature in degC
+            float    light_klx;            //!< Light KLux (only 7-in-1)
+            float    light_lux;            //!< Light lux (only 7-in-1)
             float    uv;                   //!< uv radiation (only 6-in-1)
             float    rain_mm;              //!< rain gauge level in mm
             #ifdef WIND_DATA_FLOATINGPOINT

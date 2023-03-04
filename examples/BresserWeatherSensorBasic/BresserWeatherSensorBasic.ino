@@ -80,7 +80,7 @@ void loop()
     // Timeout occurs after a small multiple of expected time-on-air.
     int decode_status = weatherSensor.getMessage();
 
-    if (decode_status == DECODE_OK || decode_status == DECODE_PAR_ERR) {
+    if (decode_status == DECODE_OK) {
     
       Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
           weatherSensor.sensor[i].sensor_id,

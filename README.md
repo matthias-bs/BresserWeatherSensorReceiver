@@ -56,7 +56,7 @@ See `WeatherSensorCfg.h` for configuration options.
 
 * Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
 
-  SX1276 is compatible to RFM95W and HPD13A.
+  SX1276 is compatible with RFM95W and HPD13A.
 
 * Set the I/O pinning according to your hardware
 

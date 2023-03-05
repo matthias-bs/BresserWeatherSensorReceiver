@@ -237,3 +237,7 @@ See [BUILD](BUILD.md)
 ## Source Documentation
 
 https://matthias-bs.github.io/BresserWeatherSensorReceiver/
+
+# Legal
+
+> This project is in no way affiliated with, authorized, maintained, sponsored or endorsed by Bresser GmbH or any of its affiliates or subsidiaries.

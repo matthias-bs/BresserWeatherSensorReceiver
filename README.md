@@ -13,14 +13,15 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 
 (The Bresser 5-in-1 Weather Stations seem to use two different protocols - 5-in-1 and 6-in-1.)
 
-| Model         | Sensor Type | Decoder Function                |
-| ------------- | ----------- | ------------------------------- |
-| 7002510..12   | Weather | decodeBresser**5In1**Payload()  |
-| 7902510..12   | Weather | decodeBresser**5In1**Payload()  |
-| 7002585       | Weather | decodeBresser**6In1**Payload()  |
-| 7009999       | Thermo-/Hygrometer | decodeBresser**6in1**Payload() |
-| 7009972       | Soil Moisture/Temperature | decodeBresser**6In1**Payload() |
-| 7003600000000 and WSX3001000000 | Weather | decodeBresser**7In1**Payload()  |
+| Model         | Type | Decoder Function                |
+| ------------- | ---- | ------------------------------- |
+| 7002510..12   | Weather Station | decodeBresser**5In1**Payload()  |
+| 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
+| 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
+| 9602510       | Weather Sensor | ? |
+| 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
+| 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
+| 7003600000000 and WSX3001000000 | Weather Station | decodeBresser**7In1**Payload()  |
 
 ## Configuration
 

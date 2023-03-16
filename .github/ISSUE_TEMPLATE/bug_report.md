@@ -32,8 +32,8 @@ If applicable, add log file to help explain your problem.
 **Embedded Device (please complete the following information):**
  - Arduino IDE Version: [e.g. 1.8.19]
  - ESP32/ESP8266 Board Support Package Version: [e.g. ESP32 2.0.7]
- - Library Version [e.g. 22]
- - Your Board: [brand/model/version] 
+ - Library Version [e.g. 0.6.1]
+ - Your Board: [brand/model/version] (if unsure, attach a photo)
  - Selected Board in the Arduino IDE: [brand/model/version]
  - Your Radio Transceiver Module (if external): [brand/model/chipset/frequency] 
  - **Pinning/Wiring**

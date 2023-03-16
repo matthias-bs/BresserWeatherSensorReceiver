@@ -30,7 +30,7 @@ If applicable, add log file to help explain your problem.
  - Serial console log file (see [Debug Output Configuration in Arduino IDE](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/DEBUG_OUTPUT.md))
 
 **Embedded Device (please complete the following information):**
- - Arduino IDE Version: [e.g. 1.0.6]
+ - Arduino IDE Version: [e.g. 1.8.19]
  - ESP32/ESP8266 Board Support Package Version: [e.g. ESP32 2.0.7]
  - Library Version [e.g. 22]
  - Your Board: [brand/model/version] 

@@ -38,6 +38,7 @@
 // 20230207 Added pin definitions for ARDUINO_TTGO_LoRa32_v21new
 // 20230208 Added pin definitions for ARDUINO_TTGO_LoRa32_V2
 // 20230301 Added pin definitions for Wireless_Stick (from Heltec)
+// 20230316 Added pin definitions for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
 //
 // ToDo:
 // -
@@ -83,6 +84,12 @@
 // This define is set by selecting "Adafruit Feather ESP32-S2" in the Arduino IDE:
 //#define ARDUINO_ADAFRUIT_FEATHER_ESP32S2
 
+// Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
+// https://github.com/espressif/arduino-esp32/blob/master/variants/feather_esp32/pins_arduino.h
+//
+// This define is set by selecting "Adafruit ESP32 Feather" in the Arduino IDE:
+//#define ARDUINO_FEATHER_ESP32
+
 // DFRobot Firebeetle32
 // https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
 //
@@ -109,6 +116,11 @@
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
+
+#elif defined(ARDUINO_FEATHER_ESP32)
+    #pragma message("ARDUINO_FEATHER_ESP32 defined; assuming RFM95W FeatherWing will be used")
+    #define USE_SX1276
+    #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_ESP32_DEV)
     #pragma message("Generic ESP32; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
@@ -303,6 +315,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  9
+
+#elif defined(ARDUINO_FEATHER_ESP32)
+    // Use pinning for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
+    #define PIN_RECEIVER_CS   14
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  32
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 33
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  27
 
 #elif defined(ESP32)
     // Generic pinning for ESP32 development boards

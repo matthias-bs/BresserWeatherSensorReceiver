@@ -232,7 +232,7 @@ DecodeStatus WeatherSensor::getMessage(void)
                 }
             #endif
             #ifdef BRESSER_5_IN_1
-                else if (decode_res == DECODE_INVALID ||
+                if (decode_res == DECODE_INVALID ||
                     decode_res == DECODE_PAR_ERR ||
                     decode_res == DECODE_CHK_ERR ||
                     decode_res == DECODE_DIG_ERR) {

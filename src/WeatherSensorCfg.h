@@ -225,7 +225,7 @@
 // Select appropriate sensor message format(s)
 #define BRESSER_5_IN_1
 #define BRESSER_6_IN_1
-//#define BRESSER_7_IN_1
+#define BRESSER_7_IN_1
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"

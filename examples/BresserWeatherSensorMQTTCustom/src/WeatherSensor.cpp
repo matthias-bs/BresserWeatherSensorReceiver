@@ -55,6 +55,7 @@
 // 20230111 Added additional digit for rain gauge in 5in1-decoder (maximum is now 999.9mm)
 // 20230114 Modified decodeBresser6In1Payload() to distinguish msg type based on 'flags' (msg[16])
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
+// 20230329 Fixed issue introduced with 7 in 1 decoder
 //
 // ToDo:
 // -
@@ -101,7 +102,7 @@ int16_t WeatherSensor::begin(void) {
             while (true)
                 ;
         }
-        state = radio.fixedPacketLengthMode(27);
+        state = radio.fixedPacketLengthMode(MSG_BUF_SIZE);
         if (state != RADIOLIB_ERR_NONE) {
             log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
             while (true)
@@ -195,7 +196,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
 
 DecodeStatus WeatherSensor::getMessage(void)
 {
-    uint8_t         recvData[27];
+    uint8_t         recvData[MSG_BUF_SIZE];
     DecodeStatus    decode_res = DECODE_INVALID;
 
     // Receive data
@@ -204,7 +205,7 @@ DecodeStatus WeatherSensor::getMessage(void)
     //     3. wait for expected RX packet or timeout [~500us in this configuration]
     //     4. flush RX buffer
     //     5. switch to standby
-    int state = radio.receive(recvData, 27);
+    int state = radio.receive(recvData, MSG_BUF_SIZE);
     rssi = radio.getRSSI();
 
     if (state == RADIOLIB_ERR_NONE) {
@@ -805,49 +806,45 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   if (msg[21] == 0x00) {
       log_e("DECODE_FAIL_SANITY !!!");
   }
+  
   // data whitening
+  uint8_t msgw[MSG_BUF_SIZE];
   for (unsigned i = 0; i < msgSize; ++i) {
-      msg[i] ^= 0xaa;
+      msgw[i] = msg[i] ^ 0xaa;
   }
 
   // LFSR-16 digest, generator 0x8810 key 0xba95 final xor 0x6df1
-  int chkdgst = (msg[0] << 8) | msg[1];
-  //int digest  = lfsr_digest16(&msg[2], 15, 0x8810, 0x5412); // bresser_6in1
-  int digest  = lfsr_digest16(&msg[2], 23, 0x8810, 0xba95); // bresser_7in1
+  int chkdgst = (msgw[0] << 8) | msgw[1];
+  int digest  = lfsr_digest16(&msgw[2], 23, 0x8810, 0xba95); // bresser_7in1
   if ((chkdgst ^ digest) != 0x6df1) { // bresser_7in1
       log_d("Digest check failed - [%02X] Vs [%02X] (%02X)", chkdgst, digest, chkdgst ^ digest); // bresser_7in1
       return DECODE_DIG_ERR;
   }
 
-  // data whitening (XOR with 0xAA)
-  for (unsigned i = 0; i < sizeof (msg); ++i) {
-      msg[i] ^= 0xaa;
-  }
-
-  int id_tmp   = (msg[2] << 8) | (msg[3]);
+  int id_tmp   = (msgw[2] << 8) | (msgw[3]);
   DecodeStatus status;
 
   // Find appropriate slot in sensor data array and update <status>
   int slot = findSlot(id_tmp, &status);
 
-//  if (status != DECODE_OK)
-//      return status;
+  if (status != DECODE_OK)
+      return status;
 
-  int wdir     = (msg[4] >> 4) * 100 + (msg[4] & 0x0f) * 10 + (msg[5] >> 4);
-  int wgst_raw = (msg[7] >> 4) * 100 + (msg[7] & 0x0f) * 10 + (msg[8] >> 4);
-  int wavg_raw = (msg[8] & 0x0f) * 100 + (msg[9] >> 4) * 10 + (msg[9] & 0x0f);
-  //int rain_raw = (msg[10] >> 4) * 100000 + (msg[10] & 0x0f) * 10000 + (msg[11] >> 4) * 1000 + (msg[11] & 0x0f) * 100 + (msg[12] >> 4) * 10 + (msg[12] & 0x0f) * 1; // 6 digits
-  int rain_raw = (msg[10] >> 4) * 1000 + (msg[10] & 0x0f) * 100 + (msg[11] >> 4) * 10 + (msg[11] & 0x0f) * 1; // 4 digits
+  int wdir     = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
+  int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
+  int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
+  //int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
+  int rain_raw = (msgw[10] >> 4) * 1000 + (msgw[10] & 0x0f) * 100 + (msgw[11] >> 4) * 10 + (msgw[11] & 0x0f) * 1; // 4 digits
   float rain_mm = rain_raw * 0.1f;
-  int temp_raw = (msg[14] >> 4) * 100 + (msg[14] & 0x0f) * 10 + (msg[15] >> 4);
+  int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
   float temp_c = temp_raw * 0.1f;
-  int flags    = (msg[15] & 0x0f);
+  int flags    = (msgw[15] & 0x0f);
   int battery_low = (flags & 0x06) == 0x06;
   if (temp_raw > 600)
       temp_c = (temp_raw - 1000) * 0.1f;
-  int humidity = (msg[16] >> 4) * 10 + (msg[16] & 0x0f);
-  int lght_raw = (msg[17] >> 4) * 100000 + (msg[17] & 0x0f) * 10000 + (msg[18] >> 4) * 1000 + (msg[18] & 0x0f) * 100 + (msg[19] >> 4) * 10 + (msg[19] & 0x0f);
-  int uv_raw =   (msg[20] >> 4) * 100 + (msg[20] & 0x0f) * 10 + (msg[21] >> 4);
+  int humidity = (msgw[16] >> 4) * 10 + (msgw[16] & 0x0f);
+  int lght_raw = (msgw[17] >> 4) * 100000 + (msgw[17] & 0x0f) * 10000 + (msgw[18] >> 4) * 1000 + (msgw[18] & 0x0f) * 100 + (msgw[19] >> 4) * 10 + (msgw[19] & 0x0f);
+  int uv_raw =   (msgw[20] >> 4) * 100 + (msgw[20] & 0x0f) * 10 + (msgw[21] >> 4);
 
   float light_klx = lght_raw * 0.001f; // TODO: remove this
   float light_lux = lght_raw;
@@ -883,7 +880,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].rssi        = rssi;
 
   /* clang-format off */
-/*  data = data_make(
+  /*  data = data_make(
           "model",            "",             DATA_STRING, "Bresser-7in1",
           "id",               "",             DATA_INT,    id,
           "temperature_C",    "Temperature",  DATA_FORMAT, "%.1f C", DATA_DOUBLE, temp_c,
@@ -898,7 +895,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
           "battery_ok",       "Battery",      DATA_INT,    !battery_low,
           "mic",              "Integrity",    DATA_STRING, "CRC",
           NULL);
-*/
+   */
   /* clang-format on */
 
 //  decoder_output_data(decoder, data);

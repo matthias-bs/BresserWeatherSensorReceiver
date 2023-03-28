@@ -102,7 +102,7 @@ int16_t WeatherSensor::begin(void) {
             while (true)
                 ;
         }
-        state = radio.fixedPacketLengthMode(27);
+        state = radio.fixedPacketLengthMode(MSG_BUF_SIZE);
         if (state != RADIOLIB_ERR_NONE) {
             log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
             while (true)
@@ -196,7 +196,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
 
 DecodeStatus WeatherSensor::getMessage(void)
 {
-    uint8_t         recvData[27];
+    uint8_t         recvData[MSG_BUF_SIZE];
     DecodeStatus    decode_res = DECODE_INVALID;
 
     // Receive data
@@ -205,7 +205,7 @@ DecodeStatus WeatherSensor::getMessage(void)
     //     3. wait for expected RX packet or timeout [~500us in this configuration]
     //     4. flush RX buffer
     //     5. switch to standby
-    int state = radio.receive(recvData, 27);
+    int state = radio.receive(recvData, MSG_BUF_SIZE);
     rssi = radio.getRSSI();
 
     if (state == RADIOLIB_ERR_NONE) {

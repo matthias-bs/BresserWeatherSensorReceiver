@@ -21,6 +21,7 @@ jobs:
           - esp32:esp32:ttgo-lora32:Revision=TTGO_LoRa32_v21new
           - esp32:esp32:heltec_wireless_stick:PSRAM=disabled
           - esp32:esp32:adafruit_feather_esp32s2
+          - esp32:esp32:featheresp32
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
           
@@ -88,7 +89,7 @@ jobs:
           arduino-cli lib install RadioLib@5.7.0
           arduino-cli lib install "LoRa Serialization"@3.1.0
           arduino-cli lib install MQTT@2.5.1
-          arduino-cli lib install ArduinoJson@6.21.0
+          arduino-cli lib install ArduinoJson@6.21.1
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

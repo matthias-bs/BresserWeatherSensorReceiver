@@ -52,6 +52,7 @@
 // 20221207 Added SENSOR_TYPE_THERMO_HYGRO
 // 20220110 Added WEATHER0_RAIN_OV/WEATHER1_RAIN_OV
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
+// 20230328 Added MSG_BUF_SIZE
 //
 // ToDo:
 // -

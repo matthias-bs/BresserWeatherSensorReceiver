@@ -93,6 +93,8 @@
 #define DATA_TYPE               0x2     // at least one slot with specific sensor type
 #define DATA_ALL_SLOTS          0x8     // all slots completed
 
+// Message buffer size
+#define MSG_BUF_SIZE            27
 
 // Radio message decoding status
 typedef enum DecodeStatus {

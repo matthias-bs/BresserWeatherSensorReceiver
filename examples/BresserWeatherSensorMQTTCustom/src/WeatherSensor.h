@@ -52,6 +52,7 @@
 // 20221207 Added SENSOR_TYPE_THERMO_HYGRO
 // 20220110 Added WEATHER0_RAIN_OV/WEATHER1_RAIN_OV
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
+// 20230328 Added MSG_BUF_SIZE
 //
 // ToDo:
 // -
@@ -93,6 +94,8 @@
 #define DATA_TYPE               0x2     // at least one slot with specific sensor type
 #define DATA_ALL_SLOTS          0x8     // all slots completed
 
+// Message buffer size
+#define MSG_BUF_SIZE            27
 
 // Radio message decoding status
 typedef enum DecodeStatus {

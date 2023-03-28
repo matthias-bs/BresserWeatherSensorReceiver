@@ -55,6 +55,7 @@
 // 20230111 Added additional digit for rain gauge in 5in1-decoder (maximum is now 999.9mm)
 // 20230114 Modified decodeBresser6In1Payload() to distinguish msg type based on 'flags' (msg[16])
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
+// 20230329 Fixed issue introduced with 7 in 1 decoder
 //
 // ToDo:
 // -
@@ -805,9 +806,10 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   if (msg[21] == 0x00) {
       log_e("DECODE_FAIL_SANITY !!!");
   }
+  
   // data whitening
-  uint8_t msgw[msgSize];
-    for (unsigned i = 0; i < msgSize; ++i) {
+  uint8_t msgw[MSG_BUF_SIZE];
+  for (unsigned i = 0; i < msgSize; ++i) {
       msgw[i] = msg[i] ^ 0xaa;
   }
 
@@ -825,8 +827,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   // Find appropriate slot in sensor data array and update <status>
   int slot = findSlot(id_tmp, &status);
 
-//  if (status != DECODE_OK)
-//      return status;
+  if (status != DECODE_OK)
+      return status;
 
   int wdir     = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
   int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
@@ -878,7 +880,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].rssi        = rssi;
 
   /* clang-format off */
-/*  data = data_make(
+  /*  data = data_make(
           "model",            "",             DATA_STRING, "Bresser-7in1",
           "id",               "",             DATA_INT,    id,
           "temperature_C",    "Temperature",  DATA_FORMAT, "%.1f C", DATA_DOUBLE, temp_c,
@@ -893,7 +895,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
           "battery_ok",       "Battery",      DATA_INT,    !battery_low,
           "mic",              "Integrity",    DATA_STRING, "CRC",
           NULL);
-*/
+   */
   /* clang-format on */
 
 //  decoder_output_data(decoder, data);

@@ -194,6 +194,7 @@ Solder-Bridges on the Module/Wing:
 * A to DI01
 
 ## Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
+![ePulse_Feather+FeatherWing](https://user-images.githubusercontent.com/83612361/228173195-f13fe4c4-7f86-4e73-b485-d5d553034554.jpg)
 
 **Note: Make sure to use the 868MHz version!**
 * [ADA3231](https://www.adafruit.com/product/3231) - Adafruit LoRa Radio FeatherWing - RFM95W 900 MHz - RadioFruit

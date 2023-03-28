@@ -41,6 +41,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®TTGO-LORA32 V2.1](http://www.lilygo.cn/prod_view.aspx?TypeId=50060&Id=1271&FId=t3:50060:3) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/)      | "Heltec Wireless Stick" | n.a.                       | ARDUINO_heltec_wireless_stick     | SX1276 |        |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
+   | [Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-esp32-or-thingpulse-epulse-feather-with-adafruit-lora-radio-featherwing)                                | "Adafruit ESP32 Feather" | n.a.               | ARDUINO_FEATHER_ESP32   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS |
 
 
 The preprocessor will provide some output regarding the selected configuration if enabled in the Arduino IDE's Preferences ("Verbose Output"), e.g. 
@@ -203,7 +204,7 @@ Solder-Bridges on the Module/Wing:
 Solder-Bridges on the Module/Wing:
 * A to RST
 * B to DIO1 
-* D to DIO0
+* D to IRQ
 * E to CS
 
 ## Adafruit RFM95W LoRa Radio Transceiver Breakout

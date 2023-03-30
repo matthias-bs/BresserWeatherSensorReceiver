@@ -37,6 +37,7 @@
 // History:
 //
 // 20220830 Created
+// 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 //
 // ToDo: 
 // -
@@ -44,7 +45,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include "time.h"
-#include <sys/time.h>
+#if defined(ESP32) || defined(ESP8266)
+  #include <sys/time.h>
+#endif
 
 /**
  * \def

@@ -233,7 +233,7 @@ The RFM95W also supports FSK modulation and thus can be used to receive the weat
 Some restrictions apply:
 * Based on AVR ATmega32u4 clocked at 8 MHz
 * No WiFi
-* Basic SW example already uses 92% of available program memory
+* Basic SW example already uses 92% of available program memory (see [BUILD_AVR.md](BUILD_AVR.md) for additional hints)
 * Only a single pad for antenna
 
 ## Antennas and RF Connectors

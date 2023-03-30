@@ -88,7 +88,7 @@ void loop()
       #endif
       if (weatherSensor.sensor[i].temp_ok) {
           Serial.print(F(" Temp [C]: "));
-          Serial.print(weatherSensor.sensor[i].temp_c);
+          Serial.print(weatherSensor.sensor[i].temp_c, 1);
       } else {
           Serial.print(F(" Temp [C]: ---.- "));
       }
@@ -102,17 +102,17 @@ void loop()
       
       if (weatherSensor.sensor[i].wind_ok) {
           Serial.print(F(" Wind max [m/s]: "));
-          Serial.print(weatherSensor.sensor[i].wind_gust_meter_sec_fp1/10.0);
+          Serial.print(weatherSensor.sensor[i].wind_gust_meter_sec_fp1/10.0, 1);
           Serial.print(F(" Wind avg [m/s]: "));
-          Serial.print(weatherSensor.sensor[i].wind_avg_meter_sec_fp1/10.0);
+          Serial.print(weatherSensor.sensor[i].wind_avg_meter_sec_fp1/10.0, 1);
           Serial.print(F(" Wind dir [deg]: "));
-          Serial.print(weatherSensor.sensor[i].wind_direction_deg_fp1/10.0);
+          Serial.print(weatherSensor.sensor[i].wind_direction_deg_fp1/10.0, 1);
       } else {
           Serial.print(F(" Wind max [m/s]: --.- Wind avg [m/s]: --.- Wind dir [deg]: ---.- "));
       }
       if (weatherSensor.sensor[i].rain_ok) {
           Serial.print(F(" Rain [mm]: "));
-          Serial.print(weatherSensor.sensor[i].rain_mm);
+          Serial.print(weatherSensor.sensor[i].rain_mm, 1);
       } else {
           Serial.print(F(" Rain [mm]: -----.- ")); 
       }
@@ -125,7 +125,7 @@ void loop()
       #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
       if (weatherSensor.sensor[i].uv_ok) {
           Serial.print(F(" UV index [%]: "));
-          Serial.print(weatherSensor.sensor[i].uv);
+          Serial.print(weatherSensor.sensor[i].uv, 1);
       } else {
           Serial.print(F(" UV index [%]: -.- "));
       }
@@ -133,7 +133,7 @@ void loop()
       #ifdef BRESSER_7_IN_1
       if (weatherSensor.sensor[i].light_ok) {
           Serial.print(F(" Light [klux]:"));
-          Serial.print(weatherSensor.sensor[i].light_klx);
+          Serial.print(weatherSensor.sensor[i].light_klx, 1);
       }
       else {
           Serial.print(F(" Light [klux]: --.- "));
@@ -141,7 +141,7 @@ void loop()
       #endif
       
       Serial.print(F(" RSSI [dBm]: "));
-      Serial.println(weatherSensor.sensor[i].rssi);
+      Serial.println(weatherSensor.sensor[i].rssi, 1);
       
     } // if (decode_status == DECODE_OK)
 

@@ -1,4 +1,7 @@
-In `RadioLib/src/BuildOpt.h`:
+# SW Build for Adafruit Feather 32u4 LoRa Radio (AVR Architecture)
+
+Disable unused drivers in `RadioLib/src/BuildOpt.h`:
+```
   //#define RADIOLIB_EXCLUDE_CC1101
   #define RADIOLIB_EXCLUDE_NRF24
   #define RADIOLIB_EXCLUDE_RF69
@@ -17,3 +20,4 @@ In `RadioLib/src/BuildOpt.h`:
   #define RADIOLIB_EXCLUDE_RTTY
   #define RADIOLIB_EXCLUDE_SSTV
   #define RADIOLIB_EXCLUDE_DIRECT_RECEIVE
+```

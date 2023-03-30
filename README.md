@@ -42,7 +42,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/)      | "Heltec Wireless Stick" | n.a.                       | ARDUINO_heltec_wireless_stick     | SX1276 |        |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
    | [Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-esp32-or-thingpulse-epulse-feather-with-adafruit-lora-radio-featherwing)                                | "Adafruit ESP32 Feather" | n.a.               | ARDUINO_FEATHER_ESP32   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS |
-
+ | [Adafruit Feather 32u4 RFM95 LoRa Radio](https://www.adafruit.com/product/3078)      | "Adafruit Feather 32u4" | n.a.                       | ARDUINO_AVR_FEATHER32U4     | SX1276 (RFM95W) |        |
 
 The preprocessor will provide some output regarding the selected configuration if enabled in the Arduino IDE's Preferences ("Verbose Output"), e.g. 
 ```
@@ -220,6 +220,21 @@ See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://
 
 **Note:**
 The RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
+
+## Adafruit Feather 32u4 RFM95 LoRa Radio
+
+**Note: Make sure to use the 868MHz version!**
+
+**Note: Not recommended for new projects!**
+
+* [ADA3078](https://www.adafruit.com/product/3078) - 868/915 MHz version
+* Antenna
+
+Some restrictions apply:
+* Based on AVR ATmega32u4 clocked at 8 MHz
+* No WiFi
+* Basic SW example already uses 92% of available program memory
+* Only a single pad for antenna
 
 ## Antennas and RF Connectors
 

@@ -233,7 +233,7 @@ The RFM95W also supports FSK modulation and thus can be used to receive the weat
 Some restrictions apply:
 * Based on AVR ATmega32u4 clocked at 8 MHz
 * No WiFi
-* Basic SW example already uses 92% of available program memory (see [BUILD_AVR.md](BUILD_AVR.md) for additional hints)
+* Basic SW example ([examples/BresserWeatherSensorFeather32u4](https://github.com/matthias-bs/BresserWeatherSensorReceiver/tree/main/examples/BresserWeatherSensorFeather32u4)) already uses 92% of available program memory (see [BUILD_AVR.md](BUILD_AVR.md) for additional hints)
 * Only a single pad for antenna
 * `WeatherUtils.h/.cpp`: `winddir_flt_to_str()` not implemented
 

@@ -1,8 +1,11 @@
 #include <math.h>
-#include <string>
+#if defined(ESP32) || defined(ESP8266)
+  #include <string>
+#endif
 #include <string.h>
 #include "WeatherUtils.h"
 
+#if defined(ESP32) || defined(ESP8266)
 // Mapping of wind direction in degrees to text
 // Note: add your localization as desired
 const std::string COMPASS_POINTS[17] = {
@@ -24,6 +27,7 @@ char * winddir_flt_to_str(float dir, char * buf)
     
     return buf;
 };
+#endif
 
 //
 // Convert wind speed from meters per second to Beaufort

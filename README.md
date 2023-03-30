@@ -235,6 +235,7 @@ Some restrictions apply:
 * No WiFi
 * Basic SW example already uses 92% of available program memory (see [BUILD_AVR.md](BUILD_AVR.md) for additional hints)
 * Only a single pad for antenna
+* `WeatherUtils.h/.cpp`: `winddir_flt_to_str()` not implemented
 
 ## Antennas and RF Connectors
 

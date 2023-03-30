@@ -89,21 +89,25 @@ $(document).ready(function(){initNavTree('_weather_utils_8h_source.html',''); in
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#if !defined(WEATHER_UTILS_H)</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define WEATHER_UTILS_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keywordtype">float</span> calcdewpoint(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> humidity);</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keywordtype">float</span> calcwindchill(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed);</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="keywordtype">float</span> calcheatindex(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> humidity);</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keywordtype">float</span> calchumidex(<span class="keywordtype">float</span> temperature, <span class="keywordtype">float</span> humidity);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="keywordtype">float</span> perceived_temperature(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed, <span class="keywordtype">float</span> humidity);</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keywordtype">char</span> * winddir_flt_to_str(<span class="keywordtype">float</span> dir, <span class="keywordtype">char</span> * buf);</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;uint8_t windspeed_ms_to_bft(<span class="keywordtype">float</span> ms);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#ifdef ARDUINO_ARCH_AVR</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">  #include &lt;stdint.h&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160; </div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keywordtype">float</span> calcdewpoint(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keywordtype">float</span> calcwindchill(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keywordtype">float</span> calcheatindex(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="keywordtype">float</span> calchumidex(<span class="keywordtype">float</span> temperature, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="keywordtype">float</span> perceived_temperature(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">char</span> * winddir_flt_to_str(<span class="keywordtype">float</span> dir, <span class="keywordtype">char</span> * buf);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160; </div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;uint8_t windspeed_ms_to_bft(<span class="keywordtype">float</span> ms);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

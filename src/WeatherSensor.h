@@ -53,6 +53,7 @@
 // 20220110 Added WEATHER0_RAIN_OV/WEATHER1_RAIN_OV
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230328 Added MSG_BUF_SIZE
+// 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 //
 // ToDo:
 // -
@@ -63,7 +64,9 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#include <string>
+#if defined(ESP32) || defined(ESP8266)
+  #include <string>
+#endif
 #include <RadioLib.h>
 
 
@@ -103,6 +106,7 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
+#if defined(ESP32) || defined(ESP8266)
 /*!
  * \struct SensorMap
  *
@@ -112,6 +116,7 @@ typedef struct SensorMap {
     uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
     std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
+#endif
 
 
 /*!

@@ -161,6 +161,9 @@ See [Debug Output Configuration in Arduino IDE](DEBUG_OUTPUT.md)
 
 # HW Examples
 
+**Note:**
+The SX1276/RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
+
 ## ESP8266 D1 Mini with CC1101
 
 <img src="https://user-images.githubusercontent.com/83612361/158458191-b5cabad3-3515-45d0-98e3-94b0fa13b8ef.jpg" alt="Bresser5in1_CC1101_D1-Mini" width="400">
@@ -219,8 +222,19 @@ Solder-Bridges on the Module/Wing:
 
 See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://learn.adafruit.com/adafruit-rfm69hcw-and-rfm96-rfm95-rfm98-lora-packet-padio-breakouts/pinouts).
 
-**Note:**
-The RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
+
+## DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
+
+**Note: Make sure to use the 868MHz version!**
+* [DFR0478](https://www.dfrobot.com/product-1590.html) - FireBeetle ESP32 IoT Microcontroller
+* [TEL0125](https://www.dfrobot.com/product-1831.html) - LoRa Radio 868MHz - FireBeetle Covers
+
+
+Solder-Bridges on the Cover:
+* _TBD_ to RST
+* _TBD_ to DIO1 
+* _TBD_ to IRQ
+* _TBD_ to CS
 
 ## Adafruit Feather 32u4 RFM95 LoRa Radio
 

@@ -691,8 +691,12 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     if (temp_ok) {
         bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-        float temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
-
+        //Workaround for 3-in-1 Professional Wind Gauge / Anemometer 
+        //float temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
+        float temp     = temp_raw * 0.1f;
+        if (temp_raw > 600)
+            temp = (temp_raw - 1000) * 0.1f;
+        
         sensor[slot].temp_c      = temp;
         sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
         sensor[slot].humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);

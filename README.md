@@ -17,6 +17,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | ------------- | ---- | ------------------------------- |
 | 7002510..12   | Weather Station | decodeBresser**5In1**Payload()  |
 | 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
+| 7002531       | 3-in-1 Professional Wind Gauge / Anemometer | decodeBresser**6In1**Payload() 1) |
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 9602510       | Weather Sensor | ? |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |

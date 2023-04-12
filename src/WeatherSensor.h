@@ -271,6 +271,16 @@ class WeatherSensor {
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
 
+        /*!
+         * Check if sensor ID is in sensor_ids_decode3in1[]
+         *
+         * \param id        sensor ID
+         *
+         * \returns         true if sensor is in sensor_ids_decode3in1[],
+         *                  false otherwise 
+         */
+        bool is_decode3in1(uint32_t id);
+        
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array
 

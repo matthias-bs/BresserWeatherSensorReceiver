@@ -393,7 +393,8 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
 //
 // Check if sensor is in sensor_ids_decode3in1[]
 //
-bool is_decode3in1(uint32_t id)
+bool WeatherSensor::is_decode3in1(uint32_t id)
+{
     uint8_t n_3in1 = sizeof(sensor_ids_decode3in1)/4;
     if (n_3in1 != 0) {
        for (int i=0; i<n_3in1; i++) {

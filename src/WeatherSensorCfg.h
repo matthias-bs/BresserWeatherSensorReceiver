@@ -40,6 +40,7 @@
 // 20230301 Added pin definitions for Wireless_Stick (from Heltec)
 // 20230316 Added pin definitions for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
 // 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
+// 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 //
 // ToDo:
 // -
@@ -158,6 +159,10 @@
 #define SENSOR_IDS_INC {}
 //#define SENSOR_IDS_INC { 0x83750871 }
 
+// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
+// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
+//#define SENSOR_IDS_DECODE3IN1 {}
+#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
 
 // ------------------------------------------------------------------------------------------------
 // --- Debug Logging Output ---

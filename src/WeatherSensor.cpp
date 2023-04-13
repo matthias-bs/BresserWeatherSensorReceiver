@@ -399,7 +399,7 @@ bool WeatherSensor::is_decode3in1(uint32_t id)
     if (n_3in1 != 0) {
        for (int i=0; i<n_3in1; i++) {
            if (id == sensor_ids_decode3in1[i]) {
-               log_v("ID %0x08X is a Professional Wind Gauge");
+               log_v("ID %08X is a Professional Wind Gauge", id);
                return true;
            }
        }

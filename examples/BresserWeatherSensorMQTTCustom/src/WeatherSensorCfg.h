@@ -39,6 +39,8 @@
 // 20230208 Added pin definitions for ARDUINO_TTGO_LoRa32_V2
 // 20230301 Added pin definitions for Wireless_Stick (from Heltec)
 // 20230316 Added pin definitions for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
+// 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
+// 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 //
 // ToDo:
 // -
@@ -127,6 +129,10 @@
     #define LORAWAN_NODE
     #define USE_SX1276
 
+#elif defined(ARDUINO_AVR_FEATHER32U4)
+    #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Arduino Feather 32u4 RFM95 LoRa Radio")
+    #define USE_SX1276
+
 #endif
 
 
@@ -153,6 +159,10 @@
 #define SENSOR_IDS_INC {}
 //#define SENSOR_IDS_INC { 0x83750871 }
 
+// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
+// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
+//#define SENSOR_IDS_DECODE3IN1 {}
+#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
 
 // ------------------------------------------------------------------------------------------------
 // --- Debug Logging Output ---
@@ -208,6 +218,48 @@
 
 #endif
 
+//   Replacement for
+//   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
+//   on Arduino AVR:
+#if defined(ARDUINO_ARCH_AVR)
+    #define ARDUHAL_LOG_LEVEL_NONE      0
+    #define ARDUHAL_LOG_LEVEL_ERROR     1
+    #define ARDUHAL_LOG_LEVEL_WARN      2
+    #define ARDUHAL_LOG_LEVEL_INFO      3
+    #define ARDUHAL_LOG_LEVEL_DEBUG     4
+    #define ARDUHAL_LOG_LEVEL_VERBOSE   5
+
+    // Set desired level here!
+    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
+
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
+        #define log_e(...) { printf(__VA_ARGS__); println(); }
+     #else
+        #define log_e(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
+        #define log_w(...) { printf(__VA_ARGS__); println(); }
+     #else
+        #define log_w(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
+        #define log_i(...) { printf(__VA_ARGS__); println(); }
+     #else
+        #define log_i(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
+        #define log_d(...) { printf(__VA_ARGS__); println(); }
+     #else
+        #define log_d(...) {}
+     #endif
+    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
+        #define log_v(...) { printf(__VA_ARGS__); println(); }
+     #else
+        #define log_v(...) {}
+     #endif
+#endif
+
+
 //#define _DEBUG_MODE_          // Enable debug output (serial console)
 #define DEBUG_PORT Serial
 #if defined(_DEBUG_MODE_)
@@ -225,7 +277,7 @@
 // Select appropriate sensor message format(s)
 #define BRESSER_5_IN_1
 #define BRESSER_6_IN_1
-//#define BRESSER_7_IN_1
+#define BRESSER_7_IN_1
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"
@@ -349,11 +401,25 @@
     // CC1101: GDO0 / RFM95W/SX127x: G0
     #define PIN_RECEIVER_IRQ  4
 
-    // CC1101: GDO2 / RFM95W/SX127x:
+    // CC1101: GDO2 / RFM95W/SX127x: G1
     #define PIN_RECEIVER_GPIO 5
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  2
+
+#elif defined(ARDUINO_AVR_FEATHER32U4)
+        // Pinning for Adafruit Feather 32u4 
+    #define PIN_RECEIVER_CS   8
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  7
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 (not used)
+    #define PIN_RECEIVER_GPIO 99
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  4
+
 #endif
 
 #define STR_HELPER(x) #x

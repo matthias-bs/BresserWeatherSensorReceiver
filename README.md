@@ -230,6 +230,7 @@ See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://
 
 ## DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
 ![firebeetle_esp32+cover_lora](https://user-images.githubusercontent.com/83612361/233463592-e99a9d1c-5100-4ac2-9b33-bcfc974406f0.jpg)
+Note: Stacking headers were included with TEL0125.
 
 **Note: Make sure to use the 868MHz version!**
 * [DFR0478](https://www.dfrobot.com/product-1590.html) - FireBeetle ESP32 IoT Microcontroller

@@ -89,7 +89,7 @@ jobs:
           arduino-cli lib install RadioLib@5.7.0
           arduino-cli lib install "LoRa Serialization"@3.1.0
           arduino-cli lib install MQTT@2.5.1
-          arduino-cli lib install ArduinoJson@6.21.1
+          arduino-cli lib install ArduinoJson@6.21.2
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

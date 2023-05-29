@@ -41,6 +41,7 @@
 // 20230316 Added pin definitions for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
 // 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
 //
 // ToDo:
 // -

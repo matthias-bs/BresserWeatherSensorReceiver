@@ -54,6 +54,7 @@
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230328 Added MSG_BUF_SIZE
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
+// 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 //
 // ToDo:
 // -
@@ -271,6 +272,16 @@ class WeatherSensor {
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
 
+        /*!
+         * Check if sensor ID is in sensor_ids_decode3in1[]
+         *
+         * \param id        sensor ID
+         *
+         * \returns         true if sensor is in sensor_ids_decode3in1[],
+         *                  false otherwise 
+         */
+        bool is_decode3in1(uint32_t id);
+        
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array
 

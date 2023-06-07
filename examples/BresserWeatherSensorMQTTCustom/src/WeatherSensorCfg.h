@@ -42,6 +42,7 @@
 // 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
+// 20230607 Added pin definitions for Heltec WiFi LoRa 32(V2)
 //
 // ToDo:
 // -
@@ -81,6 +82,10 @@
 // in the Arduino IDE:
 //#define ARDUINO_heltec_wireless_stick
 
+// This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)"
+// in the Adruino IDE:
+//#define ARDUINO_heltec_wifi_lora_32_V2
+
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
 //
@@ -116,6 +121,10 @@
     #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
     #define USE_SX1276
 
+#elif defined(ARDUINO_heltec_wifi_lora_32_V2)
+    #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
+    #define USE_SX1276
+
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
@@ -125,15 +134,27 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_ESP32_DEV)
-    #pragma message("Generic ESP32; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
-    #define LORAWAN_NODE
-    #define USE_SX1276
-
 #elif defined(ARDUINO_AVR_FEATHER32U4)
     #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Arduino Feather 32u4 RFM95 LoRa Radio")
     #define USE_SX1276
+    
+#elif defined(ARDUINO_ESP32_DEV)
+    //#define LORAWAN_NODE
+    #define FIREBEETLE_ESP32_COVER_LORA
+    
+    #if !defined(LORAWAN_NODE) && !defined(FIREBEETLE_ESP32_COVER_LORA)
+        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+        
+    #elif defined(LORAWAN_NODE) 
+        #pragma message("LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
+        #define USE_SX1276
 
+    #elif defined(FIREBEETLE_ESP32_COVER_LORA)
+        #define USE_SX1276
+        #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
+        #pragma message("Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1")
+    
+    #endif
 #endif
 
 
@@ -218,6 +239,7 @@
      #endif
 
 #endif
+
 
 //   Replacement for
 //   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
@@ -315,6 +337,18 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  12
 
+#elif defined(FIREBEETLE_ESP32_COVER_LORA)
+    #define PIN_RECEIVER_CS   27 // D4
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  26 // D3
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 9  // D5
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  25 // D2
+
 #elif defined(ARDUINO_TTGO_LoRa32_V1) || defined(ARDUINO_TTGO_LoRa32_V2)
     // Use pinning for LILIGO TTGO LoRa32-OLED
     #define PIN_RECEIVER_CS   LORA_CS
@@ -343,8 +377,8 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ARDUINO_heltec_wireless_stick)
-    // Use pinning for Heltec Wireless Stick
+#elif defined(ARDUINO_heltec_wireless_stick) || defined(ARDUINO_heltec_wifi_lora_32_V2)
+    // Use pinning for Heltec Wireless Stick or WiFi LoRa32 V2, respectively
     #define PIN_RECEIVER_CS   SS
 
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -394,7 +428,7 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  32
-
+    
 #elif defined(ESP8266)
     // Generic pinning for ESP8266 development boards (e.g. LOLIN/WEMOS D1 mini)
     #define PIN_RECEIVER_CS   15
@@ -407,9 +441,9 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  2
-
+    
 #elif defined(ARDUINO_AVR_FEATHER32U4)
-        // Pinning for Adafruit Feather 32u4 
+    // Pinning for Adafruit Feather 32u4 
     #define PIN_RECEIVER_CS   8
 
     // CC1101: GDO0 / RFM95W/SX127x: G0

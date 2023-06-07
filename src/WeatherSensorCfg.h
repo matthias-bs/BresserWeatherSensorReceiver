@@ -42,6 +42,7 @@
 // 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
+// 20230607 Added pin definitions for Heltec WiFi LoRa 32(V2)
 //
 // ToDo:
 // -
@@ -81,6 +82,10 @@
 // in the Arduino IDE:
 //#define ARDUINO_heltec_wireless_stick
 
+// This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)"
+// in the Adruino IDE:
+//#define ARDUINO_heltec_wifi_lora_32_V2
+
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
 //
@@ -114,6 +119,10 @@
 
 #elif defined(ARDUINO_heltec_wireless_stick)
     #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
+    #define USE_SX1276
+
+#elif defined(ARDUINO_heltec_wifi_lora_32_V2)
+    #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -368,8 +377,8 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ARDUINO_heltec_wireless_stick)
-    // Use pinning for Heltec Wireless Stick
+#elif defined(ARDUINO_heltec_wireless_stick) || defined(ARDUINO_heltec_wifi_lora_32_V2)
+    // Use pinning for Heltec Wireless Stick or WiFi LoRa32 V2, respectively
     #define PIN_RECEIVER_CS   SS
 
     // CC1101: GDO0 / RFM95W/SX127x: G0

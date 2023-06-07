@@ -135,7 +135,7 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_AVR_FEATHER32U4)
-    #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Arduino Feather 32u4 RFM95 LoRa Radio")
+    #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
     #define USE_SX1276
     
 #elif defined(ARDUINO_ESP32_DEV)

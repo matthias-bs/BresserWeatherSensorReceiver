@@ -877,6 +877,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].light_lux   = light_lux;
   sensor[slot].uv          = uv_index;
   sensor[slot].battery_ok  = !battery_low;
+  sensor[slot].valid       = true;
+  sensor[slot].complete    = true;
   sensor[slot].rssi        = rssi;
 
   /* clang-format off */

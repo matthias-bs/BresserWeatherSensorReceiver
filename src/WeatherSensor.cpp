@@ -57,6 +57,8 @@
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230329 Fixed issue introduced with 7 in 1 decoder
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230412 Fixed 7 in 1 decoder (valid/complete flags were not set)
+// 20230613 Fixed rain value in 7 in 1 decoder
 //
 // ToDo:
 // -
@@ -865,8 +867,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   int wdir     = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
   int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
   int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
-  //int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
-  int rain_raw = (msgw[10] >> 4) * 1000 + (msgw[10] & 0x0f) * 100 + (msgw[11] >> 4) * 10 + (msgw[11] & 0x0f) * 1; // 4 digits
+  int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
   float rain_mm = rain_raw * 0.1f;
   int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
   float temp_c = temp_raw * 0.1f;

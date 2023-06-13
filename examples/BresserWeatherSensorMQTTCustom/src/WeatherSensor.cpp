@@ -56,6 +56,9 @@
 // 20230114 Modified decodeBresser6In1Payload() to distinguish msg type based on 'flags' (msg[16])
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230329 Fixed issue introduced with 7 in 1 decoder
+// 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230412 Fixed 7 in 1 decoder (valid/complete flags were not set)
+// 20230613 Fixed rain value in 7 in 1 decoder
 //
 // ToDo:
 // -
@@ -78,6 +81,10 @@ uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
 
 // List of sensor IDs to be included - if empty, handle all available sensors
 uint32_t const sensor_ids_inc[] = SENSOR_IDS_INC;
+
+// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
+// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
+uint32_t const sensor_ids_decode3in1[] = SENSOR_IDS_DECODE3IN1;
 
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
@@ -385,6 +392,22 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
     return -1;
 }
 
+//
+// Check if sensor is in sensor_ids_decode3in1[]
+//
+bool WeatherSensor::is_decode3in1(uint32_t id)
+{
+    uint8_t n_3in1 = sizeof(sensor_ids_decode3in1)/4;
+    if (n_3in1 != 0) {
+       for (int i=0; i<n_3in1; i++) {
+           if (id == sensor_ids_decode3in1[i]) {
+               log_v("ID %08X is a Professional Wind Gauge", id);
+               return true;
+           }
+       }
+    }
+    return false;
+}
 
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
@@ -651,6 +674,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     bool wind_ok     = false;
     bool rain_ok     = false;
     bool moisture_ok = false;
+    bool f_3in1      = false;
 
     // LFSR-16 digest, generator 0x8810 init 0x5412
     int chkdgst = (msg[0] << 8) | msg[1];
@@ -685,20 +709,28 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = chan_tmp;
 
+    f_3in1 = is_decode3in1(id_tmp);
 
     // temperature, humidity(, uv) - shared with rain counter
     temp_ok = humidity_ok = (flags == 0);
     if (temp_ok) {
         bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-        float temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
-
+        float temp;
+        
+        // Workaround for 3-in-1 Professional Wind Gauge / Anemometer 
+        if (f_3in1) {
+            temp     = ((sign) ? -temp_raw : temp_raw) * 0.1f;
+        } else {
+            temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
+        }
+        
         sensor[slot].temp_c      = temp;
         sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
         sensor[slot].humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
         // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
-        uv_ok  = (~msg[15] & 0xff) <= 0x99 && (~msg[16] & 0xf0) <= 0x90;
+        uv_ok  = (~msg[15] & 0xff) <= (0x99 && (~msg[16] & 0xf0) <= 0x90) && !f_3in1;
         if (uv_ok) {
             int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
                 sensor[slot].uv = uv_raw * 0.1f;
@@ -768,8 +800,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
 
     sensor[slot].valid    = true;
 
-    // Weather station data is split into two separate messages
-    sensor[slot].complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].temp_ok && sensor[slot].rain_ok) || (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);
+    // Weather station data is split into two separate messages (except for Professional Wind Gauge)
+    sensor[slot].complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].temp_ok && sensor[slot].rain_ok) ||
+                            f_3in1 ||
+                            (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);
 
     // Save rssi to sensor specific data set
     sensor[slot].rssi = rssi;
@@ -833,8 +867,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   int wdir     = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
   int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
   int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
-  //int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
-  int rain_raw = (msgw[10] >> 4) * 1000 + (msgw[10] & 0x0f) * 100 + (msgw[11] >> 4) * 10 + (msgw[11] & 0x0f) * 1; // 4 digits
+  int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
   float rain_mm = rain_raw * 0.1f;
   int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
   float temp_c = temp_raw * 0.1f;

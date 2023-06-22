@@ -91,6 +91,8 @@ jobs:
           arduino-cli lib install "LoRa Serialization"@3.1.0
           arduino-cli lib install MQTT@2.5.1
           arduino-cli lib install ArduinoJson@6.21.2
+          arduino-cli lib install WiFiManager@2.0.16-rc.2
+          arduino-cli lib install ESP:DouBleResetDetector@1.3.2
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

@@ -25,9 +25,11 @@
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
 // Based on:
-// arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
+// arduino-mqtt by Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
-
+// WiFiManager by tzapu (https://github.com/tzapu/WiFiManager)
+// ESP_DoubleResetDetector by Khoi Hoang (https://github.com/khoih-prog/ESP_DoubleResetDetector)
+//
 // MQTT subscriptions:
 //     - none -
 //
@@ -40,12 +42,12 @@
 // $ via LWT
 //
 //
-// created: 02/2022
+// created: 06/2023
 //
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2023 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -83,15 +85,21 @@
 //     https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
 //   - ESP8266: 
 //     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/BearSSL_Validation/BearSSL_Validation.ino
+// - WiFiManager code based on example AutoConnectwithFSParameters
+// - Using ESP_DoubleResetDetector (https://github.com/khoih-prog/ESP_DoubleResetDetector)
+//   to force WiFiManager reconfiguration
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
 
+// Library Defines - Need to be defined before library import
+#define ESP_DRD_USE_SPIFFS true
+
 // BEGIN User specific options
-#define LED_EN                  // Enable LED indicating successful data reception
-#define LED_GPIO        2       // LED pin
-#define NUM_SENSORS     1       // Number of sensors to be received
+//#define LED_EN                  // Enable LED indicating successful data reception
+#define LED_GPIO        LED_BUILTIN      // LED pin
+//#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size
@@ -104,8 +112,18 @@
 #define WIFI_RETRIES    10      // WiFi connection retries
 #define WIFI_DELAY      1000    // Delay between connection attempts [ms]
 #define SLEEP_EN        true    // enable sleep mode (see notes above!)
-#define USE_SECUREWIFI          // use secure WIFI
-//#define USE_WIFI              // use non-secure WIFI
+//#define USE_SECUREWIFI          // use secure WIFI
+#define USE_WIFI              // use non-secure WIFI
+
+#define JSON_CONFIG_FILE "/wifimanager_config.json"
+
+// Number of seconds after reset during which a
+// subseqent reset will be considered a double reset.
+#define DRD_TIMEOUT 10
+
+// RTC Memory Address for the DoubleResetDetector to use
+#define DRD_ADDRESS 0
+
 
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
@@ -113,8 +131,6 @@
 
 // Generate sensor data to test collecting data from multiple sources
 //#define GEN_SENSOR_DATA
-
-int const num_sensors = 1;
 
 // END User specific configuration
 
@@ -134,6 +150,12 @@ int const num_sensors = 1;
 
 
 #include <MQTT.h>
+#include <FS.h>
+#ifdef ESP32
+    #include <SPIFFS.h>
+#endif
+#include <WiFiManager.h>
+#include <ESP_DoubleResetDetector.h>
 #include <ArduinoJson.h>
 #include <time.h>
 #include "WeatherSensorCfg.h"
@@ -141,7 +163,7 @@ int const num_sensors = 1;
 #include "WeatherUtils.h"
 #include "RainGauge.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20221024";
+const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -156,8 +178,6 @@ SensorMap sensor_map[NUM_SENSORS] = {
 // #define CHECK_FINGERPRINT
 ////--------------------------////
 
-#include "secrets.h"
-
 #ifndef SECRETS
     const char ssid[] = "WiFiSSID";
     const char pass[] = "WiFiPassword";
@@ -165,10 +185,12 @@ SensorMap sensor_map[NUM_SENSORS] = {
     #define HOSTNAME "ESPWeather"
     #define APPEND_CHIP_ID
 
-    #define    MQTT_PORT     8883 // checked by pre-processor!
-    const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = ""; // leave blank if no credentials used
-    const char MQTT_PASS[] = ""; // leave blank if no credentials used
+    // define your default values here, if there are different values in config.json, they are overwritten.
+    char mqtt_host[40];
+    char mqtt_port[6] = "1883";
+    char mqtt_user[21] = "";
+    char mqtt_pass[21] = "";
+
 
     #ifdef CHECK_CA_ROOT
     static const char digicert[] PROGMEM = R"EOF(
@@ -227,6 +249,14 @@ SensorMap sensor_map[NUM_SENSORS] = {
     #endif
 #endif
 
+DoubleResetDetector *drd;
+
+// flag for saving data
+bool shouldSaveConfig = false;
+
+// flag for forcing WiFiManager re-config
+bool forceConfig = false;
+
 WeatherSensor weatherSensor;
 RainGauge     rainGauge;
 
@@ -277,9 +307,19 @@ time_t now;
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
 
-//
-// Wait for WiFi connection
-//
+/*!
+ * \brief Callback notifying us of the need to save config
+ */
+void saveConfigCallback()
+{
+  Serial.println("Should save config");
+  shouldSaveConfig = true;
+}
+
+
+/*!
+ * \brief Wait for WiFi connection
+ */
 void wifi_wait(int wifi_retries, int wifi_delay)
 {
     int count = 0;
@@ -294,19 +334,158 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 }
 
 
-// Setup WiFi in Station Mode
-//
-void mqtt_setup(void)
+/*!
+ * \brief WiFiManager Setup
+ *
+ * Configures WiFi access point and MQTT connection parameters
+ */
+void wifimgr_setup(void)
 {
-    Serial.print(F("Attempting to connect to SSID: "));
-    Serial.print(ssid);
-    WiFi.hostname(Hostname);
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, pass);
-    wifi_wait(WIFI_RETRIES, WIFI_DELAY);
-    Serial.println(F("connected!"));
+
+  // clean FS, for testing
+  //SPIFFS.format();
+
+  // read configuration from FS json
+  Serial.println("mounting FS...");
+
+  if (SPIFFS.begin()) {
+    Serial.println("mounted file system");
+    if (SPIFFS.exists("/config.json")) {
+      // file exists, reading and loading
+      Serial.println("reading config file");
+      File configFile = SPIFFS.open("/config.json", "r");
+      if (configFile) {
+        Serial.println("opened config file");
+        size_t size = configFile.size();
+        // Allocate a buffer to store contents of the file.
+        std::unique_ptr<char[]> buf(new char[size]);
+
+        configFile.readBytes(buf.get(), size);
+
+        DynamicJsonDocument json(1024);
+        auto deserializeError = deserializeJson(json, buf.get());
+        serializeJson(json, Serial);
+
+        if ( ! deserializeError ) {
+          Serial.println("\nparsed json");
+          strcpy(mqtt_host, json["mqtt_server"]);
+          strcpy(mqtt_port, json["mqtt_port"]);
+          strcpy(mqtt_user, json["mqtt_user"]);
+          strcpy(mqtt_pass, json["mqtt_pass"]);
+        } else {
+          Serial.println("failed to load json config");
+        }
+        configFile.close();
+      }
+    }
+  } else {
+    Serial.println("failed to mount FS");
+  }
+  //end read
+
+  //WiFi.disconnect();
+  WiFi.hostname(Hostname);
+  WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
+  delay(10);
+
+  // wm.resetSettings(); // wipe settings
+
+  // The extra parameters to be configured (can be either global or just in the setup)
+  // After connecting, parameter.getValue() will get you the configured value
+  // id/name placeholder/prompt default length
+  WiFiManagerParameter custom_mqtt_server("server", "MQTT Server (Broker)", mqtt_host, 40);
+  WiFiManagerParameter custom_mqtt_port("port", "MQTT Port", mqtt_port, 6);
+  WiFiManagerParameter custom_mqtt_user("user", "MQTT Username", mqtt_user, 20);
+  WiFiManagerParameter custom_mqtt_pass("pass", "MQTT Password", mqtt_pass, 20);
+
+  WiFiManager wifiManager;
+
+  if (forceConfig) {
+    wifiManager.resetSettings();
+  }
+
+  // set config save notify callback
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+
+  // set static ip
+  //wifiManager.setSTAStaticIPConfig(IPAddress(10, 0, 1, 99), IPAddress(10, 0, 1, 1), IPAddress(255, 255, 255, 0));
+
+  // add all your parameters here
+  wifiManager.addParameter(&custom_mqtt_server);
+  wifiManager.addParameter(&custom_mqtt_port);
+  wifiManager.addParameter(&custom_mqtt_user);
+  wifiManager.addParameter(&custom_mqtt_pass);
+
+  // Options
+  // reset settings - for testing
+  //wifiManager.resetSettings();
+
+  // set minimum quality of signal so it ignores AP's under that quality
+  // defaults to 8%
+  //wifiManager.setMinimumSignalQuality();
+
+  // sets timeout until configuration portal gets turned off
+  // useful to make it all retry or go to sleep
+  // in seconds
+  wifiManager.setTimeout(120);
+
+  // fetches ssid and pass and tries to connect
+  // if it does not connect it starts an access point with the specified name
+  // and goes into a blocking loop awaiting configuration
+  if (!wifiManager.autoConnect(Hostname, "password")) {
+    Serial.println("failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    ESP.restart();
+    delay(5000);
+  }
+
+  // if you get here you have connected to the WiFi
+  Serial.println("connected...yeey :)");
+
+  // read updated parameters
+  strcpy(mqtt_host, custom_mqtt_server.getValue());
+  strcpy(mqtt_port, custom_mqtt_port.getValue());
+  strcpy(mqtt_user, custom_mqtt_user.getValue());
+  strcpy(mqtt_pass, custom_mqtt_pass.getValue());
+  Serial.println("The values in the file are: ");
+  Serial.println("\tmqtt_server : " + String(mqtt_host));
+  Serial.println("\tmqtt_port : " + String(mqtt_port));
+  Serial.println("\tmqtt_user : " + String(mqtt_user));
+  Serial.println("\tmqtt_pass : ***");
+
+  // save the custom parameters to FS
+  if (shouldSaveConfig) {
+    Serial.println("saving config");
+ 
+    DynamicJsonDocument json(1024);
+    json["mqtt_server"] = mqtt_host;
+    json["mqtt_port"] = mqtt_port;
+    json["mqtt_user"] = mqtt_user;
+    json["mqtt_pass"] = mqtt_pass;
+
+    File configFile = SPIFFS.open("/config.json", "w");
+    if (!configFile) {
+      Serial.println("failed to open config file for writing");
+    }
+
+    serializeJson(json, Serial);
+    serializeJson(json, configFile);
+
+    configFile.close();
+    //end save
+  }
+
+  Serial.println("local ip");
+  Serial.println(WiFi.localIP());
+}
 
 
+/*!
+ * \brief Setup secure WiFi (if enabled) and MQTT client
+ */
+ void mqtt_setup(void)
+{
     #ifdef USE_SECUREWIFI
         // Note: TLS security needs correct time
         Serial.print("Setting time using SNTP ");
@@ -340,7 +519,7 @@ void mqtt_setup(void)
             net.setInsecure();
         #endif
     #endif
-    client.begin(MQTT_HOST, MQTT_PORT, net);
+    client.begin(mqtt_host, atoi(mqtt_port), net);
 
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
@@ -349,16 +528,16 @@ void mqtt_setup(void)
 }
 
 
-//
-// (Re-)Connect to WLAN and connect MQTT broker
-//
+/*!
+ * \brief (Re-)Connect to WLAN and connect MQTT broker
+ */
 void mqtt_connect(void)
 {
     Serial.print(F("Checking wifi..."));
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
     Serial.print(F("\nMQTT connecting... "));
-    while (!client.connect(Hostname, MQTT_USER, MQTT_PASS))
+    while (!client.connect(Hostname, mqtt_user, mqtt_pass))
     {
         Serial.print(".");
         delay(1000);
@@ -542,6 +721,21 @@ void setup() {
     snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
     snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
 
+    drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
+    if (drd->detectDoubleReset())
+    {
+        Serial.println(F("Forcing config mode as there was a Double reset detected"));
+        forceConfig = true;
+    }
+/*
+    bool spiffsSetup = loadConfigFile();
+    if (!spiffsSetup)
+    {
+        Serial.println(F("Forcing config mode as there is no saved config"));
+        forceConfig = true;
+    }
+*/
+    wifimgr_setup();
     mqtt_setup();
     weatherSensor.begin();
 }
@@ -553,6 +747,7 @@ void setup() {
 void clientLoopWrapper(void)
 {
     client.loop();
+    drd->loop();
 }
 
 
@@ -560,6 +755,7 @@ void clientLoopWrapper(void)
 // Main execution loop
 //
 void loop() {
+    drd->loop();
     if (WiFi.status() != WL_CONNECTED)
     {
         Serial.print(F("Checking wifi"));

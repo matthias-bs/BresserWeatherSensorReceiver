@@ -144,6 +144,7 @@ $ via LWT
 ```
 {"sensor_id":12345678,"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
 ```
+
 **Dashboard with [IoT MQTT Panel](https://snrlab.in/iot/iot-mqtt-panel-user-guide) (Example)**
 
 <img src="https://user-images.githubusercontent.com/83612361/158457786-516467f9-2eec-4726-a9bd-36e9dc9eec5c.png" alt="IoTMQTTPanel_Bresser_5-in-1" width="400">
@@ -156,6 +157,20 @@ The file [BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTCustom/s
 (from [BresserWeatherSensorReceiver/src/WeatherSensorCfg.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/WeatherSensorCfg.h)).
 
 See [examples/BresserWeatherSensorMQTTCustom/Readme.md](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTTCustom/Readme.md) for details.
+
+### [BresserWeatherSensorMQTTWiFiMgr](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTWiFiMgr)
+
+Same core functionality as [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTT/BresserWeatherSensorMQTT.ino), but instead of using static WiFi- and MQTT-connection data, [WiFiManager](https://github.com/tzapu/WiFiManager) is used instead.
+
+**Note:**
+When using the sketch on a device for the first time, you must format the flash file system (SPIFFS) first, otherwise the configuration cannot be saved.
+
+After a successful setup, you can perform two consecutive resets (within 10 seconds) to enable WiFiManager for changing the configuration. This is achieved by using [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector).
+
+<img src="https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/86a3f629-276d-48ac-8eff-acda051e7a2b" alt="WiFiManager Start Screen" width="300">
+<br>
+<img src="https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/a1055ec5-dcc0-44ac-89fc-6a18497cce6e" alt="WiFiManager Configuration Screen" width="300"> 
+
 
 ### [BresserWeatherSensorDomoticz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorDomoticz)
 

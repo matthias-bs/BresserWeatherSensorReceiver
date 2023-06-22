@@ -163,7 +163,16 @@ See [examples/BresserWeatherSensorMQTTCustom/Readme.md](https://github.com/matth
 Same core functionality as [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTT/BresserWeatherSensorMQTT.ino), but instead of using static WiFi- and MQTT-connection data, [WiFiManager](https://github.com/tzapu/WiFiManager) is used instead.
 
 **Note:**
+
 When using the sketch on a device for the first time, you must format the flash file system (SPIFFS) first, otherwise the configuration cannot be saved.
+
+**Configuration:**
+
+* Access Point SSID: ESPWeather-<chip_id>
+* Access Point Password: password
+* Configuration URL: http://192.168.4.1/ (The browser must be connected to the access point above!)
+
+Please refer to the [WiFiManager](https://github.com/tzapu/WiFiManager) documentation for details!
 
 After a successful setup, you can perform two consecutive resets (within 10 seconds) to enable WiFiManager for changing the configuration. This is achieved by using [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector).
 

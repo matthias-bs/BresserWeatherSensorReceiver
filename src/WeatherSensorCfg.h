@@ -42,6 +42,7 @@
 // 20230330 Added pin definitions and changes for Adafruit Feather 32u4 (AVR) RFM95 LoRa Radio 
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
+// 20230624 Added Bresser Lightning Sensor decoder
 //
 // ToDo:
 // -
@@ -169,7 +170,7 @@
 //#define SENSOR_IDS_EXC { 0x39582376 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
+#define SENSOR_IDS_INC { 0xEEFB }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
@@ -292,6 +293,7 @@
 #define BRESSER_5_IN_1
 #define BRESSER_6_IN_1
 #define BRESSER_7_IN_1
+#define BRESSER_LIGHTNING
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"

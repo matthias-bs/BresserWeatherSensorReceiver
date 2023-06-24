@@ -969,9 +969,11 @@ First two bytes are an LFSR-16 digest, generator 0x8810 key 0xabf9 with a final 
 #ifdef BRESSER_LIGHTNING
 DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize)
 {   
-    // see AS3935 Datasheet, Table 17 - Distance Estimation
-    uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
-    
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        // see AS3935 Datasheet, Table 17 - Distance Estimation
+        uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
+    #endif
+
     // data whitening
     uint8_t msgw[MSG_BUF_SIZE];
     for (unsigned i = 0; i < msgSize; ++i) {

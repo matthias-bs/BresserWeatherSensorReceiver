@@ -999,12 +999,12 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         return status;
 
     uint8_t ctr         = (msgw[4] << 4) | (msgw[5] & 0xf0) >> 4;
-    log_v("--> CTR RAW: %d  BCD: %d", ctr, (((msgw[4] & 0xf0) >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] & 0xf0) >> 4));
+    log_v("--> CTR RAW: %d  BCD: %d", ctr, ((msgw[4] & 0xf0) >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] & 0xf0) >> 4);
     uint8_t battery_low = (msgw[5] & 0x08) == 0x00;
     uint16_t unknown1   = ((msgw[5] & 0x0f) << 8) |  msgw[6];
     uint8_t type        = msgw[6] >> 4;
     uint8_t distance_km = msgw[7];
-    log_v("--> DST RAW: %d  BCD: %d  TAB: %d", msgw[7], (((msgw[7] & 0xf0) >> 4) * 10 + msgw[7] & 0x0f), distance_map[ msgw[7] ]);
+    log_v("--> DST RAW: %d  BCD: %d  TAB: %d", msgw[7], ((msgw[7] & 0xf0) >> 4) * 10 + msgw[7] & 0x0f, distance_map[ msgw[7] ]);
     uint16_t unknown2   = (msgw[8] << 8) | msgw[9];
 
     sensor[slot].sensor_id       = id_tmp;

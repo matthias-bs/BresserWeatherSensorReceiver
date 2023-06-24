@@ -152,7 +152,7 @@ void loop()
         if (weatherSensor.sensor[i].lightning_distance_km == 0) {
           Serial.printf("Distance: [%2dkm] ", weatherSensor.sensor[i].lightning_distance_km);
         } else {
-          Serial.printf("Distance: [----] ", weatherSensor.sensor[i].lightning_distance_km);
+          Serial.printf("Distance: [----] ");
         }
         Serial.printf("unknown1: [0x%03X] ", weatherSensor.sensor[i].lightning_unknown1);
         Serial.printf("unknown2: [0x%04X] ", weatherSensor.sensor[i].lightning_unknown2);

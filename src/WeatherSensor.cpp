@@ -973,9 +973,6 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         // see AS3935 Datasheet, Table 17 - Distance Estimation
         uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
     #endif
-    // FIXME Workaround for CI
-    (void)(distance_map);
-
     
     // data whitening
     uint8_t msgw[MSG_BUF_SIZE];

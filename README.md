@@ -31,7 +31,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 
 ### Configuration by selecting a supported Board in the Arduino IDE
 
-By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of you choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
+By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of your choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
 
 If you are not using the Arduino IDE, you can use the defines in the table below with your specific tool chain to get the same result.
 

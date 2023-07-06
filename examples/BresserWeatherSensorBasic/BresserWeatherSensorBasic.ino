@@ -149,7 +149,7 @@ void loop()
             weatherSensor.sensor[i].s_type,
             weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
         Serial.printf("Lightning Counter: [%3d] ", weatherSensor.sensor[i].lightning_count);
-        if (weatherSensor.sensor[i].lightning_distance_km == 0) {
+        if (weatherSensor.sensor[i].lightning_distance_km != 0) {
           Serial.printf("Distance: [%2dkm] ", weatherSensor.sensor[i].lightning_distance_km);
         } else {
           Serial.printf("Distance: [----] ");

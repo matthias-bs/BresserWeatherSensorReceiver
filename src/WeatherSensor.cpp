@@ -974,10 +974,16 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
     #endif
     
+    #if 0
+    uint8_t test_data[] = { 0x73, 0x69, 0xB5, 0x08, 0xAA, 0xA2, 0x90, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+     0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x15 };
+    #endif
+
     // data whitening
     uint8_t msgw[MSG_BUF_SIZE];
     for (unsigned i = 0; i < msgSize; ++i) {
         msgw[i] = msg[i] ^ 0xaa;
+        //msgw[i] = test_data[i] ^ 0xaa;
     }
     
     // LFSR-16 digest, generator 0x8810 key 0xabf9 with a final xor 0x899e

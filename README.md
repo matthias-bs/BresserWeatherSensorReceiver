@@ -24,6 +24,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7003600000000 and WSX3001000000 | Weather Station | decodeBresser**7In1**Payload()  |
+| 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
 
 **1)** Manual configuration required, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
 

@@ -702,12 +702,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     if (status != DECODE_OK)
         return status;
 
-    // unused...
-    //int startup = (msg[6] >> 3) & 1; // s.a. #1214
-
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = chan_tmp;
+    sensor[slot].startup     = (msg[6] >> 3) & 1; // s.a. #1214
 
     f_3in1 = is_decode3in1(id_tmp);
 

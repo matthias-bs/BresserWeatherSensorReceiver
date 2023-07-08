@@ -598,7 +598,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 // Moisture:
 //
 //     f16e 187000e34 7 ffffff0000 252 2 16 fff 004 000 [25,2, 99%, CH 7]
-//     DIGEST:8h8h ID?8h8h8h8h STYPE:4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID?8h8h8h8h :4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
 //
 // Moisture is transmitted in the humidity field as index 1-16: 0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99.
 // The Wind speed and direction fields decode to valid zero but we exclude them from the output.
@@ -636,8 +636,8 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 //
 // Wind and Temperature/Humidity or Rain:
 //
-//     DIGEST:8h8h ID:8h8h8h8h STYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
-//     DIGEST:8h8h ID:8h8h8h8h STYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
 //
 // Digest is LFSR-16 gen 0x8810 key 0x5412, excluding the add-checksum and trailer.
 // Checksum is 8-bit add (with carry) to 0xff.
@@ -892,7 +892,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].uv_ok        = true;
 
   sensor[slot].sensor_id   = id_tmp;
-  sensor[slot].stype       = msgw[6] >> 4;
+  sensor[slot].s_type      = msgw[6] >> 4;
   sensor[slot].startup     = (msgw[6] & 0x08) == 0x08;
   sensor[slot].temp_c      = temp_c;
   sensor[slot].humidity    = humidity;

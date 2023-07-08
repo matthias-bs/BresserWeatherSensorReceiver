@@ -59,6 +59,7 @@
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230412 Fixed 7 in 1 decoder (valid/complete flags were not set)
 // 20230613 Fixed rain value in 7 in 1 decoder
+// 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 //
 // ToDo:
 // -
@@ -891,6 +892,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].uv_ok        = true;
 
   sensor[slot].sensor_id   = id_tmp;
+  sensor[slot].stype       = msgw[6] >> 4;
+  sensor[slot].startup     = (msgw[6] & 0x08) == 0x08;
   sensor[slot].temp_c      = temp_c;
   sensor[slot].humidity    = humidity;
 #ifdef WIND_DATA_FLOATINGPOINT

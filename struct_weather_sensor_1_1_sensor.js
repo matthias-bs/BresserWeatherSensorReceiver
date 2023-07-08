@@ -15,6 +15,7 @@ var struct_weather_sensor_1_1_sensor =
     [ "rssi", "struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1", null ],
     [ "s_type", "struct_weather_sensor_1_1_sensor.html#aabf3f23ee4b7db05580765f7ce392838", null ],
     [ "sensor_id", "struct_weather_sensor_1_1_sensor.html#abbf124d4f3f1792ff596b7dd03b9cd94", null ],
+    [ "startup", "struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4", null ],
     [ "temp_c", "struct_weather_sensor_1_1_sensor.html#adc13b0de8543fcf00628e061fab26992", null ],
     [ "temp_ok", "struct_weather_sensor_1_1_sensor.html#a1dca88a5b98a1eb7320217ec3784cf7b", null ],
     [ "uv", "struct_weather_sensor_1_1_sensor.html#af1fd284df9f4171542a075c18e9eee9a", null ],

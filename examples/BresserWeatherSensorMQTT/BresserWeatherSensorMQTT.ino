@@ -492,6 +492,13 @@ void publishWeatherdata(bool complete)
       mqtt_payload  += String("}");
       mqtt_payload2 += String("}");
 
+      if (mqtt_payload.length() > PAYLOAD_SIZE) {
+        log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
+      }
+      if (mqtt_payload2.length() > PAYLOAD_SIZE) {
+        log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
+      }
+    
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
         mqtt_topic = String(mqttPubData);
@@ -511,7 +518,7 @@ void publishWeatherdata(bool complete)
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
       #endif
       log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
-      client.publish(mqtt_topic, mqtt_payload, false, 0);
+      client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
 
       // extra data
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
@@ -519,7 +526,7 @@ void publishWeatherdata(bool complete)
       #endif
       if (mqtt_payload2.length() > 2) {
         log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
-        client.publish(mqttPubExtra, mqtt_payload2, false, 0);
+        client.publish(mqttPubExtra, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }

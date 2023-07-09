@@ -106,7 +106,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
-#include <String.h>
+#include <string>
 
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception

@@ -75,6 +75,7 @@
 // Sensor Types
 // 0  - Weather Station          5-in-1; PN 7002510..12/7902510..12
 // 1  - Weather Station          6-in-1; PN 7002585
+//    - Professional Wind Gauge  6-in-1; PN 7002531
 // 2  - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
 // 4  - Soil Moisture Sensor     6-in-1; PN 7009972
 // 9  - Professional Rain Gauge  (5-in-1 decoder)

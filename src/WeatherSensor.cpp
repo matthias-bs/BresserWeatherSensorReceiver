@@ -518,6 +518,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
+    sensor[slot].startup     = false; // To Do
 
     int temp_raw = (msg[20] & 0x0f) + ((msg[20] & 0xf0) >> 4) * 10 + (msg[21] &0x0f) * 100;
     if (msg[25] & 0x0f) {

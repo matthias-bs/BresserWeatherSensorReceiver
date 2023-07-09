@@ -484,9 +484,9 @@ void publishWeatherdata(bool complete)
           mqtt_payload  += String(",\"lightning_count\":")       + String(weatherSensor.sensor[i].lightning_count);
           mqtt_payload  += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lightning_distance_km);
           mqtt_payload  += String(",\"lightning_unknown1\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown1, HEX).toUpperCase() + String("\"");
+              + String(weatherSensor.sensor[i].lightning_unknown1, HEX) + String("\"");
           mqtt_payload  += String(",\"lightning_unknown2\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown2, HEX).toUpperCase() + String("\"");
+              + String(weatherSensor.sensor[i].lightning_unknown2, HEX) + String("\"");
       }
       mqtt_payload  += String("}");
       mqtt_payload2 += String("}");
@@ -495,10 +495,10 @@ void publishWeatherdata(bool complete)
       for (int n=0; n<NUM_SENSORS; n++) {
         mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += Sring("/") + sensor_map[n].name;
+          mqtt_topic += String("/") + sensor_map[n].name;
         }
         else {
-          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX).toUpperCase();
+          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);
         }
       }
 

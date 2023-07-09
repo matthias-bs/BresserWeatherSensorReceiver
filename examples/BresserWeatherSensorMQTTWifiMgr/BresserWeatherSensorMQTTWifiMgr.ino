@@ -70,6 +70,7 @@
 // History:
 //
 // 20230619 Created from BresserWeatherSensorMQTT
+// 20230709 Added lightning sensor
 //
 // ToDo:
 //
@@ -644,6 +645,13 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);
       }
+      if (weatherSensor.sensor[i].lightning_ok || complete) {
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_count\":%d", weatherSensor.sensor[i].lightning_count);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_distance_km\":%d", weatherSensor.sensor[i].lightning_distance_km);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_unknown1\":\"0x%03X\"", weatherSensor.sensor[i].lightning_unknown1);
+          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_unknown2\":\"0x%04X\"", weatherSensor.sensor[i].lightning_unknown2);   
+      }
+
       sprintf(&mqtt_payload[strlen(mqtt_payload)], "}");
       sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "}");
 

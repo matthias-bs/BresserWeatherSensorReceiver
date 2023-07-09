@@ -55,6 +55,7 @@
 // 20230328 Added MSG_BUF_SIZE
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230624 Added Bresser Lightning Sensor decoder
 // 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
 //
 // ToDo:
@@ -73,20 +74,21 @@
 
 
 // Sensor Types
-// 0  - Weather Station          5-in-1; PN 7002510..12/7902510..12
-// 1  - Weather Station          6-in-1; PN 7002585
-//    - Professional Wind Gauge  6-in-1; PN 7002531
-// 2  - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
-// 4  - Soil Moisture Sensor     6-in-1; PN 7009972
-// 9  - Professional Rain Gauge  (5-in-1 decoder)
+// 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
+// 1 - Weather Station          6-in-1; PN 7002585
+//   - Professional Wind Gauge  6-in-1; PN 7002531
+// 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
+// 3 - Lightning Sensor         PN 7009976
+// 4 - Soil Moisture Sensor     6-in-1; PN 7009972
+// 9 - Professional Rain Gauge  (5-in-1 decoder)
 // 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
 // ? - Air Quality Sensor
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
-// ? - Lightning Sensor
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
+#define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 #define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
@@ -196,6 +198,7 @@ class WeatherSensor {
             bool     rain_ok = false;      //!< rain gauge level o.k.
             bool     battery_ok = false;   //!< battery o.k.
             bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
+            bool     lightning_ok = false; //!< lightning o.k. (only lightning)
             float    temp_c;               //!< temperature in degC
             float    light_klx;            //!< Light KLux (only 7-in-1)
             float    light_lux;            //!< Light lux (only 7-in-1)
@@ -214,9 +217,13 @@ class WeatherSensor {
             uint16_t wind_gust_meter_sec_fp1; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
             uint16_t wind_avg_meter_sec_fp1;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
             #endif
-            uint8_t  humidity;             //!< humidity in %
-            uint8_t  moisture;             //!< moisture in % (only 6-in-1)
-            float    rssi;                 //!< received signal strength indicator in dBm
+            uint8_t  humidity;              //!< humidity in %
+            uint8_t  moisture;              //!< moisture in % (only 6-in-1)
+            uint8_t  lightning_distance_km; //!< lightning distance in km (only lightning)
+            uint8_t  lightning_count;       //!< lightning strike counter (only lightning)
+            uint8_t  lightning_unknown1;    //!< unknown part 1
+            uint16_t lightning_unknown2;    //!< unknown part 2
+            float    rssi;                  //!< received signal strength indicator in dBm
         };
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
@@ -244,15 +251,16 @@ class WeatherSensor {
         {
             for (int i=0; i< NUM_SENSORS; i++) {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
-                    sensor[i].valid       = false;
-                    sensor[i].complete    = false;
-                    sensor[i].temp_ok     = false;
-                    sensor[i].humidity_ok = false;
-                    sensor[i].light_ok    = false;
-                    sensor[i].uv_ok       = false;
-                    sensor[i].wind_ok     = false;
-                    sensor[i].rain_ok     = false;
-                    sensor[i].moisture_ok = false;
+                    sensor[i].valid        = false;
+                    sensor[i].complete     = false;
+                    sensor[i].temp_ok      = false;
+                    sensor[i].humidity_ok  = false;
+                    sensor[i].light_ok     = false;
+                    sensor[i].uv_ok        = false;
+                    sensor[i].wind_ok      = false;
+                    sensor[i].rain_ok      = false;
+                    sensor[i].moisture_ok  = false;
+                    sensor[i].lightning_ok = false;
                 }
             }
         };
@@ -347,6 +355,18 @@ class WeatherSensor {
             \returns Decode status.
             */
             DecodeStatus decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize);
+        #endif
+        #ifdef BRESSER_LIGHTNING
+             /*!
+            \brief Decode BRESSER_LIGHTNING message. (similar to 7-in-1)
+
+            \param msg     Message buffer.
+
+            \param msgSize Message size in bytes.
+
+            \returns Decode status.
+            */
+           DecodeStatus decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize);
         #endif
 
     protected:

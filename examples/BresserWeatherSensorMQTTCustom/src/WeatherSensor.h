@@ -53,6 +53,9 @@
 // 20220110 Added WEATHER0_RAIN_OV/WEATHER1_RAIN_OV
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230328 Added MSG_BUF_SIZE
+// 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
+// 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
 //
 // ToDo:
 // -
@@ -63,16 +66,19 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#include <string>
+#if defined(ESP32) || defined(ESP8266)
+  #include <string>
+#endif
 #include <RadioLib.h>
 
 
 // Sensor Types
-// 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
-// 1 - Weather Station          6-in-1; PN 7002585
-// 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
-// 4 - Soil Moisture Sensor     6-in-1; PN 7009972
-// 9 - Professional Rain Gauge  (5-in-1 decoder)
+// 0  - Weather Station          5-in-1; PN 7002510..12/7902510..12
+// 1  - Weather Station          6-in-1; PN 7002585
+// 2  - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
+// 4  - Soil Moisture Sensor     6-in-1; PN 7009972
+// 9  - Professional Rain Gauge  (5-in-1 decoder)
+// 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
 // ? - Air Quality Sensor
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
@@ -82,6 +88,7 @@
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
+#define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
 
 
 // Sensor specific rain gauge overflow threshold (mm)
@@ -103,6 +110,7 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
+#if defined(ESP32) || defined(ESP8266)
 /*!
  * \struct SensorMap
  *
@@ -112,6 +120,7 @@ typedef struct SensorMap {
     uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
     std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
+#endif
 
 
 /*!
@@ -175,6 +184,7 @@ class WeatherSensor {
             uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
             uint8_t  s_type;               //!< sensor type (only 6-in1)
             uint8_t  chan;                 //!< channel (only 6-in-1)
+            bool     startup = false;      //!< startup after reset / battery change
             bool     valid;                //!< data valid (but not necessarily complete)
             bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
             bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
@@ -266,6 +276,16 @@ class WeatherSensor {
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
 
+        /*!
+         * Check if sensor ID is in sensor_ids_decode3in1[]
+         *
+         * \param id        sensor ID
+         *
+         * \returns         true if sensor is in sensor_ids_decode3in1[],
+         *                  false otherwise 
+         */
+        bool is_decode3in1(uint32_t id);
+        
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array
 

@@ -56,6 +56,7 @@
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230624 Added Bresser Lightning Sensor decoder
+// 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
 //
 // ToDo:
 // -
@@ -80,6 +81,7 @@
 // 3 - Lightning Sensor         PN 7009976
 // 4 - Soil Moisture Sensor     6-in-1; PN 7009972
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
+// 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
 // ? - Air Quality Sensor
 // ? - Water Leakage Sensor
 // ? - Pool Thermometer
@@ -89,6 +91,7 @@
 #define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
+#define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
 
 
 // Sensor specific rain gauge overflow threshold (mm)
@@ -184,6 +187,7 @@ class WeatherSensor {
             uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
             uint8_t  s_type;               //!< sensor type (only 6-in1)
             uint8_t  chan;                 //!< channel (only 6-in-1)
+            bool     startup = false;      //!< startup after reset / battery change
             bool     valid;                //!< data valid (but not necessarily complete)
             bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
             bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)

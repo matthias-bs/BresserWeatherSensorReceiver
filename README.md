@@ -16,22 +16,35 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 
 | Model         | Type | Decoder Function                |
 | ------------- | ---- | ------------------------------- |
-| 7002510..12   | Weather Station | decodeBresser**5In1**Payload()  |
+| 7002510..12, 9602510   | Weather Station | decodeBresser**5In1**Payload()  |
 | 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
 | *7002531*       | *3-in-1 Professional Wind Gauge / Anemometer* | *decodeBresser**6In1**Payload()* **1)** |
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
-| 9602510       | Weather Sensor | ? |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
-| 7003600000000 and WSX3001000000 | Weather Station | decodeBresser**7In1**Payload()  |
+| 7003600000000 and WSX3001000000 | Weather Station | decodeBresser**7In1**Payload() **2)** |
+| 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
+| 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
+| 7803300       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 
-**1)** negative temperatures are currently not decoded correctly, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
+Some guesswork:
+
+| Numbering Scheme | Type |
+| ---------------- | ---- |
+| 700[25\|32\|33]*   | Weather Station, Base + Sensor |
+| 780[25\|32\|33]*   | Weather Station Sensor (Replacement) |
+| 790*             | Weather Station Base (Replacement) |
+| 700[99]*         | Accessory Sensor |
+
+**1)** Manual configuration required, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
+
+**2)** The part number is specific to the actual variant. 
 
 ## Configuration
 
 ### Configuration by selecting a supported Board in the Arduino IDE
 
-By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of you choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
+By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of your choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
 
 If you are not using the Arduino IDE, you can use the defines in the table below with your specific tool chain to get the same result.
 
@@ -42,7 +55,8 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®TTGO-LORA32 V1](https://github.com/Xinyuan-LilyGo/TTGO-LoRa-Series) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
    | [LILYGO®TTGO-LORA32 V2](https://github.com/LilyGO/TTGO-LORA32) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32 V2.1](http://www.lilygo.cn/prod_view.aspx?TypeId=50060&Id=1271&FId=t3:50060:3) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
-   | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/)      | "Heltec Wireless Stick" | n.a.                       | ARDUINO_heltec_wireless_stick     | SX1276 | - |
+   | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick  | SX1276 | - |
+   | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_heltec_wifi_lora_32_V2 | SX1276 | - |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
    | [Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-esp32-or-thingpulse-epulse-feather-with-adafruit-lora-radio-featherwing)                                | "Adafruit ESP32 Feather" | n.a.               | ARDUINO_FEATHER_ESP32   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS |
  | [DFRobot FireBeetle with FireBeetle Cover LoRa Radio 868MHz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#dfrobot-firebeetle-esp32-with-firebeetle-cover-lora-radio-868mhz)                               | "FireBeetle-ESP32" | n.a.               | ARDUINO_ESP32_DEV & **FIREBEETLE_ESP32_COVER_LORA**<sup>1</sup>   | SX1276 (LoRa1276) | Wiring on the cover: <br>D2 to RESET<br>D3 to DIO0<br>D4 to CS<br>D5 to DIO1 |
@@ -143,6 +157,7 @@ $ via LWT
 ```
 {"sensor_id":12345678,"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
 ```
+
 **Dashboard with [IoT MQTT Panel](https://snrlab.in/iot/iot-mqtt-panel-user-guide) (Example)**
 
 <img src="https://user-images.githubusercontent.com/83612361/158457786-516467f9-2eec-4726-a9bd-36e9dc9eec5c.png" alt="IoTMQTTPanel_Bresser_5-in-1" width="400">
@@ -155,6 +170,29 @@ The file [BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTCustom/s
 (from [BresserWeatherSensorReceiver/src/WeatherSensorCfg.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/WeatherSensorCfg.h)).
 
 See [examples/BresserWeatherSensorMQTTCustom/Readme.md](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTTCustom/Readme.md) for details.
+
+### [BresserWeatherSensorMQTTWiFiMgr](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTTWiFiMgr)
+
+Same core functionality as [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTT/BresserWeatherSensorMQTT.ino), but instead of using static WiFi- and MQTT-connection data, [WiFiManager](https://github.com/tzapu/WiFiManager) is used instead.
+
+**Note:**
+
+When using the sketch on a device for the first time, you must format the flash file system (SPIFFS) first, otherwise the configuration cannot be saved.
+
+**Configuration:**
+
+* Access Point SSID: ESPWeather-<chip_id>
+* Access Point Password: password
+* Configuration URL: http://192.168.4.1/ (The browser must be connected to the access point above!)
+
+Please refer to the [WiFiManager](https://github.com/tzapu/WiFiManager) documentation for details!
+
+After a successful setup, you can perform two consecutive resets (within 10 seconds) to enable WiFiManager for changing the configuration. This is achieved by using [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector).
+
+<img src="https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/86a3f629-276d-48ac-8eff-acda051e7a2b" alt="WiFiManager Start Screen" width="300">
+<br>
+<img src="https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/a1055ec5-dcc0-44ac-89fc-6a18497cce6e" alt="WiFiManager Configuration Screen" width="300"> 
+
 
 ### [BresserWeatherSensorDomoticz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorDomoticz)
 

@@ -57,7 +57,10 @@
 // 20230228 Added Bresser 7 in 1 decoder by Jorge Navarro-Ortiz (jorgenavarro@ugr.es)
 // 20230329 Fixed issue introduced with 7 in 1 decoder
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
+// 20230412 Fixed 7 in 1 decoder (valid/complete flags were not set)
 // 20230624 Added Bresser Lightning Sensor decoder
+// 20230613 Fixed rain value in 7 in 1 decoder
+// 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 //
 // ToDo:
 // -
@@ -523,6 +526,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
+    sensor[slot].startup     = false; // To Do
 
     int temp_raw = (msg[20] & 0x0f) + ((msg[20] & 0xf0) >> 4) * 10 + (msg[21] &0x0f) * 100;
     if (msg[25] & 0x0f) {
@@ -603,7 +607,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 // Moisture:
 //
 //     f16e 187000e34 7 ffffff0000 252 2 16 fff 004 000 [25,2, 99%, CH 7]
-//     DIGEST:8h8h ID?8h8h8h8h STYPE:4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID?8h8h8h8h :4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
 //
 // Moisture is transmitted in the humidity field as index 1-16: 0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99.
 // The Wind speed and direction fields decode to valid zero but we exclude them from the output.
@@ -641,8 +645,8 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 //
 // Wind and Temperature/Humidity or Rain:
 //
-//     DIGEST:8h8h ID:8h8h8h8h STYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
-//     DIGEST:8h8h ID:8h8h8h8h STYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
 //
 // Digest is LFSR-16 gen 0x8810 key 0x5412, excluding the add-checksum and trailer.
 // Checksum is 8-bit add (with carry) to 0xff.
@@ -708,12 +712,10 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     if (status != DECODE_OK)
         return status;
 
-    // unused...
-    //int startup = (msg[6] >> 3) & 1; // s.a. #1214
-
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = chan_tmp;
+    sensor[slot].startup     = (msg[6] >> 3) & 1; // s.a. #1214
 
     f_3in1 = is_decode3in1(id_tmp);
 
@@ -873,8 +875,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   int wdir     = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
   int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
   int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
-  //int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
-  int rain_raw = (msgw[10] >> 4) * 1000 + (msgw[10] & 0x0f) * 100 + (msgw[11] >> 4) * 10 + (msgw[11] & 0x0f) * 1; // 4 digits
+  int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
   float rain_mm = rain_raw * 0.1f;
   int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
   float temp_c = temp_raw * 0.1f;
@@ -900,6 +901,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].uv_ok        = true;
 
   sensor[slot].sensor_id   = id_tmp;
+  sensor[slot].s_type      = msgw[6] >> 4;
+  sensor[slot].startup     = (msgw[6] & 0x08) == 0x08;
   sensor[slot].temp_c      = temp_c;
   sensor[slot].humidity    = humidity;
 #ifdef WIND_DATA_FLOATINGPOINT
@@ -917,6 +920,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].light_lux   = light_lux;
   sensor[slot].uv          = uv_index;
   sensor[slot].battery_ok  = !battery_low;
+  sensor[slot].valid       = true;
+  sensor[slot].complete    = true;
   sensor[slot].rssi        = rssi;
   sensor[slot].valid       = true;
   sensor[slot].complete    = true;

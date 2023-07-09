@@ -86,6 +86,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230114 Fixed rain gauge update
 // 20230124 Improved WiFi connection robustness
+// 20230708 Changed MQTT payload and topic from char[] to String
 //
 // ToDo:
 //

@@ -170,7 +170,7 @@
 //#define SENSOR_IDS_EXC { 0x39582376 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC { 0xEEFB }
+#define SENSOR_IDS_INC {}
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"

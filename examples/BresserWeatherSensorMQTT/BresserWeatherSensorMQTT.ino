@@ -496,7 +496,7 @@ void publishWeatherdata(bool complete)
       for (int n=0; n<NUM_SENSORS; n++) {
         mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += String("/") + sensor_map[n].name;
+          mqtt_topic += String("/") + String(sensor_map[n].name);
         }
         else {
           mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);

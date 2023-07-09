@@ -433,14 +433,14 @@ void publishWeatherdata(bool complete)
       }
 
       // Example:
-      // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":"1.2","wind_avg":"1.2","wind_dir":150,"rain":146}
+      // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":"1.2","wind_avg":"1.2","wind_dir":150,"rain":146}
       mqtt_payload  = "{";
       mqtt_payload2 = "{";
       mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
           mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
       #endif
-      mqtt_payload += String(",\"battery_ok\"") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
+      mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
       if (weatherSensor.sensor[i].temp_ok || complete) {
           mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].temp_c, 1);
       }

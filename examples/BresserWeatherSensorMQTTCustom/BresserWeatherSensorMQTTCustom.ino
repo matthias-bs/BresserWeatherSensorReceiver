@@ -87,6 +87,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230114 Fixed rain gauge update
 // 20230124 Improved WiFi connection robustness
+// 20230708 Changed MQTT payload and topic from char[] to String
 //
 // ToDo:
 //
@@ -148,7 +149,7 @@
     #include <ESP8266WiFi.h>
 #endif
 
-
+#include <string>
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
@@ -157,7 +158,7 @@
 #include "src/WeatherUtils.h"
 #include "src/RainGauge.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20221024";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20230709";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -404,7 +405,6 @@ void messageReceived(String &topic, String &payload)
 */
 
 
-
 /*!
   \brief Publish weather data as MQTT message
 
@@ -413,9 +413,9 @@ void messageReceived(String &topic, String &payload)
 */
 void publishWeatherdata(bool complete)
 {
-    char mqtt_payload[PAYLOAD_SIZE];  // sensor data
-    char mqtt_payload2[PAYLOAD_SIZE]; // calculated extra data
-    char mqtt_topic[TOPIC_SIZE+31];   // add space for ID/name
+    String mqtt_payload;  // sensor data
+    String mqtt_payload2; // calculated extra data
+    String mqtt_topic;    // MQTT topic including ID/name
 
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
@@ -423,8 +423,8 @@ void publishWeatherdata(bool complete)
 
     for (int i=0; i<NUM_SENSORS; i++) {
       // Reset string buffers
-      mqtt_payload[0]  = '\0';
-      mqtt_payload2[0] = '\0';
+      mqtt_payload  = "";
+      mqtt_payload2 = "";
 
       if (!weatherSensor.sensor[i].valid)
           continue;
@@ -436,86 +436,100 @@ void publishWeatherdata(bool complete)
       }
 
       // Example:
-      // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "{");
-      sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "{");
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "\"id\":%u", weatherSensor.sensor[i].sensor_id);
+      // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":"1.2","wind_avg":"1.2","wind_dir":150,"rain":146}
+      mqtt_payload  = "{";
+      mqtt_payload2 = "{";
+      mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"ch\":%d", weatherSensor.sensor[i].chan);
+          mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
       #endif
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"battery_ok\":%d", weatherSensor.sensor[i].battery_ok ? 1 : 0);
+      mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
       if (weatherSensor.sensor[i].temp_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"temp_c\":%.1f", weatherSensor.sensor[i].temp_c);
+          mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].temp_c, 1);
       }
       if (weatherSensor.sensor[i].humidity_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"humidity\":%d", weatherSensor.sensor[i].humidity);
+          mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].humidity);
       }
       if (weatherSensor.sensor[i].wind_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_gust\":%.1f", weatherSensor.sensor[i].wind_gust_meter_sec);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_avg\":%.1f", weatherSensor.sensor[i].wind_avg_meter_sec);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"wind_dir\":%.1f", weatherSensor.sensor[i].wind_direction_deg);
+          mqtt_payload += String(",\"wind_gust\":") + String(weatherSensor.sensor[i].wind_gust_meter_sec, 1);
+          mqtt_payload += String(",\"wind_avg\":")  + String(weatherSensor.sensor[i].wind_avg_meter_sec, 1);
+          mqtt_payload += String(",\"wind_dir\":")  + String(weatherSensor.sensor[i].wind_direction_deg, 1);
       }
       if (weatherSensor.sensor[i].wind_ok) {
           char buf[4];
-          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "\"wind_dir_txt\":\"%s\"",
-            winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf));
-          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"wind_gust_bft\":%d",
-            windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
-          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"wind_avg_bft\":%d",
-            windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
+          mqtt_payload2 += String("\"wind_dir_txt\":\"") + String(winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf)) + "\"";
+          mqtt_payload2 += String(",\"wind_gust_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
+          mqtt_payload2 += String(",\"wind_avg_bft\":")  + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
       }
       if ((weatherSensor.sensor[i].temp_ok) && (weatherSensor.sensor[i].humidity_ok)) {
-        sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"dewpoint_c\":%.1f",
-          calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity));
+        mqtt_payload2 += String(",\"dewpoint_c\":") + String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1);
 
         if (weatherSensor.sensor[i].wind_ok) {
-          sprintf(&mqtt_payload2[strlen(mqtt_payload2)], ",\"perceived_temp_c\":%.1f",
-            perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity));
+          mqtt_payload2 += String(",\"perceived_temp_c\":") 
+              + String(perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity), 1);
         }
       }
       if (weatherSensor.sensor[i].uv_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"uv\":%.1f", weatherSensor.sensor[i].uv);
+          mqtt_payload += String(",\"uv\":") + String(weatherSensor.sensor[i].uv, 1);
       }
       if (weatherSensor.sensor[i].light_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"light_klx\":%.1f", weatherSensor.sensor[i].light_klx);
+          mqtt_payload += String(",\"light_klx\":") + String(weatherSensor.sensor[i].light_klx, 1);
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain\":%.1f", weatherSensor.sensor[i].rain_mm);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_d\":%.1f", rainGauge.currentDay());
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_w\":%.1f", rainGauge.currentWeek());
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"rain_m\":%.1f", rainGauge.currentMonth());
+          mqtt_payload += String(",\"rain\":")  + String(weatherSensor.sensor[i].rain_mm, 1);
+          mqtt_payload += String(",\"rain_d\":") + String(rainGauge.currentDay(), 1);
+          mqtt_payload += String(",\"rain_w\":") + String(rainGauge.currentWeek(), 1);
+          mqtt_payload += String(",\"rain_m\":") + String(rainGauge.currentMonth(), 1);
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"moisture\":%d", weatherSensor.sensor[i].moisture);
+          mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].moisture);
       }
       if (weatherSensor.sensor[i].lightning_ok || complete) {
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_count\":%d", weatherSensor.sensor[i].lightning_count);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_distance_km\":%d", weatherSensor.sensor[i].lightning_distance_km);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_unknown1\":\"0x%03X\"", weatherSensor.sensor[i].lightning_unknown1);
-          sprintf(&mqtt_payload[strlen(mqtt_payload)], ",\"lightning_unknown2\":\"0x%04X\"", weatherSensor.sensor[i].lightning_unknown2);   
+          mqtt_payload  += String(",\"lightning_count\":")       + String(weatherSensor.sensor[i].lightning_count);
+          mqtt_payload  += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lightning_distance_km);
+          mqtt_payload  += String(",\"lightning_unknown1\":\"0x") 
+              + String(weatherSensor.sensor[i].lightning_unknown1, HEX) + String("\"");
+          mqtt_payload  += String(",\"lightning_unknown2\":\"0x") 
+              + String(weatherSensor.sensor[i].lightning_unknown2, HEX) + String("\"");
       }
-      sprintf(&mqtt_payload[strlen(mqtt_payload)], "}");
-      sprintf(&mqtt_payload2[strlen(mqtt_payload2)], "}");
+      mqtt_payload  += String("}");
+      mqtt_payload2 += String("}");
 
+      if (mqtt_payload.length() > PAYLOAD_SIZE) {
+        log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
+      }
+      if (mqtt_payload2.length() > PAYLOAD_SIZE) {
+        log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
+      }
+    
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
+        mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          snprintf(mqtt_topic, TOPIC_SIZE+31, "%s/%s", mqttPubData, sensor_map[n].name.substr(0, 30).c_str());
-          break;
+          mqtt_topic += String("/") + String(sensor_map[n].name.c_str());
         }
         else {
-          snprintf(mqtt_topic, TOPIC_SIZE+31, "%s/%8X", mqttPubData, weatherSensor.sensor[i].sensor_id);
+          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);
         }
       }
 
       // sensor data
-      Serial.printf("%s: %s\n", mqtt_topic, mqtt_payload);
-      client.publish(mqtt_topic, mqtt_payload, false, 0);
+      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        char mqtt_topic_tmp[TOPIC_SIZE];
+        char mqtt_payload_tmp[PAYLOAD_SIZE];
+        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
+        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
+      #endif
+      log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+      client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
 
       // extra data
-      if (strlen(mqtt_payload2) > 2) {
-        Serial.printf("%s: %s\n", mqttPubExtra, mqtt_payload2);
-        client.publish(mqttPubExtra, mqtt_payload2, false, 0);
+      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
+      #endif
+      if (mqtt_payload2.length() > 2) {
+        log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
+        client.publish(mqttPubExtra, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }

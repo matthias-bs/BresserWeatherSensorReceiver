@@ -435,61 +435,61 @@ void publishWeatherdata(bool complete)
       // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       mqtt_payload  = "{";
       mqtt_payload2 = "{";
-      mqtt_payload  += "\"id\":" + String(weatherSensor.sensor[i].sensor_id);
+      mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
       #ifdef BRESSER_6_IN_1
-          mqtt_payload += ",\"ch\":" + String(weatherSensor.sensor[i].chan);
+          mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
       #endif
-      mqtt_payload += ",\"battery_ok\"" + (weatherSensor.sensor[i].battery_ok ? "1" : "0");
+      mqtt_payload += String(",\"battery_ok\"") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
       if (weatherSensor.sensor[i].temp_ok || complete) {
-          mqtt_payload += ",\"temp_c\":" + String(weatherSensor.sensor[i].temp_c, 1);
+          mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].temp_c, 1);
       }
       if (weatherSensor.sensor[i].humidity_ok || complete) {
-          mqtt_payload += ",\"humidity\":" + String(weatherSensor.sensor[i].humidity);
+          mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].humidity);
       }
       if (weatherSensor.sensor[i].wind_ok || complete) {
-          mqtt_payload += ",\"wind_gust\":" + String(weatherSensor.sensor[i].wind_gust_meter_sec, 1);
-          mqtt_payload += ",\"wind_avg\":"  + String(weatherSensor.sensor[i].wind_avg_meter_sec, 1);
-          mqtt_payload += ",\"wind_dir\":"  + String(weatherSensor.sensor[i].wind_direction_deg, 1);
+          mqtt_payload += String(",\"wind_gust\":") + String(weatherSensor.sensor[i].wind_gust_meter_sec, 1);
+          mqtt_payload += String(",\"wind_avg\":")  + String(weatherSensor.sensor[i].wind_avg_meter_sec, 1);
+          mqtt_payload += String(",\"wind_dir\":")  + String(weatherSensor.sensor[i].wind_direction_deg, 1);
       }
       if (weatherSensor.sensor[i].wind_ok) {
           char buf[4];
-          mqtt_payload2 += "\"wind_dir_txt\":\"" + String(winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf)) + "\"";
-          mqtt_payload2 += ",\"wind_gust_bft\":" + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
-          mqtt_payload2 += ",\"wind_avg_bft\":"  + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
+          mqtt_payload2 += String("\"wind_dir_txt\":\"") + String(winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf)) + "\"";
+          mqtt_payload2 += String(",\"wind_gust_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
+          mqtt_payload2 += String(",\"wind_avg_bft\":")  + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
       }
       if ((weatherSensor.sensor[i].temp_ok) && (weatherSensor.sensor[i].humidity_ok)) {
-        mqtt_payload2 += ",\"dewpoint_c\":" + String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1);
+        mqtt_payload2 += String(",\"dewpoint_c\":") + String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1);
 
         if (weatherSensor.sensor[i].wind_ok) {
-          mqtt_payload2 += ",\"perceived_temp_c\":" 
+          mqtt_payload2 += String(",\"perceived_temp_c\":") 
               + String(perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity), 1);
         }
       }
       if (weatherSensor.sensor[i].uv_ok || complete) {
-          mqtt_payload += ",\"uv\":" + String(weatherSensor.sensor[i].uv, 1);
+          mqtt_payload += String(",\"uv\":") + String(weatherSensor.sensor[i].uv, 1);
       }
       if (weatherSensor.sensor[i].light_ok || complete) {
-          mqtt_payload += ",\"light_klx\":" + String(weatherSensor.sensor[i].light_klx, 1);
+          mqtt_payload += String(",\"light_klx\":") + String(weatherSensor.sensor[i].light_klx, 1);
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
-          mqtt_payload += ",\"rain\":"  + String(weatherSensor.sensor[i].rain_mm, 1);
-          mqtt_payload += ",\"rain_d\":" + String(rainGauge.currentDay(), 1);
-          mqtt_payload += ",\"rain_w\":" + String(rainGauge.currentWeek(), 1);
-          mqtt_payload += ",\"rain_m\":" + String(rainGauge.currentMonth(), 1);
+          mqtt_payload += String(",\"rain\":")  + String(weatherSensor.sensor[i].rain_mm, 1);
+          mqtt_payload += String(",\"rain_d\":") + String(rainGauge.currentDay(), 1);
+          mqtt_payload += String(",\"rain_w\":") + String(rainGauge.currentWeek(), 1);
+          mqtt_payload += String(",\"rain_m\":") + String(rainGauge.currentMonth(), 1);
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
-          mqtt_payload += ",\"moisture\":" + String(weatherSensor.sensor[i].moisture);
+          mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].moisture);
       }
       if (weatherSensor.sensor[i].lightning_ok || complete) {
-          mqtt_payload  += ",\"lightning_count\":"       + String(weatherSensor.sensor[i].lightning_count);
-          mqtt_payload  += ",\"lightning_distance_km\":" + String(weatherSensor.sensor[i].lightning_distance_km);
-          mqtt_payload  += ",\"lightning_unknown1\":\"0x" 
+          mqtt_payload  += String(",\"lightning_count\":")       + String(weatherSensor.sensor[i].lightning_count);
+          mqtt_payload  += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lightning_distance_km);
+          mqtt_payload  += String(",\"lightning_unknown1\":\"0x") 
               + String(weatherSensor.sensor[i].lightning_unknown1, HEX).toUpperCase() + "\"";
-          mqtt_payload  += ",\"lightning_unknown2\":\"0x" 
+          mqtt_payload  += String(",\"lightning_unknown2\":\"0x") 
               + String(weatherSensor.sensor[i].lightning_unknown2, HEX).toUpperCase() + "\"";   
       }
-      mqtt_payload  +=  "}";
-      mqtt_payload2 +=  "}";
+      mqtt_payload  += String("}");
+      mqtt_payload2 += String("}");
 
       // Try to map sensor ID to name to make MQTT topic explanatory
       for (int n=0; n<NUM_SENSORS; n++) {
@@ -503,12 +503,21 @@ void publishWeatherdata(bool complete)
       }
 
       // sensor data
-      log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
+      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        char mqtt_topic_tmp[TOPIC_SIZE];
+        char mqtt_payload_tmp[PAYLOAD_SIZE];
+        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
+        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
+      #endif
+      log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
       client.publish(mqtt_topic, mqtt_payload, false, 0);
 
       // extra data
-      if (strlen(mqtt_payload2) > 2) {
-        log_i("%s: %s\n", mqttPubExtra.c_str(), mqtt_payload2.c_str());
+      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
+      #endif
+      if (mqtt_payload2.length() > 2) {
+        log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
         client.publish(mqttPubExtra, mqtt_payload2, false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)

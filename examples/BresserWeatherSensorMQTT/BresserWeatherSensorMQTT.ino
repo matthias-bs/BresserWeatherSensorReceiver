@@ -433,7 +433,7 @@ void publishWeatherdata(bool complete)
       }
 
       // Example:
-      // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
+      // {"ch":0,"battery_ok":true,"humidity":44,"wind_gust":"1.2","wind_avg":"1.2","wind_dir":150,"rain":146}
       mqtt_payload  = "{";
       mqtt_payload2 = "{";
       mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);

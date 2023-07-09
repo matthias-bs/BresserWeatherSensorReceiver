@@ -106,7 +106,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
-#include <string>
 
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception
@@ -153,6 +152,7 @@ int const num_sensors = 1;
 #endif
 
 
+#include <string>
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
@@ -161,7 +161,7 @@ int const num_sensors = 1;
 #include "WeatherUtils.h"
 #include "RainGauge.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20221024";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20230709";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -496,7 +496,7 @@ void publishWeatherdata(bool complete)
       for (int n=0; n<NUM_SENSORS; n++) {
         mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += String("/") + String(sensor_map[n].name);
+          mqtt_topic += String("/") + String(sensor_map[n].name.c_str());
         }
         else {
           mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);

@@ -846,7 +846,7 @@ First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final 
 DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize) {
 
   if (msg[21] == 0x00) {
-      log_e("DECODE_FAIL_SANITY !!!");
+      log_d("Data sanity check failed");
   }
   
   // data whitening

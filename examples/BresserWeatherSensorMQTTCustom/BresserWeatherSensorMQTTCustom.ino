@@ -664,6 +664,7 @@ void loop() {
         Serial.printf("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.loop();
         client.disconnect();
         client.loop();
         #ifdef LED_EN

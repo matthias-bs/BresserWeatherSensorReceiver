@@ -484,9 +484,9 @@ void publishWeatherdata(bool complete)
           mqtt_payload  += String(",\"lightning_count\":")       + String(weatherSensor.sensor[i].lightning_count);
           mqtt_payload  += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lightning_distance_km);
           mqtt_payload  += String(",\"lightning_unknown1\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown1, HEX).toUpperCase() + "\"";
+              + String(weatherSensor.sensor[i].lightning_unknown1, HEX).toUpperCase() + String("\"");
           mqtt_payload  += String(",\"lightning_unknown2\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown2, HEX).toUpperCase() + "\"";   
+              + String(weatherSensor.sensor[i].lightning_unknown2, HEX).toUpperCase() + String("\"");
       }
       mqtt_payload  += String("}");
       mqtt_payload2 += String("}");

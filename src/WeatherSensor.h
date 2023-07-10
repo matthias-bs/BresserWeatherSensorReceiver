@@ -397,7 +397,7 @@ class WeatherSensor {
              *  Byte #: 00 01 02 03...
              * <descr>: DE AD BE EF...
              */
-            void log_message(char *descr, uint8_t *msg, uint8_t msgSize) {
+            void log_message(const char *descr, uint8_t *msg, uint8_t msgSize) {
                 char buf[128];
                 const char txt[] = "Byte #: ";
                 int offs;

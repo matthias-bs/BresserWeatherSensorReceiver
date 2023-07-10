@@ -865,19 +865,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   }
 
   #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
-      char buf[128];
-      *buf = '\0';
-      // Print byte index
-      for (size_t i = 0 ; i < msgSize; i++) {
-          sprintf(&buf[strlen(buf)], "%02d ", i);
-      }
-      log_v("          Byte #: %s", buf);
-
-      *buf = '\0';
-      for (size_t i = 0 ; i < msgSize; i++) {
-          sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
-      }
-      log_v("De-whitened Data: %s", buf);
+      log_message("De-whitened Data", msgw, msgSize);
   #endif
 
   int id_tmp   = (msgw[2] << 8) | (msgw[3]);
@@ -1020,19 +1008,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
     }
     
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
-        char buf[128];
-        *buf = '\0';
-        // Print byte index
-        for (size_t i = 0 ; i < msgSize; i++) {
-            sprintf(&buf[strlen(buf)], "%02d ", i);
-        }
-        log_v("          Byte #: %s", buf);
-    
-        *buf = '\0';
-        for (size_t i = 0 ; i < msgSize; i++) {
-            sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
-        }
-        log_v("De-whitened Data: %s", buf);
+        log_message("De-whitened Data", msgw, msgSize);
     #endif
 
     int id_tmp  = (msgw[2] << 8) | (msgw[3]);

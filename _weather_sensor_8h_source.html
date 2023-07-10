@@ -323,7 +323,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        <span class="keywordtype">int</span> add_bytes(uint8_t <span class="keyword">const</span> message[], <span class="keywordtype">unsigned</span> num_bytes);</div>
 <div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160; </div>
 <div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;<span class="preprocessor">        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE</span></div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;            <span class="keywordtype">void</span> log_message(<span class="keywordtype">char</span> *descr, uint8_t *msg, uint8_t msgSize) {</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;            <span class="keywordtype">void</span> log_message(<span class="keyword">const</span> <span class="keywordtype">char</span> *descr, uint8_t *msg, uint8_t msgSize) {</div>
 <div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                <span class="keywordtype">char</span> buf[128];</div>
 <div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span> txt[] = <span class="stringliteral">&quot;Byte #: &quot;</span>;</div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                <span class="keywordtype">int</span> offs;</div>

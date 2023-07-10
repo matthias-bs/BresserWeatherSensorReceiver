@@ -402,7 +402,7 @@ class WeatherSensor {
                 const char txt[] = "Byte #: ";
                 int offs;
                 int len1 = strlen(txt);
-                int len2 = strlen(descr);
+                int len2 = strlen(descr) + 2; // add colon and space
                 int prefix_len = max(len1, len2);
     
                 memset(buf, ' ', prefix_len);

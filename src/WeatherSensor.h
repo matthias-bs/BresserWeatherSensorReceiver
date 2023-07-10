@@ -405,7 +405,7 @@ class WeatherSensor {
                 int len2 = strlen(descr);
                 int prefix_len = max(len1, len2);
     
-                memset(buf, " ", prefix_len);
+                memset(buf, ' ', prefix_len);
                 buf[prefix_len] = '\0';
                 offs = (len1 < len2) ? (len2 - len 1) : 0;
                 strcpy(&buf[offs], txt);
@@ -416,7 +416,7 @@ class WeatherSensor {
                 }
                 log_v("%s", buf);
           
-                memset(buf, " ", prefix_len);
+                memset(buf, ' ', prefix_len);
                 buf[prefix_len] ='\0';
                 offs = (len1 > len2) ? (len1 - len2) : 0;
                 strcpy(&buf[offs], descr);

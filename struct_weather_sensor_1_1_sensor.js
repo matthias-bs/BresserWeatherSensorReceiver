@@ -11,7 +11,7 @@ var struct_weather_sensor_1_1_sensor =
     [ "lightning_count", "struct_weather_sensor_1_1_sensor.html#a64b797dc2e77409c65c44efbcd8a62e9", null ],
     [ "lightning_distance_km", "struct_weather_sensor_1_1_sensor.html#a77fc13b3e0da95ae026c075330035383", null ],
     [ "lightning_ok", "struct_weather_sensor_1_1_sensor.html#a2908169e0db96a0e19f05cd68660578e", null ],
-    [ "lightning_unknown1", "struct_weather_sensor_1_1_sensor.html#af8c3c3c58d03cc7fb6a16886afee4716", null ],
+    [ "lightning_unknown1", "struct_weather_sensor_1_1_sensor.html#a08d79febedd862a6e9037fe55d4a3772", null ],
     [ "lightning_unknown2", "struct_weather_sensor_1_1_sensor.html#ab70ec898bffe156ba86e21a8b7984aee", null ],
     [ "moisture", "struct_weather_sensor_1_1_sensor.html#a7d81ebc4829395fc132b5077f5a40c47", null ],
     [ "moisture_ok", "struct_weather_sensor_1_1_sensor.html#adb4d7e0eab22ff15c08aa17ce44738fc", null ],

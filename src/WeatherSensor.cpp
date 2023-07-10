@@ -855,15 +855,6 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   for (unsigned i = 0; i < msgSize; ++i) {
       msgw[i] = msg[i] ^ 0xaa;
   }
-     
-  #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
-      char buf[128];
-      *buf = '\0';
-      for (size_t i = 0 ; i < msgSize; i++) {
-          sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
-      }
-      log_v("De-whitened Data: %s", buf);
-  #endif
 
   // LFSR-16 digest, generator 0x8810 key 0xba95 final xor 0x6df1
   int chkdgst = (msgw[0] << 8) | msgw[1];
@@ -872,6 +863,22 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
       log_d("Digest check failed - [%04X] vs [%04X] (%04X)", chkdgst, digest, chkdgst ^ digest);
       return DECODE_DIG_ERR;
   }
+
+  #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+      char buf[128];
+      *buf = '\0';
+      // Print byte index
+      for (size_t i = 0 ; i < msgSize; i++) {
+          sprintf(&buf[strlen(buf)], "%02d ", i);
+      }
+      log_v("Byte #:           %s", buf);
+
+      *buf = '\0';
+      for (size_t i = 0 ; i < msgSize; i++) {
+          sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
+      }
+      log_v("De-whitened Data: %s", buf);
+  #endif
 
   int id_tmp   = (msgw[2] << 8) | (msgw[3]);
   DecodeStatus status;
@@ -1003,22 +1010,6 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
             msgw[i] = msg[i] ^ 0xaa;
         #endif
     }
-
-    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
-        char buf[128];
-        *buf = '\0';
-        // Print byte index; skip last byte of preamble (D4)
-        for (size_t i = 1 ; i <= msgSize; i++) {
-            sprintf(&buf[strlen(buf)], "%02d ", i);
-        }
-        log_v("De-whitened Data:    %s", buf);
-    
-        *buf = '\0';
-        for (size_t i = 0 ; i < msgSize; i++) {
-            sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
-        }
-        log_v("De-whitened Data: %s", buf);
-    #endif
     
     // LFSR-16 digest, generator 0x8810 key 0xabf9 with a final xor 0x899e
     int chk    = (msgw[0] << 8) | msgw[1];
@@ -1027,6 +1018,22 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         log_d("Digest check failed - [%04X] vs [%04X] (%04X)", chk, digest, chk ^ digest);
         return DECODE_DIG_ERR;
     }
+    
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        char buf[128];
+        *buf = '\0';
+        // Print byte index
+        for (size_t i = 0 ; i < msgSize; i++) {
+            sprintf(&buf[strlen(buf)], "%02d ", i);
+        }
+        log_v("Byte #:           %s", buf);
+    
+        *buf = '\0';
+        for (size_t i = 0 ; i < msgSize; i++) {
+            sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
+        }
+        log_v("De-whitened Data: %s", buf);
+    #endif
 
     int id_tmp  = (msgw[2] << 8) | (msgw[3]);
 

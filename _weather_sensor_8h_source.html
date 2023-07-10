@@ -322,23 +322,55 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
 <div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        <span class="keywordtype">int</span> add_bytes(uint8_t <span class="keyword">const</span> message[], <span class="keywordtype">unsigned</span> num_bytes);</div>
 <div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160; </div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;<span class="preprocessor">        #ifdef _DEBUG_MODE_</span></div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;            <span class="keywordtype">void</span> printRawdata(uint8_t *msg, uint8_t msgSize) {</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;                DEBUG_PRINT(F(<span class="stringliteral">&quot;Raw Data: &quot;</span>));</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;                <span class="keywordflow">for</span> (uint8_t p = 0 ; p &lt; msgSize ; p++) {</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;                    <span class="keywordflow">if</span> (msg[p] &lt; 16) {</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;                        DEBUG_PRINT(<span class="stringliteral">&quot;0&quot;</span>);</div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;                    }</div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;                    DEBUG_PRINT(msg[p], HEX);</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                    DEBUG_PRINT(<span class="stringliteral">&quot; &quot;</span>);</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;                }</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                DEBUG_PRINTLN();</div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;            };</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;<span class="preprocessor">        #endif</span></div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160; </div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;};</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160; </div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;<span class="preprocessor">        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE</span></div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;            <span class="keywordtype">void</span> log_message(<span class="keywordtype">char</span> *descr, uint8_t *msg, uint8_t msgSize) {</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                <span class="keywordtype">char</span> buf[128];</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span> txt[] = <span class="stringliteral">&quot;Byte #: &quot;</span>;</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                <span class="keywordtype">int</span> offs;</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                <span class="keywordtype">int</span> len1 = strlen(txt);</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                <span class="keywordtype">int</span> len2 = strlen(descr);</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                <span class="keywordtype">int</span> prefix_len = max(len1, len2);</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    </div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                memset(buf, <span class="stringliteral">&quot; &quot;</span>, prefix_len);</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;                buf[prefix_len] = <span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                offs = (len1 &lt; len2) ? (len2 - len 1) : 0;</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                strcpy(&amp;buf[offs], txt);</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;              </div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                <span class="comment">// Print byte index</span></div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0 ; i &lt; msgSize; i++) {</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                    sprintf(&amp;buf[strlen(buf)], <span class="stringliteral">&quot;%02d &quot;</span>, i);</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                }</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                log_v(<span class="stringliteral">&quot;%s&quot;</span>, buf);</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;          </div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                memset(buf, <span class="stringliteral">&quot; &quot;</span>, prefix_len);</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                buf[prefix_len] =<span class="charliteral">&#39;\0&#39;</span>;</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                offs = (len1 &gt; len2) ? (len1 - len2) : 0;</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                strcpy(&amp;buf[offs], descr);</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;              </div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0 ; i &lt; msgSize; i++) {</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                    sprintf(&amp;buf[strlen(buf)], <span class="stringliteral">&quot;%02X &quot;</span>, msg[i]);</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;                }</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;                log_v(<span class="stringliteral">&quot;%s&quot;</span>, buf);</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;            }</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;<span class="preprocessor">        #endif</span></div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160; </div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;<span class="preprocessor">        #ifdef _DEBUG_MODE_</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;            <span class="keywordtype">void</span> printRawdata(uint8_t *msg, uint8_t msgSize) {</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                DEBUG_PRINT(F(<span class="stringliteral">&quot;Raw Data: &quot;</span>));</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;                <span class="keywordflow">for</span> (uint8_t p = 0 ; p &lt; msgSize ; p++) {</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;                    <span class="keywordflow">if</span> (msg[p] &lt; 16) {</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;                        DEBUG_PRINT(<span class="stringliteral">&quot;0&quot;</span>);</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;                    }</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;                    DEBUG_PRINT(msg[p], HEX);</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;                    DEBUG_PRINT(<span class="stringliteral">&quot; &quot;</span>);</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;                }</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;                DEBUG_PRINTLN();</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;            };</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;<span class="preprocessor">        #endif</span></div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160; </div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;};</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160; </div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="aclass_weather_sensor_html"><div class="ttname"><a href="class_weather_sensor.html">WeatherSensor</a></div><div class="ttdoc">Receive, decode and store Bresser Weather Sensor Data Uses CC1101 or SX1276 radio module for receivin...</div><div class="ttdef"><b>Definition:</b> WeatherSensor.h:135</div></div>
 <div class="ttc" id="aclass_weather_sensor_html_a05fbfc16fb2e13543591cb0b3cd8baaf"><div class="ttname"><a href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf">WeatherSensor::getMessage</a></div><div class="ttdeci">DecodeStatus getMessage(void)</div><div class="ttdoc">Tries to receive radio message (non-blocking) and to decode it. Timeout occurs after a multitude of e...</div><div class="ttdef"><b>Definition:</b> WeatherSensor.cpp:207</div></div>
 <div class="ttc" id="aclass_weather_sensor_html_a0adf85658be20d05e43e34c6b728b989"><div class="ttname"><a href="class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989">WeatherSensor::findId</a></div><div class="ttdeci">int findId(uint32_t id)</div><div class="ttdef"><b>Definition:</b> WeatherSensor.cpp:382</div></div>

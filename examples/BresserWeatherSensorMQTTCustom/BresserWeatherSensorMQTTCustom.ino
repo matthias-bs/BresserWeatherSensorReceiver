@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTTCustom.ino
+// BresserWeatherSensorMQTT.ino
 //
 // Example for BresserWeatherSensorReceiver -
 // this is finally a useful application.
@@ -27,7 +27,7 @@
 // Based on:
 // arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
-//
+
 // MQTT subscriptions:
 //     - none -
 //
@@ -83,11 +83,11 @@
 //          Added rain gauge statistics
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.
-// 20221024 Modified WeatherSensorCfg.h/WeatherSensor.h handling
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230114 Fixed rain gauge update
 // 20230124 Improved WiFi connection robustness
 // 20230708 Changed MQTT payload and topic from char[] to String
+// 20230710 Added optional JSON output of floating point values as strings
 //
 // ToDo:
 //
@@ -111,6 +111,7 @@
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO        2       // LED pin
+#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size
@@ -126,6 +127,16 @@
 #define USE_SECUREWIFI          // use secure WIFI
 //#define USE_WIFI              // use non-secure WIFI
 
+// See
+// https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
+// and
+// https://stackoverflow.com/questions/35709595/why-would-you-use-a-string-in-json-to-represent-a-decimal-number
+//
+// Summary:
+// A string representation of a float (e.g. "temp_c":"21.5") is recommended if the value shall displayed with the specified number of decimals.
+// Otherwise the float value can be output as a numerical value (e.g. "temp_c":21.5).
+//
+//#define JSON_FLOAT_AS_STRING
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
@@ -149,14 +160,21 @@
     #include <ESP8266WiFi.h>
 #endif
 
+
 #include <string>
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include "src/WeatherSensorCfg.h"
-#include "src/WeatherSensor.h"
-#include "src/WeatherUtils.h"
-#include "src/RainGauge.h"
+#include "WeatherSensorCfg.h"
+#include "WeatherSensor.h"
+#include "WeatherUtils.h"
+#include "RainGauge.h"
+
+#if defined(JSON_FLOAT_AS_STRING)
+    #define JSON_FLOAT(x) String("\"") + x + String("\"")
+#else
+    #define JSON_FLOAT(x) x
+#endif
 
 const char sketch_id[] = "BresserWeatherSensorMQTT 20230709";
 
@@ -176,21 +194,16 @@ SensorMap sensor_map[NUM_SENSORS] = {
 #include "secrets.h"
 
 #ifndef SECRETS
-    // Optionally copy everything between BEGIN secrets / END secrets to secrets.h
-    // Otherwise, leave secrets.h as an empty file and edit the contents below.
+    const char ssid[] = "WiFiSSID";
+    const char pass[] = "WiFiPassword";
 
-    // BEGIN secrets
-    #define SECRETS
-    const char ssid[] = "SSID";
-    const char pass[] = "password";
-
-    #define HOSTNAME "BresserDomo"
+    #define HOSTNAME "ESPWeather"
     #define APPEND_CHIP_ID
 
-    const int  MQTT_PORT   = 8883; // typically 8883 with TLS / 1883 without TLS
+    #define    MQTT_PORT     8883 // checked by pre-processor!
     const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = "";   // leave blank if no credentials used
-    const char MQTT_PASS[] = "";   // leave blank if no credentials used
+    const char MQTT_USER[] = ""; // leave blank if no credentials used
+    const char MQTT_PASS[] = ""; // leave blank if no credentials used
 
     #ifdef CHECK_CA_ROOT
     static const char digicert[] PROGMEM = R"EOF(
@@ -299,7 +312,6 @@ time_t now;
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
 
-
 //
 // Wait for WiFi connection
 //
@@ -317,7 +329,6 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 }
 
 
-//
 // Setup WiFi in Station Mode
 //
 void mqtt_setup(void)
@@ -405,6 +416,7 @@ void messageReceived(String &topic, String &payload)
 */
 
 
+
 /*!
   \brief Publish weather data as MQTT message
 
@@ -436,7 +448,7 @@ void publishWeatherdata(bool complete)
       }
 
       // Example:
-      // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":"1.2","wind_avg":"1.2","wind_dir":150,"rain":146}
+      // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
       mqtt_payload  = "{";
       mqtt_payload2 = "{";
       mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
@@ -445,15 +457,15 @@ void publishWeatherdata(bool complete)
       #endif
       mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
       if (weatherSensor.sensor[i].temp_ok || complete) {
-          mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].temp_c, 1);
+          mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].temp_c, 1));
       }
       if (weatherSensor.sensor[i].humidity_ok || complete) {
           mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].humidity);
       }
       if (weatherSensor.sensor[i].wind_ok || complete) {
-          mqtt_payload += String(",\"wind_gust\":") + String(weatherSensor.sensor[i].wind_gust_meter_sec, 1);
-          mqtt_payload += String(",\"wind_avg\":")  + String(weatherSensor.sensor[i].wind_avg_meter_sec, 1);
-          mqtt_payload += String(",\"wind_dir\":")  + String(weatherSensor.sensor[i].wind_direction_deg, 1);
+          mqtt_payload += String(",\"wind_gust\":") + JSON_FLOAT(String(weatherSensor.sensor[i].wind_gust_meter_sec, 1));
+          mqtt_payload += String(",\"wind_avg\":")  + JSON_FLOAT(String(weatherSensor.sensor[i].wind_avg_meter_sec, 1));
+          mqtt_payload += String(",\"wind_dir\":")  + JSON_FLOAT(String(weatherSensor.sensor[i].wind_direction_deg, 1));
       }
       if (weatherSensor.sensor[i].wind_ok) {
           char buf[4];
@@ -462,24 +474,25 @@ void publishWeatherdata(bool complete)
           mqtt_payload2 += String(",\"wind_avg_bft\":")  + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
       }
       if ((weatherSensor.sensor[i].temp_ok) && (weatherSensor.sensor[i].humidity_ok)) {
-        mqtt_payload2 += String(",\"dewpoint_c\":") + String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1);
+        mqtt_payload2 += String(",\"dewpoint_c\":")
+            + JSON_FLOAT(String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1));
 
         if (weatherSensor.sensor[i].wind_ok) {
           mqtt_payload2 += String(",\"perceived_temp_c\":") 
-              + String(perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity), 1);
+              + JSON_FLOAT(String(perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity), 1));
         }
       }
       if (weatherSensor.sensor[i].uv_ok || complete) {
-          mqtt_payload += String(",\"uv\":") + String(weatherSensor.sensor[i].uv, 1);
+          mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].uv, 1));
       }
       if (weatherSensor.sensor[i].light_ok || complete) {
-          mqtt_payload += String(",\"light_klx\":") + String(weatherSensor.sensor[i].light_klx, 1);
+          mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].light_klx, 1));
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
-          mqtt_payload += String(",\"rain\":")  + String(weatherSensor.sensor[i].rain_mm, 1);
-          mqtt_payload += String(",\"rain_d\":") + String(rainGauge.currentDay(), 1);
-          mqtt_payload += String(",\"rain_w\":") + String(rainGauge.currentWeek(), 1);
-          mqtt_payload += String(",\"rain_m\":") + String(rainGauge.currentMonth(), 1);
+          mqtt_payload += String(",\"rain\":")   + JSON_FLOAT(String(weatherSensor.sensor[i].rain_mm, 1));
+          mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
+          mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
+          mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
       }
       if (weatherSensor.sensor[i].moisture_ok || complete) {
           mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].moisture);
@@ -546,7 +559,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.printf("%s: %s\n", mqttPubRadio, mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio, mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -669,11 +682,13 @@ void loop() {
 
     // Go to sleep only after complete set of data has been sent
     if (SLEEP_EN && (decode_ok || force_sleep)) {
-        if (force_sleep) {
-            log_d("Awake time-out!");
-        } else {
-            log_d("Data forwarding completed.");
-        }
+        #ifdef _DEBUG_MODE_
+            if (force_sleep) {
+                Serial.println(F("Awake time-out!"));
+            } else {
+                Serial.println(F("Data forwarding completed."));
+            }
+        #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
         Serial.printf("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();

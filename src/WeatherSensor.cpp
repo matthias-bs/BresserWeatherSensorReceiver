@@ -871,7 +871,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
       for (size_t i = 0 ; i < msgSize; i++) {
           sprintf(&buf[strlen(buf)], "%02d ", i);
       }
-      log_v("Byte #:           %s", buf);
+      log_v("          Byte #: %s", buf);
 
       *buf = '\0';
       for (size_t i = 0 ; i < msgSize; i++) {
@@ -1026,7 +1026,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         for (size_t i = 0 ; i < msgSize; i++) {
             sprintf(&buf[strlen(buf)], "%02d ", i);
         }
-        log_v("Byte #:           %s", buf);
+        log_v("          Byte #: %s", buf);
     
         *buf = '\0';
         for (size_t i = 0 ; i < msgSize; i++) {

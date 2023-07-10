@@ -328,7 +328,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                <span class="keyword">const</span> <span class="keywordtype">char</span> txt[] = <span class="stringliteral">&quot;Byte #: &quot;</span>;</div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                <span class="keywordtype">int</span> offs;</div>
 <div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                <span class="keywordtype">int</span> len1 = strlen(txt);</div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                <span class="keywordtype">int</span> len2 = strlen(descr);</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                <span class="keywordtype">int</span> len2 = strlen(descr) + 2; <span class="comment">// add colon and space</span></div>
 <div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                <span class="keywordtype">int</span> prefix_len = max(len1, len2);</div>
 <div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    </div>
 <div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                memset(buf, <span class="charliteral">&#39; &#39;</span>, prefix_len);</div>

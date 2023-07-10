@@ -345,7 +345,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                memset(buf, <span class="charliteral">&#39; &#39;</span>, prefix_len);</div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                buf[prefix_len] =<span class="charliteral">&#39;\0&#39;</span>;</div>
 <div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                offs = (len1 &gt; len2) ? (len1 - len2) : 0;</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                strcpy(&amp;buf[offs], descr);</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                sprintf(&amp;buf[offs], <span class="stringliteral">&quot;%s:&quot;</span>, descr);</div>
 <div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;              </div>
 <div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0 ; i &lt; msgSize; i++) {</div>
 <div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                    sprintf(&amp;buf[strlen(buf)], <span class="stringliteral">&quot;%02X &quot;</span>, msg[i]);</div>

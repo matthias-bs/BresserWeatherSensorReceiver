@@ -519,7 +519,7 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
-      String mqtt_topic_sensor;
+      String sensor_str;
       for (int n=0; n<NUM_SENSORS; n++) {
         //mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {

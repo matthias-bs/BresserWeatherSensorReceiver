@@ -221,7 +221,7 @@ class WeatherSensor {
             uint8_t  moisture;              //!< moisture in % (only 6-in-1)
             uint8_t  lightning_distance_km; //!< lightning distance in km (only lightning)
             uint8_t  lightning_count;       //!< lightning strike counter (only lightning)
-            uint8_t  lightning_unknown1;    //!< unknown part 1
+            uint16_t lightning_unknown1;    //!< unknown part 1
             uint16_t lightning_unknown2;    //!< unknown part 2
             float    rssi;                  //!< received signal strength indicator in dBm
         };

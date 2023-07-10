@@ -483,7 +483,7 @@ void publishWeatherdata(bool complete)
         }
       }
       if (weatherSensor.sensor[i].uv_ok || complete) {
-          mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].uv, 1);
+          mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].uv, 1));
       }
       if (weatherSensor.sensor[i].light_ok || complete) {
           mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].light_klx, 1));

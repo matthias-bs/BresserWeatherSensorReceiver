@@ -272,7 +272,7 @@ const char MQTT_PUB_STATUS[]      = "/status";
 const char MQTT_PUB_RADIO[]       = "/radio";
 const char MQTT_PUB_DATA[]        = "data";
 const char MQTT_PUB_RSSI[]        = "rssi";
-const char MQTT_PUB_EXTRA[]       = "/extra";
+const char MQTT_PUB_EXTRA[]       = "extra";
 
 
 char mqttPubStatus[TOPIC_SIZE];
@@ -551,7 +551,7 @@ void publishWeatherdata(bool complete)
       client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
         
       // extra data
-      mqtt_topic = String(HOSTNAME) + String('/') + String(MQTT_PUB_EXTRA);
+      mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
       
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());

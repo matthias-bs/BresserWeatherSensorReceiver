@@ -850,7 +850,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
       log_d("Data sanity check failed");
   }
   
-  // data whitening
+  // data de-whitening
   uint8_t msgw[MSG_BUF_SIZE];
   for (unsigned i = 0; i < msgSize; ++i) {
       msgw[i] = msg[i] ^ 0xaa;
@@ -859,7 +859,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
       char buf[128];
       *buf = '\0';
-      for(size_t i = 0 ; i < sizeof(msgSize) ; i++) {
+      for (size_t i = 0 ; i < msgSize; i++) {
           sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
       }
       log_v("De-whitened Data: %s", buf);
@@ -1007,7 +1007,14 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         char buf[128];
         *buf = '\0';
-        for(size_t i = 0 ; i < sizeof(msgSize) ; i++) {
+        // Print byte index; skip last byte of preamble (D4)
+        for (size_t i = 1 ; i <= msgSize; i++) {
+            sprintf(&buf[strlen(buf)], "%02d ", i);
+        }
+        log_v("De-whitened Data:    %s", buf);
+    
+        *buf = '\0';
+        for (size_t i = 0 ; i < msgSize; i++) {
             sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
         }
         log_v("De-whitened Data: %s", buf);

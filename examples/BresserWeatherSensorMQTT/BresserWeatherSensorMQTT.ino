@@ -277,8 +277,6 @@ const char MQTT_PUB_EXTRA[]       = "extra";
 
 char mqttPubStatus[TOPIC_SIZE];
 char mqttPubRadio[TOPIC_SIZE];
-char mqttPubData[TOPIC_SIZE];
-char mqttPubExtra[TOPIC_SIZE];
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -522,7 +520,6 @@ void publishWeatherdata(bool complete)
       // Try to map sensor ID to name to make MQTT topic explanatory
       String sensor_str;
       for (int n=0; n<NUM_SENSORS; n++) {
-        //mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
           sensor_str = String(sensor_map[n].name.c_str());
         }
@@ -554,10 +551,11 @@ void publishWeatherdata(bool complete)
       mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
       
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
       #endif
       if (mqtt_payload2.length() > 2) {
-        log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
+        log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
         client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
@@ -611,10 +609,6 @@ void setup() {
 
     snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
     snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
-    /*
-    snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
-    snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
-    */
     
     mqtt_setup();
     weatherSensor.begin();

@@ -385,6 +385,49 @@ class WeatherSensor {
         */
         int add_bytes(uint8_t const message[], unsigned num_bytes);
 
+        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+            /*!
+             * \brief Log message payload
+             *
+             * \param descr    Description.
+             * \param msg      Message buffer.
+             * \param msgSize  Message size.
+             *
+             * Result (example):
+             *  Byte #: 00 01 02 03...
+             * <descr>: DE AD BE EF...
+             */
+            void log_message(char *descr, uint8_t *msg, uint8_t msgSize) {
+                char buf[128];
+                const char txt[] = "Byte #: ";
+                int offs;
+                int len1 = strlen(txt);
+                int len2 = strlen(descr);
+                int prefix_len = max(len1, len2);
+    
+                memset(buf, " ", prefix_len);
+                buf[prefix_len] = '\0';
+                offs = (len1 < len2) ? (len2 - len 1) : 0;
+                strcpy(&buf[offs], txt);
+              
+                // Print byte index
+                for (size_t i = 0 ; i < msgSize; i++) {
+                    sprintf(&buf[strlen(buf)], "%02d ", i);
+                }
+                log_v("%s", buf);
+          
+                memset(buf, " ", prefix_len);
+                buf[prefix_len] ='\0';
+                offs = (len1 > len2) ? (len1 - len2) : 0;
+                strcpy(&buf[offs], descr);
+              
+                for (size_t i = 0 ; i < msgSize; i++) {
+                    sprintf(&buf[strlen(buf)], "%02X ", msg[i]);
+                }
+                log_v("%s", buf);
+            }
+        #endif
+
         #ifdef _DEBUG_MODE_
             /*!
             \brief Print raw message payload as hex byte values.

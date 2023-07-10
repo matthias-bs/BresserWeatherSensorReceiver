@@ -32,7 +32,8 @@
 //     - none -
 //
 // MQTT publications:
-//     <base_topic>/data/<ID|Name>  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/data  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/rssi  sensor specific RSSI
 //     <base_topic>/extra           calculated data
 //     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
@@ -88,6 +89,7 @@
 // 20230124 Improved WiFi connection robustness
 // 20230708 Changed MQTT payload and topic from char[] to String
 // 20230710 Added optional JSON output of floating point values as strings
+//          Modified MQTT topics
 //
 // ToDo:
 //
@@ -270,6 +272,7 @@ const char MQTT_PUB_STATUS[]      = "/status";
 const char MQTT_PUB_RADIO[]       = "/radio";
 const char MQTT_PUB_DATA[]        = "/data";
 const char MQTT_PUB_EXTRA[]       = "/extra";
+const char MQTT_PUB_RSSI[]        = "/rssi";
 
 char mqttPubStatus[TOPIC_SIZE];
 char mqttPubRadio[TOPIC_SIZE];
@@ -516,17 +519,23 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
+      String mqtt_topic_sensor;
       for (int n=0; n<NUM_SENSORS; n++) {
-        mqtt_topic = String(mqttPubData);
+        //mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += String("/") + String(sensor_map[n].name.c_str());
+          sensor_str = String(sensor_map[n].name.c_str());
         }
         else {
-          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);
+          sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
         }
       }
-
+        
+      String mqtt_topic_base = String(HOSTNAME) + String('/') + sensor_str + String('/');
+      String mqtt_topic;
+        
       // sensor data
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
+      
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         char mqtt_topic_tmp[TOPIC_SIZE];
         char mqtt_payload_tmp[PAYLOAD_SIZE];
@@ -536,13 +545,19 @@ void publishWeatherdata(bool complete)
       log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
       client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
 
+      // sensor specific RSSI
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
+      client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+        
       // extra data
+      mqtt_topic = String(HOSTNAME) + String('/') + String(MQTT_PUB_EXTRA);
+      
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
       #endif
       if (mqtt_payload2.length() > 2) {
         log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
-        client.publish(mqttPubExtra, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
+        client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }
@@ -595,9 +610,11 @@ void setup() {
 
     snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
     snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
+    /*
     snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
     snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
-
+    */
+    
     mqtt_setup();
     weatherSensor.begin();
 }

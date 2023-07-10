@@ -419,7 +419,7 @@ class WeatherSensor {
                 memset(buf, ' ', prefix_len);
                 buf[prefix_len] ='\0';
                 offs = (len1 > len2) ? (len1 - len2) : 0;
-                sprintf(&buf[offs], "%s:", descr);
+                sprintf(&buf[offs], "%s: ", descr);
               
                 for (size_t i = 0 ; i < msgSize; i++) {
                     sprintf(&buf[strlen(buf)], "%02X ", msg[i]);

@@ -270,9 +270,10 @@ RainGauge     rainGauge;
 // MQTT topics
 const char MQTT_PUB_STATUS[]      = "/status";
 const char MQTT_PUB_RADIO[]       = "/radio";
-const char MQTT_PUB_DATA[]        = "/data";
+const char MQTT_PUB_DATA[]        = "data";
+const char MQTT_PUB_RSSI[]        = "rssi";
 const char MQTT_PUB_EXTRA[]       = "/extra";
-const char MQTT_PUB_RSSI[]        = "/rssi";
+
 
 char mqttPubStatus[TOPIC_SIZE];
 char mqttPubRadio[TOPIC_SIZE];
@@ -530,7 +531,7 @@ void publishWeatherdata(bool complete)
         }
       }
         
-      String mqtt_topic_base = String(HOSTNAME) + String('/') + sensor_str + String('/');
+      String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
       String mqtt_topic;
         
       // sensor data

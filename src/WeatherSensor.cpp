@@ -61,6 +61,7 @@
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230613 Fixed rain value in 7 in 1 decoder
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
+// 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
 //
 // ToDo:
 // -
@@ -854,6 +855,15 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   for (unsigned i = 0; i < msgSize; ++i) {
       msgw[i] = msg[i] ^ 0xaa;
   }
+     
+  #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+      char buf[128];
+      *buf = '\0';
+      for(size_t i = 0 ; i < sizeof(msgSize) ; i++) {
+          sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
+      }
+      log_v("De-whitened Data: %s", buf);
+  #endif
 
   // LFSR-16 digest, generator 0x8810 key 0xba95 final xor 0x6df1
   int chkdgst = (msgw[0] << 8) | msgw[1];
@@ -979,23 +989,33 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
         uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
     #endif
     
-    #if 0
+    #if defined(LIGHTNING_TEST_DATA)
     uint8_t test_data[] = { 0x73, 0x69, 0xB5, 0x08, 0xAA, 0xA2, 0x90, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
      0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x15 };
     #endif
 
-    // data whitening
+    // data de-whitening
     uint8_t msgw[MSG_BUF_SIZE];
     for (unsigned i = 0; i < msgSize; ++i) {
-        msgw[i] = msg[i] ^ 0xaa;
-        //msgw[i] = test_data[i] ^ 0xaa;
+        #if defined(LIGHTNING_TEST_DATA)
+            msgw[i] = test_data[i] ^ 0xaa;
+        #else
+            msgw[i] = msg[i] ^ 0xaa;
+        #endif
     }
+
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        char buf[128];
+        *buf = '\0';
+        for(size_t i = 0 ; i < sizeof(msgSize) ; i++) {
+            sprintf(&buf[strlen(buf)], "%02X ", msgw[i]);
+        }
+        log_v("De-whitened Data: %s", buf);
+    #endif
     
     // LFSR-16 digest, generator 0x8810 key 0xabf9 with a final xor 0x899e
     int chk    = (msgw[0] << 8) | msgw[1];
     int digest = lfsr_digest16(&msgw[2], 8, 0x8810, 0xabf9);
-    //fprintf(stderr, "DIGEST %04x vs %04x (%04x) \n", chk, digest, chk ^ digest);
-    //if (((chk ^ digest) != 0x899e) && ((chk ^ digest) != 0x8b9e)) {
     if (((chk ^ digest) != 0x899e)) {
         log_d("Digest check failed - [%04X] vs [%04X] (%04X)", chk, digest, chk ^ digest);
         return DECODE_DIG_ERR;

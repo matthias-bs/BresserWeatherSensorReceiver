@@ -331,7 +331,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                <span class="keywordtype">int</span> len2 = strlen(descr);</div>
 <div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;                <span class="keywordtype">int</span> prefix_len = max(len1, len2);</div>
 <div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    </div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                memset(buf, <span class="stringliteral">&quot; &quot;</span>, prefix_len);</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;                memset(buf, <span class="charliteral">&#39; &#39;</span>, prefix_len);</div>
 <div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;                buf[prefix_len] = <span class="charliteral">&#39;\0&#39;</span>;</div>
 <div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                offs = (len1 &lt; len2) ? (len2 - len 1) : 0;</div>
 <div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                strcpy(&amp;buf[offs], txt);</div>
@@ -342,7 +342,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_8h_source.html',''); i
 <div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                }</div>
 <div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                log_v(<span class="stringliteral">&quot;%s&quot;</span>, buf);</div>
 <div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;          </div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                memset(buf, <span class="stringliteral">&quot; &quot;</span>, prefix_len);</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                memset(buf, <span class="charliteral">&#39; &#39;</span>, prefix_len);</div>
 <div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                buf[prefix_len] =<span class="charliteral">&#39;\0&#39;</span>;</div>
 <div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                offs = (len1 &gt; len2) ? (len1 - len2) : 0;</div>
 <div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                strcpy(&amp;buf[offs], descr);</div>

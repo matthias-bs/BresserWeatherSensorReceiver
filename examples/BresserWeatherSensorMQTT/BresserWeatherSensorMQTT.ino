@@ -346,8 +346,11 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 }
 
 
-// Setup WiFi in Station Mode
-//
+/*!
+ * \brief WiFiManager Setup
+ *
+ * Configures WiFi access point and MQTT connection parameters
+ */
 void mqtt_setup(void)
 {
     log_i("Attempting to connect to SSID: %s", ssid);
@@ -369,7 +372,7 @@ void mqtt_setup(void)
             Serial.print(".");
             now = time(nullptr);
         }
-        Serial.println("\ndone!");
+        log_i("\ndone!");
         struct tm timeinfo;
         gmtime_r(&now, &timeinfo);
         log_i("Current time: %s", asctime(&timeinfo));
@@ -411,9 +414,9 @@ void mqtt_setup(void)
 }
 
 
-//
-// (Re-)Connect to WLAN and connect MQTT broker
-//
+/*!
+ * \brief (Re-)Connect to WLAN and connect MQTT broker
+ */
 void mqtt_connect(void)
 {
     Serial.print(F("Checking wifi..."));
@@ -426,7 +429,7 @@ void mqtt_connect(void)
         delay(1000);
     }
 
-    Serial.println(F("connected!"));
+    log_i("\nconnected!");
     //client.subscribe(MQTT_SUB_IN);
     log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
@@ -598,7 +601,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio, mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str()), mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -724,7 +727,7 @@ void loop() {
             }
         #endif
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus, "offline");
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();

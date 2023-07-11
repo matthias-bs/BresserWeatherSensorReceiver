@@ -359,7 +359,7 @@ void wifi_wait(int wifi_retries, int wifi_delay)
         Serial.print(".");
         delay(wifi_delay);
         if (++count == wifi_retries) {
-            Serial.printf("WiFi connection timed out, will restart after %d s\n", SLEEP_INTERVAL/1000);
+            log_e("\nWiFi connection timed out, will restart after %d s", SLEEP_INTERVAL/1000);
             ESP.deepSleep(SLEEP_INTERVAL * 1000);
         }
     }
@@ -381,13 +381,13 @@ void wifimgr_setup(void)
   Serial.println("mounting FS...");
 
   if (SPIFFS.begin()) {
-    Serial.println("mounted file system");
+    log_i("mounted file system");
     if (SPIFFS.exists("/config.json")) {
       // file exists, reading and loading
-      Serial.println("reading config file");
+      log_i("reading config file");
       File configFile = SPIFFS.open("/config.json", "r");
       if (configFile) {
-        Serial.println("opened config file");
+        log_i("opened config file");
         size_t size = configFile.size();
         // Allocate a buffer to store contents of the file.
         std::unique_ptr<char[]> buf(new char[size]);
@@ -411,7 +411,7 @@ void wifimgr_setup(void)
       }
     }
   } else {
-    Serial.println("failed to mount FS");
+    log_e("failed to mount FS");
   }
   //end read
 
@@ -473,22 +473,22 @@ void wifimgr_setup(void)
   }
 
   // if you get here you have connected to the WiFi
-  Serial.println("connected...yeey :)");
+  log_i("connected...yeey :)");
 
   // read updated parameters
   strcpy(mqtt_host, custom_mqtt_server.getValue());
   strcpy(mqtt_port, custom_mqtt_port.getValue());
   strcpy(mqtt_user, custom_mqtt_user.getValue());
   strcpy(mqtt_pass, custom_mqtt_pass.getValue());
-  Serial.println("The values in the file are: ");
-  Serial.println("\tmqtt_server : " + String(mqtt_host));
-  Serial.println("\tmqtt_port : " + String(mqtt_port));
-  Serial.println("\tmqtt_user : " + String(mqtt_user));
-  Serial.println("\tmqtt_pass : ***");
+  log_i("The values in the file are: ");
+  log_i("\tmqtt_server : " + String(mqtt_host));
+  log_i("\tmqtt_port : " + String(mqtt_port));
+  log_i("\tmqtt_user : " + String(mqtt_user));
+  log_i("\tmqtt_pass : ***");
 
   // save the custom parameters to FS
   if (shouldSaveConfig) {
-    Serial.println("saving config");
+    log_i("saving config");
  
     DynamicJsonDocument json(1024);
     json["mqtt_server"] = mqtt_host;
@@ -498,7 +498,7 @@ void wifimgr_setup(void)
 
     File configFile = SPIFFS.open("/config.json", "w");
     if (!configFile) {
-      Serial.println("failed to open config file for writing");
+      log_e("failed to open config file for writing");
     }
 
     serializeJson(json, Serial);
@@ -508,8 +508,8 @@ void wifimgr_setup(void)
     //end save
   }
 
-  Serial.println("local ip");
-  Serial.println(WiFi.localIP());
+  log_i("local ip");
+  log_i("%s", WiFi.localIP());
 }
 
 
@@ -520,7 +520,7 @@ void wifimgr_setup(void)
 {
     #ifdef USE_SECUREWIFI
         // Note: TLS security needs correct time
-        Serial.print("Setting time using SNTP ");
+        log_i("Setting time using SNTP");
         configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
         now = time(nullptr);
         while (now < 1510592825)
@@ -529,22 +529,33 @@ void wifimgr_setup(void)
             Serial.print(".");
             now = time(nullptr);
         }
-        Serial.println("done!");
+        log_i("\ndone!");
         struct tm timeinfo;
         gmtime_r(&now, &timeinfo);
-        Serial.print("Current time: ");
-        Serial.println(asctime(&timeinfo));
+        log_i("Current time: %s", asctime(&timeinfo));
 
-        #ifdef CHECK_CA_ROOT
-            BearSSL::X509List cert(digicert);
-            net.setTrustAnchors(&cert);
-        #endif
-        #ifdef CHECK_PUB_KEY
-            BearSSL::PublicKey key(pubkey);
-            net.setKnownKey(&key);
-        #endif
-        #ifdef CHECK_FINGERPRINT
-            net.setFingerprint(fp);
+             #if defined(ESP8266)
+            #ifdef CHECK_CA_ROOT
+                BearSSL::X509List cert(digicert);
+                net.setTrustAnchors(&cert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                BearSSL::PublicKey key(pubkey);
+                net.setKnownKey(&key);
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
+        #elif defined(ESP32)
+            #ifdef CHECK_CA_ROOT
+                net.setCACert(digicert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                error "CHECK_PUB_KEY: not implemented"
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
         #endif
         #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
             // do not verify tls certificate
@@ -555,7 +566,7 @@ void wifimgr_setup(void)
 
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus, "dead", true /* retained*/, 1 /* qos */);
+    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -575,9 +586,9 @@ void mqtt_connect(void)
         delay(1000);
     }
 
-    Serial.println(F("connected!"));
+    log_i("\nconnected!");
     //client.subscribe(MQTT_SUB_IN);
-    Serial.printf("%s: %s\n", mqttPubStatus, "online");
+    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
 
@@ -692,17 +703,22 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
+      String sensor_str;
       for (int n=0; n<NUM_SENSORS; n++) {
-        mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += String("/") + String(sensor_map[n].name.c_str());
+          sensor_str = String(sensor_map[n].name.c_str());
         }
         else {
-          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);
+          sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
         }
       }
 
+      String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
+      String mqtt_topic;
+        
       // sensor data
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
+
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         char mqtt_topic_tmp[TOPIC_SIZE];
         char mqtt_payload_tmp[PAYLOAD_SIZE];
@@ -712,13 +728,20 @@ void publishWeatherdata(bool complete)
       log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
       client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
 
+      // sensor specific RSSI
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
+      client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+        
       // extra data
+      mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
+      
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
       #endif
       if (mqtt_payload2.length() > 2) {
-        log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
-        client.publish(mqttPubExtra, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
+        log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+        client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }
@@ -735,7 +758,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.printf("%s: %s\n", mqttPubRadio, mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -747,10 +770,7 @@ void publishRadio(void)
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
-    Serial.println();
-    Serial.println();
-    Serial.println(sketch_id);
-    Serial.println();
+    log_i("\n\n%s\n", sketch_id);
 
     #ifdef LED_EN
       // Configure LED output pins
@@ -769,10 +789,8 @@ void setup() {
         snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
-    snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
-    snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
-    snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
-    snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
+    mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
+    mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
     if (drd->detectDoubleReset())
@@ -836,7 +854,7 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        Serial.printf("%s: %s\n", mqttPubStatus, "online");
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -853,7 +871,7 @@ void loop() {
         #endif
 
         // Attempt to receive data set with timeout of <xx> s
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_COMPLETE, 0, &clientLoopWrapper);
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN
@@ -882,8 +900,8 @@ void loop() {
                 Serial.println(F("Data forwarding completed."));
             }
         #endif
-        Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
+        log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();

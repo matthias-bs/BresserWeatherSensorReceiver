@@ -32,7 +32,8 @@
 //     - none -
 //
 // MQTT publications:
-//     <base_topic>/data/<ID|Name>  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/data  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/rssi  sensor specific RSSI
 //     <base_topic>/extra           calculated data
 //     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
@@ -88,6 +89,10 @@
 // 20230124 Improved WiFi connection robustness
 // 20230708 Changed MQTT payload and topic from char[] to String
 // 20230710 Added optional JSON output of floating point values as strings
+//          Modified MQTT topics
+// 20230711 Changed remaining MQTT topics from char[] to String
+//          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
+//          Added define RX_STRATEGY
 //
 // ToDo:
 //
@@ -114,7 +119,7 @@
 #define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
-#define TOPIC_SIZE      60      // maximum MQTT topic size
+#define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
 #define HOSTNAME_SIZE   30      // maximum hostname size
 #define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
@@ -126,6 +131,12 @@
 #define SLEEP_EN        true    // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI          // use secure WIFI
 //#define USE_WIFI              // use non-secure WIFI
+
+// Stop reception when data of at least one sensor is complete
+#define RX_STRATEGY DATA_COMPLETE
+
+// Stop reception when data of all (NUM_SENSORS) is complete
+//#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // See
 // https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
@@ -266,21 +277,20 @@ WeatherSensor weatherSensor;
 RainGauge     rainGauge;
 
 // MQTT topics
-const char MQTT_PUB_STATUS[]      = "/status";
-const char MQTT_PUB_RADIO[]       = "/radio";
-const char MQTT_PUB_DATA[]        = "/data";
-const char MQTT_PUB_EXTRA[]       = "/extra";
+const char MQTT_PUB_STATUS[]      = "status";
+const char MQTT_PUB_RADIO[]       = "radio";
+const char MQTT_PUB_DATA[]        = "data";
+const char MQTT_PUB_RSSI[]        = "rssi";
+const char MQTT_PUB_EXTRA[]       = "extra";
 
-char mqttPubStatus[TOPIC_SIZE];
-char mqttPubRadio[TOPIC_SIZE];
-char mqttPubData[TOPIC_SIZE];
-char mqttPubExtra[TOPIC_SIZE];
+String mqttPubStatus;
+String mqttPubRadio;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
 
 #if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
-#error "cant have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
+#error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
 // Generate WiFi network instance
@@ -322,7 +332,7 @@ void wifi_wait(int wifi_retries, int wifi_delay)
         Serial.print(".");
         delay(wifi_delay);
         if (++count == wifi_retries) {
-            Serial.printf("WiFi connection timed out, will restart after %d s\n", SLEEP_INTERVAL/1000);
+            log_e("\nWiFi connection timed out, will restart after %d s", SLEEP_INTERVAL/1000);
             ESP.deepSleep(SLEEP_INTERVAL * 1000);
         }
     }
@@ -333,18 +343,17 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 //
 void mqtt_setup(void)
 {
-    Serial.print(F("Attempting to connect to SSID: "));
-    Serial.print(ssid);
+    log_i("Attempting to connect to SSID: %s", ssid);
     WiFi.hostname(Hostname);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
-    Serial.println(F("connected!"));
+    log_i("connected!");
 
 
     #ifdef USE_SECUREWIFI
         // Note: TLS security needs correct time
-        Serial.print("Setting time using SNTP ");
+        log_i("Setting time using SNTP");
         configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
         now = time(nullptr);
         while (now < 1510592825)
@@ -353,22 +362,33 @@ void mqtt_setup(void)
             Serial.print(".");
             now = time(nullptr);
         }
-        Serial.println("done!");
+        Serial.println("\ndone!");
         struct tm timeinfo;
         gmtime_r(&now, &timeinfo);
-        Serial.print("Current time: ");
-        Serial.println(asctime(&timeinfo));
+        log_i("Current time: %s", asctime(&timeinfo));
 
-        #ifdef CHECK_CA_ROOT
-            BearSSL::X509List cert(digicert);
-            net.setTrustAnchors(&cert);
-        #endif
-        #ifdef CHECK_PUB_KEY
-            BearSSL::PublicKey key(pubkey);
-            net.setKnownKey(&key);
-        #endif
-        #ifdef CHECK_FINGERPRINT
-            net.setFingerprint(fp);
+        #if defined(ESP8266)
+            #ifdef CHECK_CA_ROOT
+                BearSSL::X509List cert(digicert);
+                net.setTrustAnchors(&cert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                BearSSL::PublicKey key(pubkey);
+                net.setKnownKey(&key);
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
+        #elif defined(ESP32)
+            #ifdef CHECK_CA_ROOT
+                net.setCACert(digicert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                error "CHECK_PUB_KEY: not implemented"
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
         #endif
         #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
             // do not verify tls certificate
@@ -379,7 +399,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus, "dead", true /* retained*/, 1 /* qos */);
+    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -401,7 +421,7 @@ void mqtt_connect(void)
 
     Serial.println(F("connected!"));
     //client.subscribe(MQTT_SUB_IN);
-    Serial.printf("%s: %s\n", mqttPubStatus, "online");
+    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
 
@@ -516,17 +536,22 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
+      String sensor_str;
       for (int n=0; n<NUM_SENSORS; n++) {
-        mqtt_topic = String(mqttPubData);
         if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          mqtt_topic += String("/") + String(sensor_map[n].name.c_str());
+          sensor_str = String(sensor_map[n].name.c_str());
         }
         else {
-          mqtt_topic += String("/") + String(weatherSensor.sensor[i].sensor_id, HEX);
+          sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
         }
       }
-
+        
+      String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
+      String mqtt_topic;
+        
       // sensor data
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
+      
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         char mqtt_topic_tmp[TOPIC_SIZE];
         char mqtt_payload_tmp[PAYLOAD_SIZE];
@@ -536,13 +561,20 @@ void publishWeatherdata(bool complete)
       log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
       client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
 
+      // sensor specific RSSI
+      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
+      client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+        
       // extra data
+      mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
+      
       #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
       #endif
       if (mqtt_payload2.length() > 2) {
-        log_i("%s: %s\n", mqttPubExtra, mqtt_payload_tmp);
-        client.publish(mqttPubExtra, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
+        log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+        client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
       }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }
@@ -571,10 +603,7 @@ void publishRadio(void)
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
-    Serial.println();
-    Serial.println();
-    Serial.println(sketch_id);
-    Serial.println();
+    log_i("\n\n%s\n", sketch_id);
 
     #ifdef LED_EN
       // Configure LED output pins
@@ -593,11 +622,9 @@ void setup() {
         snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
-    snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
-    snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
-    snprintf(mqttPubData,   TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_DATA);
-    snprintf(mqttPubExtra,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_EXTRA);
-
+    mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
+    mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    
     mqtt_setup();
     weatherSensor.begin();
 }
@@ -643,7 +670,7 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        Serial.printf("%s: %s\n", mqttPubStatus, "online");
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -660,7 +687,7 @@ void loop() {
         #endif
 
         // Attempt to receive data set with timeout of <xx> s
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_COMPLETE, 0, &clientLoopWrapper);
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN
@@ -689,8 +716,8 @@ void loop() {
                 Serial.println(F("Data forwarding completed."));
             }
         #endif
-        Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
+        log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
+        log_i("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();

@@ -509,7 +509,7 @@ void wifimgr_setup(void)
   }
 
   log_i("local ip");
-  log_i("%s", WiFi.localIP());
+  log_i("%s", WiFi.localIP().toString().c_str());
 }
 
 

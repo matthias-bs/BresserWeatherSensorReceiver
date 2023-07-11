@@ -187,7 +187,7 @@
     #define JSON_FLOAT(x) x
 #endif
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20230709";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20230711";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {

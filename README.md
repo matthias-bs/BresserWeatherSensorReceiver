@@ -33,7 +33,7 @@ Some guesswork:
 
 | Numbering Scheme | Type |
 | ---------------- | ---- |
-| 700[25\|32\|33|36]*   | Weather Station, Base + Sensor |
+| 700[25\|32\|33\|36]*   | Weather Station, Base + Sensor |
 | 780[25\|32\|33]*   | Weather Station Sensor (Replacement) |
 | 790*             | Weather Station Base (Replacement) |
 | 700[99]*         | Accessory Sensor |

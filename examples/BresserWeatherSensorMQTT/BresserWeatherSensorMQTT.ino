@@ -25,7 +25,7 @@
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
 // Based on:
-// arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
+// arduino-mqtt by Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
 
 // MQTT subscriptions:
@@ -88,6 +88,7 @@
 // 20230114 Fixed rain gauge update
 // 20230124 Improved WiFi connection robustness
 // 20230708 Changed MQTT payload and topic from char[] to String
+// 20230709 Added lightning sensor
 // 20230710 Added optional JSON output of floating point values as strings
 //          Modified MQTT topics
 // 20230711 Changed remaining MQTT topics from char[] to String
@@ -116,7 +117,6 @@
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO        2       // LED pin
-#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
@@ -148,6 +148,7 @@
 // Otherwise the float value can be output as a numerical value (e.g. "temp_c":21.5).
 //
 //#define JSON_FLOAT_AS_STRING
+
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
@@ -325,6 +326,12 @@ void mqtt_connect(void);
 //
 // Wait for WiFi connection
 //
+/*!
+ * \brief Wait for WiFi connection
+ *
+ * \param wifi_retres   max. no. of retries
+ * \param wifi_delay    delay in ms before each attemüt
+ */
 void wifi_wait(int wifi_retries, int wifi_delay)
 {
     int count = 0;

@@ -23,6 +23,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
+| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() |
 | 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |

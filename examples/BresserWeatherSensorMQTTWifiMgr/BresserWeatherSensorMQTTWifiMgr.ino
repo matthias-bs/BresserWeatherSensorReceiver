@@ -34,7 +34,8 @@
 //     - none -
 //
 // MQTT publications:
-//     <base_topic>/data/<ID|Name>  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/data  sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/rssi  sensor specific RSSI
 //     <base_topic>/extra           calculated data
 //     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
@@ -70,9 +71,13 @@
 // History:
 //
 // 20230619 Created from BresserWeatherSensorMQTT
-// 20230709 Added lightning sensor
 // 20230708 Changed MQTT payload and topic from char[] to String
+// 20230709 Added lightning sensor
 // 20230710 Added optional JSON output of floating point values as strings
+//          Modified MQTT topics
+// 20230711 Changed remaining MQTT topics from char[] to String
+//          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
+//          Added define RX_STRATEGY
 //
 // ToDo:
 //
@@ -102,10 +107,9 @@
 // BEGIN User specific options
 //#define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO        LED_BUILTIN      // LED pin
-//#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
-#define TOPIC_SIZE      60      // maximum MQTT topic size
+#define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
 #define HOSTNAME_SIZE   30      // maximum hostname size
 #define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
@@ -117,6 +121,12 @@
 #define SLEEP_EN        true    // enable sleep mode (see notes above!)
 //#define USE_SECUREWIFI          // use secure WIFI
 #define USE_WIFI              // use non-secure WIFI
+
+// Stop reception when data of at least one sensor is complete
+#define RX_STRATEGY DATA_COMPLETE
+
+// Stop reception when data of all (NUM_SENSORS) is complete
+//#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 #define JSON_CONFIG_FILE "/wifimanager_config.json"
 
@@ -281,21 +291,20 @@ WeatherSensor weatherSensor;
 RainGauge     rainGauge;
 
 // MQTT topics
-const char MQTT_PUB_STATUS[]      = "/status";
-const char MQTT_PUB_RADIO[]       = "/radio";
-const char MQTT_PUB_DATA[]        = "/data";
-const char MQTT_PUB_EXTRA[]       = "/extra";
+const char MQTT_PUB_STATUS[]      = "status";
+const char MQTT_PUB_RADIO[]       = "radio";
+const char MQTT_PUB_DATA[]        = "data";
+const char MQTT_PUB_RSSI[]        = "rssi";
+const char MQTT_PUB_EXTRA[]       = "extra";
 
-char mqttPubStatus[TOPIC_SIZE];
-char mqttPubRadio[TOPIC_SIZE];
-char mqttPubData[TOPIC_SIZE];
-char mqttPubExtra[TOPIC_SIZE];
+String mqttPubStatus;
+String mqttPubRadio;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
 
 #if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
-#error "cant have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
+#error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
 // Generate WiFi network instance
@@ -339,6 +348,9 @@ void saveConfigCallback()
 
 /*!
  * \brief Wait for WiFi connection
+ *
+ * \param wifi_retres   max. no. of retries
+ * \param wifi_delay    delay in ms before each attemüt
  */
 void wifi_wait(int wifi_retries, int wifi_delay)
 {

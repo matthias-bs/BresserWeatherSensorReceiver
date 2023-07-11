@@ -601,7 +601,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio.c_str()), mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }

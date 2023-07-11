@@ -90,6 +90,7 @@
 // 20230708 Changed MQTT payload and topic from char[] to String
 // 20230710 Added optional JSON output of floating point values as strings
 //          Modified MQTT topics
+// 20230711 Changed remaining MQTT topics from char[] to String
 //
 // ToDo:
 //
@@ -268,15 +269,15 @@ WeatherSensor weatherSensor;
 RainGauge     rainGauge;
 
 // MQTT topics
-const char MQTT_PUB_STATUS[]      = "/status";
-const char MQTT_PUB_RADIO[]       = "/radio";
+const char MQTT_PUB_STATUS[]      = "status";
+const char MQTT_PUB_RADIO[]       = "radio";
 const char MQTT_PUB_DATA[]        = "data";
 const char MQTT_PUB_RSSI[]        = "rssi";
 const char MQTT_PUB_EXTRA[]       = "extra";
 
 
-char mqttPubStatus[TOPIC_SIZE];
-char mqttPubRadio[TOPIC_SIZE];
+String mqttPubStatus;
+String mqttPubRadio;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -324,7 +325,7 @@ void wifi_wait(int wifi_retries, int wifi_delay)
         Serial.print(".");
         delay(wifi_delay);
         if (++count == wifi_retries) {
-            Serial.printf("WiFi connection timed out, will restart after %d s\n", SLEEP_INTERVAL/1000);
+            log_e("\nWiFi connection timed out, will restart after %d s", SLEEP_INTERVAL/1000);
             ESP.deepSleep(SLEEP_INTERVAL * 1000);
         }
     }
@@ -335,18 +336,17 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 //
 void mqtt_setup(void)
 {
-    Serial.print(F("Attempting to connect to SSID: "));
-    Serial.print(ssid);
+    log_i("Attempting to connect to SSID: %s", ssid);
     WiFi.hostname(Hostname);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
-    Serial.println(F("connected!"));
+    log_i("connected!");
 
 
     #ifdef USE_SECUREWIFI
         // Note: TLS security needs correct time
-        Serial.print("Setting time using SNTP ");
+        log_i("Setting time using SNTP");
         configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
         now = time(nullptr);
         while (now < 1510592825)
@@ -355,11 +355,10 @@ void mqtt_setup(void)
             Serial.print(".");
             now = time(nullptr);
         }
-        Serial.println("done!");
+        Serial.println("\ndone!");
         struct tm timeinfo;
         gmtime_r(&now, &timeinfo);
-        Serial.print("Current time: ");
-        Serial.println(asctime(&timeinfo));
+        log_i("Current time: %s", asctime(&timeinfo));
 
         #ifdef CHECK_CA_ROOT
             BearSSL::X509List cert(digicert);
@@ -381,7 +380,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus, "dead", true /* retained*/, 1 /* qos */);
+    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained*/, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -403,7 +402,7 @@ void mqtt_connect(void)
 
     Serial.println(F("connected!"));
     //client.subscribe(MQTT_SUB_IN);
-    Serial.printf("%s: %s\n", mqttPubStatus, "online");
+    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
 
@@ -585,10 +584,7 @@ void publishRadio(void)
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
-    Serial.println();
-    Serial.println();
-    Serial.println(sketch_id);
-    Serial.println();
+    log_i("\n\n%s\n", sketch_id);
 
     #ifdef LED_EN
       // Configure LED output pins
@@ -607,8 +603,8 @@ void setup() {
         snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
     #endif
 
-    snprintf(mqttPubStatus, TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_STATUS);
-    snprintf(mqttPubRadio,  TOPIC_SIZE, "%s%s", Hostname, MQTT_PUB_RADIO);
+    mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
+    mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
     
     mqtt_setup();
     weatherSensor.begin();
@@ -655,7 +651,7 @@ void loop() {
     if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        Serial.printf("%s: %s\n", mqttPubStatus, "online");
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -701,8 +697,8 @@ void loop() {
                 Serial.println(F("Data forwarding completed."));
             }
         #endif
-        Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
+        log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
+        log_i("%s: %s\n", mqttPubStatus, "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();

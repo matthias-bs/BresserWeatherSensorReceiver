@@ -481,9 +481,9 @@ void wifimgr_setup(void)
   strcpy(mqtt_user, custom_mqtt_user.getValue());
   strcpy(mqtt_pass, custom_mqtt_pass.getValue());
   log_i("The values in the file are: ");
-  log_i("\tmqtt_server : " + String(mqtt_host));
-  log_i("\tmqtt_port : " + String(mqtt_port));
-  log_i("\tmqtt_user : " + String(mqtt_user));
+  log_i("\tmqtt_server : %s", mqtt_host);
+  log_i("\tmqtt_port : %d", mqtt_port);
+  log_i("\tmqtt_user : %s", mqtt_user);
   log_i("\tmqtt_pass : ***");
 
   // save the custom parameters to FS
@@ -507,9 +507,8 @@ void wifimgr_setup(void)
     configFile.close();
     //end save
   }
-
-  log_i("local ip");
-  log_i("%s", WiFi.localIP().toString().c_str());
+  
+  log_i("local ip: %s", WiFi.localIP().toString().c_str());
 }
 
 

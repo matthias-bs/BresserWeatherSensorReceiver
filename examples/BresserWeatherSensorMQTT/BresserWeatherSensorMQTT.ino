@@ -91,6 +91,8 @@
 // 20230710 Added optional JSON output of floating point values as strings
 //          Modified MQTT topics
 // 20230711 Changed remaining MQTT topics from char[] to String
+//          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
+//          Added define RX_STRATEGY
 //
 // ToDo:
 //
@@ -117,7 +119,7 @@
 #define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
-#define TOPIC_SIZE      60      // maximum MQTT topic size
+#define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
 #define HOSTNAME_SIZE   30      // maximum hostname size
 #define RX_TIMEOUT      90000   // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
@@ -129,6 +131,12 @@
 #define SLEEP_EN        true    // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI          // use secure WIFI
 //#define USE_WIFI              // use non-secure WIFI
+
+// Stop reception when data of at least one sensor is complete
+#define RX_STRATEGY DATA_COMPLETE
+
+// Stop reception when data of all (NUM_SENSORS) is complete
+//#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // See
 // https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
@@ -275,7 +283,6 @@ const char MQTT_PUB_DATA[]        = "data";
 const char MQTT_PUB_RSSI[]        = "rssi";
 const char MQTT_PUB_EXTRA[]       = "extra";
 
-
 String mqttPubStatus;
 String mqttPubRadio;
 char Hostname[HOSTNAME_SIZE];
@@ -283,7 +290,7 @@ char Hostname[HOSTNAME_SIZE];
 //////////////////////////////////////////////////////
 
 #if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
-#error "cant have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
+#error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
 // Generate WiFi network instance
@@ -360,16 +367,28 @@ void mqtt_setup(void)
         gmtime_r(&now, &timeinfo);
         log_i("Current time: %s", asctime(&timeinfo));
 
-        #ifdef CHECK_CA_ROOT
-            BearSSL::X509List cert(digicert);
-            net.setTrustAnchors(&cert);
-        #endif
-        #ifdef CHECK_PUB_KEY
-            BearSSL::PublicKey key(pubkey);
-            net.setKnownKey(&key);
-        #endif
-        #ifdef CHECK_FINGERPRINT
-            net.setFingerprint(fp);
+        #if defined(ESP8266)
+            #ifdef CHECK_CA_ROOT
+                BearSSL::X509List cert(digicert);
+                net.setTrustAnchors(&cert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                BearSSL::PublicKey key(pubkey);
+                net.setKnownKey(&key);
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
+        #elif defined(ESP32)
+            #ifdef CHECK_CA_ROOT
+                net.setCACert(digicert);
+            #endif
+            #ifdef CHECK_PUB_KEY
+                error "CHECK_PUB_KEY: not implemented"
+            #endif
+            #ifdef CHECK_FINGERPRINT
+                net.setFingerprint(fp);
+            #endif
         #endif
         #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
             // do not verify tls certificate
@@ -380,7 +399,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback (if required)
     //client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained*/, 1 /* qos */);
+    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -668,7 +687,7 @@ void loop() {
         #endif
 
         // Attempt to receive data set with timeout of <xx> s
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, DATA_COMPLETE, 0, &clientLoopWrapper);
+        decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
     #endif
 
     #ifdef LED_EN

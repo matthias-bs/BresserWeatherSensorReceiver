@@ -74,7 +74,7 @@ static void setTime(const char *time, tm &tm, time_t &ts)
   strptime(time, "%Y-%m-%d %H:%M", &tm);
   ts = mktime(&tm);
 }
-#if 0
+
 TEST_GROUP(TestRainGaugeHour) {
   void setup() {
       rainGauge.reset();
@@ -182,7 +182,7 @@ TEST_GROUP(TestRainGaugeMonthlyOv) {
   void teardown() {
   }
 };
-#endif
+
 TEST_GROUP(TestRainGaugeStartup) {
   void setup() {
       rainGauge.reset();
@@ -191,7 +191,7 @@ TEST_GROUP(TestRainGaugeStartup) {
   void teardown() {
   }
 };
-
+#if 0
 /*
  * Test rainfall during past hour (no rain gauge overflow)
  */
@@ -1082,7 +1082,7 @@ TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
   DOUBLES_EQUAL(rainMonthly += 5, rainGauge.currentMonth(), TOLERANCE);
   
 }
-
+#endif
 
 /*
  * Test weekly rainfall (with rain gauge overflow)

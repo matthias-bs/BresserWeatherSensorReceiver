@@ -57,6 +57,7 @@
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
+// 20230716 Added decodeMessage() to separate decoding function from receiving function
 //
 // ToDo:
 // -
@@ -177,6 +178,14 @@ class WeatherSensor {
         \returns DecodeStatus
         */
         DecodeStatus    getMessage(void);
+
+        /*!
+        \brief Decode message
+        Tries the available decoders until a decoding was successful.
+
+        \returns DecodeStatus
+        */
+        DecodeStatus    decodeMessage(uint8_t *msg, uint8_t msgSize);
 
         /**
          * \struct Sensor

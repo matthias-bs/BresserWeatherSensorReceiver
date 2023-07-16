@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reset_65',['reset',['../class_rain_gauge.html#ad625c2e0aa39f69cd93cabf4f39c5ab6',1,'RainGauge']]]
+  ['pasthour_66',['pastHour',['../class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc',1,'RainGauge']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['update_66',['update',['../class_rain_gauge.html#a5942527ea4b8983e6133be7af4754b41',1,'RainGauge']]]
+  ['reset_67',['reset',['../class_rain_gauge.html#ad625c2e0aa39f69cd93cabf4f39c5ab6',1,'RainGauge']]]
 ];

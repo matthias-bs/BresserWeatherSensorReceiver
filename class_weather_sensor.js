@@ -5,6 +5,7 @@ var class_weather_sensor =
     [ "WeatherSensor", "class_weather_sensor.html#aa72d395844ee645e779a3b005fbd5dfd", null ],
     [ "begin", "class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b", null ],
     [ "clearSlots", "class_weather_sensor.html#af7d1085b72f2f41e8b349e63d2628b0c", null ],
+    [ "decodeMessage", "class_weather_sensor.html#ae0009e19fb685982483ffa47808ff3a5", null ],
     [ "findId", "class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989", null ],
     [ "findType", "class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa", null ],
     [ "genMessage", "class_weather_sensor.html#a643dd64dab119203c14883e712d76aea", null ],

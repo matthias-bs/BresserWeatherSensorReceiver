@@ -126,6 +126,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a05fbfc16fb2e13543591cb0b3cd8baaf"><td class="memItemLeft" align="right" valign="top">DecodeStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf">getMessage</a> (void)</td></tr>
 <tr class="memdesc:a05fbfc16fb2e13543591cb0b3cd8baaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to receive radio message (non-blocking) and to decode it. Timeout occurs after a multitude of expected time-on-air.  <a href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf">More...</a><br /></td></tr>
 <tr class="separator:a05fbfc16fb2e13543591cb0b3cd8baaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0009e19fb685982483ffa47808ff3a5"><td class="memItemLeft" align="right" valign="top">DecodeStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ae0009e19fb685982483ffa47808ff3a5">decodeMessage</a> (uint8_t *msg, uint8_t msgSize)</td></tr>
+<tr class="memdesc:ae0009e19fb685982483ffa47808ff3a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode message Tries the available decoders until a decoding was successful.  <a href="class_weather_sensor.html#ae0009e19fb685982483ffa47808ff3a5">More...</a><br /></td></tr>
+<tr class="separator:ae0009e19fb685982483ffa47808ff3a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a643dd64dab119203c14883e712d76aea"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a643dd64dab119203c14883e712d76aea">genMessage</a> (int i, uint32_t id=0xff, uint8_t type=1, uint8_t channel=0)</td></tr>
 <tr class="memdesc:a643dd64dab119203c14883e712d76aea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates data otherwise received and decoded from a radio message.  <a href="class_weather_sensor.html#a643dd64dab119203c14883e712d76aea">More...</a><br /></td></tr>
 <tr class="separator:a643dd64dab119203c14883e712d76aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,6 +209,37 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae0009e19fb685982483ffa47808ff3a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0009e19fb685982483ffa47808ff3a5">&#9670;&nbsp;</a></span>decodeMessage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DecodeStatus WeatherSensor::decodeMessage </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>msgSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decode message Tries the available decoders until a decoding was successful. </p>
+<dl class="section return"><dt>Returns</dt><dd>DecodeStatus </dd></dl>
 
 </div>
 </div>

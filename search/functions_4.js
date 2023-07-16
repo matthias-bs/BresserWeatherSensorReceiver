@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['init_62',['init',['../class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070',1,'RainGauge']]],
-  ['is_5fdecode3in1_63',['is_decode3in1',['../class_weather_sensor.html#a3fe7bfad520c8834c5f85f7b0ed9eaad',1,'WeatherSensor']]]
+  ['genmessage_61',['genMessage',['../class_weather_sensor.html#a643dd64dab119203c14883e712d76aea',1,'WeatherSensor']]],
+  ['getdata_62',['getData',['../class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a',1,'WeatherSensor']]],
+  ['getmessage_63',['getMessage',['../class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf',1,'WeatherSensor']]]
 ];

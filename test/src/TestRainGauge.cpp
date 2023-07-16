@@ -191,7 +191,7 @@ TEST_GROUP(TestRainGaugeStartup) {
   void teardown() {
   }
 };
-#if 0
+
 /*
  * Test rainfall during past hour (no rain gauge overflow)
  */
@@ -1082,10 +1082,11 @@ TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
   DOUBLES_EQUAL(rainMonthly += 5, rainGauge.currentMonth(), TOLERANCE);
   
 }
-#endif
+
 
 /*
- * Test weekly rainfall (with rain gauge overflow)
+ * Test that rain gauge values are preserved after sensor startup,
+ * i.e. sensor reset or battery change
  */
 TEST(TestRainGaugeStartup, TestRainStartup) {
   tm        tm;

@@ -57,6 +57,7 @@
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
+// 20230716 Added decodeMessage() to separate decoding function from receiving function
 //
 // ToDo:
 // -
@@ -178,6 +179,14 @@ class WeatherSensor {
         */
         DecodeStatus    getMessage(void);
 
+        /*!
+        \brief Decode message
+        Tries the available decoders until a decoding was successful.
+
+        \returns DecodeStatus
+        */
+        DecodeStatus    decodeMessage(uint8_t *msg, uint8_t msgSize);
+
         /**
          * \struct Sensor
          *
@@ -221,7 +230,7 @@ class WeatherSensor {
             uint8_t  moisture;              //!< moisture in % (only 6-in-1)
             uint8_t  lightning_distance_km; //!< lightning distance in km (only lightning)
             uint8_t  lightning_count;       //!< lightning strike counter (only lightning)
-            uint8_t  lightning_unknown1;    //!< unknown part 1
+            uint16_t lightning_unknown1;    //!< unknown part 1
             uint16_t lightning_unknown2;    //!< unknown part 2
             float    rssi;                  //!< received signal strength indicator in dBm
         };
@@ -384,6 +393,49 @@ class WeatherSensor {
         \returns Sum of all message bytes.
         */
         int add_bytes(uint8_t const message[], unsigned num_bytes);
+
+        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+            /*!
+             * \brief Log message payload
+             *
+             * \param descr    Description.
+             * \param msg      Message buffer.
+             * \param msgSize  Message size.
+             *
+             * Result (example):
+             *  Byte #: 00 01 02 03...
+             * <descr>: DE AD BE EF...
+             */
+            void log_message(const char *descr, uint8_t *msg, uint8_t msgSize) {
+                char buf[128];
+                const char txt[] = "Byte #: ";
+                int offs;
+                int len1 = strlen(txt);
+                int len2 = strlen(descr) + 2; // add colon and space
+                int prefix_len = max(len1, len2);
+    
+                memset(buf, ' ', prefix_len);
+                buf[prefix_len] = '\0';
+                offs = (len1 < len2) ? (len2 - len1) : 0;
+                strcpy(&buf[offs], txt);
+              
+                // Print byte index
+                for (size_t i = 0 ; i < msgSize; i++) {
+                    sprintf(&buf[strlen(buf)], "%02d ", i);
+                }
+                log_v("%s", buf);
+          
+                memset(buf, ' ', prefix_len);
+                buf[prefix_len] ='\0';
+                offs = (len1 > len2) ? (len1 - len2) : 0;
+                sprintf(&buf[offs], "%s: ", descr);
+              
+                for (size_t i = 0 ; i < msgSize; i++) {
+                    sprintf(&buf[strlen(buf)], "%02X ", msg[i]);
+                }
+                log_v("%s", buf);
+            }
+        #endif
 
         #ifdef _DEBUG_MODE_
             /*!

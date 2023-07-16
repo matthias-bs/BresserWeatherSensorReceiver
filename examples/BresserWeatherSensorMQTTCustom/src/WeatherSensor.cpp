@@ -58,8 +58,11 @@
 // 20230329 Fixed issue introduced with 7 in 1 decoder
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230412 Fixed 7 in 1 decoder (valid/complete flags were not set)
+// 20230624 Added Bresser Lightning Sensor decoder
 // 20230613 Fixed rain value in 7 in 1 decoder
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
+// 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
+// 20230716 Added decodeMessage() to separate decoding function from receiving function
 //
 // ToDo:
 // -
@@ -229,25 +232,7 @@ DecodeStatus WeatherSensor::getMessage(void)
             #endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
 
-            #ifdef BRESSER_7_IN_1
-                decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
-            #endif
-            #ifdef BRESSER_6_IN_1
-                if (decode_res == DECODE_INVALID ||
-                    decode_res == DECODE_PAR_ERR ||
-                    decode_res == DECODE_CHK_ERR ||
-                    decode_res == DECODE_DIG_ERR) {
-                    decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
-                }
-            #endif
-            #ifdef BRESSER_5_IN_1
-                if (decode_res == DECODE_INVALID ||
-                    decode_res == DECODE_PAR_ERR ||
-                    decode_res == DECODE_CHK_ERR ||
-                    decode_res == DECODE_DIG_ERR) {
-                    decode_res = decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1);
-                }
-            #endif
+            decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
             log_v("T");
@@ -258,6 +243,40 @@ DecodeStatus WeatherSensor::getMessage(void)
         }
     } // if (state == RADIOLIB_ERR_NONE)
 
+    return decode_res;
+}
+
+
+DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
+    DecodeStatus decode_res = DECODE_INVALID;
+    
+    #ifdef BRESSER_7_IN_1
+        decode_res = decodeBresser7In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }
+    #endif
+    #ifdef BRESSER_6_IN_1
+        decode_res = decodeBresser6In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }        
+    #endif
+    #ifdef BRESSER_5_IN_1
+        decode_res = decodeBresser5In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }        
+    #endif
+    #ifdef BRESSER_LIGHTNING
+        decode_res = decodeBresserLightningPayload(msg, msgSize);
+    #endif
     return decode_res;
 }
 
@@ -841,7 +860,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
       log_d("Data sanity check failed");
   }
   
-  // data whitening
+  // data de-whitening
   uint8_t msgw[MSG_BUF_SIZE];
   for (unsigned i = 0; i < msgSize; ++i) {
       msgw[i] = msg[i] ^ 0xaa;
@@ -851,9 +870,13 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   int chkdgst = (msgw[0] << 8) | msgw[1];
   int digest  = lfsr_digest16(&msgw[2], 23, 0x8810, 0xba95); // bresser_7in1
   if ((chkdgst ^ digest) != 0x6df1) { // bresser_7in1
-      log_d("Digest check failed - [%02X] Vs [%02X] (%02X)", chkdgst, digest, chkdgst ^ digest); // bresser_7in1
+      log_d("Digest check failed - [%04X] vs [%04X] (%04X)", chkdgst, digest, chkdgst ^ digest);
       return DECODE_DIG_ERR;
   }
+
+  #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+      log_message("De-whitened Data", msgw, msgSize);
+  #endif
 
   int id_tmp   = (msgw[2] << 8) | (msgw[3]);
   DecodeStatus status;
@@ -915,6 +938,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
   sensor[slot].valid       = true;
   sensor[slot].complete    = true;
   sensor[slot].rssi        = rssi;
+  sensor[slot].valid       = true;
+  sensor[slot].complete    = true;
 
   /* clang-format off */
   /*  data = data_make(
@@ -939,5 +964,113 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSi
 
   return DECODE_OK;
 
+}
+#endif
+
+/**
+Decoder for Bresser Lightning, outdoor sensor.
+
+https://github.com/merbanan/rtl_433/issues/2140
+
+DIGEST:8h8h ID:8h8h CTR:12h   ?4h8h KM:8d ?8h8h
+       0 1     2 3      4 5h   5l 6    7   8 9
+
+Preamble:
+
+  aa 2d d4
+
+Observed length depends on reset_limit.
+The data has a whitening of 0xaa.
+
+
+First two bytes are an LFSR-16 digest, generator 0x8810 key 0xabf9 with a final xor 0x899e
+*/
+
+#ifdef BRESSER_LIGHTNING
+DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize)
+{   
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        // see AS3935 Datasheet, Table 17 - Distance Estimation
+        uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
+    #endif
+    
+    #if defined(LIGHTNING_TEST_DATA)
+    uint8_t test_data[] = { 0x73, 0x69, 0xB5, 0x08, 0xAA, 0xA2, 0x90, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+     0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x15 };
+    #endif
+
+    // data de-whitening
+    uint8_t msgw[MSG_BUF_SIZE];
+    for (unsigned i = 0; i < msgSize; ++i) {
+        #if defined(LIGHTNING_TEST_DATA)
+            msgw[i] = test_data[i] ^ 0xaa;
+        #else
+            msgw[i] = msg[i] ^ 0xaa;
+        #endif
+    }
+    
+    // LFSR-16 digest, generator 0x8810 key 0xabf9 with a final xor 0x899e
+    int chk    = (msgw[0] << 8) | msgw[1];
+    int digest = lfsr_digest16(&msgw[2], 8, 0x8810, 0xabf9);
+    if (((chk ^ digest) != 0x899e)) {
+        log_d("Digest check failed - [%04X] vs [%04X] (%04X)", chk, digest, chk ^ digest);
+        return DECODE_DIG_ERR;
+    }
+    
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        log_message("De-whitened Data", msgw, msgSize);
+    #endif
+
+    int id_tmp  = (msgw[2] << 8) | (msgw[3]);
+
+    DecodeStatus status;
+
+    // Find appropriate slot in sensor data array and update <status>
+    int slot = findSlot(id_tmp, &status);
+
+    if (status != DECODE_OK)
+        return status;
+
+    uint8_t ctr         = (msgw[4] << 4) | (msgw[5] & 0xf0) >> 4;
+    log_v("--> CTR RAW: %d  BCD: %d", ctr, ((((msgw[4] & 0xf0) >> 4) * 100) + (msgw[4] & 0x0f) * 10 + ((msgw[5] & 0xf0) >> 4)));
+    uint8_t battery_low = (msgw[5] & 0x08) == 0x00;
+    uint16_t unknown1   = ((msgw[5] & 0x0f) << 8) |  msgw[6];
+    uint8_t type        = msgw[6] >> 4;
+    uint8_t distance_km = msgw[7];
+    log_v("--> DST RAW: %d  BCD: %d  TAB: %d", msgw[7], ((((msgw[7] & 0xf0) >> 4) * 10) + (msgw[7] & 0x0f)), distance_map[ msgw[7] ]);
+    uint16_t unknown2   = (msgw[8] << 8) | msgw[9];
+
+    sensor[slot].sensor_id       = id_tmp;
+    sensor[slot].s_type          = type;
+    sensor[slot].lightning_count = ctr;
+    sensor[slot].lightning_distance_km = distance_km;
+    sensor[slot].lightning_unknown1 = unknown1;
+    sensor[slot].lightning_unknown2 = unknown2;
+    sensor[slot].battery_ok      = !battery_low;
+    sensor[slot].lightning_ok    = true;
+    sensor[slot].rssi            = rssi;
+    sensor[slot].valid           = true;
+    sensor[slot].complete        = true;
+
+    log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, type, ctr, battery_low, distance_km, unknown1, unknown2);
+    
+    
+    /* clang-format off */
+    /* data = data_make(
+            "model",        "",           DATA_STRING, "Bresser_lightning",
+            "id",           "",           DATA_INT, id,
+            "Frage1",       "?",          DATA_INT, frage1,
+            "Kilometer",    "Kilometer",  DATA_INT, kilometer,
+            "CTR",          "CTR",        DATA_INT, ctr,
+            "Frage2",       "??",         DATA_INT, frage2,
+            "mic",          "Integrity",  DATA_STRING, "CRC",
+            "battery_low",  "Battery Low", DATA_INT, !battery_low,
+            NULL);
+     */
+    /* clang-format on */
+
+    //decoder_output_data(decoder, data);
+
+    return DECODE_OK;
 }
 #endif

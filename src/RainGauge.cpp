@@ -243,11 +243,11 @@ RainGauge::update(tm t, float rain, bool startup, float raingaugeMax)
         // Save last rain value before startup
         nvData.rainStartup = nvData.rainPrev;
     }
-    nvData.startupPrev = startup;
-
-    if (rain < nvData.rainPrev) {
+    else if (rain < nvData.rainPrev) {
         nvData.rainOvf++;
     }
+   
+    nvData.startupPrev = startup;
     nvData.rainPrev = rain;
     
     rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;

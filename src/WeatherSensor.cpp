@@ -62,6 +62,7 @@
 // 20230613 Fixed rain value in 7 in 1 decoder
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 // 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
+// 20230716 Added decodeMessage() to separate decoding function from receiving function
 //
 // ToDo:
 // -
@@ -231,32 +232,7 @@ DecodeStatus WeatherSensor::getMessage(void)
             #endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
 
-            #ifdef BRESSER_7_IN_1
-                decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
-            #endif
-            #ifdef BRESSER_6_IN_1
-                if (decode_res == DECODE_INVALID ||
-                    decode_res == DECODE_PAR_ERR ||
-                    decode_res == DECODE_CHK_ERR ||
-                    decode_res == DECODE_DIG_ERR) {
-                    decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
-                }
-            #endif
-            #ifdef BRESSER_5_IN_1
-                if (decode_res == DECODE_INVALID ||
-                    decode_res == DECODE_PAR_ERR ||
-                    decode_res == DECODE_CHK_ERR ||
-                    decode_res == DECODE_DIG_ERR) {
-                    decode_res = decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1);
-                }
-            #endif
-            #ifdef BRESSER_LIGHTNING
-                if (decode_res == DECODE_INVALID ||
-                    decode_res == DECODE_PAR_ERR ||
-                    decode_res == DECODE_CHK_ERR) {
-                    decode_res = decodeBresserLightningPayload(&recvData[1], sizeof(recvData) - 1);
-                }
-            #endif
+            decode_res = decodeMessage(recvData, sizeof(recvData));
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
             log_v("T");
@@ -267,6 +243,40 @@ DecodeStatus WeatherSensor::getMessage(void)
         }
     } // if (state == RADIOLIB_ERR_NONE)
 
+    return decode_res;
+}
+
+
+DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
+    DecodeStatus decode_res = DECODE_INVALID;
+    
+    #ifdef BRESSER_7_IN_1
+        decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }
+    #endif
+    #ifdef BRESSER_6_IN_1
+        decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }        
+    #endif
+    #ifdef BRESSER_5_IN_1
+        decode_res = decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }        
+    #endif
+    #ifdef BRESSER_LIGHTNING
+        decode_res = decodeBresserLightningPayload(&recvData[1], sizeof(recvData) - 1);
+    #endif
     return decode_res;
 }
 

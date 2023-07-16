@@ -232,7 +232,7 @@ DecodeStatus WeatherSensor::getMessage(void)
             #endif
             log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
 
-            decode_res = decodeMessage(recvData, sizeof(recvData));
+            decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
         } // if (recvData[0] == 0xD4)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
             log_v("T");
@@ -251,7 +251,7 @@ DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
     DecodeStatus decode_res = DECODE_INVALID;
     
     #ifdef BRESSER_7_IN_1
-        decode_res = decodeBresser7In1Payload(&recvData[1], sizeof(recvData) - 1);
+        decode_res = decodeBresser7In1Payload(msg, msgSize);
         if (decode_res == DECODE_OK   ||
             decode_res == DECODE_FULL ||
             decode_res == DECODE_SKIP) {
@@ -259,7 +259,7 @@ DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
         }
     #endif
     #ifdef BRESSER_6_IN_1
-        decode_res = decodeBresser6In1Payload(&recvData[1], sizeof(recvData) - 1);
+        decode_res = decodeBresser6In1Payload(msg, msgSize);
         if (decode_res == DECODE_OK   ||
             decode_res == DECODE_FULL ||
             decode_res == DECODE_SKIP) {
@@ -267,7 +267,7 @@ DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
         }        
     #endif
     #ifdef BRESSER_5_IN_1
-        decode_res = decodeBresser5In1Payload(&recvData[1], sizeof(recvData) - 1);
+        decode_res = decodeBresser5In1Payload(msg, msgSize);
         if (decode_res == DECODE_OK   ||
             decode_res == DECODE_FULL ||
             decode_res == DECODE_SKIP) {
@@ -275,7 +275,7 @@ DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
         }        
     #endif
     #ifdef BRESSER_LIGHTNING
-        decode_res = decodeBresserLightningPayload(&recvData[1], sizeof(recvData) - 1);
+        decode_res = decodeBresserLightningPayload(msg, msgSize);
     #endif
     return decode_res;
 }

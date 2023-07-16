@@ -37,6 +37,7 @@
 // History:
 //
 // 20220830 Created
+// 20230716 Implemented sensor startup handling
 //
 // ToDo: 
 // -
@@ -71,6 +72,10 @@ typedef struct {
     uint8_t   head;
     uint8_t   tail;
 
+    /* Sensor startup handling */
+    bool      startupPrev; // previous state of startup
+    float     rainStartup; // rain gauge before startup 
+
     /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
     uint8_t   tsDayBegin; // day of week
     float     rainDayBegin; // rain gauge @ begin of day
@@ -94,6 +99,8 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainBuf = {0}, 
    .head = 0,
    .tail = 0,
+   .startupPrev = false,
+   .rainStartup = 0,
    .tsDayBegin = 0xFF,
    .rainDayBegin = 0,
    .tsWeekBegin = 0xFF,
@@ -172,6 +179,8 @@ RainGauge::printCircularBuffer(void)
 void
 RainGauge::reset(void)
 {
+    nvData.startupPrev    = false;
+    nvData.rainStartup    = 0;
     nvData.tsDayBegin     = 0xFF;
     nvData.rainDayBegin   = 0;
     nvData.tsWeekBegin    = 0xFF;
@@ -222,19 +231,26 @@ RainGauge::timeStamp(tm t)
 }
 
 void
-RainGauge::update(tm t, float rain, float raingaugeMax)
+RainGauge::update(tm t, float rain, bool startup, float raingaugeMax)
 {
     uint8_t  head_tmp; // circular buffer; temporary head index
 
     // Seconds since Midnight
     uint32_t ts = timeStamp(t);
     
+    // Startup change 0->1 detected
+    if (!nvData.startupPrev && startup) {
+        // Save last rain value before startup
+        nvData.rainStartup = nvData.rainPrev;
+    }
+    nvData.startupPrev = startup;
+
     if (rain < nvData.rainPrev) {
         nvData.rainOvf++;
     }
     nvData.rainPrev = rain;
     
-    rainCurr = (nvData.rainOvf * raingaugeMax) + rain;
+    rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
 
     // Check if no saved data is available yet
     if (nvData.wdayPrev == 0xFF) {

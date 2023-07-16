@@ -237,14 +237,15 @@ RainGauge::update(tm t, float rain, bool startup, float raingaugeMax)
 
     // Seconds since Midnight
     uint32_t ts = timeStamp(t);
-    
-    // Startup change 0->1 detected
-    if (!nvData.startupPrev && startup) {
-        // Save last rain value before startup
-        nvData.rainStartup = nvData.rainPrev;
-    }
-    else if (rain < nvData.rainPrev) {
-        nvData.rainOvf++;
+
+    if (rain < nvData.rainPrev) {
+       // Startup change 0->1 detected
+       if (!nvData.startupPrev && startup) {
+           // Save last rain value before startup
+           nvData.rainStartup = nvData.rainPrev;
+       } else {
+           nvData.rainOvf++;
+       }
     }
    
     nvData.startupPrev = startup;

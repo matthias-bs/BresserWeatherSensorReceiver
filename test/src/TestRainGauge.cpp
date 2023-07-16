@@ -183,6 +183,14 @@ TEST_GROUP(TestRainGaugeMonthlyOv) {
   }
 };
 
+TEST_GROUP(TestRainGaugeStartup) {
+  void setup() {
+      rainGauge.reset();
+  }
+
+  void teardown() {
+  }
+};
 
 /*
  * Test rainfall during past hour (no rain gauge overflow)
@@ -1075,3 +1083,38 @@ TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
   
 }
 
+
+/*
+ * Test that rain gauge values are preserved after sensor startup,
+ * i.e. sensor reset or battery change
+ */
+TEST(TestRainGaugeStartup, TestRainStartup) {
+  tm        tm;
+  time_t    ts;
+  float     rainSensor;
+    
+  printf("< RainStartup >\n");
+   
+  setTime("2023-07-16 8:00:00", tm, ts);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
+
+  setTime("2023-07-16 8:05:00", tm, ts);
+  rainGauge.update(tm, rainSensor = 10.0);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
+
+  setTime("2023-07-16 8:10:00", tm, ts);
+  rainGauge.update(tm, rainSensor = 15.0);
+  DOUBLES_EQUAL(5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(5, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(5, rainGauge.currentWeek(), TOLERANCE);
+
+  setTime("2023-07-16 8:15:00", tm, ts);
+  rainGauge.update(tm, rainSensor = 0, true);
+  DOUBLES_EQUAL(5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(5, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(5, rainGauge.currentWeek(), TOLERANCE);
+}

@@ -38,6 +38,7 @@
 //
 // 20220830 Created
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
+// 20230716 Implemented sensor startup handling
 //
 // ToDo: 
 // -
@@ -111,9 +112,11 @@ public:
      * 
      * \param rain         rain gauge raw value
      * 
+     * \param startup      sensor startup flag
+     * 
      * \param rainGaugeMax overflow value; when reached, the rain gauge is reset to zero
      */  
-    void  update(tm timeinfo, float rain, float raingaugeMax = RAINGAUGE_MAX_VALUE);
+    void  update(tm timeinfo, float rain, bool startup = false, float raingaugeMax = RAINGAUGE_MAX_VALUE);
     
     
     /**

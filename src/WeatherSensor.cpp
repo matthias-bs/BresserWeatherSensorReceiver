@@ -749,7 +749,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
         sensor[slot].humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
         // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
-        uv_ok  = (~msg[15] & 0xff) <= (0x99 && (~msg[16] & 0xf0) <= 0x90) && !f_3in1;
+        uv_ok  = ((~msg[15] & 0xff) <= 0x99) && ((~msg[16] & 0xf0) <= 0x90) && !f_3in1;
         if (uv_ok) {
             int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
                 sensor[slot].uv = uv_raw * 0.1f;

@@ -7,6 +7,6 @@ var class_rain_gauge =
     [ "init", "class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070", null ],
     [ "pastHour", "class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc", null ],
     [ "reset", "class_rain_gauge.html#ad625c2e0aa39f69cd93cabf4f39c5ab6", null ],
-    [ "update", "class_rain_gauge.html#a5942527ea4b8983e6133be7af4754b41", null ],
+    [ "update", "class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91", null ],
     [ "rainCurr", "class_rain_gauge.html#a636e150f6d40bbc35f8d68cf123c271f", null ]
 ];

@@ -102,9 +102,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ad625c2e0aa39f69cd93cabf4f39c5ab6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab32d6ff89366d290a5c264a51f950070"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">init</a> (tm t, float rain)</td></tr>
 <tr class="separator:ab32d6ff89366d290a5c264a51f950070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5942527ea4b8983e6133be7af4754b41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a5942527ea4b8983e6133be7af4754b41">update</a> (tm timeinfo, float rain, float raingaugeMax=RAINGAUGE_MAX_VALUE)</td></tr>
-<tr class="memdesc:a5942527ea4b8983e6133be7af4754b41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update rain gauge statistics.  <a href="class_rain_gauge.html#a5942527ea4b8983e6133be7af4754b41">More...</a><br /></td></tr>
-<tr class="separator:a5942527ea4b8983e6133be7af4754b41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">update</a> (tm timeinfo, float rain, bool startup=false, float raingaugeMax=RAINGAUGE_MAX_VALUE)</td></tr>
+<tr class="memdesc:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update rain gauge statistics.  <a href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">More...</a><br /></td></tr>
+<tr class="separator:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8635f7cda13cf9a5f9e72f2f1ba81ecc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">pastHour</a> (void)</td></tr>
 <tr class="separator:a8635f7cda13cf9a5f9e72f2f1ba81ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a3e7c4b47d59c707543df9e0db26574"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">currentDay</a> (void)</td></tr>
@@ -283,8 +283,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
 * </pre> 
 </div>
 </div>
-<a id="a5942527ea4b8983e6133be7af4754b41"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5942527ea4b8983e6133be7af4754b41">&#9670;&nbsp;</a></span>update()</h2>
+<a id="a2632d98a1b617ae6a2ff5d7cfbe03c91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2632d98a1b617ae6a2ff5d7cfbe03c91">&#9670;&nbsp;</a></span>update()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -300,6 +300,12 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
           <td></td>
           <td class="paramtype">float&#160;</td>
           <td class="paramname"><em>rain</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>startup</em> = <code>false</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -320,6 +326,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
   <table class="params">
     <tr><td class="paramname">timeinfo</td><td>date and time (struct tm)</td></tr>
     <tr><td class="paramname">rain</td><td>rain gauge raw value</td></tr>
+    <tr><td class="paramname">startup</td><td>sensor startup flag</td></tr>
     <tr><td class="paramname">rainGaugeMax</td><td>overflow value; when reached, the rain gauge is reset to zero </td></tr>
   </table>
   </dd>

@@ -94,6 +94,7 @@
 // 20230711 Changed remaining MQTT topics from char[] to String
 //          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
 //          Added define RX_STRATEGY
+// 20230717 Added weather sensor startup handling to rain gauge
 //
 // ToDo:
 //
@@ -474,7 +475,7 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].rain_ok) {
           struct tm timeinfo;
           gmtime_r(&now, &timeinfo);
-          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm);
+          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm, weatherSensor.sensor[i].startup);
       }
 
       // Example:

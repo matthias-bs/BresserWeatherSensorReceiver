@@ -53,8 +53,8 @@ const int SECONDS_PER_DAY  = 86400;
 #ifndef RTC_DATA_ATTR
    #define RTC_DATA_ATTR static
 #endif
-#if defined(SLEEP_EN) && !defined(ESP32)
-   #error "RainGauge with SLEEP_EN only supported on ESP32!"
+#if !defined(ESP32)
+   #warning "RainGauge with SLEEP_EN only supported on ESP32!"
 #endif
 
 

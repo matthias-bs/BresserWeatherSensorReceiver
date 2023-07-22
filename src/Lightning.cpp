@@ -61,7 +61,7 @@
    #define RTC_DATA_ATTR static
 #endif
 #if !defined(ESP32)
-   #warning "Lightning with SLEEP_EN only supported on ESP32!"
+   #pragma message("Lightning with SLEEP_EN only supported on ESP32!")
 #endif
 
 /**

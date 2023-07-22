@@ -137,7 +137,7 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
 }
 
 bool
-Lightning::lastEvent(time_t &timestamp, uint16_t &events, uint8_t &distance)
+Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
 {
     if (nvLightning.events == -1) {
         return false;

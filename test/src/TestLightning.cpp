@@ -74,6 +74,15 @@ TEST_GROUP(TG_LightningBasic) {
   }
 };
 
+TEST_GROUP(TG_LightningHourly) {
+  void setup() {
+      lightning.reset();
+  }
+
+  void teardown() {
+  }
+};
+
 
 /*
  * Test basic lightning functions
@@ -130,4 +139,33 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   lightning.reset();
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK_FALSE(res);
+}
+
+
+/*
+ * Test basic lightning functions
+ */
+TEST(TG_LightningHourly, Test_LightningHourly) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  time_t    res_ts;
+  time_t    exp_ts;
+  int       res_events;
+  uint8_t   res_distance;
+
+  printf("< LightningHourly >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.init(48);
+  lightning.update(ts, 48, 5);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(0, res_events);
+
+  // Step 1
+  setTime("2023-07-22 8:06", tm, ts);
+  lightning.update(ts, 50, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(2, res_events);
+
 }

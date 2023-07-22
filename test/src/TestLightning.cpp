@@ -83,9 +83,9 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   time_t    ts;
   bool      res;
   time_t    res_ts;
+  time_t    exp_ts;
   int       res_events;
   uint8_t   res_distance;
-  //float     rainSensor;
 
   printf("< LightningBasic >\n");
   
@@ -98,15 +98,16 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   lightning.update(ts, 50, 7);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK(res);
-  CHECK_EQUAL(ts, res_ts);
+  CHECK_EQUAL(exp_ts=ts, res_ts);
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
 
+  // Counter not changed
   setTime("2023-07-22 8:12", tm, ts);
   lightning.update(ts, 50, 12);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK(res);
-  CHECK_EQUAL(ts, res_ts);
+  CHECK_EQUAL(exp_ts, res_ts);
   CHECK_EQUAL(0, res_events);
   CHECK_EQUAL(12, res_distance);
 

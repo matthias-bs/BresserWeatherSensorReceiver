@@ -285,7 +285,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   int       res_events;
   int       exp_events;
 
-  printf("< LightningHourly >\n");
+  printf("< LightningDouble >\n");
   
   setTime("2023-07-22 8:00", tm, ts);
   lightning.init(48);

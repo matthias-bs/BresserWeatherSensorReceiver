@@ -120,8 +120,8 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
     }
 
     if (nvLightning.prevCount < count) {
-        nvLightning.prevCount = count;
         nvLightning.events = count - nvLightning.prevCount;
+        nvLightning.prevCount = count;
         nvLightning.distance = distance;
         nvLightning.timestamp = timestamp;
     }

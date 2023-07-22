@@ -94,6 +94,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK_FALSE(res);
 
+  // Step 1
   setTime("2023-07-22 8:06", tm, ts);
   lightning.update(ts, 50, 7);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
@@ -102,14 +103,16 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
 
+  // Step 2
   // Counter not changed
+  // Same state as State 1
   setTime("2023-07-22 8:12", tm, ts);
   lightning.update(ts, 50, 12);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK(res);
   CHECK_EQUAL(exp_ts, res_ts);
-  CHECK_EQUAL(0, res_events);
-  CHECK_EQUAL(12, res_distance);
+  CHECK_EQUAL(2, res_events);
+  CHECK_EQUAL(7, res_distance);
 
   setTime("2023-07-22 8:18", tm, ts);
   lightning.update(ts, 55, 30);

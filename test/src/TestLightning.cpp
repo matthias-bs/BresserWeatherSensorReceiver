@@ -148,24 +148,35 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
 TEST(TG_LightningHourly, Test_LightningHourly) {
   tm        tm;
   time_t    ts;
-  bool      res;
+  int       counter;
   time_t    res_ts;
   time_t    exp_ts;
   int       res_events;
-  uint8_t   res_distance;
+  int       exp_events;
 
   printf("< LightningHourly >\n");
   
   setTime("2023-07-22 8:00", tm, ts);
   lightning.init(48);
-  lightning.update(ts, 48, 5);
+  lightning.update(ts, counter=48, 5);
   res_events = lightning.pastHour(ts);
-  CHECK_EQUAL(0, res_events);
+  CHECK_EQUAL(exp_events=0, res_events);
 
   // Step 1
+  // Counter +2
   setTime("2023-07-22 8:06", tm, ts);
-  lightning.update(ts, 50, 7);
+  counter += 2;
+  exp_events += 2;
+  lightning.update(ts, counter, 7);
   res_events = lightning.pastHour(ts);
-  CHECK_EQUAL(2, res_events);
+  CHECK_EQUAL(exp_events, res_events);
 
+  // Step 2
+  // Counter +3
+  setTime("2023-07-22 8:12", tm, ts);
+  counter += 3;
+  exp_events += 3;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
 }

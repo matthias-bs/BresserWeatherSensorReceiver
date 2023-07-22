@@ -114,6 +114,8 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
 
+  // Step 3
+  // Counter +5, Distance 30
   setTime("2023-07-22 8:18", tm, ts);
   lightning.update(ts, 55, 30);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
@@ -121,4 +123,11 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(ts, res_ts);
   CHECK_EQUAL(5, res_events);
   CHECK_EQUAL(30, res_distance);
+
+  // Step 4
+  // Reset
+  setTime("2023-07-22 8:24", tm, ts);
+  lightning.reset();
+  res = lightning.lastEvent(res_ts, res_events, res_distance);
+  CHECK_FALSE(res);
 }

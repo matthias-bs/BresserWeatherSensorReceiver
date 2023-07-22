@@ -95,7 +95,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_FALSE(res);
 
   setTime("2022-09-06 8:06", tm, ts);
-  lightning.update(tm, 50, 7);
+  lightning.update(ts, 50, 7);
   res = lightning.lastEvent(time_t &res_ts, uint16_t &res_events, uint8_t &res_distance);
   CHECK(res);
   CHECK_EQUAL(ts, res_ts);

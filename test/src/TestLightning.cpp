@@ -83,6 +83,15 @@ TEST_GROUP(TG_LightningHourly) {
   }
 };
 
+TEST_GROUP(TG_LightningDouble) {
+  void setup() {
+      lightning.reset();
+  }
+
+  void teardown() {
+  }
+};
+
 
 /*
  * Test basic lightning functions
@@ -143,14 +152,12 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
 
 
 /*
- * Test basic lightning functions
+ * Test hourly lightning events
  */
 TEST(TG_LightningHourly, Test_LightningHourly) {
   tm        tm;
   time_t    ts;
   int       counter;
-  time_t    res_ts;
-  time_t    exp_ts;
   int       res_events;
   int       exp_events;
 
@@ -261,6 +268,45 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 12;
   exp_events += 12;
   exp_events -= 3;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+
+/*
+ * Test hourly lightning events
+ * Two updates during the same time slot
+ */
+TEST(TG_LightningDouble, Test_LightningDouble) {
+  tm        tm;
+  time_t    ts;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+
+  printf("< LightningHourly >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.init(48);
+  lightning.update(ts, counter=48, 5);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter = 50;
+  exp_events = 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 2
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter = 53;
+  exp_events = 5;
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour(ts);
   CHECK_EQUAL(exp_events, res_events);

@@ -83,7 +83,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   time_t    ts;
   bool      res;
   time_t    res_ts;
-  uint16_t  res_events;
+  int       res_events;
   uint8_t   res_distance;
   //float     rainSensor;
 

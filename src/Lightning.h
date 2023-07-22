@@ -121,7 +121,7 @@ public:
      * 
      * \param lightningCountMax overflow value; when reached, the sensor's counter is reset to zero
      */  
-    void  update(time_t timestamp, uint16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
+    void  update(time_t timestamp, int count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
     
     
     /**
@@ -142,7 +142,7 @@ public:
      */
     int lastCycle(void);
 
-    bool lastEvent(time_t &timestamp, uint16_t &events, uint8_t &distance);
+    bool lastEvent(time_t &timestamp, int &events, uint8_t &distance);
 
 private:
     inline int inc(int x)

@@ -73,8 +73,8 @@
  */
 typedef struct {
     /* Data of last lightning event */
-    uint16_t  prevCount;
-    uint16_t  events;
+    int       prevCount;
+    int       events;
     uint8_t   distance;
     time_t    timestamp;
 
@@ -109,10 +109,13 @@ Lightning::init(uint16_t count)
 }
 
 void
-Lightning::update(time_t timestamp, uint16_t count, uint8_t distance, bool startup)
+Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
 {
+    // currently unused
+    (void)startup;
+
     if (nvLightning.prevCount == -1) {
-        nvLightning.prevcount = count;
+        nvLightning.prevCount = count;
         return;
     }
 

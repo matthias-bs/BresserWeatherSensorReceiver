@@ -58,6 +58,7 @@
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
+// 20230723 Added SENSOR_TYPE_WATER
 //
 // ToDo:
 // -
@@ -81,6 +82,7 @@
 // 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
 // 3 - Lightning Sensor         PN 7009976
 // 4 - Soil Moisture Sensor     6-in-1; PN 7009972
+// 5 - Water Leakage Sensor     6-in-1; PN 7009975
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
 // 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
 // ? - Air Quality Sensor
@@ -91,6 +93,7 @@
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
 #define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
+#define SENSOR_TYPE_WATER           5 // Water Leakage
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 #define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
 

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>BresserWeatherSensorReceiver: Class List</title>
+<title>BresserWeatherSensorReceiver: nvLightning_t Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -63,7 +63,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('annotated.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structnv_lightning__t.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -82,25 +82,41 @@ $(document).ready(function(){initNavTree('annotated.html',''); initResizable(); 
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="structnv_lightning__t-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Class List</div>  </div>
+<div class="title">nvLightning_t Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock">Here are the classes, structs, unions and interfaces with brief descriptions:</div><div class="directory">
-<div class="levels">[detail level <span onclick="javascript:toggleLevel(1);">1</span><span onclick="javascript:toggleLevel(2);">2</span>]</div><table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="class_lightning.html" target="_self">Lightning</a></td><td class="desc">Calculation number of lightning events during last sensor update cycle and during last hour (past 60 minutes); storing timestamp and distance of last event </td></tr>
-<tr id="row_1_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnv_data__t.html" target="_self">nvData_t</a></td><td class="desc"></td></tr>
-<tr id="row_2_" class="even"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="structnv_lightning__t.html" target="_self">nvLightning_t</a></td><td class="desc"></td></tr>
-<tr id="row_3_"><td class="entry"><span style="width:16px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="class_rain_gauge.html" target="_self">RainGauge</a></td><td class="desc">Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall </td></tr>
-<tr id="row_4_" class="even"><td class="entry"><span style="width:0px;display:inline-block;">&#160;</span><span id="arr_4_" class="arrow" onclick="toggleFolder('4_')">&#9660;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="class_weather_sensor.html" target="_self">WeatherSensor</a></td><td class="desc">Receive, decode and store Bresser Weather <a class="el" href="struct_weather_sensor_1_1_sensor.html" title="sensor data and status flags">Sensor</a> Data Uses CC1101 or SX1276 radio module for receiving FSK modulated signal at 868 MHz </td></tr>
-<tr id="row_4_0_"><td class="entry"><span style="width:32px;display:inline-block;">&#160;</span><span class="icona"><span class="icon">C</span></span><a class="el" href="struct_weather_sensor_1_1_sensor.html" target="_self">Sensor</a></td><td class="desc"><a class="el" href="struct_weather_sensor_1_1_sensor.html" title="sensor data and status flags">Sensor</a> data and status flags </td></tr>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:aa2318125acf5022a45080fafaa560aa6"><td class="memItemLeft" align="right" valign="top"><a id="aa2318125acf5022a45080fafaa560aa6"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>prevCount</b></td></tr>
+<tr class="separator:aa2318125acf5022a45080fafaa560aa6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b3c4c50b5aaf301810420c699cadfd4"><td class="memItemLeft" align="right" valign="top"><a id="a0b3c4c50b5aaf301810420c699cadfd4"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>events</b></td></tr>
+<tr class="separator:a0b3c4c50b5aaf301810420c699cadfd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afab02b732c4f9586b9b8353a85c2a72d"><td class="memItemLeft" align="right" valign="top"><a id="afab02b732c4f9586b9b8353a85c2a72d"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>distance</b></td></tr>
+<tr class="separator:afab02b732c4f9586b9b8353a85c2a72d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20a5bd6643924f83336634b53f364f7b"><td class="memItemLeft" align="right" valign="top"><a id="a20a5bd6643924f83336634b53f364f7b"></a>
+time_t&#160;</td><td class="memItemRight" valign="bottom"><b>timestamp</b></td></tr>
+<tr class="separator:a20a5bd6643924f83336634b53f364f7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ae6276ee56395135d7069876c473a40"><td class="memItemLeft" align="right" valign="top"><a id="a8ae6276ee56395135d7069876c473a40"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>hist</b> [LIGHTNING_HIST_SIZE]</td></tr>
+<tr class="separator:a8ae6276ee56395135d7069876c473a40"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- directory -->
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>src/Lightning.cpp</li>
+</ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="structnv_lightning__t.html">nvLightning_t</a></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>

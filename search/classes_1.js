@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['raingauge_50',['RainGauge',['../class_rain_gauge.html',1,'']]]
+  ['nvdata_5ft_52',['nvData_t',['../structnv_data__t.html',1,'']]],
+  ['nvlightning_5ft_53',['nvLightning_t',['../structnv_lightning__t.html',1,'']]]
 ];

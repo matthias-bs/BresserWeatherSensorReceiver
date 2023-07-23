@@ -43,7 +43,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_rain_gauge_8h_source.html"
+"_lightning_8h_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

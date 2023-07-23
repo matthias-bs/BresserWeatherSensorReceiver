@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['weathersensor_52',['WeatherSensor',['../class_weather_sensor.html',1,'']]]
+  ['sensor_55',['Sensor',['../struct_weather_sensor_1_1_sensor.html',1,'WeatherSensor']]]
 ];

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nvdata_5ft_49',['nvData_t',['../structnv_data__t.html',1,'']]]
+  ['lightning_51',['Lightning',['../class_lightning.html',1,'']]]
 ];

@@ -89,15 +89,16 @@ void loop()
     // This example uses only a single slot in the sensor data array
     int const i=0;
 
-    int idx = 0;
+    static int idx = 0;
     // Clear all sensor data
     weatherSensor.clearSlots();
-
-    idx = (idx == 4) ? 0 : idx+1;
 
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
     DecodeStatus decode_status = weatherSensor.decodeMessage(&testData[idx][0], MSG_BUF_SIZE-1);
+
+    idx = (idx == 4) ? 0 : idx+1;
+    Serial.printf("testData[%d]\n", idx);
 
     if (decode_status == DECODE_OK) {
       if (weatherSensor.sensor[i].s_type != SENSOR_TYPE_LIGHTNING) {
@@ -177,5 +178,5 @@ void loop()
       }
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)
-    delay(100);
+    delay(1000);
 } // loop()

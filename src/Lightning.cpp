@@ -79,7 +79,7 @@ typedef struct {
     time_t    timestamp;
 
     /* Data of past 60 minutes */
-    uint16_t  hist[LIGHTNING_HIST_SIZE];
+    int       hist[LIGHTNING_HIST_SIZE];
 
 } nvLightning_t;
 

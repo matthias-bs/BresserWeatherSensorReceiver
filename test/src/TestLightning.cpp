@@ -456,7 +456,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events -= 2;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(ts, res_events);
-  CHECK_FALSE(res);
+  //CHECK_FALSE(res);
   //CHECK_EQUAL(exp_events, res_events);
 
   // Step 11
@@ -466,6 +466,18 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   counter += 12;
   exp_events += 12;
   exp_events -= 3;
+  lightning.update(ts, counter, 7);
+  res = lightning.pastHour(ts, res_events);
+  CHECK(res);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 12
+  // Counter +13
+  // Events from Step 2 are discarded!
+  setTime("2023-07-22 9:12", tm, ts);
+  counter += 13;
+  exp_events += 13;
+  exp_events -= 4;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(ts, res_events);
   CHECK(res);

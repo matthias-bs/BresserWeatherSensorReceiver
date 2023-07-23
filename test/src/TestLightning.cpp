@@ -344,6 +344,8 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   // Step 1
   // Counter +2
   setTime("2023-07-22 8:06", tm, ts);
+  counter += 2;
+  exp_events += 2;
   // ---
   // No update!!!
   // ---

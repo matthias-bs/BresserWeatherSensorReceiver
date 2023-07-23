@@ -152,6 +152,6 @@ private:
 
     inline int dec(int x)
     {
-        return (x == 0) ? (LIGHTNING_HIST_SIZE - 9) : --x;
+        return (x == 0) ? (LIGHTNING_HIST_SIZE - 1) : --x;
     }
 };

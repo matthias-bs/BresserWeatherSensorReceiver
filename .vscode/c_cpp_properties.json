@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "Arduino",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/mp/Arduino/libraries/**"
+            ],
+            "defines": [],
+            "intelliSenseMode": "${default}",
+            "configurationProvider": "vsciot-vscode.vscode-arduino"
+        }
+    ],
+    "version": 4
+}

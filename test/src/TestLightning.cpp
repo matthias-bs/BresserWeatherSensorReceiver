@@ -92,6 +92,15 @@ TEST_GROUP(TG_LightningDouble) {
   }
 };
 
+TEST_GROUP(TG_LightningSkip) {
+  void setup() {
+      lightning.reset();
+  }
+
+  void teardown() {
+  }
+};
+
 
 /*
  * Test basic lightning functions
@@ -307,6 +316,128 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   setTime("2023-07-22 8:06", tm, ts);
   counter = 53;
   exp_events = 5;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+
+/*
+ * Test hourly lightning events
+ * Deliberately skip entry at 8:06
+ */
+TEST(TG_LightningSkip, Test_LightningSkip) {
+  tm        tm;
+  time_t    ts;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+
+  printf("< LightningSkip >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.init(48);
+  lightning.update(ts, counter=48, 5);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  // ---
+  // No update!!!
+  // ---
+
+  // Step 2
+  // Counter +3
+  setTime("2023-07-22 8:12", tm, ts);
+  counter += 3;
+  exp_events += 3;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Counter +4
+  setTime("2023-07-22 8:18", tm, ts);
+  counter += 4;
+  exp_events += 4;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 4
+  // Counter +5
+  setTime("2023-07-22 8:24", tm, ts);
+  counter += 5;
+  exp_events += 5;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 5
+  // Counter +6
+  setTime("2023-07-22 8:30", tm, ts);
+  counter += 6;
+  exp_events += 6;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 6
+  // Counter +7
+  setTime("2023-07-22 8:36", tm, ts);
+  counter += 7;
+  exp_events += 7;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 7
+  // Counter +8
+  setTime("2023-07-22 8:42", tm, ts);
+  counter += 8;
+  exp_events += 8;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 8
+  // Counter +9
+  setTime("2023-07-22 8:48", tm, ts);
+  counter += 9;
+  exp_events += 9;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 9
+  // Counter +10
+  setTime("2023-07-22 8:54", tm, ts);
+  counter += 10;
+  exp_events += 10;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 10
+  // Counter +11
+  // Events from Step 1 are discarded!
+  setTime("2023-07-22 9:00", tm, ts);
+  counter += 11;
+  exp_events += 11;
+  exp_events -= 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(ts);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 11
+  // Counter +12
+  // Events from Step 2 are discarded!
+  setTime("2023-07-22 9:06", tm, ts);
+  counter += 12;
+  exp_events += 12;
+  exp_events -= 3;
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour(ts);
   CHECK_EQUAL(exp_events, res_events);

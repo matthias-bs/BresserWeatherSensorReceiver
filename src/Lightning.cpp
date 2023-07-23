@@ -133,6 +133,15 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
     int min = timeinfo.tm_min;
     int idx = min / LIGHTNING_UPD_RATE;
 
+    // Search for skipped entries, i.e. entries which are smaller than their predecessor
+    int start = inc(idx);
+    int end   = dec(idx);
+    for (int i=start; i==end; inc(i)) {
+        if (nvLightning.hist[inc(i)] < nvLightning.hist[i]) {
+            printf("Marking %d as invalid\n", inc(i));
+            hist[inc(i)] = -1;
+        }
+    } 
     nvLightning.hist[idx] = count;
 }
 
@@ -158,6 +167,9 @@ Lightning::pastHour(time_t timestamp)
     
     int min = timeinfo.tm_min;
     int idx = min / LIGHTNING_UPD_RATE;
-
+    
+    if (nvLightning.hist[inc(idx)] == -1) {
+        print("Invalid\n");
+    }
     return nvLightning.hist[idx] - nvLightning.hist[inc(idx)]; 
 }

@@ -132,11 +132,10 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
 
     int min = timeinfo.tm_min;
     int idx = min / LIGHTNING_UPD_RATE;
+    nvLightning.hist[idx] = count;
 
     // Search for skipped entries, i.e. entries which are smaller than their predecessor
-    int start = inc(idx);
-    int end   = dec(idx);
-    printf("start=%d. end=%d\n", start, end);
+    
     for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
         printf("i=%d ", i);
         if (i == idx) {

@@ -60,6 +60,7 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
+#include "WeatherSensorCfg.h"
 
 /**
  * \def

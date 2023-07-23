@@ -138,7 +138,7 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
     
     for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
         printf("i=%d: hist[i]=%d\n", i, nvLightning.hist[i]);
-        if (i == idx) {
+        if ((i == idx) || (i == inc(idx))) {
             continue;
         }
         if (nvLightning.hist[i] < nvLightning.hist[dec(i)]) {
@@ -147,7 +147,6 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
         }
     }
     printf("\n");
-    nvLightning.hist[idx] = count;
 }
 
 bool

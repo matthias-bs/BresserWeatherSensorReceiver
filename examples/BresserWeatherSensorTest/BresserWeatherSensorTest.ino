@@ -93,7 +93,7 @@ void loop()
     // Clear all sensor data
     weatherSensor.clearSlots();
 
-    idx = (idx == 4) ? 0 : idx++;
+    idx = (idx == 4) ? 0 : idx+1;
 
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.

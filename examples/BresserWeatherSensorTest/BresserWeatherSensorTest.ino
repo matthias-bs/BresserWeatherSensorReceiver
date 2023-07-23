@@ -89,7 +89,7 @@ void loop()
 
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
-    DecodeStatus decode_status = weatherSensor.decodeMessage(test_data[idx][0], MSG_BUF_SIZE-1);
+    DecodeStatus decode_status = weatherSensor.decodeMessage(testData[idx][0], MSG_BUF_SIZE-1);
 
     if (decode_status == DECODE_OK) {
       if (weatherSensor.sensor[i].s_type != SENSOR_TYPE_LIGHTNING) {

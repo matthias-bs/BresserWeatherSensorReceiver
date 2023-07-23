@@ -129,9 +129,12 @@ public:
      * 
      * \brief Get number of lightning events during past 60 minutes
      * 
-     * \return number of lightning events during past 60 minutes
+     * \param timestamp     current time
+     * \param events        return number of events during past 60 minutes
+     * 
+     * \return true if valid
      */
-    int pastHour(time_t timestamp);
+    bool pastHour(time_t timestamp, int &events);
 
     /*
      * \fn lastCycle
@@ -142,6 +145,17 @@ public:
      */
     int lastCycle(void);
 
+    /*
+     * \fn lastEvent
+     *
+     * \brief Get data of last lightning event
+     * 
+     * \param timestamp     timestamp of last event
+     * \param events        number of lightning strikes
+     * \param distance      estimated distance
+     * 
+     * \return true if valid    
+     */
     bool lastEvent(time_t &timestamp, int &events, uint8_t &distance);
 
 private:

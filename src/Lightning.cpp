@@ -163,8 +163,8 @@ Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
     return true;
 }
 
-int
-Lightning::pastHour(time_t timestamp)
+bool
+Lightning::pastHour(time_t timestamp, int &events)
 {
     struct tm timeinfo;
     localtime_r(&timestamp, &timeinfo);
@@ -174,6 +174,8 @@ Lightning::pastHour(time_t timestamp)
     
     if (nvLightning.hist[inc(idx)] == -1) {
         printf("Invalid\n");
+        return false;
     }
-    return nvLightning.hist[idx] - nvLightning.hist[inc(idx)]; 
+    events = nvLightning.hist[idx] - nvLightning.hist[inc(idx)];
+    return true;
 }

@@ -137,11 +137,13 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
     int start = inc(idx);
     int end   = dec(idx);
     for (int i=start; i==end; i=inc(i)) {
+        printf("i=%d ", i);
         if (nvLightning.hist[inc(i)] < nvLightning.hist[i]) {
             printf("Marking %d as invalid\n", inc(i));
             nvLightning.hist[inc(i)] = -1;
         }
-    } 
+    }
+    printf("\n");
     nvLightning.hist[idx] = count;
 }
 

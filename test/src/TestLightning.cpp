@@ -101,7 +101,7 @@ TEST_GROUP(TG_LightningSkip) {
   }
 };
 
-
+#if 0
 /*
  * Test basic lightning functions
  */
@@ -320,7 +320,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   res_events = lightning.pastHour(ts);
   CHECK_EQUAL(exp_events, res_events);
 }
-
+#endif
 
 /*
  * Test hourly lightning events

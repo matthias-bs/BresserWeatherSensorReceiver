@@ -95,7 +95,7 @@ var NAVTREEINDEX0 =
 "structnv_lightning__t.html":[0,0,2],
 "structnv_lightning__t.html#a0b3c4c50b5aaf301810420c699cadfd4":[0,0,2,1],
 "structnv_lightning__t.html#a20a5bd6643924f83336634b53f364f7b":[0,0,2,4],
-"structnv_lightning__t.html#a8ae6276ee56395135d7069876c473a40":[0,0,2,2],
+"structnv_lightning__t.html#aa09856d04689bec67be47938b7503030":[0,0,2,2],
 "structnv_lightning__t.html#aa2318125acf5022a45080fafaa560aa6":[0,0,2,3],
 "structnv_lightning__t.html#afab02b732c4f9586b9b8353a85c2a72d":[0,0,2,0]
 };

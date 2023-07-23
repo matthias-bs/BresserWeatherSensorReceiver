@@ -136,7 +136,7 @@ Lightning::update(time_t timestamp, int count, uint8_t distance, bool startup)
     // Search for skipped entries, i.e. entries which are smaller than their predecessor
     int start = inc(idx);
     int end   = dec(idx);
-    for (int i=start; i==end; inc(i)) {
+    for (int i=start; i==end; i=inc(i)) {
         if (nvLightning.hist[inc(i)] < nvLightning.hist[i]) {
             printf("Marking %d as invalid\n", inc(i));
             nvLightning.hist[inc(i)] = -1;

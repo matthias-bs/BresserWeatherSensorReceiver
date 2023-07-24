@@ -39,7 +39,7 @@
 //
 // History:
 //
-// 20220523 Created from BresserWeatherSensorBasic.ino
+// 20230723 Created from BresserWeatherSensorBasic.ino
 //
 // ToDo: 
 // - 

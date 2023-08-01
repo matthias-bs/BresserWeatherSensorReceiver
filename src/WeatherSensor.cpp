@@ -472,7 +472,7 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
 //
 // Example input data:
 //   EA EC 7F EB 5F EE EF FA FE 76 BB FA FF 15 13 80 14 A0 11 10 05 01 89 44 05 00
-//   CC CC CC CC CC CC CC CC CC CC CC CC CC uu II SS GG DG WW  W TT  T HH RR RR Bt
+//   CC CC CC CC CC CC CC CC CC CC CC CC CC uu II sS GG DG WW  W TT  T HH RR RR Bt
 // - C = Check, inverted data of 13 byte further
 // - uu = checksum (number/count of set bits within bytes 14-25)
 // - I = station ID (maybe)
@@ -484,6 +484,7 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
 // - H = humidity in percent, BCD coded, HH = 23 => 23 %
 // - R = rain in mm, BCD coded, RRRR = 1203 => 031.2 mm
 // - B = Battery. 0=Ok, 8=Low.
+// - s = startup, 0 after power-on/reset / 8 after 1 hour
 // - S = sensor type, only low nibble used, 0x9 for Bresser Professional Rain Gauge
 //
 // Parameters:
@@ -537,7 +538,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
-    sensor[slot].startup     = false; // To Do
+    sensor[slot].startup     = ((msg[15] & 0x80) == 0) ? true : false; 
 
     int temp_raw = (msg[20] & 0x0f) + ((msg[20] & 0xf0) >> 4) * 10 + (msg[21] &0x0f) * 100;
     if (msg[25] & 0x0f) {
@@ -726,7 +727,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = chan_tmp;
-    sensor[slot].startup     = (msg[6] >> 3) & 1; // s.a. #1214
+    sensor[slot].startup     = ((msg[6] & 0x8) == 0) ? true : false; // s.a. #1214
 
     f_3in1 = is_decode3in1(id_tmp);
 

@@ -63,6 +63,7 @@
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 // 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
+// 20230804 Added Bresser Water Leakage Sensor (P/N 7009975) decoder
 //
 // ToDo:
 // -
@@ -276,6 +277,14 @@ DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
     #endif
     #ifdef BRESSER_LIGHTNING
         decode_res = decodeBresserLightningPayload(msg, msgSize);
+        if (decode_res == DECODE_OK   ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP) {
+            return decode_res;
+        }                
+    #endif
+    #ifdef BRESSER_LEAKAGE
+        decode_res = decodeBresserLeakagePayload(msg, msgSize);
     #endif
     return decode_res;
 }
@@ -1073,6 +1082,105 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
 
     //decoder_output_data(decoder, data);
 
+    return DECODE_OK;
+}
+#endif
+
+/**
+ * Decoder for Bresser Water Leakage outdoor sensor
+ *
+ * https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/77
+ * 
+ * Preamble: aa aa 2d d4
+ * 
+ * hhhh ID:hhhhhhhh TYPE:4d NSTARTUP:b CH:3d ALARM:b NALARM:b BATT:bb FLAGS:bbbb hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+ * 
+ * Examples:
+ * ---------
+ * [Bresser Water Leakage Sensor, PN 7009975]
+ * 
+ *[00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25]
+ * 
+ * C7 70 35 97 04 08 57 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF FF FF FF FF [CH7]
+ * DF 7D 36 49 27 09 56 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF FF FF FF FF [CH6]
+ * 9E 30 79 84 33 06 55 70 00 00 00 00 00 00 00 00 03 FF FD DF FF BF FF DF FF FF [CH5]
+ * 37 D8 57 19 73 02 51 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF BF FF EF FB [set CH4, received CH1 -> switch not positioned correctly]
+ * E2 C8 68 27 91 24 54 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF FF FF FF FF [CH4]
+ * B3 DA 55 57 17 40 53 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF FF FF FF FB [CH3]
+ * 37 FA 84 73 03 02 52 70 00 00 00 00 00 00 00 00 03 FF FF FF DF FF FF FF FF FF [CH2]
+ * 27 F3 80 02 52 88 51 70 00 00 00 00 00 00 00 00 03 FF FF FF FF FF DF FF FF FF [CH1]
+ * A6 FB 80 02 52 88 59 70 00 00 00 00 00 00 00 00 03 FD F7 FF FF BF FF FF FF FF [CH1+NSTARTUP]
+ * A6 FB 80 02 52 88 59 B0 00 00 00 00 00 00 00 00 03 FF FF FF FD FF F7 FF FF FF [CH1+NSTARTUP+ALARM]
+ * A6 FB 80 02 52 88 59 70 00 00 00 00 00 00 00 00 03 FF FF BF F7 F7 FD 7F FF FF [CH1+NSTARTUP]
+ * [Reset]
+ * C0 10 36 79 37 09 51 70 00 00 00 00 00 00 00 00 01 1E FD FD FF FF FF DF FF FF [CH1]
+ * C0 10 36 79 37 09 51 B0 00 00 00 00 00 00 00 00 03 FE FD FF AF FF FF FF FF FD [CH1+ALARM]
+ * [Reset]
+ * 71 9C 54 81 72 09 51 40 00 00 00 00 00 00 00 00 0F FF FF FF FF FF FF DF FF FE [CH1+BATT_LO]
+ * 71 9C 54 81 72 09 51 40 00 00 00 00 00 00 00 00 0F FE FF FF FF FF FB FF FF FF
+ * 71 9C 54 81 72 09 51 40 00 00 00 00 00 00 00 00 07 FD F7 FF DF FF FF DF FF FF
+ * 71 9C 54 81 72 09 51 80 00 00 00 00 00 00 00 00 1F FF FF F7 FF FF FF FF FF FF [CH1+BATT_LO+ALARM]
+ * F0 94 54 81 72 09 59 40 00 00 00 00 00 00 00 00 0F FF DF FF FF FF FF BF FD F7 [CH1+BATT_LO+NSTARTUP]
+ * F0 94 54 81 72 09 59 80 00 00 00 00 00 00 00 00 03 FF B7 FF ED FF FF FF DF FF [CH1+BATT_LO+NSTARTUP+ALARM]
+ * 
+ * - The actual message length is not known (probably 16 or 17 bytes)
+ * - The first two bytes are presumably a checksum/digest; algorithm still to be found
+ * - The ID changes on power-up/reset
+ * - NSTARTUP changes from 0 to 1 approx. one hour after power-on/reset
+ */
+#ifdef BRESSER_LEAKAGE
+DecodeStatus WeatherSensor::decodeBresserLeakagePayload(uint8_t *msg, uint8_t msgSize)
+{   
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        log_message("Data", msg, msgSize);
+    #endif
+
+    uint32_t id_tmp   = ((uint32_t)msg[2] << 24) | (msg[3] << 16) | (msg[4] << 8) | (msg[5]);
+    uint8_t  type_tmp = msg[6] >> 4;
+    uint8_t  chan_tmp = (msg[6] & 0x7);
+    bool     alarm    = (msg[7] & 0x80) == 0x80;
+    bool     no_alarm = (msg[7] & 0x40) == 0x40;
+
+    DecodeStatus status;
+
+    uint8_t null_bytes = msg[7] & 0xF;
+
+    for (int i=8; i<=15; i++) {
+        null_bytes |= msg[i];
+    }
+
+    // The checksum/digest algorithm is currently unknown.
+    // We apply some heuristics to validate that the message is realy from
+    // a water leakage sensor.
+    bool decode_ok = (type_tmp == SENSOR_TYPE_LEAKAGE) &&
+                     (alarm != no_alarm) && 
+                     (chan_tmp != 0) && 
+                     (null_bytes == 0);
+
+    status = (decode_ok) ? DECODE_OK : DECODE_INVALID;
+    if (status != DECODE_OK)
+        return status;
+    
+    // Find appropriate slot in sensor data array and update <status>
+    int slot = findSlot(id_tmp, &status);
+
+    if (status != DECODE_OK)
+        return status;
+    
+    sensor[slot].sensor_id           = id_tmp;
+    sensor[slot].s_type              = type_tmp;
+    sensor[slot].chan                = chan_tmp;
+    sensor[slot].startup             = (msg[6] >> 3) & 1;
+    sensor[slot].water_leakage_alarm = (alarm && !no_alarm);
+    sensor[slot].battery_ok          = (msg[7] & 0x30) != 0x00;
+    sensor[slot].leakage_ok          = true;
+    sensor[slot].rssi                = rssi;
+    sensor[slot].valid               = true;
+    sensor[slot].complete            = true;
+
+    log_d("~~~ ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
+        id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
+    
     return DECODE_OK;
 }
 #endif

@@ -44,6 +44,7 @@
 // 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
 // 20230607 Added pin definitions for Heltec WiFi LoRa 32(V2)
 // 20230624 Added Bresser Lightning Sensor decoder
+// 20230804 Added Bresser Water Leakage Sensor decoder
 //
 // ToDo:
 // -
@@ -175,8 +176,8 @@
 #define NUM_SENSORS     1       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
-#define SENSOR_IDS_EXC {}
-//#define SENSOR_IDS_EXC { 0x39582376 }
+#define SENSOR_IDS_EXC { 0x792882A2 }
+//#define SENSOR_IDS_EXC { 0x792882A2 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
 #define SENSOR_IDS_INC {}
@@ -303,6 +304,7 @@
 #define BRESSER_6_IN_1
 #define BRESSER_7_IN_1
 #define BRESSER_LIGHTNING
+#define BRESSER_LEAKAGE
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"

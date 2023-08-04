@@ -63,7 +63,6 @@
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 // 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
-// 20230804 Added Bresser Water Leakage Sensor (P/N 7009975) decoder
 //
 // ToDo:
 // -
@@ -248,7 +247,7 @@ DecodeStatus WeatherSensor::getMessage(void)
 }
 
 
-DecodeStatus WeatherSensor::decodeMessage(uint8_t *msg, uint8_t msgSize) {
+DecodeStatus WeatherSensor::decodeMessage(const uint8_t * msg, uint8_t msgSize) {
     DecodeStatus decode_res = DECODE_INVALID;
     
     #ifdef BRESSER_7_IN_1
@@ -509,7 +508,7 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
 // DECODE_CHK_ERR - Checksum Error
 //
 #ifdef BRESSER_5_IN_1
-DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSize) {
+DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t msgSize) {
     // First 13 bytes need to match inverse of last 13 bytes
     for (unsigned col = 0; col < msgSize / 2; ++col) {
         if ((msg[col] ^ msg[col + 13]) != 0xff) {
@@ -695,7 +694,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSi
 //  DECODE_DIG_ERR - Digest Check Error
 //  DECODE_CHK_ERR - Checksum Error
 #ifdef BRESSER_6_IN_1
-DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSize) {
+DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t msgSize) {
     (void)msgSize; // unused parameter - kept for consistency with other decoders; avoid warning
     int const moisture_map[] = {0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99}; // scale is 20/3
 
@@ -771,13 +770,14 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     //int unk_raw = ((msg[15] & 0xf0) >> 4) * 10 + (msg[15] & 0x0f);
 
     // invert 3 bytes wind speeds
-    msg[7] ^= 0xff;
-    msg[8] ^= 0xff;
-    msg[9] ^= 0xff;
-    wind_ok = (msg[7] <= 0x99) && (msg[8] <= 0x99) && (msg[9] <= 0x99);
+    uint8_t _imsg7 = msg[7] ^ 0xff;
+    uint8_t _imsg8 = msg[8] ^ 0xff;
+    uint8_t _imsg9 = msg[9] ^ 0xff;
+    
+    wind_ok = (_imsg7 <= 0x99) && (_imsg8 <= 0x99) && (_imsg9 <= 0x99);
     if (wind_ok) {
-        int gust_raw     = (msg[7] >> 4) * 100 + (msg[7] & 0x0f) * 10 + (msg[8] >> 4);
-        int wavg_raw     = (msg[9] >> 4) * 100 + (msg[9] & 0x0f) * 10 + (msg[8] & 0x0f);
+        int gust_raw     = (_imsg7 >> 4) * 100 + (_imsg7 & 0x0f) * 10 + (_imsg8 >> 4);
+        int wavg_raw     = (_imsg9 >> 4) * 100 + (_imsg9 & 0x0f) * 10 + (_imsg8 & 0x0f);
         int wind_dir_raw = ((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4);
 
 #ifdef WIND_DATA_FLOATINGPOINT
@@ -793,15 +793,16 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSi
     }
 
     // rain counter, inverted 3 bytes BCD - shared with temp/hum
-    msg[12] ^= 0xff;
-    msg[13] ^= 0xff;
-    msg[14] ^= 0xff;
+    uint8_t _imsg12 = msg[12] ^ 0xff;
+    uint8_t _imsg13 = msg[13] ^ 0xff;
+    uint8_t _imsg14 = msg[14] ^ 0xff;
+
 
     rain_ok = (flags == 1) && (type_tmp == 1);
     if (rain_ok) {
-        int rain_raw     = (msg[12] >> 4) * 100000 + (msg[12] & 0x0f) * 10000
-                         + (msg[13] >> 4) * 1000 + (msg[13] & 0x0f) * 100
-                         + (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+        int rain_raw     = (_imsg12 >> 4) * 100000 + (_imsg12 & 0x0f) * 10000
+                         + (_imsg13 >> 4) * 1000 + (_imsg13 & 0x0f) * 100
+                         + (_imsg14 >> 4) * 10 + (_imsg14 & 0x0f);
         sensor[slot].rain_mm   = rain_raw * 0.1f;
     }
 
@@ -865,7 +866,7 @@ Unit of light is kLux (not W/m²).
 First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1, which likely means we got that wrong.
 */
 #ifdef BRESSER_7_IN_1
-DecodeStatus WeatherSensor::decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize) {
+DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t msgSize) {
 
   if (msg[21] == 0x00) {
       log_d("Data sanity check failed");
@@ -998,7 +999,7 @@ First two bytes are an LFSR-16 digest, generator 0x8810 key 0xabf9 with a final 
 */
 
 #ifdef BRESSER_LIGHTNING
-DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize)
+DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, uint8_t msgSize)
 {   
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         // see AS3935 Datasheet, Table 17 - Distance Estimation
@@ -1129,7 +1130,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(uint8_t *msg, uint8_t 
  * - NSTARTUP changes from 0 to 1 approx. one hour after power-on/reset
  */
 #ifdef BRESSER_LEAKAGE
-DecodeStatus WeatherSensor::decodeBresserLeakagePayload(uint8_t *msg, uint8_t msgSize)
+DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint8_t msgSize)
 {   
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         log_message("Data", msg, msgSize);

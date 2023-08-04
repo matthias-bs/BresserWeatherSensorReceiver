@@ -189,7 +189,7 @@ class WeatherSensor {
 
         \returns DecodeStatus
         */
-        DecodeStatus    decodeMessage(uint8_t *msg, uint8_t msgSize);
+        DecodeStatus    decodeMessage(const uint8_t *msg, uint8_t msgSize);
 
         /**
          * \struct Sensor
@@ -344,7 +344,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser5In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_6_IN_1
             /*!
@@ -358,7 +358,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser6In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_7_IN_1
             /*!
@@ -370,7 +370,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser7In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_LIGHTNING
              /*!
@@ -382,7 +382,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-           DecodeStatus decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize);
+           DecodeStatus decodeBresserLightningPayload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_LEAKAGE
              /*!
@@ -394,7 +394,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-           DecodeStatus decodeBresserLeakagePayload(uint8_t *msg, uint8_t msgSize);
+           DecodeStatus decodeBresserLeakagePayload(const uint8_t *msg, uint8_t msgSize);
         #endif
 
     protected:
@@ -425,7 +425,7 @@ class WeatherSensor {
              *  Byte #: 00 01 02 03...
              * <descr>: DE AD BE EF...
              */
-            void log_message(const char *descr, uint8_t *msg, uint8_t msgSize) {
+            void log_message(const char *descr, const uint8_t *msg, uint8_t msgSize) {
                 char buf[128];
                 const char txt[] = "Byte #: ";
                 int offs;

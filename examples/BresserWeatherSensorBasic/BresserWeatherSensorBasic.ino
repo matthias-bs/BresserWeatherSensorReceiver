@@ -45,6 +45,7 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230624 Added Bresser Lightning Sensor decoder
+// 20230804 Added Bresser Water Leakage Sensor decoder
 //
 // ToDo: 
 // - 

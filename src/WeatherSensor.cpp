@@ -1125,7 +1125,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
  * F0 94 54 81 72 09 59 80 00 00 00 00 00 00 00 00 03 FF B7 FF ED FF FF FF DF FF [CH1+BATT_LO+NSTARTUP+ALARM]
  * 
  * - The actual message length is not known (probably 16 or 17 bytes)
- * - The first two bytes are presumably a checksum/digest; algorithm still to be found
+ * - The first two bytes are presumably a checksum/crc/digest; algorithm still to be found
  * - The ID changes on power-up/reset
  * - NSTARTUP changes from 0 to 1 approx. one hour after power-on/reset
  */
@@ -1135,6 +1135,8 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         log_message("Data", msg, msgSize);
     #endif
+
+    // TODO: Find checksum algorithm
 
     uint32_t id_tmp   = ((uint32_t)msg[2] << 24) | (msg[3] << 16) | (msg[4] << 8) | (msg[5]);
     uint8_t  type_tmp = msg[6] >> 4;

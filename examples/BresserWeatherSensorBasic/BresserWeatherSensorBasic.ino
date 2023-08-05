@@ -45,6 +45,7 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230624 Added Bresser Lightning Sensor decoder
+// 20230804 Added Bresser Water Leakage Sensor decoder
 //
 // ToDo: 
 // - 
@@ -82,7 +83,29 @@ void loop()
     int decode_status = weatherSensor.getMessage();
 
     if (decode_status == DECODE_OK) {
-      if (weatherSensor.sensor[i].s_type != SENSOR_TYPE_LIGHTNING) {
+      if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
+        Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
+            weatherSensor.sensor[i].sensor_id,
+            weatherSensor.sensor[i].s_type,
+            weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
+        Serial.printf("Lightning Counter: [%3d] ", weatherSensor.sensor[i].lightning_count);
+        if (weatherSensor.sensor[i].lightning_distance_km != 0) {
+          Serial.printf("Distance: [%2dkm] ", weatherSensor.sensor[i].lightning_distance_km);
+        } else {
+          Serial.printf("Distance: [----] ");
+        }
+        Serial.printf("unknown1: [0x%03X] ", weatherSensor.sensor[i].lightning_unknown1);
+        Serial.printf("unknown2: [0x%04X] ", weatherSensor.sensor[i].lightning_unknown2);
+      } else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
+        Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] Ch: [%d] ",
+            weatherSensor.sensor[i].sensor_id,
+            weatherSensor.sensor[i].s_type,
+            weatherSensor.sensor[i].battery_ok ? "OK " : "Low",
+            weatherSensor.sensor[i].chan
+        );
+        Serial.printf("Leakage: [%5s] ", (weatherSensor.sensor[i].water_leakage_alarm) ? "ALARM" : "OK");
+      } else {
+        // Anything other (weather-like) sensor is very similar
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
             weatherSensor.sensor[i].sensor_id,
             weatherSensor.sensor[i].s_type,
@@ -143,19 +166,6 @@ void loop()
         }
         #endif      
         
-      } else {
-        Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
-            weatherSensor.sensor[i].sensor_id,
-            weatherSensor.sensor[i].s_type,
-            weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
-        Serial.printf("Lightning Counter: [%3d] ", weatherSensor.sensor[i].lightning_count);
-        if (weatherSensor.sensor[i].lightning_distance_km != 0) {
-          Serial.printf("Distance: [%2dkm] ", weatherSensor.sensor[i].lightning_distance_km);
-        } else {
-          Serial.printf("Distance: [----] ");
-        }
-        Serial.printf("unknown1: [0x%03X] ", weatherSensor.sensor[i].lightning_unknown1);
-        Serial.printf("unknown2: [0x%04X] ", weatherSensor.sensor[i].lightning_unknown2);
       }
       Serial.printf("RSSI: [%5.1fdBm]\n", weatherSensor.sensor[i].rssi);
     } // if (decode_status == DECODE_OK)

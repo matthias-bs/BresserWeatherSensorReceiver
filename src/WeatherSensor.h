@@ -59,6 +59,7 @@
 // 20230708 Added SENSOR_TYPE_WEATHER_7IN1 and startup flag
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
 // 20230723 Added SENSOR_TYPE_WATER
+// 20230804 Added Bresser Water Leakage Sensor decoder
 //
 // ToDo:
 // -
@@ -93,7 +94,7 @@
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
 #define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
-#define SENSOR_TYPE_WATER           5 // Water Leakage
+#define SENSOR_TYPE_LEAKAGE         5 // Water Leakage
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 #define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
 
@@ -188,7 +189,7 @@ class WeatherSensor {
 
         \returns DecodeStatus
         */
-        DecodeStatus    decodeMessage(uint8_t *msg, uint8_t msgSize);
+        DecodeStatus    decodeMessage(const uint8_t *msg, uint8_t msgSize);
 
         /**
          * \struct Sensor
@@ -196,8 +197,8 @@ class WeatherSensor {
          * \brief sensor data and status flags
          */
         struct Sensor {
-            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes)
-            uint8_t  s_type;               //!< sensor type (only 6-in1)
+            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
+            uint8_t  s_type;               //!< sensor type (only 6-in-1)
             uint8_t  chan;                 //!< channel (only 6-in-1)
             bool     startup = false;      //!< startup after reset / battery change
             bool     valid;                //!< data valid (but not necessarily complete)
@@ -211,6 +212,7 @@ class WeatherSensor {
             bool     battery_ok = false;   //!< battery o.k.
             bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
             bool     lightning_ok = false; //!< lightning o.k. (only lightning)
+            bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
             float    temp_c;               //!< temperature in degC
             float    light_klx;            //!< Light KLux (only 7-in-1)
             float    light_lux;            //!< Light lux (only 7-in-1)
@@ -235,6 +237,7 @@ class WeatherSensor {
             uint8_t  lightning_count;       //!< lightning strike counter (only lightning)
             uint16_t lightning_unknown1;    //!< unknown part 1
             uint16_t lightning_unknown2;    //!< unknown part 2
+            bool     water_leakage_alarm;   //!< water leakage alarm (only water leakage)
             float    rssi;                  //!< received signal strength indicator in dBm
         };
 
@@ -273,6 +276,7 @@ class WeatherSensor {
                     sensor[i].rain_ok      = false;
                     sensor[i].moisture_ok  = false;
                     sensor[i].lightning_ok = false;
+                    sensor[i].leakage_ok   = false;
                 }
             }
         };
@@ -340,7 +344,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser5In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser5In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_6_IN_1
             /*!
@@ -354,7 +358,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser6In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser6In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_7_IN_1
             /*!
@@ -366,7 +370,7 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-            DecodeStatus decodeBresser7In1Payload(uint8_t *msg, uint8_t msgSize);
+            DecodeStatus decodeBresser7In1Payload(const uint8_t *msg, uint8_t msgSize);
         #endif
         #ifdef BRESSER_LIGHTNING
              /*!
@@ -378,7 +382,19 @@ class WeatherSensor {
 
             \returns Decode status.
             */
-           DecodeStatus decodeBresserLightningPayload(uint8_t *msg, uint8_t msgSize);
+           DecodeStatus decodeBresserLightningPayload(const uint8_t *msg, uint8_t msgSize);
+        #endif
+        #ifdef BRESSER_LEAKAGE
+             /*!
+            \brief Decode BRESSER_LEAKAGE message. (similar to 7-in-1)
+
+            \param msg     Message buffer.
+
+            \param msgSize Message size in bytes.
+
+            \returns Decode status.
+            */
+           DecodeStatus decodeBresserLeakagePayload(const uint8_t *msg, uint8_t msgSize);
         #endif
 
     protected:
@@ -409,7 +425,7 @@ class WeatherSensor {
              *  Byte #: 00 01 02 03...
              * <descr>: DE AD BE EF...
              */
-            void log_message(const char *descr, uint8_t *msg, uint8_t msgSize) {
+            void log_message(const char *descr, const uint8_t *msg, uint8_t msgSize) {
                 char buf[128];
                 const char txt[] = "Byte #: ";
                 int offs;

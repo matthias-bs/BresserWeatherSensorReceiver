@@ -103,7 +103,7 @@ void loop()
             weatherSensor.sensor[i].battery_ok ? "OK " : "Low",
             weatherSensor.sensor[i].chan
         );
-        Serial.printf("Leakage: [%5s] ", (weatherSensor.sensor[i].water_leakage_alarm) ? "ALARM" : "OK");
+        Serial.printf("Leakage: [%-5s] ", (weatherSensor.sensor[i].water_leakage_alarm) ? "ALARM" : "OK");
       } else {
         // Anything other (weather-like) sensor is very similar
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",

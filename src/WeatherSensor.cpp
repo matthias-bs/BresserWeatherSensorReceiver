@@ -63,6 +63,7 @@
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 // 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
+// 20230814 Fixed receiver state handling in getMessage()
 //
 // ToDo:
 // -
@@ -234,14 +235,14 @@ DecodeStatus WeatherSensor::getMessage(void)
 
             decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
         } // if (recvData[0] == 0xD4)
-        else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
-            log_v("T");
-        } // if (state == RADIOLIB_ERR_RX_TIMEOUT)
-        else {
-            // some other error occurred
-            log_d("%s Receive failed: [%d]", RECEIVER_CHIP, state);
-        }
     } // if (state == RADIOLIB_ERR_NONE)
+    else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
+        log_v("T");
+    } 
+    else {
+        // some other error occurred
+        log_d("%s Receive failed: [%d]", RECEIVER_CHIP, state);
+    }
 
     return decode_res;
 }

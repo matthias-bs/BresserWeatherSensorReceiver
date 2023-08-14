@@ -63,6 +63,7 @@
 // 20230708 Added startup flag in 6-in-1 and 7-in-1 decoder; added sensor type in 7-in-1 decoder
 // 20230710 Added verbose log message with de-whitened data (7-in-1 and lightning decoder)
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
+// 20230804 Added Bresser Water Leakage Sensor (P/N 7009975) decoder
 // 20230814 Fixed receiver state handling in getMessage()
 //
 // ToDo:

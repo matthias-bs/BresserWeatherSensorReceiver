@@ -55,9 +55,6 @@
 #endif
 
 
-
-static RainGauge rainGauge;
-
 /**
  * \example
  * struct tm tm;
@@ -76,6 +73,8 @@ static void setTime(const char *time, tm &tm, time_t &ts)
 }
 
 TEST_GROUP(TestRainGaugeHour) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -85,6 +84,8 @@ TEST_GROUP(TestRainGaugeHour) {
 };
 
 TEST_GROUP(TestRainGaugeHourShortInterval) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -94,6 +95,8 @@ TEST_GROUP(TestRainGaugeHourShortInterval) {
 };
 
 TEST_GROUP(TestRainGaugeHourLongInterval) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -103,6 +106,8 @@ TEST_GROUP(TestRainGaugeHourLongInterval) {
 };
 
 TEST_GROUP(TestRainGaugeHourExtremeInterval) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -112,6 +117,8 @@ TEST_GROUP(TestRainGaugeHourExtremeInterval) {
 };
 
 TEST_GROUP(TestRainGaugeDaily) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -121,6 +128,8 @@ TEST_GROUP(TestRainGaugeDaily) {
 };
 
 TEST_GROUP(TestRainGaugeWeekly) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -130,6 +139,8 @@ TEST_GROUP(TestRainGaugeWeekly) {
 };
 
 TEST_GROUP(TestRainGaugeMonthly) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -139,6 +150,8 @@ TEST_GROUP(TestRainGaugeMonthly) {
 };
 
 TEST_GROUP(TestRainGaugeHourOv) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -148,6 +161,8 @@ TEST_GROUP(TestRainGaugeHourOv) {
 };
 
 TEST_GROUP(TestRainGaugeHourOvMidnight) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -157,6 +172,8 @@ TEST_GROUP(TestRainGaugeHourOvMidnight) {
 };
 
 TEST_GROUP(TestRainGaugeDailyOv) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -166,6 +183,8 @@ TEST_GROUP(TestRainGaugeDailyOv) {
 };
 
 TEST_GROUP(TestRainGaugeWeeklyOv) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -175,6 +194,8 @@ TEST_GROUP(TestRainGaugeWeeklyOv) {
 };
 
 TEST_GROUP(TestRainGaugeMonthlyOv) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }
@@ -184,6 +205,8 @@ TEST_GROUP(TestRainGaugeMonthlyOv) {
 };
 
 TEST_GROUP(TestRainGaugeStartup) {
+  static RainGauge rainGauge;
+
   void setup() {
       rainGauge.reset();
   }

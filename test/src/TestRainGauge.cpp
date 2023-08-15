@@ -73,10 +73,7 @@ static void setTime(const char *time, tm &tm, time_t &ts)
 }
 
 TEST_GROUP(TestRainGaugeHour) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -84,10 +81,7 @@ TEST_GROUP(TestRainGaugeHour) {
 };
 
 TEST_GROUP(TestRainGaugeHourShortInterval) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -95,10 +89,7 @@ TEST_GROUP(TestRainGaugeHourShortInterval) {
 };
 
 TEST_GROUP(TestRainGaugeHourLongInterval) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -106,10 +97,7 @@ TEST_GROUP(TestRainGaugeHourLongInterval) {
 };
 
 TEST_GROUP(TestRainGaugeHourExtremeInterval) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -117,10 +105,7 @@ TEST_GROUP(TestRainGaugeHourExtremeInterval) {
 };
 
 TEST_GROUP(TestRainGaugeDaily) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -128,10 +113,7 @@ TEST_GROUP(TestRainGaugeDaily) {
 };
 
 TEST_GROUP(TestRainGaugeWeekly) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -139,10 +121,7 @@ TEST_GROUP(TestRainGaugeWeekly) {
 };
 
 TEST_GROUP(TestRainGaugeMonthly) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -150,10 +129,7 @@ TEST_GROUP(TestRainGaugeMonthly) {
 };
 
 TEST_GROUP(TestRainGaugeHourOv) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -161,10 +137,7 @@ TEST_GROUP(TestRainGaugeHourOv) {
 };
 
 TEST_GROUP(TestRainGaugeHourOvMidnight) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -172,10 +145,7 @@ TEST_GROUP(TestRainGaugeHourOvMidnight) {
 };
 
 TEST_GROUP(TestRainGaugeDailyOv) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -183,10 +153,7 @@ TEST_GROUP(TestRainGaugeDailyOv) {
 };
 
 TEST_GROUP(TestRainGaugeWeeklyOv) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -194,10 +161,7 @@ TEST_GROUP(TestRainGaugeWeeklyOv) {
 };
 
 TEST_GROUP(TestRainGaugeMonthlyOv) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -205,10 +169,7 @@ TEST_GROUP(TestRainGaugeMonthlyOv) {
 };
 
 TEST_GROUP(TestRainGaugeStartup) {
-  static RainGauge rainGauge;
-
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -219,6 +180,9 @@ TEST_GROUP(TestRainGaugeStartup) {
  * Test rainfall during past hour (no rain gauge overflow)
  */
 TEST(TestRainGaugeHour, Test_RainHour) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -296,6 +260,9 @@ TEST(TestRainGaugeHour, Test_RainHour) {
  * short update interval (5 minutes)
  */
 TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+  
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -385,6 +352,9 @@ TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
  * The ring buffer will not be filled completely.
  */
 TEST(TestRainGaugeHourLongInterval, Test_RainHourLong) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -459,6 +429,9 @@ TEST(TestRainGaugeHourLongInterval, Test_RainHourLong) {
  * The distance between head and tail will be > 1h.
  */
 TEST(TestRainGaugeHourExtremeInterval, Test_RainHourExtreme) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -506,6 +479,9 @@ TEST(TestRainGaugeHourExtremeInterval, Test_RainHourExtreme) {
  * Test daily rainfall (no rain gauge overflow)
  */
 TEST(TestRainGaugeDaily, Test_RainDaily) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -548,6 +524,9 @@ TEST(TestRainGaugeDaily, Test_RainDaily) {
  * Test weekly rainfall (no rain gauge overflow)
  */
 TEST(TestRainGaugeWeekly, Test_RainWeekly) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -603,6 +582,9 @@ TEST(TestRainGaugeWeekly, Test_RainWeekly) {
  * Test monthly rainfall (no rain gauge overflow)
  */
 TEST(TestRainGaugeMonthly, Test_RainMonthly) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor = 0;
@@ -727,6 +709,9 @@ TEST(TestRainGaugeMonthly, Test_RainMonthly) {
  * Test rainfall during past hour (with rain gauge overflow)
  */
 TEST(TestRainGaugeHourOv, Test_RainHourOv) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
 
@@ -804,6 +789,9 @@ TEST(TestRainGaugeHourOv, Test_RainHourOv) {
  * timestamps across Midnight
  */
 TEST(TestRainGaugeHourOvMidnight, Test_RainHourOvMidnight) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
 
@@ -886,6 +874,9 @@ TEST(TestRainGaugeHourOvMidnight, Test_RainHourOvMidnight) {
  * Test daily rainfall (with rain gauge overflow)
  */
 TEST(TestRainGaugeDailyOv, Test_RainDailyOv) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -930,6 +921,9 @@ TEST(TestRainGaugeDailyOv, Test_RainDailyOv) {
  * Test weekly rainfall (with rain gauge overflow)
  */
 TEST(TestRainGaugeWeeklyOv, Test_RainWeeklyOv) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;
@@ -986,6 +980,9 @@ TEST(TestRainGaugeWeeklyOv, Test_RainWeeklyOv) {
  * Test monthly rainfall (no rain gauge overflow)
  */
 TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor = 0;
@@ -1112,6 +1109,9 @@ TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
  * i.e. sensor reset or battery change
  */
 TEST(TestRainGaugeStartup, TestRainStartup) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
+
   tm        tm;
   time_t    ts;
   float     rainSensor;

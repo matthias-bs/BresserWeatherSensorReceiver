@@ -55,9 +55,6 @@
 #endif
 
 
-
-static RainGauge rainGauge;
-
 /**
  * \example
  * struct tm tm;
@@ -77,7 +74,6 @@ static void setTime(const char *time, tm &tm, time_t &ts)
 
 TEST_GROUP(TestRainGaugePotteryFields) {
   void setup() {
-      rainGauge.reset();
   }
 
   void teardown() {
@@ -89,6 +85,8 @@ TEST_GROUP(TestRainGaugePotteryFields) {
  * Test rainfall during past hour (no rain gauge overflow)
  */
 TEST(TestRainGaugePotteryFields, Test_PotteryFields) {
+  static RainGauge rainGauge;
+  rainGauge.reset();
   tm        tm;
   time_t    ts;
 

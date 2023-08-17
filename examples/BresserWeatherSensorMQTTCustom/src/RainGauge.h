@@ -39,6 +39,7 @@
 // 20220830 Created
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 // 20230716 Implemented sensor startup handling
+// 20230817 Implemented partial reset
 //
 // ToDo: 
 // -
@@ -64,6 +65,14 @@
  * Set to (3600 [sec] / update_rate_rate [sec]) + 1
  */ 
 #define RAINGAUGE_BUF_SIZE 11
+
+/**
+ * \defgroup Reset rain counters
+ */
+ #define RESET_RAIN_H 1
+ #define RESET_RAIN_D 2
+ #define RESET_RAIN_W 4
+ #define RESET_RAIN_M 8
 
 /**
  * \def
@@ -94,7 +103,7 @@ public:
     /**
      * Reset non-volatile data and current rain counter value
      */
-    void  reset(void);
+    void  reset(uint8_t flags=0xF);
     
     
     /**

@@ -38,6 +38,7 @@
 //
 // 20220830 Created
 // 20230716 Implemented sensor startup handling
+// 20230817 Implemented partial reset
 //
 // ToDo: 
 // -
@@ -177,22 +178,34 @@ RainGauge::printCircularBuffer(void)
 
 
 void
-RainGauge::reset(void)
+RainGauge::reset(uint8_t flags)
 {
-    nvData.startupPrev    = false;
-    nvData.rainStartup    = 0;
-    nvData.tsDayBegin     = 0xFF;
-    nvData.rainDayBegin   = 0;
-    nvData.tsWeekBegin    = 0xFF;
-    nvData.rainWeekBegin  = 0;
-    nvData.tsMonthBegin   = 0xFF;
-    nvData.rainMonthBegin = 0;
-    nvData.wdayPrev       = 0xFF;
-    nvData.rainPrev       = 0;
-    nvData.rainOvf        = 0;
-    nvData.head           = 0;
-    nvData.tail           = 0;
-    rainCurr              = 0;
+    if (flags & RESET_RAIN_H) {
+        nvData.head           = 0;
+        nvData.tail           = 0;
+
+    }
+    if (flags & RESET_RAIN_D) {
+        nvData.tsDayBegin     = 0xFF;
+        nvData.rainDayBegin   = 0;
+    }
+    if (flags & RESET_RAIN_W) {
+        nvData.tsWeekBegin    = 0xFF;
+        nvData.rainWeekBegin  = 0;
+
+    }
+    if (flags & RESET_RAIN_M) {
+        nvData.tsMonthBegin   = 0xFF;
+        nvData.rainMonthBegin = 0;
+    }
+
+    if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
+        nvData.startupPrev    = false;
+        nvData.rainStartup    = 0;
+        nvData.rainPrev       = 0;
+        nvData.rainOvf        = 0;
+        rainCurr              = 0;
+    }
 }
 
 void

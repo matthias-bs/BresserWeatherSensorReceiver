@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTTCustom.ino
+// BresserWeatherSensorMQTT.ino
 //
 // Example for BresserWeatherSensorReceiver -
 // this is finally a useful application.
@@ -25,7 +25,7 @@
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
 // Based on:
-// arduino-mqtt Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
+// arduino-mqtt by Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
 
 // MQTT subscriptions:
@@ -37,6 +37,9 @@
 //     <base_topic>/extra           calculated data
 //     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
+//
+// MQTT subscriptions:
+//     <base_topic>/reset <flags>   reset rain counters (see RainGauge.h for <flags>)
 //
 // $ via LWT
 //
@@ -88,11 +91,14 @@
 // 20230114 Fixed rain gauge update
 // 20230124 Improved WiFi connection robustness
 // 20230708 Changed MQTT payload and topic from char[] to String
+// 20230709 Added lightning sensor
 // 20230710 Added optional JSON output of floating point values as strings
 //          Modified MQTT topics
 // 20230711 Changed remaining MQTT topics from char[] to String
 //          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
 //          Added define RX_STRATEGY
+// 20230717 Added weather sensor startup handling to rain gauge
+// 20230817 Added rain gauge reset via MQTT
 //
 // ToDo:
 //
@@ -116,7 +122,6 @@
 // BEGIN User specific options
 #define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO        2       // LED pin
-#define NUM_SENSORS     1       // Number of sensors to be received
 #define TIMEZONE        1       // UTC + TIMEZONE
 #define PAYLOAD_SIZE    255     // maximum MQTT message size
 #define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
@@ -149,6 +154,7 @@
 //
 //#define JSON_FLOAT_AS_STRING
 
+
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 //#define _DEBUG_MQTT_
 
@@ -176,10 +182,10 @@
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include "src/WeatherSensorCfg.h"
-#include "src/WeatherSensor.h"
-#include "src/WeatherUtils.h"
-#include "src/RainGauge.h"
+#include "WeatherSensorCfg.h"
+#include "WeatherSensor.h"
+#include "WeatherUtils.h"
+#include "RainGauge.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
     #define JSON_FLOAT(x) String("\"") + x + String("\"")
@@ -282,9 +288,11 @@ const char MQTT_PUB_RADIO[]       = "radio";
 const char MQTT_PUB_DATA[]        = "data";
 const char MQTT_PUB_RSSI[]        = "rssi";
 const char MQTT_PUB_EXTRA[]       = "extra";
+const char MQTT_SUB_RESET[]       = "reset";
 
 String mqttPubStatus;
 String mqttPubRadio;
+String mqttSubReset;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -325,6 +333,12 @@ void mqtt_connect(void);
 //
 // Wait for WiFi connection
 //
+/*!
+ * \brief Wait for WiFi connection
+ *
+ * \param wifi_retres   max. no. of retries
+ * \param wifi_delay    delay in ms before each attemüt
+ */
 void wifi_wait(int wifi_retries, int wifi_delay)
 {
     int count = 0;
@@ -339,8 +353,11 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 }
 
 
-// Setup WiFi in Station Mode
-//
+/*!
+ * \brief WiFiManager Setup
+ *
+ * Configures WiFi access point and MQTT connection parameters
+ */
 void mqtt_setup(void)
 {
     log_i("Attempting to connect to SSID: %s", ssid);
@@ -362,7 +379,7 @@ void mqtt_setup(void)
             Serial.print(".");
             now = time(nullptr);
         }
-        Serial.println("\ndone!");
+        log_i("\ndone!");
         struct tm timeinfo;
         gmtime_r(&now, &timeinfo);
         log_i("Current time: %s", asctime(&timeinfo));
@@ -397,16 +414,16 @@ void mqtt_setup(void)
     #endif
     client.begin(MQTT_HOST, MQTT_PORT, net);
 
-    // set up MQTT receive callback (if required)
-    //client.onMessage(messageReceived);
+    // set up MQTT receive callback
+    client.onMessage(messageReceived);
     client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
 
-//
-// (Re-)Connect to WLAN and connect MQTT broker
-//
+/*!
+ * \brief (Re-)Connect to WLAN and connect MQTT broker
+ */
 void mqtt_connect(void)
 {
     Serial.print(F("Checking wifi..."));
@@ -419,21 +436,24 @@ void mqtt_connect(void)
         delay(1000);
     }
 
-    Serial.println(F("connected!"));
-    //client.subscribe(MQTT_SUB_IN);
+    log_i("\nconnected!");
+    client.subscribe(mqttSubReset);
     log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
 
 
-//
-// MQTT message received callback
-//
-/*
+/*!
+ * \brief MQTT message received callback
+ */
 void messageReceived(String &topic, String &payload)
 {
+    if (topic == mqttSubReset) {
+        uint8_t flags = payload.toInt() & 0xF;
+        log_d("MQTT msg received: reset(0x%X)", flags);
+        rainGauge.reset(flags);
+    }
 }
-*/
 
 
 
@@ -464,7 +484,7 @@ void publishWeatherdata(bool complete)
       if (weatherSensor.sensor[i].rain_ok) {
           struct tm timeinfo;
           gmtime_r(&now, &timeinfo);
-          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm);
+          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm, weatherSensor.sensor[i].startup);
       }
 
       // Example:
@@ -591,7 +611,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio, mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -624,6 +644,7 @@ void setup() {
 
     mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
     mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    mqttSubReset  = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
     
     mqtt_setup();
     weatherSensor.begin();
@@ -717,7 +738,7 @@ void loop() {
             }
         #endif
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus, "offline");
+        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();

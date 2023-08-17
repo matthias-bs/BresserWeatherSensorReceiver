@@ -40,6 +40,9 @@
 //     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
 //     <base_topic>/status          "online"|"offline"|"dead"$
 //
+// MQTT subscriptions:
+//     <base_topic>/reset <flags>   reset rain counters (see RainGauge.h for <flags>)
+//
 // $ via LWT
 //
 //
@@ -79,6 +82,7 @@
 //          Fixed secure WiFi with CHECK_CA_ROOT for ESP32
 //          Added define RX_STRATEGY
 // 20230717 Added startup handling to rain gauge
+// 20230817 Added rain gauge reset via MQTT
 //
 // ToDo:
 //
@@ -297,9 +301,11 @@ const char MQTT_PUB_RADIO[]       = "radio";
 const char MQTT_PUB_DATA[]        = "data";
 const char MQTT_PUB_RSSI[]        = "rssi";
 const char MQTT_PUB_EXTRA[]       = "extra";
+const char MQTT_SUB_RESET[]       = "reset";
 
 String mqttPubStatus;
 String mqttPubRadio;
+String mqttSubReset;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -564,8 +570,8 @@ void wifimgr_setup(void)
     #endif
     client.begin(mqtt_host, atoi(mqtt_port), net);
 
-    // set up MQTT receive callback (if required)
-    //client.onMessage(messageReceived);
+    // set up MQTT receive callback
+    client.onMessage(messageReceived);
     client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
@@ -587,20 +593,23 @@ void mqtt_connect(void)
     }
 
     log_i("\nconnected!");
-    //client.subscribe(MQTT_SUB_IN);
+    client.subscribe(mqttSubReset);
     log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
 
 
-//
-// MQTT message received callback
-//
-/*
+/*!
+ * \brief MQTT message received callback
+ */
 void messageReceived(String &topic, String &payload)
 {
+    if (topic == mqttSubReset) {
+        uint8_t flags = payload.toInt() & 0xF;
+        log_d("MQTT msg received: reset(0x%X)", flags);
+        rainGauge.reset(flags);
+    }
 }
-*/
 
 
 
@@ -791,6 +800,7 @@ void setup() {
 
     mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
     mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    mqttSubReset  = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
     if (drd->detectDoubleReset())

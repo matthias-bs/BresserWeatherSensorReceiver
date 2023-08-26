@@ -99,6 +99,7 @@
 //          Added define RX_STRATEGY
 // 20230717 Added weather sensor startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
+// 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
 //
 // ToDo:
 //
@@ -530,6 +531,7 @@ void publishWeatherdata(bool complete)
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
           mqtt_payload += String(",\"rain\":")   + JSON_FLOAT(String(weatherSensor.sensor[i].rain_mm, 1));
+          mqtt_payload += String(",\"rain_h\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
           mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
           mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
           mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));

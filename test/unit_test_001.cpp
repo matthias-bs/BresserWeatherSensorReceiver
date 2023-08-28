@@ -25,7 +25,7 @@
 
 
 #include "Arduino.h"
-#include "RainGauge.h"
+#include "../src/RainGauge.h"
 #define TOLERANCE 0.11
 
 /**

@@ -1,17 +1,49 @@
 ---
-name: Arduino CI
+name: Arduino_CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
-  runTest:
+  arduino_ci:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 2.6
-      - run: |
-          gem install arduino_ci
-          arduino_ci.rb
+      - uses: Arduino-CI/action@stable-1.6   # or latest, or a pinned version
+        env:
+          # Not all libraries are in the root directory of a repository.
+          # Specifying the path of the library here (relative to the root
+          # of the repository) will adjust that.
+          #
+          # The default is the current directory
+          #
+          USE_SUBDIR: src
+
+          # Not all libraries include examples or unit tests.  The default
+          #  behavior of arduino_ci is to assume that "if the files don't
+          #  exist, then they were not MEANT to exist".  In other words,
+          #  if you were to accidentally delete all your tests or example
+          #  sketches, then the CI runner would by default assume that was
+          #  intended and return a passing result.
+          #
+          # If you'd rather have the test runner fail the test in the
+          #  absence of either tests or examples, uncommenting either of
+          #  the following variables to 'true' (as appropriate) will
+          #  enforce that.
+          #
+          EXPECT_EXAMPLES: false
+          EXPECT_UNITTESTS: true
+
+          # Although dependencies will be installed automatically via the
+          # library manager, your library under test may require an
+          # unofficial version of a dependency.  In those cases, the custom
+          # libraries must be insalled prior to the test execution; those
+          # installation commands should be placed in a shell script (that
+          # will be executed by /bin/sh) stored in your library.
+          #
+          # Then, set this variable to the path to that file (relative to
+          # the root of your repository).  The script will be run from
+          # within the Arduino libraries directory; you should NOT attempt
+          # to find that directory nor change to it from within the script.
+          #
+          # CUSTOM_INIT_SCRIPT: install_dependencies.sh

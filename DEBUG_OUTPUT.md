@@ -37,4 +37,4 @@ Refer to the following for some background information
  #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
 ```
 
-(Options: `ARDUHAL_LOG_LEVEL_<NONE|ERROR|WARN|INFO|DEBUG|VERBOSE>`)
+    (Options: `ARDUHAL_LOG_LEVEL_<NONE|ERROR|WARN|INFO|DEBUG|VERBOSE>`)

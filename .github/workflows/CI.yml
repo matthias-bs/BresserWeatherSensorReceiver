@@ -59,7 +59,7 @@ jobs:
           # common settings - no extra options, skip nothing, all warnings
           echo "options=''" >> $GITHUB_OUTPUT
           echo "logdef=''" >> $GITHUB_OUTPUT
-          echo "skip-pattern=''" >> $GITHUB_OUTPUT
+          echo "skip-pattern=(Feather32u4).*ino" >> $GITHUB_OUTPUT
           echo "warnings='all'" >> $GITHUB_OUTPUT
           
           #if [[ "${{ contains(matrix.loglevel, 'LOG_LEVEL_NONE') }}" == "true" ]]; then

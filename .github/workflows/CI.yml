@@ -25,6 +25,7 @@ jobs:
           - esp32:esp32:featheresp32
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
+          - rp2040:rp2040:adafruit_feather:dbgport=Serial
           
 
 
@@ -79,7 +80,13 @@ jobs:
             echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
             echo "index-url=--additional-urls http://arduino.esp8266.com/stable/package_esp8266com_index.json" >> $GITHUB_OUTPUT
             #echo "skip-pattern=(HTTP|MQTT).*ino" >> $GITHUB_OUTPUT
-
+          
+          elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then
+            # ESP8266
+            #echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
+            echo "index-url=--additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json" >> $GITHUB_OUTPUT
+            #echo "skip-pattern=(HTTP|MQTT).*ino" >> $GITHUB_OUTPUT
+          
           fi
 
       - name: Install libraries

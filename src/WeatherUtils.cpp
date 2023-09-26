@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <math.h>
 #if defined(ESP32) || defined(ESP8266)
   #include <string>

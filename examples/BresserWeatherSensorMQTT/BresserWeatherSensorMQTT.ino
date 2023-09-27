@@ -732,13 +732,11 @@ void loop() {
 
     // Go to sleep only after complete set of data has been sent
     if (SLEEP_EN && (decode_ok || force_sleep)) {
-        #ifdef _DEBUG_MODE_
-            if (force_sleep) {
-                Serial.println(F("Awake time-out!"));
-            } else {
-                Serial.println(F("Data forwarding completed."));
-            }
-        #endif
+        if (force_sleep) {
+            log_d("Awake time-out!");
+        } else {
+            log_d("Data forwarding completed.");
+        }
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
         log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();

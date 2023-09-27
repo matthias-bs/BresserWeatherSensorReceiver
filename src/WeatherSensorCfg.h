@@ -223,9 +223,9 @@
     #define ARDUHAL_LOG_LEVEL_DEBUG     4
     #define ARDUHAL_LOG_LEVEL_VERBOSE   5
 
-    #if defined(ARDUINO_ARCH_RP2040)
+    #if defined(ARDUINO_ARCH_RP2040) && defined(DEBUG_RP2040_PORT)
         #define DEBUG_ESP_PORT DEBUG_RP2040_PORT
-    #else
+    #elif defined(DEBUG_ESP_PORT)
         #define DEBUG_PORT DEBUG_ESP_PORT
     #endif
     

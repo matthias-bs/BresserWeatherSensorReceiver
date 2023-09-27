@@ -86,7 +86,7 @@ void loop()
     for (int i=0; i<NUM_SENSORS; i++) {
         if (weatherSensor.sensor[i].valid) {
             Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
-                weatherSensor.sensor[i].sensor_id,
+                (unsigned int)weatherSensor.sensor[i].sensor_id,
                 weatherSensor.sensor[i].s_type,
                 weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
             #ifdef BRESSER_6_IN_1

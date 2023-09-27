@@ -303,8 +303,9 @@
 
 
 //#define _DEBUG_MODE_          // Enable debug output (serial console)
-#define DEBUG_PORT Serial
+
 #if defined(_DEBUG_MODE_)
+    #define DEBUG_PORT Serial
     #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
     #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
 #else

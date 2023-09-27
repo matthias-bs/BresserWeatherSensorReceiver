@@ -46,6 +46,7 @@
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20230926 Added pin definitions for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
+// 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
 //
 // ToDo:
 // -
@@ -213,7 +214,7 @@
 //
 //   Replacement for
 //   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
-//   on ESP8266:
+//   on ESP8266 and RP2040:
 #if defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
     #define ARDUHAL_LOG_LEVEL_NONE      0
     #define ARDUHAL_LOG_LEVEL_ERROR     1
@@ -299,18 +300,6 @@
      #else
         #define log_v(...) {}
      #endif
-#endif
-
-
-//#define _DEBUG_MODE_          // Enable debug output (serial console)
-
-#if defined(_DEBUG_MODE_)
-    #define DEBUG_PORT Serial
-    #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
-    #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
-#else
-  #define DEBUG_PRINT(...) {}
-  #define DEBUG_PRINTLN(...) {}
 #endif
 
 // Disable data type which will not be used to save RAM

@@ -96,18 +96,20 @@ void loop()
         }
         Serial.printf("unknown1: [0x%03X] ", weatherSensor.sensor[i].lightning_unknown1);
         Serial.printf("unknown2: [0x%04X] ", weatherSensor.sensor[i].lightning_unknown2);
+      
       } else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] Ch: [%d] ",
-            weatherSensor.sensor[i].sensor_id,
+            (unsigned int)weatherSensor.sensor[i].sensor_id,
             weatherSensor.sensor[i].s_type,
             weatherSensor.sensor[i].battery_ok ? "OK " : "Low",
             weatherSensor.sensor[i].chan
         );
         Serial.printf("Leakage: [%-5s] ", (weatherSensor.sensor[i].water_leakage_alarm) ? "ALARM" : "OK");
+      
       } else {
-        // Anything other (weather-like) sensor is very similar
+        // Any other (weather-like) sensor is very similar
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
-            weatherSensor.sensor[i].sensor_id,
+            (unsigned int)weatherSensor.sensor[i].sensor_id,
             weatherSensor.sensor[i].s_type,
             weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
         #ifdef BRESSER_6_IN_1

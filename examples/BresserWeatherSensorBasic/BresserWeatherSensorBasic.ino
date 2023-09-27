@@ -85,7 +85,7 @@ void loop()
     if (decode_status == DECODE_OK) {
       if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
-            weatherSensor.sensor[i].sensor_id,
+            (unsigned int)weatherSensor.sensor[i].sensor_id,
             weatherSensor.sensor[i].s_type,
             weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
         Serial.printf("Lightning Counter: [%3d] ", weatherSensor.sensor[i].lightning_count);

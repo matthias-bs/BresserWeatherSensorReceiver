@@ -473,7 +473,6 @@
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     // Use pinning for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
-    // NOTE: NOT TESTED!
     #define PIN_RECEIVER_CS   7
 
     // CC1101: GDO0 / RFM95W/SX127x: G0

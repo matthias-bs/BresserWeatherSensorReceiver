@@ -102,6 +102,12 @@
 // This define is set by selecting "Adafruit ESP32 Feather" in the Arduino IDE:
 //#define ARDUINO_FEATHER_ESP32
 
+// Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
+// https://github.com/espressif/arduino-esp32/blob/master/variants/feather_esp32/pins_arduino.h
+//
+// This define is set by selecting "Adafruit Feather RP2040" in the Arduino IDE:
+//#define ARDUINO_ADAFRUIT_FEATHER_RP2040
+
 // DFRobot Firebeetle32
 // https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
 //
@@ -146,7 +152,6 @@
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
-    #pragma message("NOT TESTED!")
 
 #elif defined(ARDUINO_ESP32_DEV)
     //#define LORAWAN_NODE
@@ -224,13 +229,13 @@
     #define ARDUHAL_LOG_LEVEL_VERBOSE   5
 
     #if defined(ARDUINO_ARCH_RP2040) && defined(DEBUG_RP2040_PORT)
-        #define DEBUG_ESP_PORT DEBUG_RP2040_PORT
+        #define DEBUG_PORT DEBUG_RP2040_PORT
     #elif defined(DEBUG_ESP_PORT)
         #define DEBUG_PORT DEBUG_ESP_PORT
     #endif
     
     // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
+    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_DEBUG
 
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
         #define log_e(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }

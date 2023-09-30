@@ -4,7 +4,7 @@
   "description": "Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W",
   "main": "WeatherSensor.cpp",
   "frameworks": "arduino",
-  "platforms": ["ESP32", "ESP8266"],
+  "platforms": ["ESP32", "ESP8266", "RP2040"],
   "directories": {
     "src": "src"
   },

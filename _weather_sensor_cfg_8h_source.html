@@ -559,26 +559,25 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160; </div>
 <div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)</span></div>
 <div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;    <span class="comment">// Use pinning for Adafruit Feather RP2040 with RFM95W &quot;FeatherWing&quot; ADA3232</span></div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    <span class="comment">// NOTE: NOT TESTED!</span></div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_CS   7</span></div>
-<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160; </div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <span class="comment">// CC1101: GDO0 / RFM95W/SX127x: G0</span></div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_IRQ  8</span></div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160; </div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;    <span class="comment">// CC1101: GDO2 / RFM95W/SX127x: G1 (not used)</span></div>
-<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_GPIO 10</span></div>
-<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160; </div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    <span class="comment">// RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC</span></div>
-<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_RST  11</span></div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160; </div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160; </div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;<span class="preprocessor">#define STR_HELPER(x) #x</span></div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;<span class="preprocessor">#define STR(x) STR_HELPER(x)</span></div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;<span class="preprocessor">#pragma message(&quot;Receiver chip: &quot;</span> RECEIVER_CHIP)</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;<span class="preprocessor">#pragma message(&quot;Pin config: RST-&gt;&quot;</span> STR(PIN_RECEIVER_RST) &quot;, CS-&gt;&quot; STR(PIN_RECEIVER_CS) &quot;, GD0/G0/IRQ-&gt;&quot; STR(PIN_RECEIVER_IRQ) &quot;, GDO2/G1/GPIO-&gt;&quot; STR(PIN_RECEIVER_GPIO) )</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160; </div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_CS   7</span></div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160; </div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;    <span class="comment">// CC1101: GDO0 / RFM95W/SX127x: G0</span></div>
+<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_IRQ  8</span></div>
+<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160; </div>
+<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;    <span class="comment">// CC1101: GDO2 / RFM95W/SX127x: G1 (not used)</span></div>
+<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_GPIO 10</span></div>
+<div class="line"><a name="l00483"></a><span class="lineno">  483</span>&#160; </div>
+<div class="line"><a name="l00484"></a><span class="lineno">  484</span>&#160;    <span class="comment">// RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC</span></div>
+<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;<span class="preprocessor">    #define PIN_RECEIVER_RST  11</span></div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160; </div>
+<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160; </div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;<span class="preprocessor">#define STR_HELPER(x) #x</span></div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;<span class="preprocessor">#define STR(x) STR_HELPER(x)</span></div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;<span class="preprocessor">#pragma message(&quot;Receiver chip: &quot;</span> RECEIVER_CHIP)</div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;<span class="preprocessor">#pragma message(&quot;Pin config: RST-&gt;&quot;</span> STR(PIN_RECEIVER_RST) &quot;, CS-&gt;&quot; STR(PIN_RECEIVER_CS) &quot;, GD0/G0/IRQ-&gt;&quot; STR(PIN_RECEIVER_IRQ) &quot;, GDO2/G1/GPIO-&gt;&quot; STR(PIN_RECEIVER_GPIO) )</div>
+<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160; </div>
+<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

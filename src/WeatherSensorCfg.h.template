@@ -103,7 +103,7 @@
 //#define ARDUINO_FEATHER_ESP32
 
 // Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
-// https://github.com/espressif/arduino-esp32/blob/master/variants/feather_esp32/pins_arduino.h
+// https://github.com/earlephilhower/arduino-pico/blob/master/variants/adafruit_feather/pins_arduino.h
 //
 // This define is set by selecting "Adafruit Feather RP2040" in the Arduino IDE:
 //#define ARDUINO_ADAFRUIT_FEATHER_RP2040

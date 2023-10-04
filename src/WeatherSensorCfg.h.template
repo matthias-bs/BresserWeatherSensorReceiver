@@ -47,6 +47,7 @@
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20230926 Added pin definitions for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
 // 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
+// 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
 //
 // ToDo:
 // -
@@ -103,7 +104,7 @@
 //#define ARDUINO_FEATHER_ESP32
 
 // Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
-// https://github.com/earlephilhower/arduino-pico/blob/master/variants/adafruit_feather/pins_arduino.h
+// https://github.com/espressif/arduino-esp32/blob/master/variants/feather_esp32/pins_arduino.h
 //
 // This define is set by selecting "Adafruit Feather RP2040" in the Arduino IDE:
 //#define ARDUINO_ADAFRUIT_FEATHER_RP2040
@@ -235,30 +236,30 @@
     #endif
     
     // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_DEBUG
+    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
 
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
-        #define log_e(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
+        #define log_e(...) { DEBUG_PORT.printf("%s(), l.%d: ",__func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_e(...) {}
      #endif
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
-        #define log_w(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
+        #define log_w(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_w(...) {}
      #endif
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
-        #define log_i(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
+        #define log_i(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_i(...) {}
      #endif
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
-        #define log_d(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
+        #define log_d(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_d(...) {}
      #endif
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
-        #define log_v(...) { DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
+        #define log_v(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_v(...) {}
      #endif

@@ -60,6 +60,7 @@
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
 // 20230723 Added SENSOR_TYPE_WATER
 // 20230804 Added Bresser Water Leakage Sensor decoder
+// 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
 //
 // ToDo:
 // -
@@ -412,6 +413,18 @@ class WeatherSensor {
         \returns Sum of all message bytes.
         */
         int add_bytes(uint8_t const message[], unsigned num_bytes);
+
+        /*!
+        \brief Calculate crc16 of all message bytes.
+
+        \param message      Message buffer.
+        \param num_bytes    Number of bytes.
+        \param polynomial   Polynomial
+        \param initial      Initial value.
+
+        \returns CRC16 of all message bytes.
+        */
+        uint16_t crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, uint16_t init);
 
         #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
             /*!

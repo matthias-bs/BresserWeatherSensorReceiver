@@ -1215,8 +1215,8 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     sensor[slot].valid               = true;
     sensor[slot].complete            = true;
 
-    log_d("~~~ ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
-        id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
+    log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
+        (unsigned int)id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
     
     return DECODE_OK;
 }

@@ -65,6 +65,8 @@
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
 // 20230804 Added Bresser Water Leakage Sensor (P/N 7009975) decoder
 // 20230814 Fixed receiver state handling in getMessage()
+// 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
+//          Added CRC check in decodeBresserLeakagePayload()
 //
 // ToDo:
 // -
@@ -474,6 +476,29 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
         result += message[i];
     }
     return result;
+}
+
+
+//
+// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
+//
+uint16_t WeatherSensor::crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, uint16_t init)
+{
+    uint16_t remainder = init;
+    unsigned byte, bit;
+
+    for (byte = 0; byte < nBytes; ++byte) {
+        remainder ^= message[byte] << 8;
+        for (bit = 0; bit < 8; ++bit) {
+            if (remainder & 0x8000) {
+                remainder = (remainder << 1) ^ polynomial;
+            }
+            else {
+                remainder = (remainder << 1);
+            }
+        }
+    }
+    return remainder;
 }
 
 
@@ -1139,7 +1164,13 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
         log_message("Data", msg, msgSize);
     #endif
 
-    // TODO: Find checksum algorithm
+     // Verify CRC (CRC16/XMODEM)
+    uint16_t crc_act = crc16(&msg[2], 5, 0x1021, 0x0000);
+    uint16_t crc_exp = (msg[0] << 8) | msg[1];
+    if (crc_act != crc_exp) {
+        log_d("CRC16 check failed - [%04X] vs [%04X]", crc_act, crc_exp);
+        return DECODE_CHK_ERR;
+    }
 
     uint32_t id_tmp   = ((uint32_t)msg[2] << 24) | (msg[3] << 16) | (msg[4] << 8) | (msg[5]);
     uint8_t  type_tmp = msg[6] >> 4;

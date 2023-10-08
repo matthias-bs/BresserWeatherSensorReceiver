@@ -12,7 +12,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 2. 6-in-1-Decoder
 3. 5-in-1 Decoder
 4. Lightning Sensor Decoder (work in progress)
-5. Water Leakage Sensor Decoder (work in progress)
+5. Water Leakage Sensor Decoder
 
 (The Bresser 5-in-1 Weather Stations seem to use two different protocols - 5-in-1 and 6-in-1.)
 
@@ -24,9 +24,9 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
-| 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() **2)** |
+| 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
 | 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() |
-| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **3)** |
+| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803300       | Weather Sensor  | decodeBresser**7In1**Payload()  |
@@ -42,9 +42,7 @@ Some guesswork:
 
 **1)** Manual configuration required, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
 
-**2)** Checksum verification not implemented - weak protection against receive errors or false decoding of other messages; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/79 
-
-**3)** The part number is specific to the actual variant, i.e. some more characters are appended
+**2)** The part number is specific to the actual variant, i.e. some more characters are appended
 
 ## Configuration
 
@@ -106,6 +104,10 @@ See `WeatherSensorCfg.h` for configuration options.
    * Specify the wanted sensors explicitly in the include list `SENSOR_IDS_EXC` - if empty, all sensors will be used
 
      e.g. `#define SENSOR_IDS_INC { 0x83750871 }`
+
+* Unused decoders can be disabled to save computation time/power by commenting out:
+
+     e.g. `//#define BRESSER_LEAKAGE`
 
 ## SW Examples
 

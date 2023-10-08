@@ -65,6 +65,8 @@
 // 20230716 Added decodeMessage() to separate decoding function from receiving function
 // 20230804 Added Bresser Water Leakage Sensor (P/N 7009975) decoder
 // 20230814 Fixed receiver state handling in getMessage()
+// 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
+//          Added CRC check in decodeBresserLeakagePayload()
 //
 // ToDo:
 // -
@@ -474,6 +476,29 @@ int WeatherSensor::add_bytes(uint8_t const message[], unsigned num_bytes)
         result += message[i];
     }
     return result;
+}
+
+
+//
+// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
+//
+uint16_t WeatherSensor::crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, uint16_t init)
+{
+    uint16_t remainder = init;
+    unsigned byte, bit;
+
+    for (byte = 0; byte < nBytes; ++byte) {
+        remainder ^= message[byte] << 8;
+        for (bit = 0; bit < 8; ++bit) {
+            if (remainder & 0x8000) {
+                remainder = (remainder << 1) ^ polynomial;
+            }
+            else {
+                remainder = (remainder << 1);
+            }
+        }
+    }
+    return remainder;
 }
 
 
@@ -1002,7 +1027,8 @@ First two bytes are an LFSR-16 digest, generator 0x8810 key 0xabf9 with a final 
 
 #ifdef BRESSER_LIGHTNING
 DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, uint8_t msgSize)
-{   
+{
+    (void)msgSize;
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         // see AS3935 Datasheet, Table 17 - Distance Estimation
         uint8_t const distance_map[] = { 1, 5, 6, 8, 10, 12, 14, 17, 20, 24, 27, 31, 34, 37, 40, 63 }; 
@@ -1138,7 +1164,13 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
         log_message("Data", msg, msgSize);
     #endif
 
-    // TODO: Find checksum algorithm
+     // Verify CRC (CRC16/XMODEM)
+    uint16_t crc_act = crc16(&msg[2], 5, 0x1021, 0x0000);
+    uint16_t crc_exp = (msg[0] << 8) | msg[1];
+    if (crc_act != crc_exp) {
+        log_d("CRC16 check failed - [%04X] vs [%04X]", crc_act, crc_exp);
+        return DECODE_CHK_ERR;
+    }
 
     uint32_t id_tmp   = ((uint32_t)msg[2] << 24) | (msg[3] << 16) | (msg[4] << 8) | (msg[5]);
     uint8_t  type_tmp = msg[6] >> 4;
@@ -1183,8 +1215,8 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     sensor[slot].valid               = true;
     sensor[slot].complete            = true;
 
-    log_d("~~~ ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
-        id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
+    log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
+        (unsigned int)id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
     
     return DECODE_OK;
 }

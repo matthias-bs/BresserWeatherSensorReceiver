@@ -4,5 +4,6 @@ var annotated_dup =
     [ "nvData_t", "structnv_data__t.html", "structnv_data__t" ],
     [ "nvLightning_t", "structnv_lightning__t.html", "structnv_lightning__t" ],
     [ "RainGauge", "class_rain_gauge.html", "class_rain_gauge" ],
+    [ "SensorMap", "struct_sensor_map.html", "struct_sensor_map" ],
     [ "WeatherSensor", "class_weather_sensor.html", "class_weather_sensor" ]
 ];

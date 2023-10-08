@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['temp_5fc_100',['temp_c',['../struct_weather_sensor_1_1_sensor.html#adc13b0de8543fcf00628e061fab26992',1,'WeatherSensor::Sensor']]],
-  ['temp_5fok_101',['temp_ok',['../struct_weather_sensor_1_1_sensor.html#a1dca88a5b98a1eb7320217ec3784cf7b',1,'WeatherSensor::Sensor']]]
+  ['rain_5fmm_99',['rain_mm',['../struct_weather_sensor_1_1_sensor.html#aea1c5facf8df55b7e58c0d9ce572152a',1,'WeatherSensor::Sensor']]],
+  ['rain_5fok_100',['rain_ok',['../struct_weather_sensor_1_1_sensor.html#ae2e073d69e22bdcaa59a60c1b8189016',1,'WeatherSensor::Sensor']]],
+  ['rssi_101',['rssi',['../struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1',1,'WeatherSensor::Sensor::rssi()'],['../class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e',1,'WeatherSensor::rssi()']]]
 ];

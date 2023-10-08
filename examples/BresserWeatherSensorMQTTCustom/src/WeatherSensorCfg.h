@@ -43,6 +43,11 @@
 // 20230412 Added workaround for Professional Wind Gauge / Anemometer, P/N 7002531
 // 20230420 Added pin definitions for DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa
 // 20230607 Added pin definitions for Heltec WiFi LoRa 32(V2)
+// 20230624 Added Bresser Lightning Sensor decoder
+// 20230804 Added Bresser Water Leakage Sensor decoder
+// 20230926 Added pin definitions for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
+// 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
+// 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
 //
 // ToDo:
 // -
@@ -53,6 +58,37 @@
 #define WEATHER_SENSOR_CFG_H
 
 #include <Arduino.h>
+
+// ------------------------------------------------------------------------------------------------
+// --- Weather Sensors ---
+// ------------------------------------------------------------------------------------------------
+#define NUM_SENSORS     1       // Number of sensors to be received
+
+// List of sensor IDs to be excluded - can be empty
+#define SENSOR_IDS_EXC { 0x792882A2 }
+//#define SENSOR_IDS_EXC { 0x792882A2 }
+
+// List of sensor IDs to be included - if empty, handle all available sensors
+#define SENSOR_IDS_INC {}
+//#define SENSOR_IDS_INC { 0x83750871 }
+
+// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
+// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
+//#define SENSOR_IDS_DECODE3IN1 {}
+#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
+
+// Disable data type which will not be used to save RAM
+#define WIND_DATA_FLOATINGPOINT
+#define WIND_DATA_FIXEDPOINT
+
+// Select appropriate sensor message format(s)
+// Comment out unused decoders to save operation time/power
+#define BRESSER_5_IN_1
+#define BRESSER_6_IN_1
+#define BRESSER_7_IN_1
+#define BRESSER_LIGHTNING
+#define BRESSER_LEAKAGE
+
 
 // ------------------------------------------------------------------------------------------------
 // --- Board ---
@@ -98,6 +134,12 @@
 // This define is set by selecting "Adafruit ESP32 Feather" in the Arduino IDE:
 //#define ARDUINO_FEATHER_ESP32
 
+// Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
+// https://github.com/espressif/arduino-esp32/blob/master/variants/feather_esp32/pins_arduino.h
+//
+// This define is set by selecting "Adafruit Feather RP2040" in the Arduino IDE:
+//#define ARDUINO_ADAFRUIT_FEATHER_RP2040
+
 // DFRobot Firebeetle32
 // https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
 //
@@ -137,7 +179,12 @@
 #elif defined(ARDUINO_AVR_FEATHER32U4)
     #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
     #define USE_SX1276
-    
+
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
+    #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming assuming RFM95W FeatherWing will be used")
+    #define USE_SX1276
+    #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
+
 #elif defined(ARDUINO_ESP32_DEV)
     //#define LORAWAN_NODE
     #define FIREBEETLE_ESP32_COVER_LORA
@@ -169,24 +216,6 @@
 
 
 // ------------------------------------------------------------------------------------------------
-// --- Weather Sensors ---
-// ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
-
-// List of sensor IDs to be excluded - can be empty
-#define SENSOR_IDS_EXC {}
-//#define SENSOR_IDS_EXC { 0x39582376 }
-
-// List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
-//#define SENSOR_IDS_INC { 0x83750871 }
-
-// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
-// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
-//#define SENSOR_IDS_DECODE3IN1 {}
-#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
-
-// ------------------------------------------------------------------------------------------------
 // --- Debug Logging Output ---
 // ------------------------------------------------------------------------------------------------
 // - ESP32:
@@ -198,10 +227,14 @@
 //   DEBUG_ESP_PORT is set in Arduino IDE:
 //   Tools->Debug port: "<None>|<Serial>|<Serial1>"
 //
+// - RP2040:
+//   DEBUG_RP2040_PORT is set in Arduino IDE:
+//   Tools->Debug port: "<Disabled>|<Serial>|<Serial1>|<Serial2>"
+//
 //   Replacement for
 //   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
-//   on ESP8266:
-#if defined(ESP8266)
+//   on ESP8266 and RP2040:
+#if defined(ESP8266) || defined(ARDUINO_ARCH_RP2040)
     #define ARDUHAL_LOG_LEVEL_NONE      0
     #define ARDUHAL_LOG_LEVEL_ERROR     1
     #define ARDUHAL_LOG_LEVEL_WARN      2
@@ -209,31 +242,37 @@
     #define ARDUHAL_LOG_LEVEL_DEBUG     4
     #define ARDUHAL_LOG_LEVEL_VERBOSE   5
 
+    #if defined(ARDUINO_ARCH_RP2040) && defined(DEBUG_RP2040_PORT)
+        #define DEBUG_PORT DEBUG_RP2040_PORT
+    #elif defined(DEBUG_ESP_PORT)
+        #define DEBUG_PORT DEBUG_ESP_PORT
+    #endif
+    
     // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_VERBOSE
+    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
 
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
-        #define log_e(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+    #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
+        #define log_e(...) { DEBUG_PORT.printf("%s(), l.%d: ",__func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_e(...) {}
      #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
-        #define log_w(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+    #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
+        #define log_w(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_w(...) {}
      #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
-        #define log_i(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+    #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
+        #define log_i(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_i(...) {}
      #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
-        #define log_d(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+    #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
+        #define log_d(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_d(...) {}
      #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
-        #define log_v(...) { DEBUG_ESP_PORT.printf(__VA_ARGS__); DEBUG_ESP_PORT.println(); }
+    #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
+        #define log_v(...) { DEBUG_PORT.printf("%s(), l.%d: ", __func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }
      #else
         #define log_v(...) {}
      #endif
@@ -281,26 +320,6 @@
         #define log_v(...) {}
      #endif
 #endif
-
-
-//#define _DEBUG_MODE_          // Enable debug output (serial console)
-#define DEBUG_PORT Serial
-#if defined(_DEBUG_MODE_)
-    #define DEBUG_PRINT(...) { DEBUG_PORT.print(__VA_ARGS__); }
-    #define DEBUG_PRINTLN(...) { DEBUG_PORT.println(__VA_ARGS__); }
-#else
-  #define DEBUG_PRINT(...) {}
-  #define DEBUG_PRINTLN(...) {}
-#endif
-
-// Disable data type which will not be used to save RAM
-#define WIND_DATA_FLOATINGPOINT
-#define WIND_DATA_FIXEDPOINT
-
-// Select appropriate sensor message format(s)
-#define BRESSER_5_IN_1
-#define BRESSER_6_IN_1
-#define BRESSER_7_IN_1
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"
@@ -454,6 +473,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  4
+
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
+    // Use pinning for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
+    #define PIN_RECEIVER_CS   7
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  8
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 (not used)
+    #define PIN_RECEIVER_GPIO 10
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  11
 
 #endif
 

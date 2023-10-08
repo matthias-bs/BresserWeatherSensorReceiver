@@ -60,6 +60,37 @@
 #include <Arduino.h>
 
 // ------------------------------------------------------------------------------------------------
+// --- Weather Sensors ---
+// ------------------------------------------------------------------------------------------------
+#define NUM_SENSORS     1       // Number of sensors to be received
+
+// List of sensor IDs to be excluded - can be empty
+#define SENSOR_IDS_EXC { 0x792882A2 }
+//#define SENSOR_IDS_EXC { 0x792882A2 }
+
+// List of sensor IDs to be included - if empty, handle all available sensors
+#define SENSOR_IDS_INC {}
+//#define SENSOR_IDS_INC { 0x83750871 }
+
+// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
+// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
+//#define SENSOR_IDS_DECODE3IN1 {}
+#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
+
+// Disable data type which will not be used to save RAM
+#define WIND_DATA_FLOATINGPOINT
+#define WIND_DATA_FIXEDPOINT
+
+// Select appropriate sensor message format(s)
+// Comment out unused decoders to save operation time/power
+#define BRESSER_5_IN_1
+#define BRESSER_6_IN_1
+#define BRESSER_7_IN_1
+#define BRESSER_LIGHTNING
+#define BRESSER_LEAKAGE
+
+
+// ------------------------------------------------------------------------------------------------
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
 // Use pinning for LoRaWAN Node
@@ -185,24 +216,6 @@
 
 
 // ------------------------------------------------------------------------------------------------
-// --- Weather Sensors ---
-// ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
-
-// List of sensor IDs to be excluded - can be empty
-#define SENSOR_IDS_EXC { 0x792882A2 }
-//#define SENSOR_IDS_EXC { 0x792882A2 }
-
-// List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
-//#define SENSOR_IDS_INC { 0x83750871 }
-
-// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
-// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
-//#define SENSOR_IDS_DECODE3IN1 {}
-#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
-
-// ------------------------------------------------------------------------------------------------
 // --- Debug Logging Output ---
 // ------------------------------------------------------------------------------------------------
 // - ESP32:
@@ -307,17 +320,6 @@
         #define log_v(...) {}
      #endif
 #endif
-
-// Disable data type which will not be used to save RAM
-#define WIND_DATA_FLOATINGPOINT
-#define WIND_DATA_FIXEDPOINT
-
-// Select appropriate sensor message format(s)
-#define BRESSER_5_IN_1
-#define BRESSER_6_IN_1
-#define BRESSER_7_IN_1
-#define BRESSER_LIGHTNING
-#define BRESSER_LEAKAGE
 
 #if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
     #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"

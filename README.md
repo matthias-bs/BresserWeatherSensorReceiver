@@ -27,7 +27,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
 | 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() |
 | 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
-| 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
+| 7803200, 7803210  | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803300       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 

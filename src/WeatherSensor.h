@@ -119,7 +119,7 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
-#if defined(ESP32) || defined(ESP8266)
+#if !defined(ARDUINO_ARCH_AVR)
 /*!
  * \struct SensorMap
  *

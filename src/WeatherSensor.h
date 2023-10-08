@@ -71,9 +71,6 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#if defined(ESP32) || defined(ESP8266)
-  #include <string>
-#endif
 #include <RadioLib.h>
 
 

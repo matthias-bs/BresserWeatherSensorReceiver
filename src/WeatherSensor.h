@@ -120,6 +120,8 @@ typedef enum DecodeStatus {
 
 
 #if !defined(ARDUINO_ARCH_AVR)
+#include <string>
+
 /*!
  * \struct SensorMap
  *

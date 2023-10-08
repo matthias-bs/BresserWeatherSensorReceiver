@@ -1,3 +1,5 @@
+:warning: **With CC1101 please use [RadioLib v6.1.0](https://github.com/jgromes/RadioLib/releases/tag/6.1.0) instead of [RadioLib v6.2.0](https://github.com/jgromes/RadioLib/releases/tag/6.2.0)! See https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/91.**
+
 # BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->
 [![CppUTest](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml)

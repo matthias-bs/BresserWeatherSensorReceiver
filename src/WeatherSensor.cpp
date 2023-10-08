@@ -1162,6 +1162,8 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
 {   
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
         log_message("Data", msg, msgSize);
+    #else
+        (void)msgSize;
     #endif
 
      // Verify CRC (CRC16/XMODEM)

@@ -62,7 +62,7 @@
 // ------------------------------------------------------------------------------------------------
 // --- Weather Sensors ---
 // ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
+#define NUM_SENSORS     4       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC { 0x792882A2 }
@@ -188,19 +188,19 @@
 #elif defined(ARDUINO_ESP32_DEV)
     //#define LORAWAN_NODE
     #define FIREBEETLE_ESP32_COVER_LORA
-    
-    #if !defined(LORAWAN_NODE) && !defined(FIREBEETLE_ESP32_COVER_LORA)
-        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
-        
+
+    #if defined(FIREBEETLE_ESP32_COVER_LORA)
+        #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
+        #define USE_SX1276
+        #pragma message("Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1")
+
     #elif defined(LORAWAN_NODE) 
         #pragma message("LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
         #define USE_SX1276
 
-    #elif defined(FIREBEETLE_ESP32_COVER_LORA)
-        #define USE_SX1276
-        #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
-        #pragma message("Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1")
-    
+    #else
+        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+        
     #endif
 #endif
 

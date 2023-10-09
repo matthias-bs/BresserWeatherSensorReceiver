@@ -1180,26 +1180,16 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     bool     alarm    = (msg[7] & 0x80) == 0x80;
     bool     no_alarm = (msg[7] & 0x40) == 0x40;
 
-    DecodeStatus status;
-
-    uint8_t null_bytes = msg[7] & 0xF;
-
-    for (int i=8; i<=15; i++) {
-        null_bytes |= msg[i];
-    }
-
-    // The checksum/digest algorithm is currently unknown.
-    // We apply some heuristics to validate that the message is realy from
-    // a water leakage sensor.
+    // Sanity checks
     bool decode_ok = (type_tmp == SENSOR_TYPE_LEAKAGE) &&
                      (alarm != no_alarm) && 
-                     (chan_tmp != 0) && 
-                     (null_bytes == 0);
+                     (chan_tmp != 0);
 
-    status = (decode_ok) ? DECODE_OK : DECODE_INVALID;
-    if (status != DECODE_OK)
-        return status;
+    if (!decode_ok)
+        return DECODE_INVALID;
     
+    DecodeStatus status = DECODE_OK;
+
     // Find appropriate slot in sensor data array and update <status>
     int slot = findSlot(id_tmp, &status);
 

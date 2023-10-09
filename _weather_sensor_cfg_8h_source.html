@@ -148,7 +148,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">// ------------------------------------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">// --- Weather Sensors ---</span></div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">// ------------------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#define NUM_SENSORS     1       </span><span class="comment">// Number of sensors to be received</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#define NUM_SENSORS     4       </span><span class="comment">// Number of sensors to be received</span></div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">// List of sensor IDs to be excluded - can be empty</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#define SENSOR_IDS_EXC { 0x792882A2 }</span></div>
@@ -274,19 +274,19 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_ESP32_DEV)</span></div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    <span class="comment">//#define LORAWAN_NODE</span></div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="preprocessor">    #define FIREBEETLE_ESP32_COVER_LORA</span></div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;    </div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="preprocessor">    #if !defined(LORAWAN_NODE) &amp;&amp; !defined(FIREBEETLE_ESP32_COVER_LORA)</span></div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">        #pragma message(&quot;ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!&quot;</span>)</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        </div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor">    #elif defined(LORAWAN_NODE) </span></div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="preprocessor">        #pragma message(&quot;LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)&quot;</span>)</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="preprocessor">        #define USE_SX1276</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160; </div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="preprocessor">    #elif defined(FIREBEETLE_ESP32_COVER_LORA)</span></div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="preprocessor">        #define USE_SX1276</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="preprocessor">        #pragma message(&quot;FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa&quot;</span>)</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="preprocessor">        #pragma message(&quot;Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1&quot;</span>)</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    </div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160; </div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="preprocessor">    #if defined(FIREBEETLE_ESP32_COVER_LORA)</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="preprocessor">        #pragma message(&quot;FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa&quot;</span>)</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="preprocessor">        #define USE_SX1276</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="preprocessor">        #pragma message(&quot;Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1&quot;</span>)</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="preprocessor">    #elif defined(LORAWAN_NODE) </span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="preprocessor">        #pragma message(&quot;LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)&quot;</span>)</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="preprocessor">        #define USE_SX1276</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="preprocessor">    #else</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="preprocessor">        #pragma message(&quot;ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!&quot;</span>)</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;        </div>
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="preprocessor">    #endif</span></div>
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160; </div>

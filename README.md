@@ -9,6 +9,8 @@
 
 Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W
 
+**See the [Wiki](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki) for additional information.**
+
 To allow automatic handling of all Bresser weather station variants, the decoders are tried in the following order until decoding succeeded:
 1. 7-in-1-Decoder 
 2. 6-in-1-Decoder

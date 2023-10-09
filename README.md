@@ -72,7 +72,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
  | [Adafruit Feather RP2040 with Adafruit LoRa Radio FeatherWing](https://www.adafruit.com/product/4884)                                | "Adafruit Feather RP2040" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_RP2040   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS<br><br>External voltage divider required for battery voltage measurement. |
  | [Adafruit Feather 32u4 RFM95 LoRa Radio](https://www.adafruit.com/product/3078)      | "Adafruit Feather 32u4" | n.a.                       | ARDUINO_AVR_FEATHER32U4     | SX1276 (RFM95W) | see [notes](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-32u4-rfm95-lora-radio)       |
 
-<sup>1</sup> Additional `#define` in `WeatherSensorCfg´.
+<sup>1</sup> Additional `#define` in `WeatherSensorCfg`.
 
 The preprocessor will provide some output regarding the selected configuration if enabled in the Arduino IDE's Preferences ("Verbose Output"), e.g. 
 ```

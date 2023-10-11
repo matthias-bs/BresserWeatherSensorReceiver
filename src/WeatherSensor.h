@@ -84,8 +84,9 @@
 // 5 - Water Leakage Sensor     6-in-1; PN 7009975
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
 // 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
-// ? - Air Quality Sensor
-// ? - Water Leakage Sensor
+// ? - Air Quality Sensor PM2.5/PM10
+// ? - CO2 Sensor
+// ? - HCHO/VCO Sensor
 // ? - Pool Thermometer
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station

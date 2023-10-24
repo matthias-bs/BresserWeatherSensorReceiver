@@ -46,6 +46,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230804 Added Bresser Water Leakage Sensor decoder
+// 20231023 Modified detection of Lightning Sensor
 //
 // ToDo: 
 // - 
@@ -83,7 +84,7 @@ void loop()
     int decode_status = weatherSensor.getMessage();
 
     if (decode_status == DECODE_OK) {
-      if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
+      if (!weatherSensor.sensor[i].temp_ok && (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)) {
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
             (unsigned int)weatherSensor.sensor[i].sensor_id,
             weatherSensor.sensor[i].s_type,

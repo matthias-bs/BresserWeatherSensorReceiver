@@ -67,6 +67,7 @@
 // 20230814 Fixed receiver state handling in getMessage()
 // 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
 //          Added CRC check in decodeBresserLeakagePayload()
+// 20231024 Added Pool / Spa Thermometer (P/N 7009973) to 6-in-1 decoder
 //
 // ToDo:
 // -
@@ -644,6 +645,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
 // - also Froggit WH6000 sensors.
 // - also rebranded as Ventus C8488A (W835)
 // - also Bresser 3-in-1 Professional Wind Gauge / Anemometer PN 7002531
+// - also Bresser Pool / Spa Thermometer PN 7009973 (s_type = 3)
 //
 // There are at least two different message types:
 // - 24 seconds interval for temperature, hum, uv and rain (alternating messages)
@@ -655,7 +657,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
 // Moisture:
 //
 //     f16e 187000e34 7 ffffff0000 252 2 16 fff 004 000 [25,2, 99%, CH 7]
-//     DIGEST:8h8h ID?8h8h8h8h :4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID?8h8h8h8h TYPE:4h STARTUP:1b CH:3d 8h 8h8h 8h8h TEMP:12h ?2b BATT:1b ?1b MOIST:8h UV?~12h ?4h CHKSUM:8h
 //
 // Moisture is transmitted in the humidity field as index 1-16: 0, 7, 13, 20, 27, 33, 40, 47, 53, 60, 67, 73, 80, 87, 93, 99.
 // The Wind speed and direction fields decode to valid zero but we exclude them from the output.
@@ -693,8 +695,8 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
 //
 // Wind and Temperature/Humidity or Rain:
 //
-//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
-//     DIGEST:8h8h ID:8h8h8h8h :4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h TYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h TEMP:8h.4h ?2b BATT:1b ?1b HUM:8h UV?~12h ?4h CHKSUM:8h
+//     DIGEST:8h8h ID:8h8h8h8h TYPE:4h STARTUP:1b CH:3d WSPEED:~8h~4h ~4h~8h WDIR:12h ?4h RAINFLAG:8h RAIN:8h8h UV:8h8h CHKSUM:8h
 //
 // Digest is LFSR-16 gen 0x8810 key 0x5412, excluding the add-checksum and trailer.
 // Checksum is 8-bit add (with carry) to 0xff.
@@ -835,13 +837,18 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
 
     moisture_ok = false;
 
+    // Pool / Spa thermometer
+    if (sensor[slot].s_type == SENSOR_TYPE_POOL_THERMO) {
+        humidity_ok = false;
+    }
+
     // the moisture sensor might present valid readings but does not have the hardware
-    if (sensor[slot].s_type == 4) {
+    if (sensor[slot].s_type == SENSOR_TYPE_SOIL) {
         wind_ok = 0;
         uv_ok   = 0;
     }
 
-    if (sensor[slot].s_type == 4 && temp_ok && sensor[slot].humidity >= 1 && sensor[slot].humidity <= 16) {
+    if (sensor[slot].s_type == SENSOR_TYPE_SOIL && temp_ok && sensor[slot].humidity >= 1 && sensor[slot].humidity <= 16) {
         moisture_ok = true;
         humidity_ok = false;
         sensor[slot].moisture = moisture_map[sensor[slot].humidity - 1];

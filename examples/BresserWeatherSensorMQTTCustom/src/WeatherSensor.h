@@ -61,6 +61,7 @@
 // 20230723 Added SENSOR_TYPE_WATER
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
+// 20231024 Added SENSOR_TYPE_POOL_THERMO
 //
 // ToDo:
 // -
@@ -71,9 +72,6 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#if defined(ESP32) || defined(ESP8266)
-  #include <string>
-#endif
 #include <RadioLib.h>
 
 
@@ -83,17 +81,20 @@
 //   - Professional Wind Gauge  6-in-1; PN 7002531
 // 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
 // 3 - Lightning Sensor         PN 7009976
+// 3 - Pool / Spa Thermometer   PN 7000073 
 // 4 - Soil Moisture Sensor     6-in-1; PN 7009972
 // 5 - Water Leakage Sensor     6-in-1; PN 7009975
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
 // 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
-// ? - Air Quality Sensor
-// ? - Water Leakage Sensor
+// ? - Air Quality Sensor PM2.5/PM10
+// ? - CO2 Sensor
+// ? - HCHO/VCO Sensor
 // ? - Pool Thermometer
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
 #define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
+#define SENSOR_TYPE_POOL_THERMO     3 // Pool / Spa Thermometer
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_LEAKAGE         5 // Water Leakage
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
@@ -119,7 +120,9 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
-#if defined(ESP32) || defined(ESP8266)
+#if !defined(ARDUINO_ARCH_AVR)
+#include <string>
+
 /*!
  * \struct SensorMap
  *

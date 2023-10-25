@@ -68,6 +68,8 @@
 // 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
 //          Added CRC check in decodeBresserLeakagePayload()
 // 20231024 Added Pool / Spa Thermometer (P/N 7009973) to 6-in-1 decoder
+// 20231026 Added Air Quality Sensor (Particulate Matter, P/N 7009970) to 7-in-1 decoder
+//          Modified decoding of sensor type (to raw, non de-whitened data)
 //
 // ToDo:
 // -
@@ -895,8 +897,9 @@ Data layout:
     {269}9a59b4a5a3da10aaaaaaaaaaaaaa8bdac8afea28a8caaaaaaa000000000000000000 [54.0 klx UV=2.6]
     {230}fe15b4a5a3da10aaaaaaaaaaaaaa8bdacbba382aacdaaaaaaa00000000 [109.2klx   UV=6.7]
     {254}2544b4a5a32a10aaaaaaaaaaaaaa8bdac88aaaaabeaaaaaaaa00000000000000 [200.000 klx UV=14
-    DIGEST:8h8h ID?8h8h WDIR:8h4h 4h 8h WGUST:8h.4h WAVG:8h.4h RAIN:8h8h4h.4h RAIN?:8h TEMP:8h.4hC FLAGS?:4h HUM:8h% LIGHT:8h4h,8h4hKL UV:8h.4h TRAILER:8h8h8h4h
+    DIGEST:8h8h ID?8h8h WDIR:8h4h 4h STYPE:4h STARTUP:1b CH:3d WGUST:8h.4h WAVG:8h.4h RAIN:8h8h4h.4h RAIN?:8h TEMP:8h.4hC FLAGS?:4h HUM:8h% LIGHT:8h4h,8h4hKL UV:8h.4h TRAILER:8h8h8h4h
 Unit of light is kLux (not W/m²).
+STYPE, STARTUP and CH are not covered by whitening. Probably also ID.
 First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1, which likely means we got that wrong.
 */
 #ifdef BRESSER_7_IN_1
@@ -920,11 +923,13 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
       return DECODE_DIG_ERR;
   }
 
-  #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+  #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
       log_message("De-whitened Data", msgw, msgSize);
   #endif
 
-  int id_tmp   = (msgw[2] << 8) | (msgw[3]);
+  int id_tmp  = (msgw[2] << 8) | (msgw[3]);
+  int s_type  = msg[6] >> 4; // raw data, no de-whitening
+
   DecodeStatus status;
 
   // Find appropriate slot in sensor data array and update <status>
@@ -951,41 +956,51 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
   float light_klx = lght_raw * 0.001f; // TODO: remove this
   float light_lux = lght_raw;
   float uv_index = uv_raw * 0.1f;
-
-  // The RTL_433 decoder does not include any field to verify that these data
-  // are ok, so we are assuming that they are ok if the decode status is ok.
-  sensor[slot].temp_ok      = true;
-  sensor[slot].humidity_ok  = true;
-  sensor[slot].wind_ok      = true;
-  sensor[slot].rain_ok      = true;
-  sensor[slot].light_ok     = true;
-  sensor[slot].uv_ok        = true;
+  uint16_t pm_2_5 = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
+  uint16_t pm_10 = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
 
   sensor[slot].sensor_id   = id_tmp;
-  sensor[slot].s_type      = msgw[6] >> 4;
-  sensor[slot].startup     = (msgw[6] & 0x08) == 0x08;
-  sensor[slot].temp_c      = temp_c;
-  sensor[slot].humidity    = humidity;
-#ifdef WIND_DATA_FLOATINGPOINT
-  sensor[slot].wind_gust_meter_sec     = wgst_raw * 0.1f;
-  sensor[slot].wind_avg_meter_sec      = wavg_raw * 0.1f;
-  sensor[slot].wind_direction_deg      = wdir * 1.0f;
-#endif
-#ifdef WIND_DATA_FIXEDPOINT
-  sensor[slot].wind_gust_meter_sec_fp1 = wgst_raw;
-  sensor[slot].wind_avg_meter_sec_fp1  = wavg_raw;
-  sensor[slot].wind_direction_deg_fp1  = wdir * 10;
-#endif
-  sensor[slot].rain_mm     = rain_mm;
-  sensor[slot].light_klx   = light_klx;
-  sensor[slot].light_lux   = light_lux;
-  sensor[slot].uv          = uv_index;
+  sensor[slot].s_type      = s_type;
+  sensor[slot].startup     = (msg[6] & 0x08) == 0x08; // raw data, no de-whitening
+  sensor[slot].chan        = msg[6] & 0x07;           // raw data, no de-whitening
+
+  
+  if (s_type == SENSOR_TYPE_WEATHER1) {
+    // The RTL_433 decoder does not include any field to verify that these data
+    // are ok, so we are assuming that they are ok if the decode status is ok.
+    sensor[slot].temp_ok      = true;
+    sensor[slot].humidity_ok  = true;
+    sensor[slot].wind_ok      = true;
+    sensor[slot].rain_ok      = true;
+    sensor[slot].light_ok     = true;
+    sensor[slot].uv_ok        = true;
+    sensor[slot].temp_c      = temp_c;
+    sensor[slot].humidity    = humidity;
+    #ifdef WIND_DATA_FLOATINGPOINT
+    sensor[slot].wind_gust_meter_sec     = wgst_raw * 0.1f;
+    sensor[slot].wind_avg_meter_sec      = wavg_raw * 0.1f;
+    sensor[slot].wind_direction_deg      = wdir * 1.0f;
+    #endif
+    #ifdef WIND_DATA_FIXEDPOINT
+    sensor[slot].wind_gust_meter_sec_fp1 = wgst_raw;
+    sensor[slot].wind_avg_meter_sec_fp1  = wavg_raw;
+    sensor[slot].wind_direction_deg_fp1  = wdir * 10;
+    #endif
+    sensor[slot].rain_mm     = rain_mm;
+    sensor[slot].light_klx   = light_klx;
+    sensor[slot].light_lux   = light_lux;
+    sensor[slot].uv          = uv_index;
+  }
+  else if (s_type == SENSOR_TYPE_AIR_PM) {
+    sensor[slot].pm_ok      = true;
+    sensor[slot].aqs_pm_2_5 = pm_2_5;
+    sensor[slot].aqs_pm_10  = pm_10;
+  }
   sensor[slot].battery_ok  = !battery_low;
   sensor[slot].valid       = true;
   sensor[slot].complete    = true;
   sensor[slot].rssi        = rssi;
-  sensor[slot].valid       = true;
-  sensor[slot].complete    = true;
+
 
   /* clang-format off */
   /*  data = data_make(
@@ -1069,6 +1084,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     #endif
 
     int id_tmp  = (msgw[2] << 8) | (msgw[3]);
+    int s_type  = msg[6] >> 4;
 
     DecodeStatus status;
 
@@ -1082,13 +1098,12 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     log_v("--> CTR RAW: %d  BCD: %d", ctr, ((((msgw[4] & 0xf0) >> 4) * 100) + (msgw[4] & 0x0f) * 10 + ((msgw[5] & 0xf0) >> 4)));
     uint8_t battery_low = (msgw[5] & 0x08) == 0x00;
     uint16_t unknown1   = ((msgw[5] & 0x0f) << 8) |  msgw[6];
-    uint8_t type        = msgw[6] >> 4;
     uint8_t distance_km = msgw[7];
     log_v("--> DST RAW: %d  BCD: %d  TAB: %d", msgw[7], ((((msgw[7] & 0xf0) >> 4) * 10) + (msgw[7] & 0x0f)), distance_map[ msgw[7] ]);
     uint16_t unknown2   = (msgw[8] << 8) | msgw[9];
 
     sensor[slot].sensor_id       = id_tmp;
-    sensor[slot].s_type          = type;
+    sensor[slot].s_type          = s_type;
     sensor[slot].lightning_count = ctr;
     sensor[slot].lightning_distance_km = distance_km;
     sensor[slot].lightning_unknown1 = unknown1;
@@ -1099,7 +1114,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     sensor[slot].valid           = true;
     sensor[slot].complete        = true;
 
-    log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, type, ctr, battery_low, distance_km, unknown1, unknown2);
+    log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
     
     
     /* clang-format off */

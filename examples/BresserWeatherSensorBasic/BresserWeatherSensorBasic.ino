@@ -47,6 +47,7 @@
 // 20230624 Added Bresser Lightning Sensor decoder
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231023 Modified detection of Lightning Sensor
+// 20231025 Added Bresser Air Quality (Particulate Matter) Sensor decoder
 //
 // ToDo: 
 // - 
@@ -107,6 +108,15 @@ void loop()
         );
         Serial.printf("Leakage: [%-5s] ", (weatherSensor.sensor[i].water_leakage_alarm) ? "ALARM" : "OK");
       
+      } else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
+        // Air Quality (Particle Matter) Sensor
+        Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
+            (unsigned int)weatherSensor.sensor[i].sensor_id,
+            weatherSensor.sensor[i].s_type,
+            weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
+        Serial.printf("Ch: [%d] ", weatherSensor.sensor[i].chan);
+        Serial.printf("PM2.5: [%uµg/m³] ", weatherSensor.sensor[i].aqs_pm_2_5);
+        Serial.printf("PM10: [%uµg/m³] ", weatherSensor.sensor[i].aqs_pm_10);
       } else {
         // Any other (weather-like) sensor is very similar
         Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",

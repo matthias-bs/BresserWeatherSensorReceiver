@@ -61,6 +61,9 @@
 // 20230723 Added SENSOR_TYPE_WATER
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
+// 20231024 Added SENSOR_TYPE_POOL_THERMO
+// 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
+//          Modified device type definitions 
 //
 // ToDo:
 // -
@@ -71,9 +74,6 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#if defined(ESP32) || defined(ESP8266)
-  #include <string>
-#endif
 #include <RadioLib.h>
 
 
@@ -81,23 +81,25 @@
 // 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
 // 1 - Weather Station          6-in-1; PN 7002585
 //   - Professional Wind Gauge  6-in-1; PN 7002531
+//   - Weather Station          7-in-1; PN 7003300
 // 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
-// 3 - Lightning Sensor         PN 7009976
+// 3 - Pool / Spa Thermometer   PN 7000073 
 // 4 - Soil Moisture Sensor     6-in-1; PN 7009972
 // 5 - Water Leakage Sensor     6-in-1; PN 7009975
+// 8 - Air Quality Sensor PM2.5/PM10
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
-// 11 - Weather Sensor 7-in-1    7-in-1; PN 7003300
-// ? - Air Quality Sensor
-// ? - Water Leakage Sensor
-// ? - Pool Thermometer
+// 9 - Lightning Sensor         PN 7009976
+// ? - CO2 Sensor
+// ? - HCHO/VCO Sensor
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
-#define SENSOR_TYPE_LIGHTNING       3 // Lightning Sensor
+#define SENSOR_TYPE_POOL_THERMO     3 // Pool / Spa Thermometer
 #define SENSOR_TYPE_SOIL            4 // Soil Temperature and Moisture (from 6-in-1 decoder)
 #define SENSOR_TYPE_LEAKAGE         5 // Water Leakage
+#define SENSOR_TYPE_AIR_PM          8 // Air Quality Sensor (Particle Matter)
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
-#define SENSOR_TYPE_WEATHER_7IN1   11 // Weather Sensor 7-in-1
+#define SENSOR_TYPE_LIGHTNING       9 // Lightning Sensor
 
 
 // Sensor specific rain gauge overflow threshold (mm)
@@ -119,7 +121,9 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
-#if defined(ESP32) || defined(ESP8266)
+#if !defined(ARDUINO_ARCH_AVR)
+#include <string>
+
 /*!
  * \struct SensorMap
  *
@@ -199,8 +203,8 @@ class WeatherSensor {
          */
         struct Sensor {
             uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
-            uint8_t  s_type;               //!< sensor type (only 6-in-1)
-            uint8_t  chan;                 //!< channel (only 6-in-1)
+            uint8_t  s_type;               //!< sensor type
+            uint8_t  chan;                 //!< channel
             bool     startup = false;      //!< startup after reset / battery change
             bool     valid;                //!< data valid (but not necessarily complete)
             bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
@@ -214,6 +218,7 @@ class WeatherSensor {
             bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
             bool     lightning_ok = false; //!< lightning o.k. (only lightning)
             bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
+            bool     pm_ok = false;        //!< air quality (particle matter) o.k. (only 7-in-1)
             float    temp_c;               //!< temperature in degC
             float    light_klx;            //!< Light KLux (only 7-in-1)
             float    light_lux;            //!< Light lux (only 7-in-1)
@@ -239,6 +244,8 @@ class WeatherSensor {
             uint16_t lightning_unknown1;    //!< unknown part 1
             uint16_t lightning_unknown2;    //!< unknown part 2
             bool     water_leakage_alarm;   //!< water leakage alarm (only water leakage)
+            uint16_t aqs_pm_2_5;            //!< air quality PM2.5 in µg/m³
+            uint16_t aqs_pm_10;             //!< air quality PM10  in µg/m³
             float    rssi;                  //!< received signal strength indicator in dBm
         };
 
@@ -278,6 +285,7 @@ class WeatherSensor {
                     sensor[i].moisture_ok  = false;
                     sensor[i].lightning_ok = false;
                     sensor[i].leakage_ok   = false;
+                    sensor[i].pm_ok        = false;
                 }
             }
         };
@@ -426,7 +434,7 @@ class WeatherSensor {
         */
         uint16_t crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, uint16_t init);
 
-        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+        #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
             /*!
              * \brief Log message payload
              *
@@ -455,7 +463,7 @@ class WeatherSensor {
                 for (size_t i = 0 ; i < msgSize; i++) {
                     sprintf(&buf[strlen(buf)], "%02d ", i);
                 }
-                log_v("%s", buf);
+                log_d("%s", buf);
           
                 memset(buf, ' ', prefix_len);
                 buf[prefix_len] ='\0';
@@ -465,25 +473,8 @@ class WeatherSensor {
                 for (size_t i = 0 ; i < msgSize; i++) {
                     sprintf(&buf[strlen(buf)], "%02X ", msg[i]);
                 }
-                log_v("%s", buf);
+                log_d("%s", buf);
             }
-        #endif
-
-        #ifdef _DEBUG_MODE_
-            /*!
-            \brief Print raw message payload as hex byte values.
-            */
-            void printRawdata(uint8_t *msg, uint8_t msgSize) {
-                DEBUG_PRINT(F("Raw Data: "));
-                for (uint8_t p = 0 ; p < msgSize ; p++) {
-                    if (msg[p] < 16) {
-                        DEBUG_PRINT("0");
-                    }
-                    DEBUG_PRINT(msg[p], HEX);
-                    DEBUG_PRINT(" ");
-                }
-                DEBUG_PRINTLN();
-            };
         #endif
 
 };

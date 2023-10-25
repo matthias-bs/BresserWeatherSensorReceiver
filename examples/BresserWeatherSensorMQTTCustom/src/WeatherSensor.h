@@ -434,7 +434,7 @@ class WeatherSensor {
         */
         uint16_t crc16(uint8_t const message[], unsigned nBytes, uint16_t polynomial, uint16_t init);
 
-        #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
+        #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
             /*!
              * \brief Log message payload
              *
@@ -475,23 +475,6 @@ class WeatherSensor {
                 }
                 log_d("%s", buf);
             }
-        #endif
-
-        #ifdef _DEBUG_MODE_
-            /*!
-            \brief Print raw message payload as hex byte values.
-            */
-            void printRawdata(uint8_t *msg, uint8_t msgSize) {
-                DEBUG_PRINT(F("Raw Data: "));
-                for (uint8_t p = 0 ; p < msgSize ; p++) {
-                    if (msg[p] < 16) {
-                        DEBUG_PRINT("0");
-                    }
-                    DEBUG_PRINT(msg[p], HEX);
-                    DEBUG_PRINT(" ");
-                }
-                DEBUG_PRINTLN();
-            };
         #endif
 
 };

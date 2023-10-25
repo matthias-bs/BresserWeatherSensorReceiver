@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['chan_82',['chan',['../struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9',1,'WeatherSensor::Sensor']]],
-  ['complete_83',['complete',['../struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57',1,'WeatherSensor::Sensor']]]
+  ['battery_5fok_86',['battery_ok',['../struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90',1,'WeatherSensor::Sensor']]]
 ];

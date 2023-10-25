@@ -1,5 +1,7 @@
 var struct_weather_sensor_1_1_sensor =
 [
+    [ "aqs_pm_10", "struct_weather_sensor_1_1_sensor.html#aa1573a9a5de66f05b79383813fc55f20", null ],
+    [ "aqs_pm_2_5", "struct_weather_sensor_1_1_sensor.html#a2a8ec5d57d048d896c16c8d14a9350ce", null ],
     [ "battery_ok", "struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90", null ],
     [ "chan", "struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9", null ],
     [ "complete", "struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57", null ],
@@ -16,6 +18,7 @@ var struct_weather_sensor_1_1_sensor =
     [ "lightning_unknown2", "struct_weather_sensor_1_1_sensor.html#ab70ec898bffe156ba86e21a8b7984aee", null ],
     [ "moisture", "struct_weather_sensor_1_1_sensor.html#a7d81ebc4829395fc132b5077f5a40c47", null ],
     [ "moisture_ok", "struct_weather_sensor_1_1_sensor.html#adb4d7e0eab22ff15c08aa17ce44738fc", null ],
+    [ "pm_ok", "struct_weather_sensor_1_1_sensor.html#a839570ab2199213a8c1c39bea0da59e5", null ],
     [ "rain_mm", "struct_weather_sensor_1_1_sensor.html#aea1c5facf8df55b7e58c0d9ce572152a", null ],
     [ "rain_ok", "struct_weather_sensor_1_1_sensor.html#ae2e073d69e22bdcaa59a60c1b8189016", null ],
     [ "rssi", "struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1", null ],

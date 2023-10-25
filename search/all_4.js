@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['genmessage_11',['genMessage',['../class_weather_sensor.html#a643dd64dab119203c14883e712d76aea',1,'WeatherSensor']]],
-  ['getdata_12',['getData',['../class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a',1,'WeatherSensor']]],
-  ['getmessage_13',['getMessage',['../class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf',1,'WeatherSensor']]]
+  ['findid_11',['findId',['../class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989',1,'WeatherSensor']]],
+  ['findtype_12',['findType',['../class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa',1,'WeatherSensor']]]
 ];

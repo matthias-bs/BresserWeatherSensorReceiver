@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['humidity_14',['humidity',['../struct_weather_sensor_1_1_sensor.html#a3d83f4b213ea4d956d69476d1c0e885b',1,'WeatherSensor::Sensor']]],
-  ['humidity_5fok_15',['humidity_ok',['../struct_weather_sensor_1_1_sensor.html#a5bf9823fc6f06e52990785ad9b193652',1,'WeatherSensor::Sensor']]]
+  ['genmessage_13',['genMessage',['../class_weather_sensor.html#a643dd64dab119203c14883e712d76aea',1,'WeatherSensor']]],
+  ['getdata_14',['getData',['../class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a',1,'WeatherSensor']]],
+  ['getmessage_15',['getMessage',['../class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf',1,'WeatherSensor']]]
 ];

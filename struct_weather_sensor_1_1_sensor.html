@@ -103,11 +103,11 @@ uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <tr class="separator:abbf124d4f3f1792ff596b7dd03b9cd94"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabf3f23ee4b7db05580765f7ce392838"><td class="memItemLeft" align="right" valign="top"><a id="aabf3f23ee4b7db05580765f7ce392838"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aabf3f23ee4b7db05580765f7ce392838">s_type</a></td></tr>
-<tr class="memdesc:aabf3f23ee4b7db05580765f7ce392838"><td class="mdescLeft">&#160;</td><td class="mdescRight">sensor type (only 6-in-1) <br /></td></tr>
+<tr class="memdesc:aabf3f23ee4b7db05580765f7ce392838"><td class="mdescLeft">&#160;</td><td class="mdescRight">sensor type <br /></td></tr>
 <tr class="separator:aabf3f23ee4b7db05580765f7ce392838"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acdcee37faebf4d2f77387d6e649b00c9"><td class="memItemLeft" align="right" valign="top"><a id="acdcee37faebf4d2f77387d6e649b00c9"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9">chan</a></td></tr>
-<tr class="memdesc:acdcee37faebf4d2f77387d6e649b00c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">channel (only 6-in-1) <br /></td></tr>
+<tr class="memdesc:acdcee37faebf4d2f77387d6e649b00c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">channel <br /></td></tr>
 <tr class="separator:acdcee37faebf4d2f77387d6e649b00c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1fb3b6988f2a14d8246b1dc239426a4"><td class="memItemLeft" align="right" valign="top"><a id="ab1fb3b6988f2a14d8246b1dc239426a4"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4">startup</a> = false</td></tr>
@@ -161,6 +161,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ab91bbf3070f0da8527323393ce80b391">leakage_ok</a> = false</td></tr>
 <tr class="memdesc:ab91bbf3070f0da8527323393ce80b391"><td class="mdescLeft">&#160;</td><td class="mdescRight">water leakage o.k. (only water leackage) <br /></td></tr>
 <tr class="separator:ab91bbf3070f0da8527323393ce80b391"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a839570ab2199213a8c1c39bea0da59e5"><td class="memItemLeft" align="right" valign="top"><a id="a839570ab2199213a8c1c39bea0da59e5"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a839570ab2199213a8c1c39bea0da59e5">pm_ok</a> = false</td></tr>
+<tr class="memdesc:a839570ab2199213a8c1c39bea0da59e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality (particle matter) o.k. (only 7-in-1) <br /></td></tr>
+<tr class="separator:a839570ab2199213a8c1c39bea0da59e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc13b0de8543fcf00628e061fab26992"><td class="memItemLeft" align="right" valign="top"><a id="adc13b0de8543fcf00628e061fab26992"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#adc13b0de8543fcf00628e061fab26992">temp_c</a></td></tr>
 <tr class="memdesc:adc13b0de8543fcf00628e061fab26992"><td class="mdescLeft">&#160;</td><td class="mdescRight">temperature in degC <br /></td></tr>
@@ -209,6 +213,14 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a430f088457fb5dc51484a801b2b203c9">water_leakage_alarm</a></td></tr>
 <tr class="memdesc:a430f088457fb5dc51484a801b2b203c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">water leakage alarm (only water leakage) <br /></td></tr>
 <tr class="separator:a430f088457fb5dc51484a801b2b203c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="memItemLeft" align="right" valign="top"><a id="a2a8ec5d57d048d896c16c8d14a9350ce"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a2a8ec5d57d048d896c16c8d14a9350ce">aqs_pm_2_5</a></td></tr>
+<tr class="memdesc:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality PM2.5 in µg/m³ <br /></td></tr>
+<tr class="separator:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1573a9a5de66f05b79383813fc55f20"><td class="memItemLeft" align="right" valign="top"><a id="aa1573a9a5de66f05b79383813fc55f20"></a>
+uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aa1573a9a5de66f05b79383813fc55f20">aqs_pm_10</a></td></tr>
+<tr class="memdesc:aa1573a9a5de66f05b79383813fc55f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality PM10 in µg/m³ <br /></td></tr>
+<tr class="separator:aa1573a9a5de66f05b79383813fc55f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="memItemLeft" align="right" valign="top"><a id="a56ca10defbfb8bb7bab5862a3fa2b7d1"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1">rssi</a></td></tr>
 <tr class="memdesc:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">received signal strength indicator in dBm <br /></td></tr>

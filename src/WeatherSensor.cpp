@@ -70,6 +70,7 @@
 // 20231024 Added Pool / Spa Thermometer (P/N 7009973) to 6-in-1 decoder
 // 20231026 Added Air Quality Sensor (Particulate Matter, P/N 7009970) to 7-in-1 decoder
 //          Modified decoding of sensor type (to raw, non de-whitened data)
+// 20231027 Refactored sensor data using a union to save memory
 //
 // ToDo:
 // -
@@ -183,17 +184,17 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
 
                 // Specific sensor type required
                 if (((flags & DATA_TYPE) != 0) && (sensor[i].s_type == type)) {
-                    if (sensor[i].complete || !(flags & DATA_COMPLETE)) {
+                    if (sensor[i].w.complete || !(flags & DATA_COMPLETE)) {
                         return true;
                     }
                 }
                 // All slots required (valid AND complete) - must check all slots
                 else if (flags & DATA_ALL_SLOTS) {
                     all_slots_valid    &= sensor[i].valid;
-                    all_slots_complete &= sensor[i].complete;
+                    all_slots_complete &= sensor[i].w.complete;
                 }
                 // At least one sensor valid and complete
-                else if (sensor[i].complete) {
+                else if (sensor[i].w.complete) {
                     return true;
                 }
             } // for (int i=0; i<NUM_SENSORS; i++)
@@ -298,32 +299,52 @@ DecodeStatus WeatherSensor::decodeMessage(const uint8_t * msg, uint8_t msgSize) 
 //
 // Generate sample data for testing
 //
-bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t type, uint8_t channel)
+bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t channel, uint8_t startup)
 {
     sensor[i].sensor_id               = id;
-    sensor[i].s_type                  = type;
+    sensor[i].s_type                  = s_type;
+    sensor[i].startup                 = startup;
     sensor[i].chan                    = channel;
-    sensor[i].temp_ok                 = true;
-    sensor[i].temp_c                  = 22.2f;
-    sensor[i].humidity_ok             = true;
-    sensor[i].humidity                = 55;
-#ifdef WIND_DATA_FLOATINGPOINT
-    sensor[i].wind_direction_deg      = 111.1;
-    sensor[i].wind_gust_meter_sec     = 4.4f;
-    sensor[i].wind_avg_meter_sec      = 3.3f;
-#endif
-#ifdef WIND_DATA_FIXEDPOINT
-    sensor[i].wind_direction_deg_fp1  = 1111;
-    sensor[i].wind_gust_meter_sec_fp1 = 44;
-    sensor[i].wind_avg_meter_sec_fp1  = 33;
-#endif
-    sensor[i].wind_ok                 = true;
-    sensor[i].rain_mm                 = 9.9f;
     sensor[i].battery_ok              = true;
     sensor[i].rssi                    = 88.8;
-
     sensor[i].valid                   = true;
-    sensor[i].complete                = true;
+
+    if ((s_type == SENSOR_TYPE_WEATHER0) || (s_type == SENSOR_TYPE_WEATHER1)) { 
+        sensor[i].w.temp_ok                 = true;
+        sensor[i].w.temp_c                  = 22.2f;
+        sensor[i].w.humidity_ok             = true;
+        sensor[i].w.humidity                = 55;
+        #ifdef WIND_DATA_FLOATINGPOINT
+            sensor[i].w.wind_direction_deg      = 111.1;
+            sensor[i].w.wind_gust_meter_sec     = 4.4f;
+            sensor[i].w.wind_avg_meter_sec      = 3.3f;
+        #endif
+        #ifdef WIND_DATA_FIXEDPOINT
+            sensor[i].w.wind_direction_deg_fp1  = 1111;
+            sensor[i].w.wind_gust_meter_sec_fp1 = 44;
+            sensor[i].w.wind_avg_meter_sec_fp1  = 33;
+        #endif
+        sensor[i].w.wind_ok                 = true;
+        sensor[i].w.rain_mm                 = 9.9f;
+        sensor[i].w.complete                = true;
+    }
+    else if (s_type == SENSOR_TYPE_LIGHTNING) {
+        sensor[i].lgt.strike_count = 42;
+        sensor[i].lgt.distance_km = 22;
+    }
+    else if (s_type == SENSOR_TYPE_LEAKAGE) {
+        sensor[i].leak.alarm = 0;
+    }
+    else if (s_type == SENSOR_TYPE_SOIL) {
+        sensor[i].soil.temp_c   = 7.7f;
+        sensor[i].soil.moisture = 50;
+    }
+    else if (s_type == SENSOR_TYPE_AIR_PM) {
+        sensor[i].pm.pm_2_5 = 1234;
+        sensor[i].pm.pm_10  = 1567;
+    }
+
+    
     return true;
 }
 
@@ -575,17 +596,20 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
         return status;
 
     sensor[slot].sensor_id   = id_tmp;
-    sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = 0; // for compatibility with other decoders
-    sensor[slot].startup     = ((msg[15] & 0x80) == 0) ? true : false; 
-
+    sensor[slot].startup     = ((msg[15] & 0x80) == 0) ? true : false;
+    sensor[slot].battery_ok  = (msg[25] & 0x80) ? false : true;
+    sensor[slot].valid       = true;
+    sensor[slot].rssi        = rssi;
+    sensor[slot].w.complete  = true;
+    
     int temp_raw = (msg[20] & 0x0f) + ((msg[20] & 0xf0) >> 4) * 10 + (msg[21] &0x0f) * 100;
     if (msg[25] & 0x0f) {
         temp_raw = -temp_raw;
     }
-    sensor[slot].temp_c = temp_raw * 0.1f;
+    sensor[slot].w.temp_c = temp_raw * 0.1f;
 
-    sensor[slot].humidity = (msg[22] & 0x0f) + ((msg[22] & 0xf0) >> 4) * 10;
+    sensor[slot].w.humidity = (msg[22] & 0x0f) + ((msg[22] & 0xf0) >> 4) * 10;
 
     int wind_direction_raw = ((msg[17] & 0xf0) >> 4) * 225;
     int gust_raw = ((msg[17] & 0x0f) << 8) + msg[16];
@@ -593,46 +617,42 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
 
 
 #ifdef WIND_DATA_FLOATINGPOINT
-    sensor[slot].wind_direction_deg      = wind_direction_raw * 0.1f;
-    sensor[slot].wind_gust_meter_sec     = gust_raw * 0.1f;
-    sensor[slot].wind_avg_meter_sec      = wind_raw * 0.1f;
+    sensor[slot].w.wind_direction_deg      = wind_direction_raw * 0.1f;
+    sensor[slot].w.wind_gust_meter_sec     = gust_raw * 0.1f;
+    sensor[slot].w.wind_avg_meter_sec      = wind_raw * 0.1f;
 #endif
 #ifdef WIND_DATA_FIXEDPOINT
-    sensor[slot].wind_direction_deg_fp1  = wind_direction_raw;
-    sensor[slot].wind_gust_meter_sec_fp1 = gust_raw;
-    sensor[slot].wind_avg_meter_sec_fp1  = wind_raw;
+    sensor[slot].w.wind_direction_deg_fp1  = wind_direction_raw;
+    sensor[slot].w.wind_gust_meter_sec_fp1 = gust_raw;
+    sensor[slot].w.wind_avg_meter_sec_fp1  = wind_raw;
 #endif
 
     int rain_raw = (msg[23] & 0x0f) + ((msg[23] & 0xf0) >> 4) * 10 + (msg[24] & 0x0f) * 100 + ((msg[24] & 0xf0) >> 4) * 1000;
-    sensor[slot].rain_mm = rain_raw * 0.1f;
+    sensor[slot].w.rain_mm = rain_raw * 0.1f;
 
-    sensor[slot].battery_ok = (msg[25] & 0x80) ? false : true;
-
-    // check if the message is from a Bresser Professional Rain Gauge
-    if ((msg[15] & 0xF) == 0x9) {
+    // Check if the message is from a Bresser Professional Rain Gauge
+    // This sensor has the same type as the Bresser Lightning Sensor -
+    // we change this to SENSOR_TYPE_WEATHER0 to simplify processing by the application.
+    if (type_tmp == 0x9) {
         // rescale the rain sensor readings
-        sensor[slot].rain_mm *= 2.5;
+        sensor[slot].w.rain_mm *= 2.5;
+        type_tmp = SENSOR_TYPE_WEATHER0;
 
         // Rain Gauge has no humidity (according to description) and no wind sensor (obviously)
-        sensor[slot].humidity_ok = false;
-        sensor[slot].wind_ok     = false;
+        sensor[slot].w.humidity_ok = false;
+        sensor[slot].w.wind_ok     = false;
 
     }
     else {
-        sensor[slot].humidity_ok = true;
-        sensor[slot].wind_ok     = true;
+        sensor[slot].w.humidity_ok = true;
+        sensor[slot].w.wind_ok     = true;
     }
-
-    sensor[slot].temp_ok      = true;
-    sensor[slot].light_ok     = false;
-    sensor[slot].uv_ok        = false;
-    sensor[slot].rain_ok      = true;
-    sensor[slot].moisture_ok  = false;
-    sensor[slot].valid        = true;
-    sensor[slot].complete     = true;
-
-    // Save rssi to sensor specific data set
-    sensor[slot].rssi = rssi;
+    
+    sensor[slot].s_type         = type_tmp;
+    sensor[slot].w.temp_ok      = true;
+    sensor[slot].w.light_ok     = false;
+    sensor[slot].w.uv_ok        = false;
+    sensor[slot].w.rain_ok      = true;
 
     return DECODE_OK;
 }
@@ -764,19 +784,28 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     if (status != DECODE_OK)
         return status;
 
+    if (!sensor[slot].valid) {
+        // Reset value after if slot is empty 
+        sensor[slot].w.temp_ok     = false;
+        sensor[slot].w.humidity_ok = false;
+        sensor[slot].w.uv_ok       = false;
+        sensor[slot].w.wind_ok     = false;
+        sensor[slot].w.rain_ok     = false;
+    }
     sensor[slot].sensor_id   = id_tmp;
     sensor[slot].s_type      = type_tmp;
     sensor[slot].chan        = chan_tmp;
     sensor[slot].startup     = ((msg[6] & 0x8) == 0) ? true : false; // s.a. #1214
+    sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
 
     f_3in1 = is_decode3in1(id_tmp);
 
     // temperature, humidity(, uv) - shared with rain counter
     temp_ok = humidity_ok = (flags == 0);
+    float temp;
     if (temp_ok) {
         bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-        float temp;
         
         // Workaround for 3-in-1 Professional Wind Gauge / Anemometer 
         if (f_3in1) {
@@ -785,15 +814,14 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
             temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
         }
         
-        sensor[slot].temp_c      = temp;
-        sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
-        sensor[slot].humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+        sensor[slot].w.temp_c      = temp;
+        sensor[slot].w.humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
         // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
         uv_ok  = ((~msg[15] & 0xff) <= 0x99) && ((~msg[16] & 0xf0) <= 0x90) && !f_3in1;
         if (uv_ok) {
             int uv_raw    = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
-                sensor[slot].uv = uv_raw * 0.1f;
+                sensor[slot].w.uv = uv_raw * 0.1f;
         }
     }
 
@@ -812,14 +840,14 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         int wind_dir_raw = ((msg[10] & 0xf0) >> 4) * 100 + (msg[10] & 0x0f) * 10 + ((msg[11] & 0xf0) >> 4);
 
 #ifdef WIND_DATA_FLOATINGPOINT
-        sensor[slot].wind_gust_meter_sec     = gust_raw * 0.1f;
-        sensor[slot].wind_avg_meter_sec      = wavg_raw * 0.1f;
-        sensor[slot].wind_direction_deg      = wind_dir_raw * 1.0f;
+        sensor[slot].w.wind_gust_meter_sec     = gust_raw * 0.1f;
+        sensor[slot].w.wind_avg_meter_sec      = wavg_raw * 0.1f;
+        sensor[slot].w.wind_direction_deg      = wind_dir_raw * 1.0f;
 #endif
 #ifdef WIND_DATA_FIXEDPOINT
-        sensor[slot].wind_gust_meter_sec_fp1 = gust_raw;
-        sensor[slot].wind_avg_meter_sec_fp1  = wavg_raw;
-        sensor[slot].wind_direction_deg_fp1  = wind_dir_raw * 10;
+        sensor[slot].w.wind_gust_meter_sec_fp1 = gust_raw;
+        sensor[slot].w.wind_avg_meter_sec_fp1  = wavg_raw;
+        sensor[slot].w.wind_direction_deg_fp1  = wind_dir_raw * 10;
 #endif
     }
 
@@ -834,7 +862,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         int rain_raw     = (_imsg12 >> 4) * 100000 + (_imsg12 & 0x0f) * 10000
                          + (_imsg13 >> 4) * 1000 + (_imsg13 & 0x0f) * 100
                          + (_imsg14 >> 4) * 10 + (_imsg14 & 0x0f);
-        sensor[slot].rain_mm   = rain_raw * 0.1f;
+        sensor[slot].w.rain_mm   = rain_raw * 0.1f;
     }
 
     moisture_ok = false;
@@ -850,27 +878,27 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         uv_ok   = 0;
     }
 
-    if (sensor[slot].s_type == SENSOR_TYPE_SOIL && temp_ok && sensor[slot].humidity >= 1 && sensor[slot].humidity <= 16) {
+    if (sensor[slot].s_type == SENSOR_TYPE_SOIL && temp_ok && sensor[slot].w.humidity >= 1 && sensor[slot].w.humidity <= 16) {
         moisture_ok = true;
         humidity_ok = false;
-        sensor[slot].moisture = moisture_map[sensor[slot].humidity - 1];
+        sensor[slot].soil.moisture = moisture_map[sensor[slot].w.humidity - 1];
+        sensor[slot].soil.temp_c = temp;
     }
 
     // Update per-slot status flags
-    sensor[slot].temp_ok     |= temp_ok;
-    sensor[slot].humidity_ok |= humidity_ok;
-    sensor[slot].uv_ok       |= uv_ok;
-    sensor[slot].wind_ok     |= wind_ok;
-    sensor[slot].rain_ok     |= rain_ok;
-    sensor[slot].moisture_ok |= moisture_ok;
+    sensor[slot].w.temp_ok     |= temp_ok;
+    sensor[slot].w.humidity_ok |= humidity_ok;
+    sensor[slot].w.uv_ok       |= uv_ok;
+    sensor[slot].w.wind_ok     |= wind_ok;
+    sensor[slot].w.rain_ok     |= rain_ok;
     log_d("Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
 
     sensor[slot].valid    = true;
 
     // Weather station data is split into two separate messages (except for Professional Wind Gauge)
-    sensor[slot].complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].temp_ok && sensor[slot].rain_ok) ||
-                            f_3in1 ||
-                            (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);
+    sensor[slot].w.complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].w.temp_ok && sensor[slot].w.rain_ok) ||
+                              f_3in1 ||
+                              (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);
 
     // Save rssi to sensor specific data set
     sensor[slot].rssi = rssi;
@@ -889,6 +917,8 @@ Preamble:
     aa aa aa aa aa 2d d4
 Observed length depends on reset_limit.
 The data has a whitening of 0xaa.
+
+Weather Center
 Data layout:
     {271}631d05c09e9a18abaabaaaaaaaaa8adacbacff9cafcaaaaaaa000000000000000000
     {262}10b8b4a5a3ca10aaaaaaaaaaaaaa8bcacbaaaa2aaaaaaaaaaa0000000000000000 [0.08 klx]
@@ -899,6 +929,11 @@ Data layout:
     {254}2544b4a5a32a10aaaaaaaaaaaaaa8bdac88aaaaabeaaaaaaaa00000000000000 [200.000 klx UV=14
     DIGEST:8h8h ID?8h8h WDIR:8h4h 4h STYPE:4h STARTUP:1b CH:3d WGUST:8h.4h WAVG:8h.4h RAIN:8h8h4h.4h RAIN?:8h TEMP:8h.4hC FLAGS?:4h HUM:8h% LIGHT:8h4h,8h4hKL UV:8h.4h TRAILER:8h8h8h4h
 Unit of light is kLux (not W/m²).
+
+Air Quality Sensor PM2.5 / PM10 Sensor (PN 7009970)
+Data layout:
+DIGEST:8h8h ID?8h8h ?8h8h STYPE:4h STARTUP:1b CH:3b ?8h 4h ?4h8h4h PM_2_5:4h8h4h PM10:4h8h4h ?4h ?8h4h BATT:1b ?3b ?8h8h8h8h8h8h TRAILER:8h8h8h
+
 STYPE, STARTUP and CH are not covered by whitening. Probably also ID.
 First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1, which likely means we got that wrong.
 */
@@ -963,44 +998,40 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
   sensor[slot].s_type      = s_type;
   sensor[slot].startup     = (msg[6] & 0x08) == 0x08; // raw data, no de-whitening
   sensor[slot].chan        = msg[6] & 0x07;           // raw data, no de-whitening
-
+  sensor[slot].battery_ok  = !battery_low;
+  sensor[slot].valid       = true;
+  sensor[slot].rssi        = rssi;
   
   if (s_type == SENSOR_TYPE_WEATHER1) {
     // The RTL_433 decoder does not include any field to verify that these data
     // are ok, so we are assuming that they are ok if the decode status is ok.
-    sensor[slot].temp_ok      = true;
-    sensor[slot].humidity_ok  = true;
-    sensor[slot].wind_ok      = true;
-    sensor[slot].rain_ok      = true;
-    sensor[slot].light_ok     = true;
-    sensor[slot].uv_ok        = true;
-    sensor[slot].temp_c      = temp_c;
-    sensor[slot].humidity    = humidity;
+    sensor[slot].w.temp_ok      = true;
+    sensor[slot].w.humidity_ok  = true;
+    sensor[slot].w.wind_ok      = true;
+    sensor[slot].w.rain_ok      = true;
+    sensor[slot].w.light_ok     = true;
+    sensor[slot].w.uv_ok        = true;
+    sensor[slot].w.temp_c      = temp_c;
+    sensor[slot].w.humidity    = humidity;
     #ifdef WIND_DATA_FLOATINGPOINT
-    sensor[slot].wind_gust_meter_sec     = wgst_raw * 0.1f;
-    sensor[slot].wind_avg_meter_sec      = wavg_raw * 0.1f;
-    sensor[slot].wind_direction_deg      = wdir * 1.0f;
+    sensor[slot].w.wind_gust_meter_sec     = wgst_raw * 0.1f;
+    sensor[slot].w.wind_avg_meter_sec      = wavg_raw * 0.1f;
+    sensor[slot].w.wind_direction_deg      = wdir * 1.0f;
     #endif
     #ifdef WIND_DATA_FIXEDPOINT
-    sensor[slot].wind_gust_meter_sec_fp1 = wgst_raw;
-    sensor[slot].wind_avg_meter_sec_fp1  = wavg_raw;
-    sensor[slot].wind_direction_deg_fp1  = wdir * 10;
+    sensor[slot].w.wind_gust_meter_sec_fp1 = wgst_raw;
+    sensor[slot].w.wind_avg_meter_sec_fp1  = wavg_raw;
+    sensor[slot].w.wind_direction_deg_fp1  = wdir * 10;
     #endif
-    sensor[slot].rain_mm     = rain_mm;
-    sensor[slot].light_klx   = light_klx;
-    sensor[slot].light_lux   = light_lux;
-    sensor[slot].uv          = uv_index;
+    sensor[slot].w.rain_mm     = rain_mm;
+    sensor[slot].w.light_klx   = light_klx;
+    sensor[slot].w.light_lux   = light_lux;
+    sensor[slot].w.uv          = uv_index;
   }
   else if (s_type == SENSOR_TYPE_AIR_PM) {
-    sensor[slot].pm_ok      = true;
-    sensor[slot].aqs_pm_2_5 = pm_2_5;
-    sensor[slot].aqs_pm_10  = pm_10;
+    sensor[slot].pm.pm_2_5 = pm_2_5;
+    sensor[slot].pm.pm_10  = pm_10;
   }
-  sensor[slot].battery_ok  = !battery_low;
-  sensor[slot].valid       = true;
-  sensor[slot].complete    = true;
-  sensor[slot].rssi        = rssi;
-
 
   /* clang-format off */
   /*  data = data_make(
@@ -1079,12 +1110,14 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
         return DECODE_DIG_ERR;
     }
     
-    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+    #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+        log_message("            Data", msg, msgSize);
         log_message("De-whitened Data", msgw, msgSize);
     #endif
 
     int id_tmp  = (msgw[2] << 8) | (msgw[3]);
     int s_type  = msg[6] >> 4;
+    int startup = (msg[6] & 0x08) >> 3;
 
     DecodeStatus status;
 
@@ -1104,15 +1137,17 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
 
     sensor[slot].sensor_id       = id_tmp;
     sensor[slot].s_type          = s_type;
-    sensor[slot].lightning_count = ctr;
-    sensor[slot].lightning_distance_km = distance_km;
-    sensor[slot].lightning_unknown1 = unknown1;
-    sensor[slot].lightning_unknown2 = unknown2;
+    sensor[slot].startup         = startup;
+    sensor[slot].chan            = 0;
     sensor[slot].battery_ok      = !battery_low;
-    sensor[slot].lightning_ok    = true;
     sensor[slot].rssi            = rssi;
     sensor[slot].valid           = true;
-    sensor[slot].complete        = true;
+
+    sensor[slot].lgt.strike_count = ctr;
+    sensor[slot].lgt.distance_km = distance_km;
+    sensor[slot].lgt.unknown2 = unknown1;
+    sensor[slot].lgt.unknown2 = unknown2;
+
 
     log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
     
@@ -1218,16 +1253,14 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     if (status != DECODE_OK)
         return status;
     
-    sensor[slot].sensor_id           = id_tmp;
-    sensor[slot].s_type              = type_tmp;
-    sensor[slot].chan                = chan_tmp;
-    sensor[slot].startup             = (msg[6] >> 3) & 1;
-    sensor[slot].water_leakage_alarm = (alarm && !no_alarm);
-    sensor[slot].battery_ok          = (msg[7] & 0x30) != 0x00;
-    sensor[slot].leakage_ok          = true;
-    sensor[slot].rssi                = rssi;
-    sensor[slot].valid               = true;
-    sensor[slot].complete            = true;
+    sensor[slot].sensor_id  = id_tmp;
+    sensor[slot].s_type     = type_tmp;
+    sensor[slot].chan       = chan_tmp;
+    sensor[slot].startup    = (msg[6] >> 3) & 1;
+    sensor[slot].battery_ok = (msg[7] & 0x30) != 0x00;
+    sensor[slot].rssi       = rssi;
+    sensor[slot].valid      = true;
+    sensor[slot].leak.alarm = (alarm && !no_alarm);
 
     log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 
         (unsigned int)id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);

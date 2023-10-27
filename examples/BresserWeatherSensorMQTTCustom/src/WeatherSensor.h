@@ -63,7 +63,8 @@
 // 20231006 Added crc16() from https://github.com/merbanan/rtl_433/blob/master/src/util.c
 // 20231024 Added SENSOR_TYPE_POOL_THERMO
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
-//          Modified device type definitions 
+//          Modified device type definitions
+// 20231027 Refactored sensor data using a union to save memory
 //
 // ToDo:
 // -
@@ -148,11 +149,12 @@ class WeatherSensor {
         \brief Constructor.
 
         */
+       /*
         WeatherSensor()
         {
+            memset(this, 0, sizeof(*this));
         };
-
-
+        */
         /*!
         \brief Presence check and initialization of radio module.
 
@@ -196,38 +198,23 @@ class WeatherSensor {
         */
         DecodeStatus    decodeMessage(const uint8_t *msg, uint8_t msgSize);
 
-        /**
-         * \struct Sensor
-         *
-         * \brief sensor data and status flags
-         */
-        struct Sensor {
-            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
-            uint8_t  s_type;               //!< sensor type
-            uint8_t  chan;                 //!< channel
-            bool     startup = false;      //!< startup after reset / battery change
-            bool     valid;                //!< data valid (but not necessarily complete)
-            bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
-            bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
-            bool     humidity_ok = false;  //!< humidity o.k.
-            bool     light_ok = false;     //!< light o.k. (only 7-in-1)
-            bool     uv_ok = false;        //!< uv radiation o.k. (only 6-in-1)
-            bool     wind_ok = false;      //!< wind speed/direction o.k. (only 6-in-1)
-            bool     rain_ok = false;      //!< rain gauge level o.k.
-            bool     battery_ok = false;   //!< battery o.k.
-            bool     moisture_ok = false;  //!< moisture o.k. (only 6-in-1)
-            bool     lightning_ok = false; //!< lightning o.k. (only lightning)
-            bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
-            bool     pm_ok = false;        //!< air quality (particle matter) o.k. (only 7-in-1)
-            float    temp_c;               //!< temperature in degC
-            float    light_klx;            //!< Light KLux (only 7-in-1)
-            float    light_lux;            //!< Light lux (only 7-in-1)
-            float    uv;                   //!< uv radiation (only 6-in-1)
-            float    rain_mm;              //!< rain gauge level in mm
-            #ifdef WIND_DATA_FLOATINGPOINT
-            float    wind_direction_deg;   //!< wind direction in deg
-            float    wind_gust_meter_sec;  //!< wind speed (gusts) in m/s
-            float    wind_avg_meter_sec;   //!< wind speed (avg)   in m/s
+        struct Weather {
+            bool     complete;                //!< data is split into two separate messages is complete (only 6-in-1 WS)
+            bool     temp_ok = false;         //!< temperature o.k. (only 6-in-1)
+            bool     humidity_ok = false;     //!< humidity o.k.
+            bool     light_ok = false;        //!< light o.k. (only 7-in-1)
+            bool     uv_ok = false;           //!< uv radiation o.k. (only 6-in-1)
+            bool     wind_ok = false;         //!< wind speed/direction o.k. (only 6-in-1)
+            bool     rain_ok = false;         //!< rain gauge level o.k.
+            float    temp_c;                  //!< temperature in degC
+            float    light_klx;               //!< Light KLux (only 7-in-1)
+            float    light_lux;               //!< Light lux (only 7-in-1)
+            float    uv;                      //!< uv radiation (only 6-in-1)
+            float    rain_mm;                 //!< rain gauge level in mm
+            #ifdef WIND_DATA_FLOATINGPOINT   
+            float    wind_direction_deg;      //!< wind direction in deg
+            float    wind_gust_meter_sec;     //!< wind speed (gusts) in m/s
+            float    wind_avg_meter_sec;      //!< wind speed (avg)   in m/s
             #endif
             #ifdef WIND_DATA_FIXEDPOINT
             // For LoRa_Serialization:
@@ -237,16 +224,67 @@ class WeatherSensor {
             uint16_t wind_gust_meter_sec_fp1; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
             uint16_t wind_avg_meter_sec_fp1;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
             #endif
-            uint8_t  humidity;              //!< humidity in %
+            uint8_t  humidity;                //!< humidity in %
+
+            Weather() {
+                memset(this, 0, sizeof(*this));
+            };
+
+        };
+
+        struct Soil {
+            // TODO needed?
+            //bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
+            //bool     moisture_ok = false;   //!< moisture o.k. (only 6-in-1)
+            float    temp_c;                //!< temperature in degC
             uint8_t  moisture;              //!< moisture in % (only 6-in-1)
-            uint8_t  lightning_distance_km; //!< lightning distance in km (only lightning)
-            uint8_t  lightning_count;       //!< lightning strike counter (only lightning)
-            uint16_t lightning_unknown1;    //!< unknown part 1
-            uint16_t lightning_unknown2;    //!< unknown part 2
-            bool     water_leakage_alarm;   //!< water leakage alarm (only water leakage)
-            uint16_t aqs_pm_2_5;            //!< air quality PM2.5 in µg/m³
-            uint16_t aqs_pm_10;             //!< air quality PM10  in µg/m³
-            float    rssi;                  //!< received signal strength indicator in dBm
+        };
+
+        struct Lightning {
+            //bool     lightning_ok = false;  //!< lightning o.k. (only lightning)
+            uint8_t  distance_km;           //!< lightning distance in km (only lightning)
+            uint8_t  strike_count;          //!< lightning strike counter (only lightning)
+            uint16_t unknown1;              //!< unknown part 1
+            uint16_t unknown2;              //!< unknown part 2
+
+        };
+
+        struct Leakage {
+            //bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
+            bool     alarm;                //!< water leakage alarm (only water leakage)
+        };
+
+        struct AirPM {
+            //bool     pm_ok = false;        //!< air quality (particle matter) o.k. (only 7-in-1)
+            uint16_t pm_2_5;               //!< air quality PM2.5 in µg/m³
+            uint16_t pm_10;                //!< air quality PM10  in µg/m³
+        };
+
+        /**
+         * \struct Sensor
+         *
+         * \brief sensor data and status flags
+         */
+        struct Sensor {
+            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
+            float    rssi;                 //!< received signal strength indicator in dBm
+            uint8_t  s_type;               //!< sensor type
+            uint8_t  chan;                 //!< channel
+            bool     startup = false;      //!< startup after reset / battery change
+            bool     battery_ok = false;   //!< battery o.k.
+            bool     valid;                //!< data valid (but not necessarily complete)
+            union {
+                struct Weather      w;
+                struct Soil         soil;
+                struct Lightning    lgt;
+                struct Leakage      leak;
+                struct AirPM        pm;
+            };
+
+            Sensor ()
+            {
+                memset(this, 0, sizeof(*this));
+            }
         };
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
@@ -259,7 +297,7 @@ class WeatherSensor {
 
         \returns Always true (for compatibility with getMessage())
         */
-        bool    genMessage(int i, uint32_t id = 0xff, uint8_t type = 1, uint8_t channel = 0);
+        bool    genMessage(int i, uint32_t id = 0xff, uint8_t s_type = 1, uint8_t channel = 0, uint8_t startup = 0);
 
 
          /*!
@@ -274,18 +312,7 @@ class WeatherSensor {
         {
             for (int i=0; i< NUM_SENSORS; i++) {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
-                    sensor[i].valid        = false;
-                    sensor[i].complete     = false;
-                    sensor[i].temp_ok      = false;
-                    sensor[i].humidity_ok  = false;
-                    sensor[i].light_ok     = false;
-                    sensor[i].uv_ok        = false;
-                    sensor[i].wind_ok      = false;
-                    sensor[i].rain_ok      = false;
-                    sensor[i].moisture_ok  = false;
-                    sensor[i].lightning_ok = false;
-                    sensor[i].leakage_ok   = false;
-                    sensor[i].pm_ok        = false;
+                    sensor[i].valid = false;
                 }
             }
         };

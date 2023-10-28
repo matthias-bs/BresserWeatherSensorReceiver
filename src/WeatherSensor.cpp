@@ -70,6 +70,7 @@
 // 20231024 Added Pool / Spa Thermometer (P/N 7009973) to 6-in-1 decoder
 // 20231026 Added Air Quality Sensor (Particulate Matter, P/N 7009970) to 7-in-1 decoder
 //          Modified decoding of sensor type (to raw, non de-whitened data)
+// 20231028 Fixed startup flag polarity in 7-in-1, lightning and leakage decoder
 //
 // ToDo:
 // -

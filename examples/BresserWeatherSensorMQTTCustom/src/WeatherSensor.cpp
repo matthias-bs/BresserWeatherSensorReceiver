@@ -1100,7 +1100,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
 
     int id_tmp  = (msgw[2] << 8) | (msgw[3]);
     int s_type  = msg[6] >> 4;
-    int startup = (msg[6] & 0x08) >> 3;
+    int startup = (msg[6] & 0x8) == 0x00;
 
     DecodeStatus status;
 

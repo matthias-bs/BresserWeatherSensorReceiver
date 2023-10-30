@@ -137,10 +137,10 @@
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI        // use secure WIFI
-//#define USE_WIFI              // use non-secure WIFI
+// #define USE_WIFI              // use non-secure WIFI
 
 // Stop reception when data of at least one sensor is complete
-#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
+#define RX_STRATEGY DATA_COMPLETE
 
 // Stop reception when data of all (NUM_SENSORS) is complete
 // #define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
@@ -198,15 +198,11 @@ const char sketch_id[] = "BresserWeatherSensorMQTT 20231028";
 // Map sensor IDs to Names
 SensorMap sensor_map[] = {
     {0x39582376, "WeatherSensor"},
-    {0x21103427, "WeatherOL"},
-    {0x22400873, "Pool"},
-    {0xeefb, "Lightning"},
-    {0x4fd9, "AirQuality"},
-    {0x83750871, "SoilMoisture-1"}
+    //{0x83750871, "SoilMoisture-1"}
 };
 
 // enable only one of these below, disabling both is fine too.
-#define CHECK_CA_ROOT
+//  #define CHECK_CA_ROOT
 //  #define CHECK_PUB_KEY
 //  Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
 //  #define CHECK_FINGERPRINT

@@ -83,6 +83,8 @@
 //          Added define RX_STRATEGY
 // 20230717 Added startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
+// 20231030 Fixed and improved mapping of sensor IDs to names
+// 
 //
 // ToDo:
 //
@@ -712,13 +714,14 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
-      String sensor_str;
-      for (int n=0; n<NUM_SENSORS; n++) {
-        if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          sensor_str = String(sensor_map[n].name.c_str());
-        }
-        else {
-          sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+      String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+
+      if (sizeof(sensor_map) > 0) {
+        for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+          if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+            sensor_str = String(sensor_map[n].name.c_str());
+            break;
+          }
         }
       }
 

@@ -457,7 +457,7 @@ void publishRadio(void)
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.printf("%s: %s\n", mqttPubRadio, mqtt_payload);
+    Serial.printf("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -541,7 +541,7 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        Serial.printf("%s: %s\n", mqttPubStatus, "online");
+        Serial.printf("%s: %s\n", mqttPubStatus.c_str(), "online");
         client.publish(mqttPubStatus, "online");
         publishRadio();
     }
@@ -592,7 +592,7 @@ void loop()
         }
 #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        Serial.printf("%s: %s\n", mqttPubStatus, "offline");
+        Serial.printf("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();

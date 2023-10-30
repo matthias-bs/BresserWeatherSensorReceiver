@@ -64,8 +64,7 @@
 // 20231024 Added SENSOR_TYPE_POOL_THERMO
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
 //          Modified device type definitions
-// 20231027 Refactored sensor data using a union to save memory
-// 20231030 Modified complete flag
+// 20231030 Refactored sensor data using a union to save memory
 //
 // ToDo:
 // -

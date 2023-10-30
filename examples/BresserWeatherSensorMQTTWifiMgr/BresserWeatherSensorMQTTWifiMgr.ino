@@ -84,7 +84,8 @@
 // 20230717 Added startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
-// 20231028 Refactored struct Sensor
+// 20231030 Fixed and improved mapping of sensor IDs to names
+//          Refactored struct Sensor
 //
 // ToDo:
 //

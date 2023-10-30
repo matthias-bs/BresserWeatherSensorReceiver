@@ -70,7 +70,8 @@
 // 20231024 Added Pool / Spa Thermometer (P/N 7009973) to 6-in-1 decoder
 // 20231026 Added Air Quality Sensor (Particulate Matter, P/N 7009970) to 7-in-1 decoder
 //          Modified decoding of sensor type (to raw, non de-whitened data)
-// 20231027 Refactored sensor data using a union to save memory
+// 20231028 Fixed startup flag polarity in 7-in-1, lightning and leakage decoder
+// 20231030 Refactored sensor data using a union to save memory
 //
 // ToDo:
 // -
@@ -998,7 +999,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
 
   sensor[slot].sensor_id   = id_tmp;
   sensor[slot].s_type      = s_type;
-  sensor[slot].startup     = (msg[6] & 0x08) == 0x08; // raw data, no de-whitening
+  sensor[slot].startup     = (msg[6] & 0x08) == 0x00; // raw data, no de-whitening
   sensor[slot].chan        = msg[6] & 0x07;           // raw data, no de-whitening
   sensor[slot].battery_ok  = !battery_low;
   sensor[slot].valid       = true;
@@ -1035,27 +1036,6 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].pm.pm_2_5 = pm_2_5;
     sensor[slot].pm.pm_10  = pm_10;
   }
-
-  /* clang-format off */
-  /*  data = data_make(
-          "model",            "",             DATA_STRING, "Bresser-7in1",
-          "id",               "",             DATA_INT,    id,
-          "temperature_C",    "Temperature",  DATA_FORMAT, "%.1f C", DATA_DOUBLE, temp_c,
-          "humidity",         "Humidity",     DATA_INT,    humidity,
-          "wind_max_m_s",     "Wind Gust",    DATA_FORMAT, "%.1f m/s", DATA_DOUBLE, wgst_raw * 0.1f,
-          "wind_avg_m_s",     "Wind Speed",   DATA_FORMAT, "%.1f m/s", DATA_DOUBLE, wavg_raw * 0.1f,
-          "wind_dir_deg",     "Direction",    DATA_INT,    wdir,
-          "rain_mm",          "Rain",         DATA_FORMAT, "%.1f mm", DATA_DOUBLE, rain_mm,
-          "light_klx",        "Light",        DATA_FORMAT, "%.3f klx", DATA_DOUBLE, light_klx, // TODO: remove this
-          "light_lux",        "Light",        DATA_FORMAT, "%.3f lux", DATA_DOUBLE, light_lux,
-          "uv",               "UV Index",     DATA_FORMAT, "%.1f", DATA_DOUBLE, uv_index,
-          "battery_ok",       "Battery",      DATA_INT,    !battery_low,
-          "mic",              "Integrity",    DATA_STRING, "CRC",
-          NULL);
-   */
-  /* clang-format on */
-
-//  decoder_output_data(decoder, data);
 
   return DECODE_OK;
 
@@ -1154,23 +1134,6 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
 
 
     log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
-    
-    
-    /* clang-format off */
-    /* data = data_make(
-            "model",        "",           DATA_STRING, "Bresser_lightning",
-            "id",           "",           DATA_INT, id,
-            "Frage1",       "?",          DATA_INT, frage1,
-            "Kilometer",    "Kilometer",  DATA_INT, kilometer,
-            "CTR",          "CTR",        DATA_INT, ctr,
-            "Frage2",       "??",         DATA_INT, frage2,
-            "mic",          "Integrity",  DATA_STRING, "CRC",
-            "battery_low",  "Battery Low", DATA_INT, !battery_low,
-            NULL);
-     */
-    /* clang-format on */
-
-    //decoder_output_data(decoder, data);
 
     return DECODE_OK;
 }
@@ -1256,11 +1219,11 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
 
     if (status != DECODE_OK)
         return status;
-    
+
     sensor[slot].sensor_id  = id_tmp;
     sensor[slot].s_type     = type_tmp;
     sensor[slot].chan       = chan_tmp;
-    sensor[slot].startup    = (msg[6] >> 3) & 1;
+    sensor[slot].startup    = (msg[6] & 0x8) == 0x00;
     sensor[slot].battery_ok = (msg[7] & 0x30) != 0x00;
     sensor[slot].rssi       = rssi;
     sensor[slot].valid      = true;

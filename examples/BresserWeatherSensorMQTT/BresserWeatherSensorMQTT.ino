@@ -100,7 +100,8 @@
 // 20230717 Added weather sensor startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
-// 20231028 Refactored struct Sensor
+// 20231030 Fixed and improved mapping of sensor IDs to names
+//          Refactored struct Sensor
 //
 // ToDo:
 //
@@ -193,7 +194,7 @@
 #define JSON_FLOAT(x) x
 #endif
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20231028";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20231030";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[] = {
@@ -570,14 +571,12 @@ void publishWeatherdata(bool complete)
         // Try to map sensor ID to name to make MQTT topic explanatory
         String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
         if (sizeof(sensor_map) > 0) {
-            for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++)
-            {
-                if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id)
-                {
-                    sensor_str = String(sensor_map[n].name.c_str());
-                    break;
-                }
+          for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+              sensor_str = String(sensor_map[n].name.c_str());
+              break;
             }
+          }
         }
 
         String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');

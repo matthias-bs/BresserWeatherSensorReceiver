@@ -100,7 +100,8 @@
 // 20230717 Added weather sensor startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
-// 20231028 Refactored struct Sensor
+// 20231030 Fixed and improved mapping of sensor IDs to names
+//          Refactored struct Sensor
 //
 // ToDo:
 //
@@ -193,7 +194,7 @@
 #define JSON_FLOAT(x) x
 #endif
 
-const char sketch_id[] = "BresserWeatherSensorMQTTCustom 20231028";
+const char sketch_id[] = "BresserWeatherSensorMQTTCustom 20231030";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {

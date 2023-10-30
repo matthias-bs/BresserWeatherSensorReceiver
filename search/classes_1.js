@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['nvdata_5ft_61',['nvData_t',['../structnv_data__t.html',1,'']]],
-  ['nvlightning_5ft_62',['nvLightning_t',['../structnv_lightning__t.html',1,'']]]
+  ['leakage_61',['Leakage',['../struct_weather_sensor_1_1_leakage.html',1,'WeatherSensor']]],
+  ['lightning_62',['Lightning',['../class_lightning.html',1,'Lightning'],['../struct_weather_sensor_1_1_lightning.html',1,'WeatherSensor::Lightning']]]
 ];

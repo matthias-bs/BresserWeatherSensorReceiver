@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['moisture_101',['moisture',['../struct_weather_sensor_1_1_sensor.html#a7d81ebc4829395fc132b5077f5a40c47',1,'WeatherSensor::Sensor']]],
-  ['moisture_5fok_102',['moisture_ok',['../struct_weather_sensor_1_1_sensor.html#adb4d7e0eab22ff15c08aa17ce44738fc',1,'WeatherSensor::Sensor']]]
+  ['light_5fklx_95',['light_klx',['../struct_weather_sensor_1_1_weather.html#a042b16928c1f70aef7959ad9907c60a0',1,'WeatherSensor::Weather']]],
+  ['light_5flux_96',['light_lux',['../struct_weather_sensor_1_1_weather.html#a22385566341d9280c7a0ef13d18e74ee',1,'WeatherSensor::Weather']]],
+  ['light_5fok_97',['light_ok',['../struct_weather_sensor_1_1_weather.html#a05f15236075cc6e7ddadddccbc748456',1,'WeatherSensor::Weather']]]
 ];

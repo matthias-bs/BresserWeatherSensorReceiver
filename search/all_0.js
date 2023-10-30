@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['aqs_5fpm_5f10_0',['aqs_pm_10',['../struct_weather_sensor_1_1_sensor.html#aa1573a9a5de66f05b79383813fc55f20',1,'WeatherSensor::Sensor']]],
-  ['aqs_5fpm_5f2_5f5_1',['aqs_pm_2_5',['../struct_weather_sensor_1_1_sensor.html#a2a8ec5d57d048d896c16c8d14a9350ce',1,'WeatherSensor::Sensor']]]
+  ['airpm_0',['AirPM',['../struct_weather_sensor_1_1_air_p_m.html',1,'WeatherSensor']]],
+  ['alarm_1',['alarm',['../struct_weather_sensor_1_1_leakage.html#a43b40fd872ac589bb7f1bbf462e59586',1,'WeatherSensor::Leakage']]]
 ];

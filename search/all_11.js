@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['water_5fleakage_5falarm_57',['water_leakage_alarm',['../struct_weather_sensor_1_1_sensor.html#a430f088457fb5dc51484a801b2b203c9',1,'WeatherSensor::Sensor']]],
-  ['weathersensor_58',['WeatherSensor',['../class_weather_sensor.html',1,'WeatherSensor'],['../class_weather_sensor.html#aa72d395844ee645e779a3b005fbd5dfd',1,'WeatherSensor::WeatherSensor()']]],
-  ['wind_5fok_59',['wind_ok',['../struct_weather_sensor_1_1_sensor.html#af370cd7be58dc4ee21592e6354947ba1',1,'WeatherSensor::Sensor']]]
+  ['weather_57',['Weather',['../struct_weather_sensor_1_1_weather.html',1,'WeatherSensor']]],
+  ['weathersensor_58',['WeatherSensor',['../class_weather_sensor.html',1,'']]],
+  ['wind_5fok_59',['wind_ok',['../struct_weather_sensor_1_1_weather.html#aa3808f22671713aa03bf42aa0cc86e9d',1,'WeatherSensor::Weather']]]
 ];

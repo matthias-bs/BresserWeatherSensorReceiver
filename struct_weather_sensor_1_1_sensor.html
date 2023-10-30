@@ -101,6 +101,10 @@ Public Attributes</h2></td></tr>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#abbf124d4f3f1792ff596b7dd03b9cd94">sensor_id</a></td></tr>
 <tr class="memdesc:abbf124d4f3f1792ff596b7dd03b9cd94"><td class="mdescLeft">&#160;</td><td class="mdescRight">sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes) <br /></td></tr>
 <tr class="separator:abbf124d4f3f1792ff596b7dd03b9cd94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="memItemLeft" align="right" valign="top"><a id="a56ca10defbfb8bb7bab5862a3fa2b7d1"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1">rssi</a></td></tr>
+<tr class="memdesc:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">received signal strength indicator in dBm <br /></td></tr>
+<tr class="separator:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabf3f23ee4b7db05580765f7ce392838"><td class="memItemLeft" align="right" valign="top"><a id="aabf3f23ee4b7db05580765f7ce392838"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aabf3f23ee4b7db05580765f7ce392838">s_type</a></td></tr>
 <tr class="memdesc:aabf3f23ee4b7db05580765f7ce392838"><td class="mdescLeft">&#160;</td><td class="mdescRight">sensor type <br /></td></tr>
@@ -113,6 +117,10 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="s
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4">startup</a> = false</td></tr>
 <tr class="memdesc:ab1fb3b6988f2a14d8246b1dc239426a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">startup after reset / battery change <br /></td></tr>
 <tr class="separator:ab1fb3b6988f2a14d8246b1dc239426a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a179014c02826f68faabbddbc9a57ff90"><td class="memItemLeft" align="right" valign="top"><a id="a179014c02826f68faabbddbc9a57ff90"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90">battery_ok</a> = false</td></tr>
+<tr class="memdesc:a179014c02826f68faabbddbc9a57ff90"><td class="mdescLeft">&#160;</td><td class="mdescRight">battery o.k. <br /></td></tr>
+<tr class="separator:a179014c02826f68faabbddbc9a57ff90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae28084d05f7e81b1c3a1b2cff859315a"><td class="memItemLeft" align="right" valign="top"><a id="ae28084d05f7e81b1c3a1b2cff859315a"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ae28084d05f7e81b1c3a1b2cff859315a">valid</a></td></tr>
 <tr class="memdesc:ae28084d05f7e81b1c3a1b2cff859315a"><td class="mdescLeft">&#160;</td><td class="mdescRight">data valid (but not necessarily complete) <br /></td></tr>
@@ -121,110 +129,25 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57">complete</a></td></tr>
 <tr class="memdesc:a8d7ac24ffcbb4cbc5ef8005c72046a57"><td class="mdescLeft">&#160;</td><td class="mdescRight">data is split into two separate messages is complete (only 6-in-1 WS) <br /></td></tr>
 <tr class="separator:a8d7ac24ffcbb4cbc5ef8005c72046a57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1dca88a5b98a1eb7320217ec3784cf7b"><td class="memItemLeft" align="right" valign="top"><a id="a1dca88a5b98a1eb7320217ec3784cf7b"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a1dca88a5b98a1eb7320217ec3784cf7b">temp_ok</a> = false</td></tr>
-<tr class="memdesc:a1dca88a5b98a1eb7320217ec3784cf7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">temperature o.k. (only 6-in-1) <br /></td></tr>
-<tr class="separator:a1dca88a5b98a1eb7320217ec3784cf7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5bf9823fc6f06e52990785ad9b193652"><td class="memItemLeft" align="right" valign="top"><a id="a5bf9823fc6f06e52990785ad9b193652"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a5bf9823fc6f06e52990785ad9b193652">humidity_ok</a> = false</td></tr>
-<tr class="memdesc:a5bf9823fc6f06e52990785ad9b193652"><td class="mdescLeft">&#160;</td><td class="mdescRight">humidity o.k. <br /></td></tr>
-<tr class="separator:a5bf9823fc6f06e52990785ad9b193652"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d863c1bae23358c2a9ac61f655c59d8"><td class="memItemLeft" align="right" valign="top"><a id="a9d863c1bae23358c2a9ac61f655c59d8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a9d863c1bae23358c2a9ac61f655c59d8">light_ok</a> = false</td></tr>
-<tr class="memdesc:a9d863c1bae23358c2a9ac61f655c59d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">light o.k. (only 7-in-1) <br /></td></tr>
-<tr class="separator:a9d863c1bae23358c2a9ac61f655c59d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfc5d072c1059334b3320b4a5da0b5c4"><td class="memItemLeft" align="right" valign="top"><a id="acfc5d072c1059334b3320b4a5da0b5c4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#acfc5d072c1059334b3320b4a5da0b5c4">uv_ok</a> = false</td></tr>
-<tr class="memdesc:acfc5d072c1059334b3320b4a5da0b5c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">uv radiation o.k. (only 6-in-1) <br /></td></tr>
-<tr class="separator:acfc5d072c1059334b3320b4a5da0b5c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af370cd7be58dc4ee21592e6354947ba1"><td class="memItemLeft" align="right" valign="top"><a id="af370cd7be58dc4ee21592e6354947ba1"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#af370cd7be58dc4ee21592e6354947ba1">wind_ok</a> = false</td></tr>
-<tr class="memdesc:af370cd7be58dc4ee21592e6354947ba1"><td class="mdescLeft">&#160;</td><td class="mdescRight">wind speed/direction o.k. (only 6-in-1) <br /></td></tr>
-<tr class="separator:af370cd7be58dc4ee21592e6354947ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2e073d69e22bdcaa59a60c1b8189016"><td class="memItemLeft" align="right" valign="top"><a id="ae2e073d69e22bdcaa59a60c1b8189016"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ae2e073d69e22bdcaa59a60c1b8189016">rain_ok</a> = false</td></tr>
-<tr class="memdesc:ae2e073d69e22bdcaa59a60c1b8189016"><td class="mdescLeft">&#160;</td><td class="mdescRight">rain gauge level o.k. <br /></td></tr>
-<tr class="separator:ae2e073d69e22bdcaa59a60c1b8189016"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a179014c02826f68faabbddbc9a57ff90"><td class="memItemLeft" align="right" valign="top"><a id="a179014c02826f68faabbddbc9a57ff90"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90">battery_ok</a> = false</td></tr>
-<tr class="memdesc:a179014c02826f68faabbddbc9a57ff90"><td class="mdescLeft">&#160;</td><td class="mdescRight">battery o.k. <br /></td></tr>
-<tr class="separator:a179014c02826f68faabbddbc9a57ff90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb4d7e0eab22ff15c08aa17ce44738fc"><td class="memItemLeft" align="right" valign="top"><a id="adb4d7e0eab22ff15c08aa17ce44738fc"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#adb4d7e0eab22ff15c08aa17ce44738fc">moisture_ok</a> = false</td></tr>
-<tr class="memdesc:adb4d7e0eab22ff15c08aa17ce44738fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">moisture o.k. (only 6-in-1) <br /></td></tr>
-<tr class="separator:adb4d7e0eab22ff15c08aa17ce44738fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2908169e0db96a0e19f05cd68660578e"><td class="memItemLeft" align="right" valign="top"><a id="a2908169e0db96a0e19f05cd68660578e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a2908169e0db96a0e19f05cd68660578e">lightning_ok</a> = false</td></tr>
-<tr class="memdesc:a2908169e0db96a0e19f05cd68660578e"><td class="mdescLeft">&#160;</td><td class="mdescRight">lightning o.k. (only lightning) <br /></td></tr>
-<tr class="separator:a2908169e0db96a0e19f05cd68660578e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab91bbf3070f0da8527323393ce80b391"><td class="memItemLeft" align="right" valign="top"><a id="ab91bbf3070f0da8527323393ce80b391"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ab91bbf3070f0da8527323393ce80b391">leakage_ok</a> = false</td></tr>
-<tr class="memdesc:ab91bbf3070f0da8527323393ce80b391"><td class="mdescLeft">&#160;</td><td class="mdescRight">water leakage o.k. (only water leackage) <br /></td></tr>
-<tr class="separator:ab91bbf3070f0da8527323393ce80b391"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a839570ab2199213a8c1c39bea0da59e5"><td class="memItemLeft" align="right" valign="top"><a id="a839570ab2199213a8c1c39bea0da59e5"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a839570ab2199213a8c1c39bea0da59e5">pm_ok</a> = false</td></tr>
-<tr class="memdesc:a839570ab2199213a8c1c39bea0da59e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality (particle matter) o.k. (only 7-in-1) <br /></td></tr>
-<tr class="separator:a839570ab2199213a8c1c39bea0da59e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc13b0de8543fcf00628e061fab26992"><td class="memItemLeft" align="right" valign="top"><a id="adc13b0de8543fcf00628e061fab26992"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#adc13b0de8543fcf00628e061fab26992">temp_c</a></td></tr>
-<tr class="memdesc:adc13b0de8543fcf00628e061fab26992"><td class="mdescLeft">&#160;</td><td class="mdescRight">temperature in degC <br /></td></tr>
-<tr class="separator:adc13b0de8543fcf00628e061fab26992"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7f794021be9cc2ad2a058715a7087d3"><td class="memItemLeft" align="right" valign="top"><a id="ae7f794021be9cc2ad2a058715a7087d3"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ae7f794021be9cc2ad2a058715a7087d3">light_klx</a></td></tr>
-<tr class="memdesc:ae7f794021be9cc2ad2a058715a7087d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Light KLux (only 7-in-1) <br /></td></tr>
-<tr class="separator:ae7f794021be9cc2ad2a058715a7087d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacfeed06cac7cb1ea40f4f928198657f"><td class="memItemLeft" align="right" valign="top"><a id="aacfeed06cac7cb1ea40f4f928198657f"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aacfeed06cac7cb1ea40f4f928198657f">light_lux</a></td></tr>
-<tr class="memdesc:aacfeed06cac7cb1ea40f4f928198657f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Light lux (only 7-in-1) <br /></td></tr>
-<tr class="separator:aacfeed06cac7cb1ea40f4f928198657f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1fd284df9f4171542a075c18e9eee9a"><td class="memItemLeft" align="right" valign="top"><a id="af1fd284df9f4171542a075c18e9eee9a"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#af1fd284df9f4171542a075c18e9eee9a">uv</a></td></tr>
-<tr class="memdesc:af1fd284df9f4171542a075c18e9eee9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">uv radiation (only 6-in-1) <br /></td></tr>
-<tr class="separator:af1fd284df9f4171542a075c18e9eee9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea1c5facf8df55b7e58c0d9ce572152a"><td class="memItemLeft" align="right" valign="top"><a id="aea1c5facf8df55b7e58c0d9ce572152a"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aea1c5facf8df55b7e58c0d9ce572152a">rain_mm</a></td></tr>
-<tr class="memdesc:aea1c5facf8df55b7e58c0d9ce572152a"><td class="mdescLeft">&#160;</td><td class="mdescRight">rain gauge level in mm <br /></td></tr>
-<tr class="separator:aea1c5facf8df55b7e58c0d9ce572152a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d83f4b213ea4d956d69476d1c0e885b"><td class="memItemLeft" align="right" valign="top"><a id="a3d83f4b213ea4d956d69476d1c0e885b"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a3d83f4b213ea4d956d69476d1c0e885b">humidity</a></td></tr>
-<tr class="memdesc:a3d83f4b213ea4d956d69476d1c0e885b"><td class="mdescLeft">&#160;</td><td class="mdescRight">humidity in % <br /></td></tr>
-<tr class="separator:a3d83f4b213ea4d956d69476d1c0e885b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d81ebc4829395fc132b5077f5a40c47"><td class="memItemLeft" align="right" valign="top"><a id="a7d81ebc4829395fc132b5077f5a40c47"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a7d81ebc4829395fc132b5077f5a40c47">moisture</a></td></tr>
-<tr class="memdesc:a7d81ebc4829395fc132b5077f5a40c47"><td class="mdescLeft">&#160;</td><td class="mdescRight">moisture in % (only 6-in-1) <br /></td></tr>
-<tr class="separator:a7d81ebc4829395fc132b5077f5a40c47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a77fc13b3e0da95ae026c075330035383"><td class="memItemLeft" align="right" valign="top"><a id="a77fc13b3e0da95ae026c075330035383"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a77fc13b3e0da95ae026c075330035383">lightning_distance_km</a></td></tr>
-<tr class="memdesc:a77fc13b3e0da95ae026c075330035383"><td class="mdescLeft">&#160;</td><td class="mdescRight">lightning distance in km (only lightning) <br /></td></tr>
-<tr class="separator:a77fc13b3e0da95ae026c075330035383"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a64b797dc2e77409c65c44efbcd8a62e9"><td class="memItemLeft" align="right" valign="top"><a id="a64b797dc2e77409c65c44efbcd8a62e9"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a64b797dc2e77409c65c44efbcd8a62e9">lightning_count</a></td></tr>
-<tr class="memdesc:a64b797dc2e77409c65c44efbcd8a62e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">lightning strike counter (only lightning) <br /></td></tr>
-<tr class="separator:a64b797dc2e77409c65c44efbcd8a62e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a08d79febedd862a6e9037fe55d4a3772"><td class="memItemLeft" align="right" valign="top"><a id="a08d79febedd862a6e9037fe55d4a3772"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a08d79febedd862a6e9037fe55d4a3772">lightning_unknown1</a></td></tr>
-<tr class="memdesc:a08d79febedd862a6e9037fe55d4a3772"><td class="mdescLeft">&#160;</td><td class="mdescRight">unknown part 1 <br /></td></tr>
-<tr class="separator:a08d79febedd862a6e9037fe55d4a3772"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab70ec898bffe156ba86e21a8b7984aee"><td class="memItemLeft" align="right" valign="top"><a id="ab70ec898bffe156ba86e21a8b7984aee"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#ab70ec898bffe156ba86e21a8b7984aee">lightning_unknown2</a></td></tr>
-<tr class="memdesc:ab70ec898bffe156ba86e21a8b7984aee"><td class="mdescLeft">&#160;</td><td class="mdescRight">unknown part 2 <br /></td></tr>
-<tr class="separator:ab70ec898bffe156ba86e21a8b7984aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a430f088457fb5dc51484a801b2b203c9"><td class="memItemLeft" align="right" valign="top"><a id="a430f088457fb5dc51484a801b2b203c9"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a430f088457fb5dc51484a801b2b203c9">water_leakage_alarm</a></td></tr>
-<tr class="memdesc:a430f088457fb5dc51484a801b2b203c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">water leakage alarm (only water leakage) <br /></td></tr>
-<tr class="separator:a430f088457fb5dc51484a801b2b203c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="memItemLeft" align="right" valign="top"><a id="a2a8ec5d57d048d896c16c8d14a9350ce"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a2a8ec5d57d048d896c16c8d14a9350ce">aqs_pm_2_5</a></td></tr>
-<tr class="memdesc:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality PM2.5 in µg/m³ <br /></td></tr>
-<tr class="separator:a2a8ec5d57d048d896c16c8d14a9350ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1573a9a5de66f05b79383813fc55f20"><td class="memItemLeft" align="right" valign="top"><a id="aa1573a9a5de66f05b79383813fc55f20"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#aa1573a9a5de66f05b79383813fc55f20">aqs_pm_10</a></td></tr>
-<tr class="memdesc:aa1573a9a5de66f05b79383813fc55f20"><td class="mdescLeft">&#160;</td><td class="mdescRight">air quality PM10 in µg/m³ <br /></td></tr>
-<tr class="separator:aa1573a9a5de66f05b79383813fc55f20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="memItemLeft" align="right" valign="top"><a id="a56ca10defbfb8bb7bab5862a3fa2b7d1"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1">rssi</a></td></tr>
-<tr class="memdesc:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">received signal strength indicator in dBm <br /></td></tr>
-<tr class="separator:a56ca10defbfb8bb7bab5862a3fa2b7d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1873dcf5c3391c1f393b0f98cd2df5c"><td class="memItemLeft" ><a id="ac1873dcf5c3391c1f393b0f98cd2df5c"></a>
+union {</td></tr>
+<tr class="memitem:ac9af526bd51482f6d0b0869f881a6451"><td class="memItemLeft" >
+&#160;&#160;&#160;struct <a class="el" href="struct_weather_sensor_1_1_weather.html">Weather</a>&#160;&#160;&#160;<b>w</b></td></tr>
+<tr class="separator:ac9af526bd51482f6d0b0869f881a6451"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dc87b82e6008651eefbd3790003584f"><td class="memItemLeft" >
+&#160;&#160;&#160;struct <a class="el" href="struct_weather_sensor_1_1_soil.html">Soil</a>&#160;&#160;&#160;<b>soil</b></td></tr>
+<tr class="separator:a2dc87b82e6008651eefbd3790003584f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47e1cfa5857051a3b6fdf318e0c653e7"><td class="memItemLeft" >
+&#160;&#160;&#160;struct <a class="el" href="struct_weather_sensor_1_1_lightning.html">Lightning</a>&#160;&#160;&#160;<b>lgt</b></td></tr>
+<tr class="separator:a47e1cfa5857051a3b6fdf318e0c653e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada8f24193a5a57c0614e68256899eef7"><td class="memItemLeft" >
+&#160;&#160;&#160;struct <a class="el" href="struct_weather_sensor_1_1_leakage.html">Leakage</a>&#160;&#160;&#160;<b>leak</b></td></tr>
+<tr class="separator:ada8f24193a5a57c0614e68256899eef7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a1f29a0007c97c6ea1b4198b964a328"><td class="memItemLeft" >
+&#160;&#160;&#160;struct <a class="el" href="struct_weather_sensor_1_1_air_p_m.html">AirPM</a>&#160;&#160;&#160;<b>pm</b></td></tr>
+<tr class="separator:a4a1f29a0007c97c6ea1b4198b964a328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1873dcf5c3391c1f393b0f98cd2df5c"><td class="memItemLeft" valign="top">};&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:ac1873dcf5c3391c1f393b0f98cd2df5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>sensor data and status flags </p>

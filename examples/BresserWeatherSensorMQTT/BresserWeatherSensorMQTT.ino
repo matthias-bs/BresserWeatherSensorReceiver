@@ -137,10 +137,10 @@
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI        // use secure WIFI
-// #define USE_WIFI              // use non-secure WIFI
+//#define USE_WIFI              // use non-secure WIFI
 
 // Stop reception when data of at least one sensor is complete
-#define RX_STRATEGY DATA_COMPLETE
+#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // Stop reception when data of all (NUM_SENSORS) is complete
 // #define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
@@ -196,13 +196,17 @@
 const char sketch_id[] = "BresserWeatherSensorMQTT 20231028";
 
 // Map sensor IDs to Names
-SensorMap sensor_map[NUM_SENSORS] = {
-    {0x39582376, "WeatherSensor"}
-    //,{0x83750871, "SoilMoisture-1"}
+SensorMap sensor_map[] = {
+    {0x39582376, "WeatherSensor"},
+    {0x21103427, "WeatherOL"},
+    {0x22400873, "Pool"},
+    {0xeefb, "Lightning"},
+    {0x4fd9, "AirQuality"},
+    {0x83750871, "SoilMoisture-1"}
 };
 
 // enable only one of these below, disabling both is fine too.
-//  #define CHECK_CA_ROOT
+#define CHECK_CA_ROOT
 //  #define CHECK_PUB_KEY
 //  Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
 //  #define CHECK_FINGERPRINT
@@ -487,9 +491,7 @@ void publishWeatherdata(bool complete)
         mqtt_payload = "{";
         mqtt_payload2 = "{";
         mqtt_payload += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
-#ifdef BRESSER_6_IN_1
         mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
-#endif
         mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
 
         if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
@@ -504,7 +506,10 @@ void publishWeatherdata(bool complete)
             mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
             mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
         }
-        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) || (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || (SENSOR_TYPE_POOL_THERMO))
+        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
 
             if (weatherSensor.sensor[i].w.temp_ok || complete)
@@ -567,16 +572,15 @@ void publishWeatherdata(bool complete)
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
-        String sensor_str;
-        for (int n = 0; n < NUM_SENSORS; n++)
-        {
-            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id)
+        String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+        if (sizeof(sensor_map) > 0) {
+            for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++)
             {
-                sensor_str = String(sensor_map[n].name.c_str());
-            }
-            else
-            {
-                sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+                if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id)
+                {
+                    sensor_str = String(sensor_map[n].name.c_str());
+                    break;
+                }
             }
         }
 

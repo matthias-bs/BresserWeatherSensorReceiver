@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTT.ino
+// BresserWeatherSensorMQTTCustom.ino
 //
 // Example for BresserWeatherSensorReceiver -
 // this is finally a useful application.
@@ -99,6 +99,8 @@
 //          Added define RX_STRATEGY
 // 20230717 Added weather sensor startup handling to rain gauge
 // 20230817 Added rain gauge reset via MQTT
+// 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
+// 20231030 Fixed and improved mapping of sensor IDs to names
 //
 // ToDo:
 //
@@ -193,7 +195,7 @@
     #define JSON_FLOAT(x) x
 #endif
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20230711";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20231030";
 
 // Map sensor IDs to Names
 SensorMap sensor_map[NUM_SENSORS] = {
@@ -530,6 +532,7 @@ void publishWeatherdata(bool complete)
       }
       if (weatherSensor.sensor[i].rain_ok || complete) {
           mqtt_payload += String(",\"rain\":")   + JSON_FLOAT(String(weatherSensor.sensor[i].rain_mm, 1));
+          mqtt_payload += String(",\"rain_h\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
           mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
           mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
           mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
@@ -556,16 +559,17 @@ void publishWeatherdata(bool complete)
       }
     
       // Try to map sensor ID to name to make MQTT topic explanatory
-      String sensor_str;
-      for (int n=0; n<NUM_SENSORS; n++) {
-        if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-          sensor_str = String(sensor_map[n].name.c_str());
-        }
-        else {
-          sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+      String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+
+      if (sizeof(sensor_map) > 0) {
+        for (size_t n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+          if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+            sensor_str = String(sensor_map[n].name.c_str());
+            break;
+          }
         }
       }
-        
+      
       String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
       String mqtt_topic;
         

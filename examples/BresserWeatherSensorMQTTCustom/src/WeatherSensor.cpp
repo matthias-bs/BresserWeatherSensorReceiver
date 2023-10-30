@@ -804,7 +804,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
 
     // temperature, humidity(, uv) - shared with rain counter
     temp_ok = humidity_ok = (flags == 0);
-    float temp;
+    float temp = 0;
     if (temp_ok) {
         bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
@@ -881,9 +881,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     if (sensor[slot].s_type == SENSOR_TYPE_SOIL && temp_ok && sensor[slot].w.humidity >= 1 && sensor[slot].w.humidity <= 16) {
         humidity_ok = false;
         sensor[slot].soil.moisture = moisture_map[sensor[slot].w.humidity - 1];
-        if (temp_ok) {
-            sensor[slot].soil.temp_c = temp;
-        }
+        sensor[slot].soil.temp_c = temp;
     }
 
     // Update per-slot status flags

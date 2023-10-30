@@ -150,20 +150,20 @@ void loop()
         
             #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
             if (ws.sensor[i].w.uv_ok) {
-                Serial.printf("UVidx: [%1.1f] ",
+                Serial.printf("UVidx: [%2.1f] ",
                     ws.sensor[i].w.uv);
             }
             else {
-                Serial.printf("UVidx: [-.-%%] ");
+                Serial.printf("UVidx: [--.-] ");
             }
             #endif
             #ifdef BRESSER_7_IN_1
             if (ws.sensor[i].w.light_ok) {
-                Serial.printf("Light: [%2.1fKlux] ",
+                Serial.printf("Light: [%2.1fklx] ",
                     ws.sensor[i].w.light_klx);
             }
             else {
-                Serial.printf("Light: [--.-Klux] ");
+                Serial.printf("Light: [--.-klx] ");
             }
             #endif
             Serial.printf("\n");

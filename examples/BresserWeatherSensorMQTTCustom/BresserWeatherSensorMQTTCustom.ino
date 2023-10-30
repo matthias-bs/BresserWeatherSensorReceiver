@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTT.ino
+// BresserWeatherSensorMQTTCustom.ino
 //
 // Example for BresserWeatherSensorReceiver -
 // this is finally a useful application.

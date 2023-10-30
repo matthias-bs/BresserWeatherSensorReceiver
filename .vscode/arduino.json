@@ -1,6 +1,0 @@
-{
-    "configuration": "Revision=TTGO_LoRa32_v21new,FlashFreq=80,UploadSpeed=921600,DebugLevel=debug,EraseFlash=none",
-    "board": "esp32:esp32:ttgo-lora32",
-    "programmer": "esptool",
-    "sketch": "examples/BresserWeatherSensorBasic/BresserWeatherSensorBasic.ino"
-}

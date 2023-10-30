@@ -41,6 +41,7 @@
 // 20220810 Changed to modified WeatherSensor class; fixed Soil Moisture Sensor Handling
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
+// 20231027 Refactored sensor structure
 //
 // ToDo:
 // -
@@ -51,92 +52,115 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
-WeatherSensor weatherSensor;
+WeatherSensor ws;
 
 
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
-    weatherSensor.begin();
+    ws.begin();
 }
 
 
 void loop()
 {
     // Clear all sensor data
-    weatherSensor.clearSlots();
+    ws.clearSlots();
 
     // Attempt to receive entire data set with timeout of <xx> s
     // Try to receive at least one complete set of data, even if
     // data is distributed across multiple radio messages.
-    bool decode_ok = weatherSensor.getData(60000, DATA_COMPLETE);
+    bool decode_ok = ws.getData(60000, DATA_COMPLETE);
 
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");
     }
     for (int i=0; i<NUM_SENSORS; i++) {
-        if (weatherSensor.sensor[i].valid) {
-            Serial.printf("Id: [%8X] Typ: [%X] Battery: [%s] ",
-                (unsigned int)weatherSensor.sensor[i].sensor_id,
-                weatherSensor.sensor[i].s_type,
-                weatherSensor.sensor[i].battery_ok ? "OK " : "Low");
-            #ifdef BRESSER_6_IN_1
-                Serial.printf("Ch: [%d] ", weatherSensor.sensor[i].chan);
-            #endif
-            if (weatherSensor.sensor[i].temp_ok) {
-                Serial.printf("Temp: [%5.1fC] ",
-                    weatherSensor.sensor[i].temp_c);
+        if (ws.sensor[i].valid) {
+            Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
+                (unsigned int)ws.sensor[i].sensor_id,
+                ws.sensor[i].s_type,
+                ws.sensor[i].chan,
+                ws.sensor[i].startup,
+                ws.sensor[i].battery_ok ? "OK " : "Low",
+                ws.sensor[i].rssi);
+            
+            if (ws.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
+                // Lightning Sensor
+                Serial.printf("Lightning Counter: [%3d] ", ws.sensor[i].lgt.strike_count);
+                if (ws.sensor[i].lgt.distance_km != 0) {
+                    Serial.printf("Distance: [%2dkm] ", ws.sensor[i].lgt.distance_km);
+                } else {
+                    Serial.printf("Distance: [----] ");
+                }
+                Serial.printf("unknown1: [0x%03X] ", ws.sensor[i].lgt.unknown1);
+                Serial.printf("unknown2: [0x%04X]\n", ws.sensor[i].lgt.unknown2);
+
+            }
+            else if (ws.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
+                // Water Leakage Sensor
+                Serial.printf("Leakage: [%-5s]\n", (ws.sensor[i].leak.alarm) ? "ALARM" : "OK");
+        
+            }
+            else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
+                // Air Quality (Particular Matter) Sensor
+                Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
+                Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
+
+            }
+            else if (ws.sensor[i].s_type == SENSOR_TYPE_SOIL) {
+                Serial.printf("Temp: [%5.1fC] ", ws.sensor[i].soil.temp_c);
+                Serial.printf("Moisture: [%2d%%]\n", ws.sensor[i].soil.moisture);
+
             } else {
-                Serial.printf("Temp: [---.-C] ");
+                // Any other (weather-like) sensor is very similar
+                if (ws.sensor[i].w.temp_ok) {
+                    Serial.printf("Temp: [%5.1fC] ", ws.sensor[i].w.temp_c);
+                } else {
+                    Serial.printf("Temp: [---.-C] ");
+                }
+                if (ws.sensor[i].w.humidity_ok) {
+                    Serial.printf("Hum: [%3d%%] ", ws.sensor[i].w.humidity);
+                }
+                else {
+                    Serial.printf("Hum: [---%%] ");
+                }
+                if (ws.sensor[i].w.wind_ok) {
+                    Serial.printf("Wmax: [%4.1fm/s] Wavg: [%4.1fm/s] Wdir: [%5.1fdeg] ",
+                            ws.sensor[i].w.wind_gust_meter_sec,
+                            ws.sensor[i].w.wind_avg_meter_sec,
+                            ws.sensor[i].w.wind_direction_deg);
+                } else {
+                    Serial.printf("Wmax: [--.-m/s] Wavg: [--.-m/s] Wdir: [---.-deg] ");
+                }
+                if (ws.sensor[i].w.rain_ok) {
+                    Serial.printf("Rain: [%7.1fmm] ",  
+                        ws.sensor[i].w.rain_mm);
+                } else {
+                    Serial.printf("Rain: [-----.-mm] "); 
+                }
+            
+                #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+                if (ws.sensor[i].w.uv_ok) {
+                    Serial.printf("UVidx: [%1.1f] ",
+                        ws.sensor[i].w.uv);
+                }
+                else {
+                    Serial.printf("UVidx: [-.-%%] ");
+                }
+                #endif
+                #ifdef BRESSER_7_IN_1
+                if (ws.sensor[i].w.light_ok) {
+                    Serial.printf("Light: [%2.1fKlux] ",
+                        ws.sensor[i].w.light_klx);
+                }
+                else {
+                    Serial.printf("Light: [--.-Klux] ");
+                }
+                #endif
+                Serial.printf("\n");
             }
-            if (weatherSensor.sensor[i].humidity_ok) {
-                Serial.printf("Hum: [%3d%%] ",
-                    weatherSensor.sensor[i].humidity);
-            }
-            else {
-                Serial.printf("Hum: [---%%] ");
-            }
-            if (weatherSensor.sensor[i].wind_ok) {
-                Serial.printf("Wind max: [%4.1fm/s] Wind avg: [%4.1fm/s] Wind dir: [%5.1fdeg] ",
-                        weatherSensor.sensor[i].wind_gust_meter_sec,
-                        weatherSensor.sensor[i].wind_avg_meter_sec,
-                        weatherSensor.sensor[i].wind_direction_deg);
-            } else {
-                Serial.printf("Wind max: [--.-m/s] Wind avg: [--.-m/s] Wind dir: [---.-deg] ");
-            }
-            if (weatherSensor.sensor[i].rain_ok) {
-                Serial.printf("Rain: [%7.1fmm] ",
-                    weatherSensor.sensor[i].rain_mm);
-            } else {
-                Serial.printf("Rain: [-----.-mm] ");
-            }
-            if (weatherSensor.sensor[i].moisture_ok) {
-                Serial.printf("Moisture: [%2d%%] ",
-                    weatherSensor.sensor[i].moisture);
-            }
-            else {
-                Serial.printf("Moisture: [--%%] ");
-            }
-            #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
-            if (weatherSensor.sensor[i].uv_ok) {
-                Serial.printf("UV index: [%1.1f] ",
-                    weatherSensor.sensor[i].uv);
-            }
-            else {
-                Serial.printf("UV index: [-.-%%] ");
-            }
-            #endif
-            #ifdef BRESSER_7_IN_1
-            if (weatherSensor.sensor[i].light_ok) {
-                Serial.printf("Light (Klux): [%2.1fKlux] ",
-                    weatherSensor.sensor[i].light_klx);
-            }
-            else {
-                Serial.printf("Light (lux): [--.-Klux] ");
-            }
-            #endif
-            Serial.printf("RSSI: [%6.1fdBm]\n", weatherSensor.sensor[i].rssi);
         }
     }
     delay(100);

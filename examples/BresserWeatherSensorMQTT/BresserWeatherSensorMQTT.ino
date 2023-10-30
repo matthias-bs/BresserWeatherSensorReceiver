@@ -101,6 +101,7 @@
 // 20230817 Added rain gauge reset via MQTT
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
 // 20231030 Fixed and improved mapping of sensor IDs to names
+//          Refactored struct Sensor
 //
 // ToDo:
 //
@@ -114,7 +115,7 @@
 // - For secure MQTT (TLS server verifycation, check the following examples:
 //   - ESP32:
 //     https://github.com/espressif/arduino-esp32/blob/master/libraries/WiFiClientSecure/examples/WiFiClientSecure/WiFiClientSecure.ino
-//   - ESP8266: 
+//   - ESP8266:
 //     https://github.com/esp8266/Arduino/blob/master/libraries/ESP8266WiFi/examples/BearSSL_Validation/BearSSL_Validation.ino
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,28 +123,28 @@
 #include <Arduino.h>
 
 // BEGIN User specific options
-#define LED_EN                  // Enable LED indicating successful data reception
-#define LED_GPIO        2       // LED pin
-#define TIMEZONE        1       // UTC + TIMEZONE
-#define PAYLOAD_SIZE    255     // maximum MQTT message size
-#define TOPIC_SIZE      60      // maximum MQTT topic size (debug output only)
-#define HOSTNAME_SIZE   30      // maximum hostname size
-#define RX_TIMEOUT      90000   // sensor receive timeout [ms]
-#define STATUS_INTERVAL 30000   // MQTT status message interval [ms]
-#define DATA_INTERVAL   15000   // MQTT data message interval [ms]
-#define AWAKE_TIMEOUT   300000  // maximum time until sketch is forced to sleep [ms]
-#define SLEEP_INTERVAL  300000  // sleep interval [ms]
-#define WIFI_RETRIES    10      // WiFi connection retries
-#define WIFI_DELAY      1000    // Delay between connection attempts [ms]
-#define SLEEP_EN        true    // enable sleep mode (see notes above!)
-#define USE_SECUREWIFI          // use secure WIFI
-//#define USE_WIFI              // use non-secure WIFI
+#define LED_EN                // Enable LED indicating successful data reception
+#define LED_GPIO 2            // LED pin
+#define TIMEZONE 1            // UTC + TIMEZONE
+#define PAYLOAD_SIZE 255      // maximum MQTT message size
+#define TOPIC_SIZE 60         // maximum MQTT topic size (debug output only)
+#define HOSTNAME_SIZE 30      // maximum hostname size
+#define RX_TIMEOUT 90000      // sensor receive timeout [ms]
+#define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
+#define DATA_INTERVAL 15000   // MQTT data message interval [ms]
+#define AWAKE_TIMEOUT 300000  // maximum time until sketch is forced to sleep [ms]
+#define SLEEP_INTERVAL 300000 // sleep interval [ms]
+#define WIFI_RETRIES 10       // WiFi connection retries
+#define WIFI_DELAY 1000       // Delay between connection attempts [ms]
+#define SLEEP_EN true         // enable sleep mode (see notes above!)
+#define USE_SECUREWIFI        // use secure WIFI
+// #define USE_WIFI              // use non-secure WIFI
 
 // Stop reception when data of at least one sensor is complete
 #define RX_STRATEGY DATA_COMPLETE
 
 // Stop reception when data of all (NUM_SENSORS) is complete
-//#define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
+// #define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // See
 // https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
@@ -154,31 +155,29 @@
 // A string representation of a float (e.g. "temp_c":"21.5") is recommended if the value shall displayed with the specified number of decimals.
 // Otherwise the float value can be output as a numerical value (e.g. "temp_c":21.5).
 //
-//#define JSON_FLOAT_AS_STRING
-
+// #define JSON_FLOAT_AS_STRING
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
-//#define _DEBUG_MQTT_
+// #define _DEBUG_MQTT_
 
 // Generate sensor data to test collecting data from multiple sources
-//#define GEN_SENSOR_DATA
+// #define GEN_SENSOR_DATA
 
 // END User specific configuration
 
-#if ( defined(USE_SECUREWIFI) && defined(USE_WIFI) ) || ( !defined(USE_SECUREWIFI) && !defined(USE_WIFI) )
-    #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
+#if (defined(USE_SECUREWIFI) && defined(USE_WIFI)) || (!defined(USE_SECUREWIFI) && !defined(USE_WIFI))
+#error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
 #endif
 
 #if defined(ESP32)
-    #if defined(USE_WIFI)
-        #include <WiFi.h>
-    #elif defined(USE_SECUREWIFI)
-        #include <WiFiClientSecure.h>
-    #endif
-#elif defined(ESP8266)
-    #include <ESP8266WiFi.h>
+#if defined(USE_WIFI)
+#include <WiFi.h>
+#elif defined(USE_SECUREWIFI)
+#include <WiFiClientSecure.h>
 #endif
-
+#elif defined(ESP8266)
+#include <ESP8266WiFi.h>
+#endif
 
 #include <string>
 #include <MQTT.h>
@@ -190,42 +189,42 @@
 #include "RainGauge.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
-    #define JSON_FLOAT(x) String("\"") + x + String("\"")
+#define JSON_FLOAT(x) String("\"") + x + String("\"")
 #else
-    #define JSON_FLOAT(x) x
+#define JSON_FLOAT(x) x
 #endif
 
 const char sketch_id[] = "BresserWeatherSensorMQTT 20231030";
 
 // Map sensor IDs to Names
-SensorMap sensor_map[NUM_SENSORS] = {
-    {0x39582376, "WeatherSensor"}
-    //,{0x83750871, "SoilMoisture-1"}
+SensorMap sensor_map[] = {
+    {0x39582376, "WeatherSensor"},
+    //{0x83750871, "SoilMoisture-1"}
 };
 
-//enable only one of these below, disabling both is fine too.
-// #define CHECK_CA_ROOT
-// #define CHECK_PUB_KEY
-// Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
-// #define CHECK_FINGERPRINT
+// enable only one of these below, disabling both is fine too.
+//  #define CHECK_CA_ROOT
+//  #define CHECK_PUB_KEY
+//  Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
+//  #define CHECK_FINGERPRINT
 ////--------------------------////
 
 #include "secrets.h"
 
 #ifndef SECRETS
-    const char ssid[] = "WiFiSSID";
-    const char pass[] = "WiFiPassword";
+const char ssid[] = "WiFiSSID";
+const char pass[] = "WiFiPassword";
 
-    #define HOSTNAME "ESPWeather"
-    #define APPEND_CHIP_ID
+#define HOSTNAME "ESPWeather"
+#define APPEND_CHIP_ID
 
-    #define    MQTT_PORT     8883 // checked by pre-processor!
-    const char MQTT_HOST[] = "xxx.yyy.zzz.com";
-    const char MQTT_USER[] = ""; // leave blank if no credentials used
-    const char MQTT_PASS[] = ""; // leave blank if no credentials used
+#define MQTT_PORT 8883 // checked by pre-processor!
+const char MQTT_HOST[] = "xxx.yyy.zzz.com";
+const char MQTT_USER[] = ""; // leave blank if no credentials used
+const char MQTT_PASS[] = ""; // leave blank if no credentials used
 
-    #ifdef CHECK_CA_ROOT
-    static const char digicert[] PROGMEM = R"EOF(
+#ifdef CHECK_CA_ROOT
+static const char digicert[] PROGMEM = R"EOF(
     -----BEGIN CERTIFICATE-----
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -256,11 +255,11 @@ SensorMap sensor_map[NUM_SENSORS] = {
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     -----END CERTIFICATE-----
     )EOF";
-    #endif
+#endif
 
-    #ifdef CHECK_PUB_KEY
-    // Extracted by: openssl x509 -pubkey -noout -in fullchain.pem
-    static const char pubkey[] PROGMEM = R"KEY(
+#ifdef CHECK_PUB_KEY
+// Extracted by: openssl x509 -pubkey -noout -in fullchain.pem
+static const char pubkey[] PROGMEM = R"KEY(
     -----BEGIN PUBLIC KEY-----
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -273,24 +272,24 @@ SensorMap sensor_map[NUM_SENSORS] = {
     xxxxxxxx
     -----END PUBLIC KEY-----
     )KEY";
-    #endif
+#endif
 
-    #ifdef CHECK_FINGERPRINT
-    // Extracted by: openssl x509 -fingerprint -in fillchain.pem
-    static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
-    #endif
+#ifdef CHECK_FINGERPRINT
+// Extracted by: openssl x509 -fingerprint -in fullchain.pem
+static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
+#endif
 #endif
 
 WeatherSensor weatherSensor;
-RainGauge     rainGauge;
+RainGauge rainGauge;
 
 // MQTT topics
-const char MQTT_PUB_STATUS[]      = "status";
-const char MQTT_PUB_RADIO[]       = "radio";
-const char MQTT_PUB_DATA[]        = "data";
-const char MQTT_PUB_RSSI[]        = "rssi";
-const char MQTT_PUB_EXTRA[]       = "extra";
-const char MQTT_SUB_RESET[]       = "reset";
+const char MQTT_PUB_STATUS[] = "status";
+const char MQTT_PUB_RADIO[] = "radio";
+const char MQTT_PUB_DATA[] = "data";
+const char MQTT_PUB_RSSI[] = "rssi";
+const char MQTT_PUB_EXTRA[] = "extra";
+const char MQTT_SUB_RESET[] = "reset";
 
 String mqttPubStatus;
 String mqttPubRadio;
@@ -305,19 +304,18 @@ char Hostname[HOSTNAME_SIZE];
 
 // Generate WiFi network instance
 #if defined(ESP32)
-    #if defined(USE_WIFI)
-        WiFiClient net;
-    #elif defined(USE_SECUREWIFI)
-        WiFiClientSecure net;
-    #endif
-#elif defined(ESP8266)
-    #if defined(USE_WIFI)
-        WiFiClient net;
-    #elif defined(USE_SECUREWIFI)
-        BearSSL::WiFiClientSecure net;
-    #endif
+#if defined(USE_WIFI)
+WiFiClient net;
+#elif defined(USE_SECUREWIFI)
+WiFiClientSecure net;
 #endif
-
+#elif defined(ESP8266)
+#if defined(USE_WIFI)
+WiFiClient net;
+#elif defined(USE_SECUREWIFI)
+BearSSL::WiFiClientSecure net;
+#endif
+#endif
 
 //
 // Generate MQTT client instance
@@ -332,28 +330,26 @@ time_t now;
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
 
-//
-// Wait for WiFi connection
-//
 /*!
  * \brief Wait for WiFi connection
  *
- * \param wifi_retres   max. no. of retries
+ * \param wifi_retries   max. no. of retries
  * \param wifi_delay    delay in ms before each attemüt
  */
 void wifi_wait(int wifi_retries, int wifi_delay)
 {
     int count = 0;
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
         Serial.print(".");
         delay(wifi_delay);
-        if (++count == wifi_retries) {
-            log_e("\nWiFi connection timed out, will restart after %d s", SLEEP_INTERVAL/1000);
+        if (++count == wifi_retries)
+        {
+            log_e("\nWiFi connection timed out, will restart after %d s", SLEEP_INTERVAL / 1000);
             ESP.deepSleep(SLEEP_INTERVAL * 1000);
         }
     }
 }
-
 
 /*!
  * \brief WiFiManager Setup
@@ -369,51 +365,50 @@ void mqtt_setup(void)
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
     log_i("connected!");
 
-
-    #ifdef USE_SECUREWIFI
-        // Note: TLS security needs correct time
-        log_i("Setting time using SNTP");
-        configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
+#ifdef USE_SECUREWIFI
+    // Note: TLS security needs correct time
+    log_i("Setting time using SNTP");
+    configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
+    now = time(nullptr);
+    while (now < 1510592825)
+    {
+        delay(500);
+        Serial.print(".");
         now = time(nullptr);
-        while (now < 1510592825)
-        {
-            delay(500);
-            Serial.print(".");
-            now = time(nullptr);
-        }
-        log_i("\ndone!");
-        struct tm timeinfo;
-        gmtime_r(&now, &timeinfo);
-        log_i("Current time: %s", asctime(&timeinfo));
+    }
+    log_i("\ndone!");
+    struct tm timeinfo;
+    gmtime_r(&now, &timeinfo);
+    log_i("Current time: %s", asctime(&timeinfo));
 
-        #if defined(ESP8266)
-            #ifdef CHECK_CA_ROOT
-                BearSSL::X509List cert(digicert);
-                net.setTrustAnchors(&cert);
-            #endif
-            #ifdef CHECK_PUB_KEY
-                BearSSL::PublicKey key(pubkey);
-                net.setKnownKey(&key);
-            #endif
-            #ifdef CHECK_FINGERPRINT
-                net.setFingerprint(fp);
-            #endif
-        #elif defined(ESP32)
-            #ifdef CHECK_CA_ROOT
-                net.setCACert(digicert);
-            #endif
-            #ifdef CHECK_PUB_KEY
-                error "CHECK_PUB_KEY: not implemented"
-            #endif
-            #ifdef CHECK_FINGERPRINT
-                net.setFingerprint(fp);
-            #endif
-        #endif
-        #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
-            // do not verify tls certificate
-            net.setInsecure();
-        #endif
-    #endif
+#if defined(ESP8266)
+#ifdef CHECK_CA_ROOT
+    BearSSL::X509List cert(digicert);
+    net.setTrustAnchors(&cert);
+#endif
+#ifdef CHECK_PUB_KEY
+    BearSSL::PublicKey key(pubkey);
+    net.setKnownKey(&key);
+#endif
+#ifdef CHECK_FINGERPRINT
+    net.setFingerprint(fp);
+#endif
+#elif defined(ESP32)
+#ifdef CHECK_CA_ROOT
+    net.setCACert(digicert);
+#endif
+#ifdef CHECK_PUB_KEY
+    error "CHECK_PUB_KEY: not implemented"
+#endif
+#ifdef CHECK_FINGERPRINT
+        net.setFingerprint(fp);
+#endif
+#endif
+#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+    // do not verify tls certificate
+    net.setInsecure();
+#endif
+#endif
     client.begin(MQTT_HOST, MQTT_PORT, net);
 
     // set up MQTT receive callback
@@ -421,7 +416,6 @@ void mqtt_setup(void)
     client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
-
 
 /*!
  * \brief (Re-)Connect to WLAN and connect MQTT broker
@@ -444,20 +438,18 @@ void mqtt_connect(void)
     client.publish(mqttPubStatus, "online");
 }
 
-
 /*!
  * \brief MQTT message received callback
  */
 void messageReceived(String &topic, String &payload)
 {
-    if (topic == mqttSubReset) {
+    if (topic == mqttSubReset)
+    {
         uint8_t flags = payload.toInt() & 0xF;
         log_d("MQTT msg received: reset(0x%X)", flags);
         rainGauge.reset(flags);
     }
 }
-
-
 
 /*!
   \brief Publish weather data as MQTT message
@@ -475,134 +467,151 @@ void publishWeatherdata(bool complete)
     // neither does MQTT Dashboard...
     // Therefore the JSON string is created manually.
 
-    for (int i=0; i<NUM_SENSORS; i++) {
-      // Reset string buffers
-      mqtt_payload  = "";
-      mqtt_payload2 = "";
+    for (int i = 0; i < NUM_SENSORS; i++)
+    {
+        // Reset string buffers
+        mqtt_payload = "";
+        mqtt_payload2 = "";
 
-      if (!weatherSensor.sensor[i].valid)
-          continue;
+        if (!weatherSensor.sensor[i].valid)
+            continue;
 
-      if (weatherSensor.sensor[i].rain_ok) {
-          struct tm timeinfo;
-          gmtime_r(&now, &timeinfo);
-          rainGauge.update(timeinfo, weatherSensor.sensor[i].rain_mm, weatherSensor.sensor[i].startup);
-      }
-
-      // Example:
-      // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
-      mqtt_payload  = "{";
-      mqtt_payload2 = "{";
-      mqtt_payload  += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
-      #ifdef BRESSER_6_IN_1
-          mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
-      #endif
-      mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
-      if (weatherSensor.sensor[i].temp_ok || complete) {
-          mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].temp_c, 1));
-      }
-      if (weatherSensor.sensor[i].humidity_ok || complete) {
-          mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].humidity);
-      }
-      if (weatherSensor.sensor[i].wind_ok || complete) {
-          mqtt_payload += String(",\"wind_gust\":") + JSON_FLOAT(String(weatherSensor.sensor[i].wind_gust_meter_sec, 1));
-          mqtt_payload += String(",\"wind_avg\":")  + JSON_FLOAT(String(weatherSensor.sensor[i].wind_avg_meter_sec, 1));
-          mqtt_payload += String(",\"wind_dir\":")  + JSON_FLOAT(String(weatherSensor.sensor[i].wind_direction_deg, 1));
-      }
-      if (weatherSensor.sensor[i].wind_ok) {
-          char buf[4];
-          mqtt_payload2 += String("\"wind_dir_txt\":\"") + String(winddir_flt_to_str(weatherSensor.sensor[i].wind_direction_deg, buf)) + "\"";
-          mqtt_payload2 += String(",\"wind_gust_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_gust_meter_sec));
-          mqtt_payload2 += String(",\"wind_avg_bft\":")  + String(windspeed_ms_to_bft(weatherSensor.sensor[i].wind_avg_meter_sec));
-      }
-      if ((weatherSensor.sensor[i].temp_ok) && (weatherSensor.sensor[i].humidity_ok)) {
-        mqtt_payload2 += String(",\"dewpoint_c\":")
-            + JSON_FLOAT(String(calcdewpoint(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].humidity), 1));
-
-        if (weatherSensor.sensor[i].wind_ok) {
-          mqtt_payload2 += String(",\"perceived_temp_c\":") 
-              + JSON_FLOAT(String(perceived_temperature(weatherSensor.sensor[i].temp_c, weatherSensor.sensor[i].wind_avg_meter_sec, weatherSensor.sensor[i].humidity), 1));
+        if (weatherSensor.sensor[i].w.rain_ok)
+        {
+            struct tm timeinfo;
+            gmtime_r(&now, &timeinfo);
+            rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
         }
-      }
-      if (weatherSensor.sensor[i].uv_ok || complete) {
-          mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].uv, 1));
-      }
-      if (weatherSensor.sensor[i].light_ok || complete) {
-          mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].light_klx, 1));
-      }
-      if (weatherSensor.sensor[i].rain_ok || complete) {
-          mqtt_payload += String(",\"rain\":")   + JSON_FLOAT(String(weatherSensor.sensor[i].rain_mm, 1));
-          mqtt_payload += String(",\"rain_h\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
-          mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
-          mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
-          mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
-      }
-      if (weatherSensor.sensor[i].moisture_ok || complete) {
-          mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].moisture);
-      }
-      if (weatherSensor.sensor[i].lightning_ok || complete) {
-          mqtt_payload  += String(",\"lightning_count\":")       + String(weatherSensor.sensor[i].lightning_count);
-          mqtt_payload  += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lightning_distance_km);
-          mqtt_payload  += String(",\"lightning_unknown1\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown1, HEX) + String("\"");
-          mqtt_payload  += String(",\"lightning_unknown2\":\"0x") 
-              + String(weatherSensor.sensor[i].lightning_unknown2, HEX) + String("\"");
-      }
-      mqtt_payload  += String("}");
-      mqtt_payload2 += String("}");
 
-      if (mqtt_payload.length() > PAYLOAD_SIZE) {
-        log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
-      }
-      if (mqtt_payload2.length() > PAYLOAD_SIZE) {
-        log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
-      }
-    
-      // Try to map sensor ID to name to make MQTT topic explanatory
-      String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+        // Example:
+        // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
+        mqtt_payload = "{";
+        mqtt_payload2 = "{";
+        mqtt_payload += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
+        mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
+        mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
 
-      if (sizeof(sensor_map) > 0) {
-        for (size_t n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
-          if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-            sensor_str = String(sensor_map[n].name.c_str());
-            break;
+        if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        {
+            mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
+            mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        {
+            mqtt_payload += String(",\"lightning_count\":") + String(weatherSensor.sensor[i].lgt.strike_count);
+            mqtt_payload += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lgt.distance_km);
+            mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
+            mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
+        }
+        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
+        {
+
+            if (weatherSensor.sensor[i].w.temp_ok || complete)
+            {
+                mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
+            }
+            if (weatherSensor.sensor[i].w.humidity_ok || complete)
+            {
+                mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].w.humidity);
+            }
+            if (weatherSensor.sensor[i].w.wind_ok || complete)
+            {
+                mqtt_payload += String(",\"wind_gust\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_gust_meter_sec, 1));
+                mqtt_payload += String(",\"wind_avg\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_avg_meter_sec, 1));
+                mqtt_payload += String(",\"wind_dir\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_direction_deg, 1));
+            }
+            if (weatherSensor.sensor[i].w.wind_ok)
+            {
+                char buf[4];
+                mqtt_payload2 += String("\"wind_dir_txt\":\"") + String(winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf)) + "\"";
+                mqtt_payload2 += String(",\"wind_gust_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_gust_meter_sec));
+                mqtt_payload2 += String(",\"wind_avg_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_avg_meter_sec));
+            }
+            if ((weatherSensor.sensor[i].w.temp_ok) && (weatherSensor.sensor[i].w.humidity_ok))
+            {
+                mqtt_payload2 += String(",\"dewpoint_c\":") + JSON_FLOAT(String(calcdewpoint(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.humidity), 1));
+
+                if (weatherSensor.sensor[i].w.wind_ok)
+                {
+                    mqtt_payload2 += String(",\"perceived_temp_c\":") + JSON_FLOAT(String(perceived_temperature(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.wind_avg_meter_sec, weatherSensor.sensor[i].w.humidity), 1));
+                }
+            }
+            if (weatherSensor.sensor[i].w.uv_ok || complete)
+            {
+                mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.uv, 1));
+            }
+            if (weatherSensor.sensor[i].w.light_ok || complete)
+            {
+                mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.light_klx, 1));
+            }
+            if (weatherSensor.sensor[i].w.rain_ok || complete)
+            {
+                mqtt_payload += String(",\"rain\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.rain_mm, 1));
+                mqtt_payload += String(",\"rain_h\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
+                mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
+                mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
+                mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
+            }
+        }
+        mqtt_payload += String("}");
+        mqtt_payload2 += String("}");
+
+        if (mqtt_payload.length() > PAYLOAD_SIZE)
+        {
+            log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
+        }
+        if (mqtt_payload2.length() > PAYLOAD_SIZE)
+        {
+            log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
+        }
+
+        // Try to map sensor ID to name to make MQTT topic explanatory
+        String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+        if (sizeof(sensor_map) > 0) {
+          for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+              sensor_str = String(sensor_map[n].name.c_str());
+              break;
+            }
           }
         }
-      }
-      
-      String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
-      String mqtt_topic;
-        
-      // sensor data
-      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
-      
-      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+
+        String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
+        String mqtt_topic;
+
+        // sensor data
+        mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
+
+#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
         char mqtt_topic_tmp[TOPIC_SIZE];
         char mqtt_payload_tmp[PAYLOAD_SIZE];
-        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
+        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
         snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
-      #endif
-      log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
-      client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE-1), false, 0);
-
-      // sensor specific RSSI
-      mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
-      client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
-        
-      // extra data
-      mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
-      
-      #if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
-        snprintf(mqtt_topic_tmp,   TOPIC_SIZE,   mqtt_topic.c_str());
-        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
-      #endif
-      if (mqtt_payload2.length() > 2) {
+#endif
         log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
-        client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE-1), false, 0);
-      }
+        client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), false, 0);
+
+        // sensor specific RSSI
+        mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
+        client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+
+        // extra data
+        mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
+
+#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
+        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
+        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
+#endif
+        if (mqtt_payload2.length() > 2)
+        {
+            log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+            client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
+        }
     } // for (int i=0; i<NUM_SENSORS; i++)
 }
-
 
 //
 // Publish radio receiver info as JSON string via MQTT
@@ -620,40 +629,40 @@ void publishRadio(void)
     payload.clear();
 }
 
-
 //
 // Setup
 //
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     log_i("\n\n%s\n", sketch_id);
 
-    #ifdef LED_EN
-      // Configure LED output pins
-      pinMode(LED_GPIO, OUTPUT);
-      digitalWrite(LED_GPIO, HIGH);
-    #endif
+#ifdef LED_EN
+    // Configure LED output pins
+    pinMode(LED_GPIO, OUTPUT);
+    digitalWrite(LED_GPIO, HIGH);
+#endif
 
     strncpy(Hostname, HOSTNAME, 20);
-    #if defined(APPEND_CHIP_ID) && defined(ESP32)
-        uint32_t chipId = 0;
-        for(int i=0; i<17; i=i+8) {
-            chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
-        }
-        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
-    #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-        snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
-    #endif
+#if defined(APPEND_CHIP_ID) && defined(ESP32)
+    uint32_t chipId = 0;
+    for (int i = 0; i < 17; i = i + 8)
+    {
+        chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+    }
+    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
+#elif defined(APPEND_CHIP_ID) && defined(ESP8266)
+    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
+#endif
 
     mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
-    mqttPubRadio  = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
-    mqttSubReset  = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
-    
+    mqttPubRadio = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
+
     mqtt_setup();
     weatherSensor.begin();
 }
-
 
 /*!
   \brief Wrapper which allows passing of member function as parameter
@@ -663,11 +672,11 @@ void clientLoopWrapper(void)
     client.loop();
 }
 
-
 //
 // Main execution loop
 //
-void loop() {
+void loop()
+{
     if (WiFi.status() != WL_CONNECTED)
     {
         Serial.print(F("Checking wifi"));
@@ -692,7 +701,8 @@ void loop() {
     }
 
     const uint32_t currentMillis = millis();
-    if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL) {
+    if (currentMillis - statusPublishPreviousMillis >= STATUS_INTERVAL)
+    {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
         log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
@@ -701,30 +711,34 @@ void loop() {
     }
 
     bool decode_ok = false;
-    #ifdef _DEBUG_MQTT_
-        decode_ok = weatherSensor.genMessage(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
-    #else
-        // Clear sensor data buffer
-        weatherSensor.clearSlots();
+#ifdef _DEBUG_MQTT_
+    decode_ok = weatherSensor.genMessage(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
+#else
+    // Clear sensor data buffer
+    weatherSensor.clearSlots();
 
-        #ifdef GEN_SENSOR_DATA
-            weatherSensor.genMessage(1 /* slot */, 0xdeadbeef /* ID */, 1 /* type */, 7 /* channel */);
-        #endif
+#ifdef GEN_SENSOR_DATA
+    weatherSensor.genMessage(1 /* slot */, 0xdeadbeef /* ID */, 1 /* type */, 7 /* channel */);
+#endif
 
-        // Attempt to receive data set with timeout of <xx> s
-        decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
-    #endif
+    // Attempt to receive data set with timeout of <xx> s
+    decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
+#endif
 
-    #ifdef LED_EN
-        if (decode_ok) {
-          digitalWrite(LED_GPIO, LOW);
-        } else {
-          digitalWrite(LED_GPIO, HIGH);
-        }
-    #endif
+#ifdef LED_EN
+    if (decode_ok)
+    {
+        digitalWrite(LED_GPIO, LOW);
+    }
+    else
+    {
+        digitalWrite(LED_GPIO, HIGH);
+    }
+#endif
 
     // publish a data message @DATA_INTERVAL
-    if (millis() - lastMillis > DATA_INTERVAL) {
+    if (millis() - lastMillis > DATA_INTERVAL)
+    {
         lastMillis = millis();
         if (decode_ok)
             publishWeatherdata(false);
@@ -733,10 +747,14 @@ void loop() {
     bool force_sleep = millis() > AWAKE_TIMEOUT;
 
     // Go to sleep only after complete set of data has been sent
-    if (SLEEP_EN && (decode_ok || force_sleep)) {
-        if (force_sleep) {
+    if (SLEEP_EN && (decode_ok || force_sleep))
+    {
+        if (force_sleep)
+        {
             log_d("Awake time-out!");
-        } else {
+        }
+        else
+        {
             log_d("Data forwarding completed.");
         }
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
@@ -746,9 +764,9 @@ void loop() {
         client.loop();
         client.disconnect();
         client.loop();
-        #ifdef LED_EN
-            pinMode(LED_GPIO, INPUT);
-        #endif
+#ifdef LED_EN
+        pinMode(LED_GPIO, INPUT);
+#endif
         ESP.deepSleep(SLEEP_INTERVAL * 1000);
     }
 } // loop()

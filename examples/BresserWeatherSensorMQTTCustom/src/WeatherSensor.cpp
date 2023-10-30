@@ -184,17 +184,17 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
 
                 // Specific sensor type required
                 if (((flags & DATA_TYPE) != 0) && (sensor[i].s_type == type)) {
-                    if (sensor[i].w.complete || !(flags & DATA_COMPLETE)) {
+                    if (sensor[i].complete || !(flags & DATA_COMPLETE)) {
                         return true;
                     }
                 }
                 // All slots required (valid AND complete) - must check all slots
                 else if (flags & DATA_ALL_SLOTS) {
                     all_slots_valid    &= sensor[i].valid;
-                    all_slots_complete &= sensor[i].w.complete;
+                    all_slots_complete &= sensor[i].complete;
                 }
                 // At least one sensor valid and complete
-                else if (sensor[i].w.complete) {
+                else if (sensor[i].complete) {
                     return true;
                 }
             } // for (int i=0; i<NUM_SENSORS; i++)
@@ -308,6 +308,7 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
     sensor[i].battery_ok              = true;
     sensor[i].rssi                    = 88.8;
     sensor[i].valid                   = true;
+    sensor[i].complete                = true;
 
     if ((s_type == SENSOR_TYPE_WEATHER0) || (s_type == SENSOR_TYPE_WEATHER1)) { 
         sensor[i].w.temp_ok                 = true;
@@ -326,7 +327,6 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
         #endif
         sensor[i].w.wind_ok                 = true;
         sensor[i].w.rain_mm                 = 9.9f;
-        sensor[i].w.complete                = true;
     }
     else if (s_type == SENSOR_TYPE_LIGHTNING) {
         sensor[i].lgt.strike_count = 42;
@@ -390,6 +390,8 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
     int free_slot   = -1;
     int update_slot = -1;
     for (int i=0; i<NUM_SENSORS; i++) {
+        log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+
         // Save first free slot
         if (!sensor[i].valid && (free_slot < 0)) {
             free_slot = i;
@@ -601,7 +603,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].battery_ok  = (msg[25] & 0x80) ? false : true;
     sensor[slot].valid       = true;
     sensor[slot].rssi        = rssi;
-    sensor[slot].w.complete  = true;
+    sensor[slot].complete    = true;
     
     int temp_raw = (msg[20] & 0x0f) + ((msg[20] & 0xf0) >> 4) * 10 + (msg[21] &0x0f) * 100;
     if (msg[25] & 0x0f) {
@@ -755,7 +757,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     bool uv_ok       = false;
     bool wind_ok     = false;
     bool rain_ok     = false;
-    bool moisture_ok = false;
     bool f_3in1      = false;
 
     // LFSR-16 digest, generator 0x8810 init 0x5412
@@ -865,8 +866,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].w.rain_mm   = rain_raw * 0.1f;
     }
 
-    moisture_ok = false;
-
     // Pool / Spa thermometer
     if (sensor[slot].s_type == SENSOR_TYPE_POOL_THERMO) {
         humidity_ok = false;
@@ -879,7 +878,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     }
 
     if (sensor[slot].s_type == SENSOR_TYPE_SOIL && temp_ok && sensor[slot].w.humidity >= 1 && sensor[slot].w.humidity <= 16) {
-        moisture_ok = true;
         humidity_ok = false;
         sensor[slot].soil.moisture = moisture_map[sensor[slot].w.humidity - 1];
         sensor[slot].soil.temp_c = temp;
@@ -891,14 +889,18 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].w.uv_ok       |= uv_ok;
     sensor[slot].w.wind_ok     |= wind_ok;
     sensor[slot].w.rain_ok     |= rain_ok;
-    log_d("Temp: %d  Hum: %d  UV: %d  Wind: %d  Rain: %d  Moist: %d", temp_ok, humidity_ok, uv_ok, wind_ok, rain_ok, moisture_ok);
+    log_d("Flags: Temp=%d  Hum=%d  Wind=%d  Rain=%d  UV=%d", temp_ok, humidity_ok, wind_ok, rain_ok, uv_ok);
 
-    sensor[slot].valid    = true;
+    sensor[slot].valid = true;
 
     // Weather station data is split into two separate messages (except for Professional Wind Gauge)
-    sensor[slot].w.complete = ((sensor[slot].s_type == SENSOR_TYPE_WEATHER1) && sensor[slot].w.temp_ok && sensor[slot].w.rain_ok) ||
-                              f_3in1 ||
-                              (sensor[slot].s_type != SENSOR_TYPE_WEATHER1);
+    if (sensor[slot].s_type == SENSOR_TYPE_WEATHER1) {
+        if (f_3in1 || (sensor[slot].w.temp_ok && sensor[slot].w.rain_ok)) {
+            sensor[slot].complete = true;
+        }
+    } else {
+        sensor[slot].complete = true;
+    }
 
     // Save rssi to sensor specific data set
     sensor[slot].rssi = rssi;
@@ -1000,6 +1002,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
   sensor[slot].chan        = msg[6] & 0x07;           // raw data, no de-whitening
   sensor[slot].battery_ok  = !battery_low;
   sensor[slot].valid       = true;
+  sensor[slot].complete    = true;
   sensor[slot].rssi        = rssi;
   
   if (s_type == SENSOR_TYPE_WEATHER1) {
@@ -1142,6 +1145,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     sensor[slot].battery_ok      = !battery_low;
     sensor[slot].rssi            = rssi;
     sensor[slot].valid           = true;
+    sensor[slot].complete        = true;
 
     sensor[slot].lgt.strike_count = ctr;
     sensor[slot].lgt.distance_km = distance_km;
@@ -1260,6 +1264,7 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     sensor[slot].battery_ok = (msg[7] & 0x30) != 0x00;
     sensor[slot].rssi       = rssi;
     sensor[slot].valid      = true;
+    sensor[slot].complete   = true;
     sensor[slot].leak.alarm = (alarm && !no_alarm);
 
     log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d", 

@@ -65,6 +65,7 @@
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
 //          Modified device type definitions
 // 20231027 Refactored sensor data using a union to save memory
+// 20231030 Modified complete flag
 //
 // ToDo:
 // -
@@ -199,7 +200,6 @@ class WeatherSensor {
         DecodeStatus    decodeMessage(const uint8_t *msg, uint8_t msgSize);
 
         struct Weather {
-            bool     complete;                //!< data is split into two separate messages is complete (only 6-in-1 WS)
             bool     temp_ok = false;         //!< temperature o.k. (only 6-in-1)
             bool     humidity_ok = false;     //!< humidity o.k.
             bool     light_ok = false;        //!< light o.k. (only 7-in-1)
@@ -273,6 +273,7 @@ class WeatherSensor {
             bool     startup = false;      //!< startup after reset / battery change
             bool     battery_ok = false;   //!< battery o.k.
             bool     valid;                //!< data valid (but not necessarily complete)
+            bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
             union {
                 struct Weather      w;
                 struct Soil         soil;
@@ -312,7 +313,8 @@ class WeatherSensor {
         {
             for (int i=0; i< NUM_SENSORS; i++) {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
-                    sensor[i].valid = false;
+                    sensor[i].valid    = false;
+                    sensor[i].complete = false;
                 }
             }
         };

@@ -48,6 +48,7 @@
 // 20230926 Added pin definitions for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
 // 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
 // 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
+// 20231101 Added USE_SX1262 for Heltec Wireless Stick V3
 //
 // ToDo:
 // -
@@ -161,7 +162,8 @@
 
 #elif defined(ARDUINO_heltec_wireless_stick)
     #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
-    #define USE_SX1276
+    //#define USE_SX1276 // V2
+    #define USE_SX1262 // V3
 
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
@@ -209,9 +211,10 @@
 // --- Radio Transceiver ---
 // ------------------------------------------------------------------------------------------------
 // Select type of receiver module (if not yet defined based on the assumptions above)
-#if ( !defined(USE_CC1101) && !defined(USE_SX1276) )
+#if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
     //#define USE_CC1101
     #define USE_SX1276
+    //#define USE_SX1262
 #endif
 
 

@@ -72,6 +72,7 @@
 //          Modified decoding of sensor type (to raw, non de-whitened data)
 // 20231028 Fixed startup flag polarity in 7-in-1, lightning and leakage decoder
 // 20231030 Refactored sensor data using a union to save memory
+// 20231101 Added radio transceiver SX1262
 //
 // ToDo:
 // -
@@ -87,7 +88,9 @@
 #if defined(USE_SX1276)
     static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
-
+#if defined(USE_SX1262)
+    static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
 
 // List of sensor IDs to be excluded - can be empty
 uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
@@ -116,7 +119,11 @@ int16_t WeatherSensor::begin(void) {
     #endif
     if (state == RADIOLIB_ERR_NONE) {
         log_d("success!");
-        state = radio.setCrcFiltering(false);
+        #ifdef USE_SX1262
+            state = radio.setCRC(0);
+        #else
+            state = radio.setCrcFiltering(false);
+        #endif
         if (state != RADIOLIB_ERR_NONE) {
             log_e("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
             while (true)

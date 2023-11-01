@@ -115,6 +115,11 @@
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V21new
 
+// Heltec Wireless Stick
+// V2 -> SX1276
+// V3 -> SX1262
+// THERE IS NO WAY TO DISTINGUISH THE VERSION AUTOMATICALLY!
+//
 // This define is set by selecting "Board: Heltec Wireless Stick"
 // in the Arduino IDE:
 //#define ARDUINO_heltec_wireless_stick
@@ -213,8 +218,8 @@
 // Select type of receiver module (if not yet defined based on the assumptions above)
 #if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
     //#define USE_CC1101
-    #define USE_SX1276
-    //#define USE_SX1262
+    //#define USE_SX1276
+    #define USE_SX1262
 #endif
 
 
@@ -336,8 +341,10 @@
     #define RECEIVER_CHIP "[CC1101]"
 #elif defined(USE_SX1276)
     #define RECEIVER_CHIP "[SX1276]"
+#elif defined(USE_SX1262)
+    #define RECEIVER_CHIP "[SX1262]"
 #else
-    #error "Either USE_CC1101 or USE_SX1276 must be defined!"
+    #error "Either USE_CC1101, USE_SX1276 or USE_SX1262 must be defined!"
 #endif
 
 

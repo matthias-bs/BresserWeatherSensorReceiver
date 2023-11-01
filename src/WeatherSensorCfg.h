@@ -167,8 +167,9 @@
 
 #elif defined(ARDUINO_heltec_wireless_stick)
     #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
-    //#define USE_SX1276 // V2
-    #define USE_SX1262 // V3
+    #pragma message("Radio transceiver chip has to be configured manually: V2 -> USE_SX1276 / V3 -> USE_SX1262")
+    //#define USE_SX1276 // Heltec Wireless Stick V2
+    #define USE_SX1262 // Heltec Wireless Stick V3
 
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
@@ -218,8 +219,8 @@
 // Select type of receiver module (if not yet defined based on the assumptions above)
 #if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
     //#define USE_CC1101
-    //#define USE_SX1276
-    #define USE_SX1262
+    #define USE_SX1276
+    //#define USE_SX1262
 #endif
 
 
@@ -329,12 +330,10 @@
      #endif
 #endif
 
-#if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
-    #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"
-#endif
-
-#if ( defined(USE_CC1101) && defined(USE_SX1276) )
-    #error "Either USE_CC1101 OR USE_SX1276 must be defined!"
+#if ( (defined(USE_CC1101) && defined(USE_SX1276)) || \
+      (defined(USE_SX1276) && defined(USE_SX1262)) || \
+      (defined(USE_SX1262) && defined(USE_CC1101)) )
+    #error "Either USE_CC1101 OR USE_SX1276 OR USE_SX1262 must be defined!"
 #endif
 
 #if defined(USE_CC1101)

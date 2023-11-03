@@ -341,13 +341,10 @@ void mqtt_connect(void);
  */
 void setTime(unsigned long epoch, int ms) {
   struct timeval tv;
-  bool overflow;
   
   if (epoch > 2082758399){
-	  overflow = true;
 	  tv.tv_sec = epoch - 2082758399;  // epoch time (seconds)
   } else {
-	  overflow = false;
 	  tv.tv_sec = epoch;  // epoch time (seconds)
   }
   tv.tv_usec = ms;    // microseconds

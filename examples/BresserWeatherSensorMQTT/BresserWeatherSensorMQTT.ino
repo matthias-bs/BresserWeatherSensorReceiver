@@ -102,6 +102,7 @@
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
 // 20231030 Fixed and improved mapping of sensor IDs to names
 //          Refactored struct Sensor
+// 20231103 Improved handling of time and date
 //
 // ToDo:
 //
@@ -139,6 +140,9 @@
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI        // use secure WIFI
 // #define USE_WIFI              // use non-secure WIFI
+
+// Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 // Stop reception when data of at least one sensor is complete
 #define RX_STRATEGY DATA_COMPLETE
@@ -325,10 +329,39 @@ MQTTClient client(PAYLOAD_SIZE);
 
 uint32_t lastMillis = 0;
 uint32_t statusPublishPreviousMillis = 0;
-time_t now;
 
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
+
+/*! 
+ * \brief Set RTC
+ *
+ * \param epoch Time since epoch
+ * \param ms unused
+ */
+void setTime(unsigned long epoch, int ms) {
+  struct timeval tv;
+  
+  if (epoch > 2082758399){
+	  tv.tv_sec = epoch - 2082758399;  // epoch time (seconds)
+  } else {
+	  tv.tv_sec = epoch;  // epoch time (seconds)
+  }
+  tv.tv_usec = ms;    // microseconds
+  settimeofday(&tv, NULL);
+}
+
+/// Print date and time (i.e. local time)
+void printDateTime(void) {
+        struct tm timeinfo;
+        char tbuf[25];
+        
+        time_t tnow;
+        time(&tnow);
+        localtime_r(&tnow, &timeinfo);
+        strftime(tbuf, 25, "%Y-%m-%d %H:%M:%S", &timeinfo);
+        log_i("%s", tbuf);
+}
 
 /*!
  * \brief Wait for WiFi connection
@@ -365,22 +398,31 @@ void mqtt_setup(void)
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
     log_i("connected!");
 
-#ifdef USE_SECUREWIFI
-    // Note: TLS security needs correct time
+
+    // Note: TLS security and rain/lightning statistics need correct time
     log_i("Setting time using SNTP");
     configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
-    now = time(nullptr);
+    time_t now = time(nullptr);
+    int retries = 10;
     while (now < 1510592825)
     {
+        if (--retries == 0)
+            break;
         delay(500);
         Serial.print(".");
         now = time(nullptr);
     }
-    log_i("\ndone!");
+    if (retries == 0) {
+        log_w("\nSetting time using SNTP failed!");
+    } else {
+        log_i("\ndone!");
+        setTime(time(nullptr), 0);
+    }
     struct tm timeinfo;
     gmtime_r(&now, &timeinfo);
-    log_i("Current time: %s", asctime(&timeinfo));
+    log_i("Current time (GMT): %s", asctime(&timeinfo));
 
+#ifdef USE_SECUREWIFI
 #if defined(ESP8266)
 #ifdef CHECK_CA_ROOT
     BearSSL::X509List cert(digicert);
@@ -479,6 +521,7 @@ void publishWeatherdata(bool complete)
         if (weatherSensor.sensor[i].w.rain_ok)
         {
             struct tm timeinfo;
+            time_t now = time(nullptr);
             gmtime_r(&now, &timeinfo);
             rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
         }
@@ -637,6 +680,10 @@ void setup()
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     log_i("\n\n%s\n", sketch_id);
+
+    // Set time zone
+    setenv("TZ", TZ_INFO, 1);
+    printDateTime();
 
 #ifdef LED_EN
     // Configure LED output pins

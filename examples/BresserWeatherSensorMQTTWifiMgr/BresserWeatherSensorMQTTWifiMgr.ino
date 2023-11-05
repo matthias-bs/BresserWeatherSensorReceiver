@@ -688,7 +688,7 @@ void publishWeatherdata(bool complete)
         {
             struct tm timeinfo;
             time_t now = time(nullptr);
-            gmtime_r(&now, &timeinfo);
+            localtime_r(&now, &timeinfo);
             rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
         }
 

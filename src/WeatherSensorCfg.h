@@ -48,6 +48,7 @@
 // 20230926 Added pin definitions for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232
 // 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
 // 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
+// 20231101 Added USE_SX1262 for Heltec Wireless Stick V3
 //
 // ToDo:
 // -
@@ -114,6 +115,11 @@
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V21new
 
+// Heltec Wireless Stick
+// V2 -> SX1276
+// V3 -> SX1262
+// THERE IS NO WAY TO DISTINGUISH THE VERSION AUTOMATICALLY!
+//
 // This define is set by selecting "Board: Heltec Wireless Stick"
 // in the Arduino IDE:
 //#define ARDUINO_heltec_wireless_stick
@@ -161,7 +167,9 @@
 
 #elif defined(ARDUINO_heltec_wireless_stick)
     #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
-    #define USE_SX1276
+    #pragma message("Radio transceiver chip has to be configured manually: V2 -> USE_SX1276 / V3 -> USE_SX1262")
+    //#define USE_SX1276 // Heltec Wireless Stick V2
+    #define USE_SX1262 // Heltec Wireless Stick V3
 
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
@@ -209,9 +217,10 @@
 // --- Radio Transceiver ---
 // ------------------------------------------------------------------------------------------------
 // Select type of receiver module (if not yet defined based on the assumptions above)
-#if ( !defined(USE_CC1101) && !defined(USE_SX1276) )
+#if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
     //#define USE_CC1101
     #define USE_SX1276
+    //#define USE_SX1262
 #endif
 
 
@@ -321,20 +330,20 @@
      #endif
 #endif
 
-#if ( !defined(BRESSER_5_IN_1) && !defined(BRESSER_6_IN_1) && !defined(BRESSER_7_IN_1) )
-    #error "Either BRESSER_5_IN_1 and/or BRESSER_6_IN_1 and/or BRESSER_7_IN_1 must be defined!"
-#endif
-
-#if ( defined(USE_CC1101) && defined(USE_SX1276) )
-    #error "Either USE_CC1101 OR USE_SX1276 must be defined!"
+#if ( (defined(USE_CC1101) && defined(USE_SX1276)) || \
+      (defined(USE_SX1276) && defined(USE_SX1262)) || \
+      (defined(USE_SX1262) && defined(USE_CC1101)) )
+    #error "Either USE_CC1101 OR USE_SX1276 OR USE_SX1262 must be defined!"
 #endif
 
 #if defined(USE_CC1101)
     #define RECEIVER_CHIP "[CC1101]"
 #elif defined(USE_SX1276)
     #define RECEIVER_CHIP "[SX1276]"
+#elif defined(USE_SX1262)
+    #define RECEIVER_CHIP "[SX1262]"
 #else
-    #error "Either USE_CC1101 or USE_SX1276 must be defined!"
+    #error "Either USE_CC1101, USE_SX1276 or USE_SX1262 must be defined!"
 #endif
 
 

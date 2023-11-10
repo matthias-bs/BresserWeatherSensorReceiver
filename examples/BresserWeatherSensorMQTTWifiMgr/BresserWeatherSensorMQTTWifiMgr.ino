@@ -110,8 +110,26 @@
 
 #include <Arduino.h>
 
+#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+#include "esp32/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S2
+#include "esp32s2/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32C3
+#include "esp32c3/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S3
+#include "esp32s3/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32C6
+#include "esp32c6/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32H2
+#include "esp32h2/rom/rtc.h"
+#else 
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
+
+
 // Library Defines - Need to be defined before library import
 #define ESP_DRD_USE_SPIFFS true
+#define DOUBLERESETDETECTOR_DEBUG true
 
 // BEGIN User specific options
 // #define LED_EN                  // Enable LED indicating successful data reception
@@ -143,7 +161,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 // Number of seconds after reset during which a
 // subseqent reset will be considered a double reset.
-#define DRD_TIMEOUT 10
+#define DRD_TIMEOUT 5
 
 // RTC Memory Address for the DoubleResetDetector to use
 #define DRD_ADDRESS 0
@@ -847,6 +865,12 @@ void setup()
     Serial.setDebugOutput(true);
     log_i("\n\n%s\n", sketch_id);
 
+    // Detect reset reason:
+    // see
+    // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
+    log_d("CPU0 reset reason: %d", rtc_get_reset_reason(0));
+    log_d("CPU1 reset reason: %d", rtc_get_reset_reason(1));
+
     // Set time zone
     setenv("TZ", TZ_INFO, 1);
     printDateTime();
@@ -874,7 +898,8 @@ void setup()
     mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
-    if (drd->detectDoubleReset())
+    // HW power-on/HW reset AND DoubleReset
+    if ((rtc_get_reset_reason(0) == 1) && drd->detectDoubleReset())
     {
         Serial.println(F("Forcing config mode as there was a Double reset detected"));
         forceConfig = true;

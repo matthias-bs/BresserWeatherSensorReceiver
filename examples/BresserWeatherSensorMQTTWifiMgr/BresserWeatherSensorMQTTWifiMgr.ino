@@ -87,7 +87,6 @@
 // 20231030 Fixed and improved mapping of sensor IDs to names
 //          Refactored struct Sensor
 // 20231103 Improved handling of time and date
-// 20231110 Fixed erroneous double reset detection after wake-up after deep sleep
 //
 // ToDo:
 //
@@ -124,7 +123,9 @@
 #elif CONFIG_IDF_TARGET_ESP32H2
 #include "esp32h2/rom/rtc.h"
 #else 
+#if !defined(ESP8266)
 #error Target CONFIG_IDF_TARGET is not supported
+#endif
 #endif
 
 
@@ -899,8 +900,17 @@ void setup()
     mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
+
+    #if defined(ESP32)
+        bool hw_reset = (rtc_get_reset_reason(0) == 1);
+    #elif defined(ESP8266)
+        rst_info *resetInfo;
+        resetInfo = ESP.getResetInfoPtr();
+        bool hw_reset = (resetInfo->reason == REASON_EXT_SYS_RST);
+    #endif
+
     // HW power-on/HW reset AND DoubleReset
-    if ((rtc_get_reset_reason(0) == 1) && drd->detectDoubleReset())
+    if (hw_reset && drd->detectDoubleReset())
     {
         Serial.println(F("Forcing config mode as there was a Double reset detected"));
         forceConfig = true;

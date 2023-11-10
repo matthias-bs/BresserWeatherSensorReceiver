@@ -87,6 +87,7 @@
 // 20231030 Fixed and improved mapping of sensor IDs to names
 //          Refactored struct Sensor
 // 20231103 Improved handling of time and date
+// 20231110 Fixed erroneous double reset detection after wake-up after deep sleep
 //
 // ToDo:
 //

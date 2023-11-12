@@ -72,6 +72,8 @@
 //          Modified decoding of sensor type (to raw, non de-whitened data)
 // 20231028 Fixed startup flag polarity in 7-in-1, lightning and leakage decoder
 // 20231030 Refactored sensor data using a union to save memory
+// 20231101 Added radio transceiver SX1262
+// 20231112 Added setting of rain_ok in genMessage()
 //
 // ToDo:
 // -
@@ -87,7 +89,9 @@
 #if defined(USE_SX1276)
     static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
-
+#if defined(USE_SX1262)
+    static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
 
 // List of sensor IDs to be excluded - can be empty
 uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
@@ -106,17 +110,23 @@ int16_t WeatherSensor::begin(void) {
     // carrier frequency:                   868.3 MHz
     // bit rate:                            8.22 kbps
     // frequency deviation:                 57.136417 kHz
-    // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276)
+    // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
     // output power:                        10 dBm
     // preamble length:                     40 bits
     #ifdef USE_CC1101
         int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
-    #else
+    #elif defined(USE_SX1276)
         int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
+    #else
+        int state = radio.beginFSK(868.3, 8.21, 57.136417, 234.3, 10, 32);
     #endif
     if (state == RADIOLIB_ERR_NONE) {
         log_d("success!");
-        state = radio.setCrcFiltering(false);
+        #ifdef USE_SX1262
+            state = radio.setCRC(0);
+        #else
+            state = radio.setCrcFiltering(false);
+        #endif
         if (state != RADIOLIB_ERR_NONE) {
             log_e("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
             while (true)
@@ -327,6 +337,7 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
             sensor[i].w.wind_avg_meter_sec_fp1  = 33;
         #endif
         sensor[i].w.wind_ok                 = true;
+        sensor[i].w.rain_ok                 = true;
         sensor[i].w.rain_mm                 = 9.9f;
     }
     else if (s_type == SENSOR_TYPE_LIGHTNING) {

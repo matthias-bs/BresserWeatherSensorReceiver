@@ -177,7 +177,7 @@
     #define USE_SX1276
 
 #elif defined(ARDUINO_heltec_wifi_32_lora_V3)
-    #pragma message("ARDUINO_heltec_wifi_lora_32_V3 defined; using on-board transceiver")
+    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 defined; using on-board transceiver")
     #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)

@@ -423,7 +423,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa
 
-#elif defined(ARDUINO_heltec_wifi_lora_32_V3)
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
     // Use pinning for Heltec WiFi LoRa32 V3
     #define PIN_RECEIVER_CS   SS
 

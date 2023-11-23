@@ -152,7 +152,7 @@ class WeatherSensor {
        /*
         WeatherSensor()
         {
-            memset(this, 0, sizeof(*this));
+            //memset(this, 0, sizeof(*this));
         };
         */
         /*!
@@ -227,15 +227,11 @@ class WeatherSensor {
         };
 
         struct Soil {
-            // TODO needed?
-            //bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
-            //bool     moisture_ok = false;   //!< moisture o.k. (only 6-in-1)
             float    temp_c;                //!< temperature in degC
             uint8_t  moisture;              //!< moisture in % (only 6-in-1)
         };
 
         struct Lightning {
-            //bool     lightning_ok = false;  //!< lightning o.k. (only lightning)
             uint8_t  distance_km;           //!< lightning distance in km (only lightning)
             uint8_t  strike_count;          //!< lightning strike counter (only lightning)
             uint16_t unknown1;              //!< unknown part 1
@@ -244,7 +240,6 @@ class WeatherSensor {
         };
 
         struct Leakage {
-            //bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
             bool     alarm;                //!< water leakage alarm (only water leakage)
         };
 
@@ -260,14 +255,14 @@ class WeatherSensor {
          * \brief sensor data and status flags
          */
         struct Sensor {
-            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
-            float    rssi;                 //!< received signal strength indicator in dBm
-            uint8_t  s_type;               //!< sensor type
-            uint8_t  chan;                 //!< channel
+            uint32_t sensor_id = 0;        //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
+            float    rssi = 0.0;           //!< received signal strength indicator in dBm
+            uint8_t  s_type = 0;           //!< sensor type
+            uint8_t  chan = 0;             //!< channel
             bool     startup = false;      //!< startup after reset / battery change
             bool     battery_ok = false;   //!< battery o.k.
-            bool     valid;                //!< data valid (but not necessarily complete)
-            bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
+            bool     valid = false;        //!< data valid (but not necessarily complete)
+            bool     complete = true;      //!< data is split into two separate messages is complete (only 6-in-1 WS)
             union {
                 struct Weather      w;
                 struct Soil         soil;
@@ -275,11 +270,6 @@ class WeatherSensor {
                 struct Leakage      leak;
                 struct AirPM        pm;
             };
-
-            Sensor ()
-            {
-                memset(this, 0, sizeof(*this));
-            }
         };
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor

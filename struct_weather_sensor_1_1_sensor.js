@@ -1,5 +1,6 @@
 var struct_weather_sensor_1_1_sensor =
 [
+    [ "Sensor", "struct_weather_sensor_1_1_sensor.html#afd11d6f1f39345f3466a7e2eebaeb2e9", null ],
     [ "battery_ok", "struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90", null ],
     [ "chan", "struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9", null ],
     [ "complete", "struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57", null ],

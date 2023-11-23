@@ -123,12 +123,8 @@ typedef struct <a class="el" href="struct_weather_sensor_1_1_sensor.html">Sensor
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa72d395844ee645e779a3b005fbd5dfd"><td class="memItemLeft" align="right" valign="top"><a id="aa72d395844ee645e779a3b005fbd5dfd"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#aa72d395844ee645e779a3b005fbd5dfd">WeatherSensor</a> ()</td></tr>
-<tr class="memdesc:aa72d395844ee645e779a3b005fbd5dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. <br /></td></tr>
-<tr class="separator:aa72d395844ee645e779a3b005fbd5dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b84d8518edf33a2f796288bb482eb8b"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">begin</a> (void)</td></tr>
-<tr class="memdesc:a9b84d8518edf33a2f796288bb482eb8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Presence check and initialization of radio module.  <a href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">More...</a><br /></td></tr>
+<tr class="memdesc:a9b84d8518edf33a2f796288bb482eb8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">More...</a><br /></td></tr>
 <tr class="separator:a9b84d8518edf33a2f796288bb482eb8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a558191760f9d9b9bf12f79f6f3e5370a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">getData</a> (uint32_t timeout, uint8_t flags=0, uint8_t type=0, void(*func)()=NULL)</td></tr>
 <tr class="memdesc:a558191760f9d9b9bf12f79f6f3e5370a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set.  <a href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">More...</a><br /></td></tr>
@@ -182,7 +178,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
       </table>
 </div><div class="memdoc">
 
-<p>Presence check and initialization of radio module. </p>
+<p>Constructor. </p>
+<p>Presence check and initialization of radio module.</p>
 <dl class="section return"><dt>Returns</dt><dd>RADIOLIB_ERR_NONE on success (otherwise does never return). </dd></dl>
 
 </div>

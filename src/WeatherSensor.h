@@ -149,12 +149,11 @@ class WeatherSensor {
         \brief Constructor.
 
         */
-       /*
         WeatherSensor()
         {
             //memset(this, 0, sizeof(*this));
         };
-        */
+        
         /*!
         \brief Presence check and initialization of radio module.
 
@@ -244,7 +243,6 @@ class WeatherSensor {
         };
 
         struct AirPM {
-            //bool     pm_ok = false;        //!< air quality (particle matter) o.k. (only 7-in-1)
             uint16_t pm_2_5;               //!< air quality PM2.5 in µg/m³
             uint16_t pm_10;                //!< air quality PM10  in µg/m³
         };
@@ -274,7 +272,7 @@ class WeatherSensor {
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
         sensor_t sensor[NUM_SENSORS];      //!< sensor data array
-        float    rssi;                     //!< received signal strength indicator in dBm
+        float    rssi = 0                  //!< received signal strength indicator in dBm
 
 
         /*!

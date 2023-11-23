@@ -149,11 +149,12 @@ class WeatherSensor {
         \brief Constructor.
 
         */
+        /*
         WeatherSensor()
         {
             //memset(this, 0, sizeof(*this));
         };
-        
+        */
         /*!
         \brief Presence check and initialization of radio module.
 
@@ -253,20 +254,25 @@ class WeatherSensor {
          * \brief sensor data and status flags
          */
         struct Sensor {
-            uint32_t sensor_id = 0;        //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
-            float    rssi = 0.0;           //!< received signal strength indicator in dBm
-            uint8_t  s_type = 0;           //!< sensor type
-            uint8_t  chan = 0;             //!< channel
-            bool     startup = false;      //!< startup after reset / battery change
-            bool     battery_ok = false;   //!< battery o.k.
-            bool     valid = false;        //!< data valid (but not necessarily complete)
-            bool     complete = true;      //!< data is split into two separate messages is complete (only 6-in-1 WS)
+            uint32_t sensor_id;        //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
+            float    rssi;             //!< received signal strength indicator in dBm
+            uint8_t  s_type;           //!< sensor type
+            uint8_t  chan;             //!< channel
+            bool     startup = false;  //!< startup after reset / battery change
+            bool     battery_ok;       //!< battery o.k.
+            bool     valid;            //!< data valid (but not necessarily complete)
+            bool     complete;         //!< data is split into two separate messages is complete (only 6-in-1 WS)
             union {
                 struct Weather      w;
                 struct Soil         soil;
                 struct Lightning    lgt;
                 struct Leakage      leak;
                 struct AirPM        pm;
+            };
+
+            Sensor ()
+            {
+                memset(this, 0, sizeof(*this));
             };
         };
 

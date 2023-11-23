@@ -13,6 +13,7 @@ var class_weather_sensor =
     [ "decodeMessage", "class_weather_sensor.html#af964b214e398132f25d4e783dffe708a", null ],
     [ "findId", "class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989", null ],
     [ "findType", "class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa", null ],
+    [ "genMessage", "class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0", null ],
     [ "getData", "class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a", null ],
     [ "getMessage", "class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf", null ],
     [ "is_decode3in1", "class_weather_sensor.html#a3fe7bfad520c8834c5f85f7b0ed9eaad", null ],

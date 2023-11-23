@@ -1,6 +1,5 @@
 var struct_weather_sensor_1_1_weather =
 [
-    [ "Weather", "struct_weather_sensor_1_1_weather.html#a9f9b44070c4984c96c92c5fd4f4fce8f", null ],
     [ "humidity", "struct_weather_sensor_1_1_weather.html#a6d6b2a367f2d206722bb93486679f19b", null ],
     [ "humidity_ok", "struct_weather_sensor_1_1_weather.html#a9ab54478c197fa9cfded3e5d7699a919", null ],
     [ "light_klx", "struct_weather_sensor_1_1_weather.html#a042b16928c1f70aef7959ad9907c60a0", null ],

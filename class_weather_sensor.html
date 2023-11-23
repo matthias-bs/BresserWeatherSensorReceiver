@@ -123,8 +123,12 @@ typedef struct <a class="el" href="struct_weather_sensor_1_1_sensor.html">Sensor
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:aa72d395844ee645e779a3b005fbd5dfd"><td class="memItemLeft" align="right" valign="top"><a id="aa72d395844ee645e779a3b005fbd5dfd"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#aa72d395844ee645e779a3b005fbd5dfd">WeatherSensor</a> ()</td></tr>
+<tr class="memdesc:aa72d395844ee645e779a3b005fbd5dfd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor. <br /></td></tr>
+<tr class="separator:aa72d395844ee645e779a3b005fbd5dfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9b84d8518edf33a2f796288bb482eb8b"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">begin</a> (void)</td></tr>
-<tr class="memdesc:a9b84d8518edf33a2f796288bb482eb8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor.  <a href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">More...</a><br /></td></tr>
+<tr class="memdesc:a9b84d8518edf33a2f796288bb482eb8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Presence check and initialization of radio module.  <a href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">More...</a><br /></td></tr>
 <tr class="separator:a9b84d8518edf33a2f796288bb482eb8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a558191760f9d9b9bf12f79f6f3e5370a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">getData</a> (uint32_t timeout, uint8_t flags=0, uint8_t type=0, void(*func)()=NULL)</td></tr>
 <tr class="memdesc:a558191760f9d9b9bf12f79f6f3e5370a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set.  <a href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">More...</a><br /></td></tr>
@@ -135,9 +139,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af964b214e398132f25d4e783dffe708a"><td class="memItemLeft" align="right" valign="top">DecodeStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#af964b214e398132f25d4e783dffe708a">decodeMessage</a> (const uint8_t *msg, uint8_t msgSize)</td></tr>
 <tr class="memdesc:af964b214e398132f25d4e783dffe708a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode message Tries the available decoders until a decoding was successful.  <a href="class_weather_sensor.html#af964b214e398132f25d4e783dffe708a">More...</a><br /></td></tr>
 <tr class="separator:af964b214e398132f25d4e783dffe708a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adffc6603766560fe6aa0cdd1200fc2a0"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0">genMessage</a> (int i, uint32_t id=0xff, uint8_t s_type=1, uint8_t channel=0, uint8_t startup=0)</td></tr>
-<tr class="memdesc:adffc6603766560fe6aa0cdd1200fc2a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generates data otherwise received and decoded from a radio message.  <a href="class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0">More...</a><br /></td></tr>
-<tr class="separator:adffc6603766560fe6aa0cdd1200fc2a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af7d1085b72f2f41e8b349e63d2628b0c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#af7d1085b72f2f41e8b349e63d2628b0c">clearSlots</a> (uint8_t type=0xFF)</td></tr>
 <tr class="memdesc:af7d1085b72f2f41e8b349e63d2628b0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear sensor data.  <a href="class_weather_sensor.html#af7d1085b72f2f41e8b349e63d2628b0c">More...</a><br /></td></tr>
 <tr class="separator:af7d1085b72f2f41e8b349e63d2628b0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,9 +155,8 @@ Public Attributes</h2></td></tr>
 <a class="el" href="class_weather_sensor.html#ae38bcb7791c9c49d5f23c150d4517dc4">sensor_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ac3edc5eaae93e8289f0267d56fa0a44a">sensor</a> [NUM_SENSORS]</td></tr>
 <tr class="memdesc:ac3edc5eaae93e8289f0267d56fa0a44a"><td class="mdescLeft">&#160;</td><td class="mdescRight">sensor data array <br /></td></tr>
 <tr class="separator:ac3edc5eaae93e8289f0267d56fa0a44a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50b72bc1883935f2ede454f57c12625e"><td class="memItemLeft" align="right" valign="top"><a id="a50b72bc1883935f2ede454f57c12625e"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e">rssi</a></td></tr>
-<tr class="memdesc:a50b72bc1883935f2ede454f57c12625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">received signal strength indicator in dBm <br /></td></tr>
+<tr class="memitem:a50b72bc1883935f2ede454f57c12625e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e">rssi</a></td></tr>
+<tr class="memdesc:a50b72bc1883935f2ede454f57c12625e"><td class="mdescLeft">&#160;</td><td class="mdescRight">received signal strength indicator in dBm  <a href="class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e">More...</a><br /></td></tr>
 <tr class="separator:a50b72bc1883935f2ede454f57c12625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -178,8 +178,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
       </table>
 </div><div class="memdoc">
 
-<p>Constructor. </p>
-<p>Presence check and initialization of radio module.</p>
+<p>Presence check and initialization of radio module. </p>
 <dl class="section return"><dt>Returns</dt><dd>RADIOLIB_ERR_NONE on success (otherwise does never return). </dd></dl>
 
 </div>
@@ -313,55 +312,6 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
 
 </div>
 </div>
-<a id="adffc6603766560fe6aa0cdd1200fc2a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adffc6603766560fe6aa0cdd1200fc2a0">&#9670;&nbsp;</a></span>genMessage()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool WeatherSensor::genMessage </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>i</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>id</em> = <code>0xff</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>s_type</em> = <code>1</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>channel</em> = <code>0</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>startup</em> = <code>0</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Generates data otherwise received and decoded from a radio message. </p>
-<dl class="section return"><dt>Returns</dt><dd>Always true (for compatibility with <a class="el" href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf" title="Tries to receive radio message (non-blocking) and to decode it. Timeout occurs after a multitude of e...">getMessage()</a>) </dd></dl>
-
-</div>
-</div>
 <a id="a558191760f9d9b9bf12f79f6f3e5370a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a558191760f9d9b9bf12f79f6f3e5370a">&#9670;&nbsp;</a></span>getData()</h2>
 
@@ -458,6 +408,28 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if sensor is in sensor_ids_decode3in1[], false otherwise </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a50b72bc1883935f2ede454f57c12625e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a50b72bc1883935f2ede454f57c12625e">&#9670;&nbsp;</a></span>rssi</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float WeatherSensor::rssi</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= 0</div>
+<div class="line"> </div>
+<div class="line"> </div>
+<div class="line">        </div>
+<div class="line">        <span class="keywordtype">bool</span>    genMessage(<span class="keywordtype">int</span> i, uint32_t <span class="keywordtype">id</span> = 0xff, uint8_t s_type = 1, uint8_t channel = 0, uint8_t startup = 0)</div>
+</div><!-- fragment -->
+<p>received signal strength indicator in dBm </p>
 
 </div>
 </div>

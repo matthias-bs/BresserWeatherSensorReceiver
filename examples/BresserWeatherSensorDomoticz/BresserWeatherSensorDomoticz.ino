@@ -271,7 +271,7 @@ uint32_t lastMillis = 0;
 uint32_t statusPublishPreviousMillis = 0;
 time_t now;
 
-void publishWeatherdata(bool complete = false);
+void publishWeatherdata(void);
 void mqtt_connect(void);
 
 /*!
@@ -398,7 +398,7 @@ void mqtt_connect(void)
   \param complete Indicate that entire data is complete, regardless of the flags temp_ok/wind_ok/rain_ok
                   (which reflect only the state of the last message)
 */
-void publishWeatherdata(bool complete)
+void publishWeatherdata(void)
 {
     String domo_payload;
     String domo2_payload;

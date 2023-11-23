@@ -205,30 +205,25 @@ class WeatherSensor {
             bool     uv_ok = false;           //!< uv radiation o.k. (only 6-in-1)
             bool     wind_ok = false;         //!< wind speed/direction o.k. (only 6-in-1)
             bool     rain_ok = false;         //!< rain gauge level o.k.
-            float    temp_c;                  //!< temperature in degC
-            float    light_klx;               //!< Light KLux (only 7-in-1)
-            float    light_lux;               //!< Light lux (only 7-in-1)
-            float    uv;                      //!< uv radiation (only 6-in-1)
-            float    rain_mm;                 //!< rain gauge level in mm
+            float    temp_c = 0.0;            //!< temperature in degC
+            float    light_klx = 0.0;         //!< Light KLux (only 7-in-1)
+            float    light_lux = 0.0;         //!< Light lux (only 7-in-1)
+            float    uv = 0.0;                //!< uv radiation (only 6-in-1)
+            float    rain_mm = 0.0;           //!< rain gauge level in mm
             #ifdef WIND_DATA_FLOATINGPOINT   
-            float    wind_direction_deg;      //!< wind direction in deg
-            float    wind_gust_meter_sec;     //!< wind speed (gusts) in m/s
-            float    wind_avg_meter_sec;      //!< wind speed (avg)   in m/s
+            float    wind_direction_deg = 0.0;  //!< wind direction in deg
+            float    wind_gust_meter_sec = 0.0; //!< wind speed (gusts) in m/s
+            float    wind_avg_meter_sec = 0.0;  //!< wind speed (avg)   in m/s
             #endif
             #ifdef WIND_DATA_FIXEDPOINT
             // For LoRa_Serialization:
             //   fixed point integer with 1 decimal -
             //   saves two bytes compared to "RawFloat"
-            uint16_t wind_direction_deg_fp1;  //!< wind direction in deg (fixed point int w. 1 decimal)
-            uint16_t wind_gust_meter_sec_fp1; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
-            uint16_t wind_avg_meter_sec_fp1;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_direction_deg_fp1 = 0;  //!< wind direction in deg (fixed point int w. 1 decimal)
+            uint16_t wind_gust_meter_sec_fp1 = 0; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_avg_meter_sec_fp1 = 0;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
             #endif
-            uint8_t  humidity;                //!< humidity in %
-
-            Weather() {
-                memset(this, 0, sizeof(*this));
-            };
-
+            uint8_t  humidity = 0;                //!< humidity in %
         };
 
         struct Soil {

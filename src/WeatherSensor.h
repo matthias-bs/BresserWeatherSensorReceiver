@@ -272,7 +272,7 @@ class WeatherSensor {
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
         sensor_t sensor[NUM_SENSORS];      //!< sensor data array
-        float    rssi = 0                  //!< received signal strength indicator in dBm
+        float    rssi = 0.0;               //!< received signal strength indicator in dBm
 
 
         /*!

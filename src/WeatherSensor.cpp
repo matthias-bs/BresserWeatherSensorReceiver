@@ -74,6 +74,7 @@
 // 20231030 Refactored sensor data using a union to save memory
 // 20231101 Added radio transceiver SX1262
 // 20231112 Added setting of rain_ok in genMessage()
+// 20231125 Added changed reception to interrupt mode
 //
 // ToDo:
 // -
@@ -102,6 +103,20 @@ uint32_t const sensor_ids_inc[] = SENSOR_IDS_INC;
 // List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
 // P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
 uint32_t const sensor_ids_decode3in1[] = SENSOR_IDS_DECODE3IN1;
+
+// Flag to indicate that a packet was received
+volatile bool receivedFlag = false;
+
+// This function is called when a complete packet is received by the module
+// IMPORTANT: This function MUST be 'void' type and MUST NOT have any arguments!
+void
+#if defined(ESP8266) || defined(ESP32)
+  IRAM_ATTR
+#endif
+setFlag(void) {
+  // We got a packet, set the flag
+  receivedFlag = true;
+}
 
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
@@ -162,6 +177,14 @@ int16_t WeatherSensor::begin(void) {
     }
     log_d("%s Setup complete - awaiting incoming messages...", RECEIVER_CHIP);
     rssi = radio.getRSSI();
+
+    // Set callback function
+    radio.setPacketReceivedAction(setFlag);
+    state = radio.startReceive();
+    if (state != RADIOLIB_ERR_NONE) {
+        log_e("%s startReceive() failed, code %d", state);
+        while (true);
+    }
 
     return state;
 }
@@ -230,36 +253,43 @@ DecodeStatus WeatherSensor::getMessage(void)
     DecodeStatus    decode_res = DECODE_INVALID;
 
     // Receive data
-    //     1. flush RX buffer
-    //     2. switch to RX mode
-    //     3. wait for expected RX packet or timeout [~500us in this configuration]
-    //     4. flush RX buffer
-    //     5. switch to standby
-    int state = radio.receive(recvData, MSG_BUF_SIZE);
-    rssi = radio.getRSSI();
+    if (receivedFlag) {
+        receivedFlag = false;
+    
 
-    if (state == RADIOLIB_ERR_NONE) {
-        // Verify last syncword is 1st byte of payload (see setSyncWord() above)
-        if (recvData[0] == 0xD4) {
-            #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
-                char buf[128];
-                *buf = '\0';
-                for(size_t i = 0 ; i < sizeof(recvData) ; i++) {
-                    sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
-                }
-                log_v("%s Data: %s", RECEIVER_CHIP, buf);
-            #endif
-            log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
+        //byte byteArr[8];
+        int numBytes = radio.getPacketLength();
+        int state = radio.readData(recvData, numBytes);
+        rssi = radio.getRSSI();
 
-            decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
-        } // if (recvData[0] == 0xD4)
-    } // if (state == RADIOLIB_ERR_NONE)
-    else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
-        log_v("T");
-    } 
-    else {
-        // some other error occurred
-        log_d("%s Receive failed: [%d]", RECEIVER_CHIP, state);
+        if (state == RADIOLIB_ERR_NONE) {
+            // Verify last syncword is 1st byte of payload (see setSyncWord() above)
+            if (recvData[0] == 0xD4) {
+                #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+                    char buf[128];
+                    *buf = '\0';
+                    for(size_t i = 0 ; i < sizeof(recvData) ; i++) {
+                        sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
+                    }
+                    log_v("%s Data: %s", RECEIVER_CHIP, buf);
+                #endif
+                log_d("%s R [%02X] RSSI: %0.1f", RECEIVER_CHIP, recvData[0], rssi);
+
+                decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
+            } // if (recvData[0] == 0xD4)
+        } // if (state == RADIOLIB_ERR_NONE)
+        else if (state == RADIOLIB_ERR_RX_TIMEOUT) {
+            log_v("T");
+        } 
+        else {
+            // some other error occurred
+            log_d("%s Receive failed: [%d]", RECEIVER_CHIP, state);
+        }
+        state = radio.startReceive();
+        if (state != RADIOLIB_ERR_NONE) {
+            log_e("%s startReceive() failed, code %d", state);
+            while (true);
+        }
     }
 
     return decode_res;

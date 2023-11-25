@@ -402,7 +402,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
     int free_slot   = -1;
     int update_slot = -1;
     for (int i=0; i<NUM_SENSORS; i++) {
-        log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+        log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, static_cast<unsigned int> (sensor[i].sensor_id), sensor[i].s_type, sensor[i].complete);
 
         // Save first free slot
         if (!sensor[i].valid && (free_slot < 0)) {

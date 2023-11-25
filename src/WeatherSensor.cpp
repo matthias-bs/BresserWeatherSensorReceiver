@@ -74,7 +74,7 @@
 // 20231030 Refactored sensor data using a union to save memory
 // 20231101 Added radio transceiver SX1262
 // 20231112 Added setting of rain_ok in genMessage()
-// 20231125 Added changed reception to interrupt mode
+// 20231125 Changed reception to interrupt mode
 //
 // ToDo:
 // -

@@ -256,10 +256,8 @@ DecodeStatus WeatherSensor::getMessage(void)
     if (receivedFlag) {
         receivedFlag = false;
     
-
-        //byte byteArr[8];
-        int numBytes = radio.getPacketLength();
-        int state = radio.readData(recvData, numBytes);
+        //int numBytes = radio.getPacketLength();
+        int state = radio.readData(recvData, MSG_BUF_SIZE);
         rssi = radio.getRSSI();
 
         if (state == RADIOLIB_ERR_NONE) {

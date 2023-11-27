@@ -49,6 +49,7 @@
 // 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
 // 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
 // 20231101 Added USE_SX1262 for Heltec Wireless Stick V3
+// 20231121 Added Heltec WiFi LoRa32 V3
 //
 // ToDo:
 // -
@@ -174,6 +175,10 @@
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
+
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
+    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 defined; using on-board transceiver")
+    #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
@@ -414,6 +419,19 @@
 
     // CC1101: GDO2 / RFM95W/SX127x: G1
     #define PIN_RECEIVER_GPIO DIO1
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  RST_LoRa
+
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
+    // Use pinning for Heltec WiFi LoRa32 V3
+    #define PIN_RECEIVER_CS   SS
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0 / SX1262: DIO0
+    #define PIN_RECEIVER_IRQ  DIO0
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 / SX1262: BUSY
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa

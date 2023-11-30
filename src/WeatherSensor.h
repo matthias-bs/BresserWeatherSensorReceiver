@@ -65,6 +65,8 @@
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
 //          Modified device type definitions
 // 20231030 Refactored sensor data using a union to save memory
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+//          for negative temperatures by fix (6-in-1 decoder)
 //
 // ToDo:
 // -
@@ -326,16 +328,6 @@ class WeatherSensor {
          * \returns         slot (or -1 if not found)
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
-
-        /*!
-         * Check if sensor ID is in sensor_ids_decode3in1[]
-         *
-         * \param id        sensor ID
-         *
-         * \returns         true if sensor is in sensor_ids_decode3in1[],
-         *                  false otherwise 
-         */
-        bool is_decode3in1(uint32_t id);
         
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array

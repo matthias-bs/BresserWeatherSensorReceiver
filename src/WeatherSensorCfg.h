@@ -50,6 +50,8 @@
 // 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
 // 20231101 Added USE_SX1262 for Heltec Wireless Stick V3
 // 20231121 Added Heltec WiFi LoRa32 V3
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+//          for negative temperatures by fix (6-in-1 decoder)
 //
 // ToDo:
 // -
@@ -73,11 +75,6 @@
 // List of sensor IDs to be included - if empty, handle all available sensors
 #define SENSOR_IDS_INC {}
 //#define SENSOR_IDS_INC { 0x83750871 }
-
-// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
-// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
-//#define SENSOR_IDS_DECODE3IN1 {}
-#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
 
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT

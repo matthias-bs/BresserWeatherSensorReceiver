@@ -197,7 +197,7 @@
 
 #elif defined(ARDUINO_ESP32_DEV)
     //#define LORAWAN_NODE
-    #define FIREBEETLE_ESP32_COVER_LORA
+    //#define FIREBEETLE_ESP32_COVER_LORA
 
     #if defined(FIREBEETLE_ESP32_COVER_LORA)
         #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
@@ -209,8 +209,8 @@
         #define USE_SX1276
 
     #else
-        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
-        
+        #pragma message("ARDUINO_ESP32_DEV defined; if you use one of those boards, select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+
     #endif
 #endif
 

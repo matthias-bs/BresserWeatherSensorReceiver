@@ -24,14 +24,14 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | ------------- | ---- | ------------------------------- |
 | 7002510..12, 9602510   | Weather Station | decodeBresser**5In1**Payload()  |
 | 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
-| *7002531*       | *3-in-1 Professional Wind Gauge / Anemometer* | *decodeBresser**6In1**Payload()* **1)** |
+| 7002531       | 3-in-1 Professional Wind Gauge / Anemometer | decodeBresser**6In1**Payload() |
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009970       | Air Quality Sensor PM 2.5 / PM 10 | decodeBresser**7In1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7009973       | Pool / Spa Thermometer           | decodeBresser**6In1**Payload() |
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
-| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **3)** |
+| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **1)** |
 | 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
 | 7003210       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
@@ -47,11 +47,10 @@ Some guesswork:
 | 790*             | Weather Station Base (Replacement) |
 | 700[99]*         | Accessory Sensor |
 
-**1)** Manual configuration required, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
+**1)** Work in progress
 
 **2)** The part number is specific to the actual variant, i.e. some more characters are appended
 
-**3)** Work in progress
 
 ## Configuration
 

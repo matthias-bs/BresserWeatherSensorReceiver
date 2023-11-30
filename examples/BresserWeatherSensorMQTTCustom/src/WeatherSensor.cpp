@@ -74,6 +74,8 @@
 // 20231030 Refactored sensor data using a union to save memory
 // 20231101 Added radio transceiver SX1262
 // 20231112 Added setting of rain_ok in genMessage()
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+//          for negative temperatures by fix (6-in-1 decoder)
 //
 // ToDo:
 // -
@@ -99,9 +101,6 @@ uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
 // List of sensor IDs to be included - if empty, handle all available sensors
 uint32_t const sensor_ids_inc[] = SENSOR_IDS_INC;
 
-// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
-// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
-uint32_t const sensor_ids_decode3in1[] = SENSOR_IDS_DECODE3IN1;
 
 int16_t WeatherSensor::begin(void) {
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
@@ -402,7 +401,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus * status)
     int free_slot   = -1;
     int update_slot = -1;
     for (int i=0; i<NUM_SENSORS; i++) {
-        log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+        log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, static_cast<unsigned int> (sensor[i].sensor_id), sensor[i].s_type, sensor[i].complete);
 
         // Save first free slot
         if (!sensor[i].valid && (free_slot < 0)) {
@@ -462,22 +461,6 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
     return -1;
 }
 
-//
-// Check if sensor is in sensor_ids_decode3in1[]
-//
-bool WeatherSensor::is_decode3in1(uint32_t id)
-{
-    uint8_t n_3in1 = sizeof(sensor_ids_decode3in1)/4;
-    if (n_3in1 != 0) {
-       for (int i=0; i<n_3in1; i++) {
-           if (id == sensor_ids_decode3in1[i]) {
-               log_v("ID %08X is a Professional Wind Gauge", id);
-               return true;
-           }
-       }
-    }
-    return false;
-}
 
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c
@@ -811,8 +794,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].startup     = ((msg[6] & 0x8) == 0) ? true : false; // s.a. #1214
     sensor[slot].battery_ok  = (msg[13] >> 1) & 1; // b[13] & 0x02 is battery_good, s.a. #1993
 
-    f_3in1 = is_decode3in1(id_tmp);
-
     // temperature, humidity(, uv) - shared with rain counter
     temp_ok = humidity_ok = (flags == 0);
     float temp = 0;
@@ -820,13 +801,14 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         bool  sign     = (msg[13] >> 3) & 1;
         int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
         
-        // Workaround for 3-in-1 Professional Wind Gauge / Anemometer 
-        if (f_3in1) {
-            temp     = ((sign) ? -temp_raw : temp_raw) * 0.1f;
-        } else {
-            temp     = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
+        temp = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
+
+        // Correction for Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531
+        // The temperature range (as far as provided in other Bresser manuals) is -40...+60°C
+        if (temp < -50.0) {
+            temp = -temp_raw * 0.1f;
         }
-        
+
         sensor[slot].w.temp_c      = temp;
         sensor[slot].w.humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 

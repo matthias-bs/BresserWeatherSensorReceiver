@@ -49,6 +49,9 @@
 // 20230927 Removed _DEBUG_MODE_ (log_d() is used instead)
 // 20231004 Added function names and line numbers to ESP8266/RP2040 debug logging
 // 20231101 Added USE_SX1262 for Heltec Wireless Stick V3
+// 20231121 Added Heltec WiFi LoRa32 V3
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+//          for negative temperatures by fix (6-in-1 decoder)
 //
 // ToDo:
 // -
@@ -72,11 +75,6 @@
 // List of sensor IDs to be included - if empty, handle all available sensors
 #define SENSOR_IDS_INC {}
 //#define SENSOR_IDS_INC { 0x83750871 }
-
-// List of sensor IDs of the model "BRESSER 3-in-1 Professional Wind Gauge / Anemometer"
-// P/N 7002531 - requiring special heandling in decodeBresser5In1Payload()
-//#define SENSOR_IDS_DECODE3IN1 {}
-#define SENSOR_IDS_DECODE3IN1 { 0x2C100512 }
 
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT
@@ -175,6 +173,10 @@
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
 
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
+    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 defined; using on-board transceiver")
+    #define USE_SX1262
+
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
@@ -195,7 +197,7 @@
 
 #elif defined(ARDUINO_ESP32_DEV)
     //#define LORAWAN_NODE
-    #define FIREBEETLE_ESP32_COVER_LORA
+    //#define FIREBEETLE_ESP32_COVER_LORA
 
     #if defined(FIREBEETLE_ESP32_COVER_LORA)
         #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
@@ -207,8 +209,8 @@
         #define USE_SX1276
 
     #else
-        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
-        
+        #pragma message("ARDUINO_ESP32_DEV defined; if you use one of those boards, select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+
     #endif
 #endif
 
@@ -414,6 +416,19 @@
 
     // CC1101: GDO2 / RFM95W/SX127x: G1
     #define PIN_RECEIVER_GPIO DIO1
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  RST_LoRa
+
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
+    // Use pinning for Heltec WiFi LoRa32 V3
+    #define PIN_RECEIVER_CS   SS
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0 / SX1262: DIO0
+    #define PIN_RECEIVER_IRQ  DIO0
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 / SX1262: BUSY
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa

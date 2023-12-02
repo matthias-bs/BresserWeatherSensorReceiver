@@ -140,6 +140,13 @@ int16_t WeatherSensor::begin(void)
     if (state == RADIOLIB_ERR_NONE)
     {
         log_d("success!");
+        state = radio.fixedPacketLengthMode(MSG_BUF_SIZE);
+        if (state != RADIOLIB_ERR_NONE)
+        {
+            log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
+            while (true)
+                ;
+        }
 #ifdef USE_SX1262
         state = radio.setCRC(0);
 #else
@@ -151,13 +158,7 @@ int16_t WeatherSensor::begin(void)
             while (true)
                 ;
         }
-        state = radio.fixedPacketLengthMode(MSG_BUF_SIZE);
-        if (state != RADIOLIB_ERR_NONE)
-        {
-            log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
-            while (true)
-                ;
-        }
+
 // Preamble: AA AA AA AA AA
 // Sync is: 2D D4
 // Preamble 40 bits but the CC1101 doesn't allow us to set that
@@ -227,7 +228,8 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                 }
 
                 // No special requirements, one valid message is sufficient
-                if (flags == 0) {
+                if (flags == 0)
+                {
                     radio.sleep();
                     return true;
                 }

@@ -76,6 +76,7 @@
 // 20231112 Added setting of rain_ok in genMessage()
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
+// 20231202 Changed reception to interrupt mode to fix issues with CC1101 and SX1262
 //
 // ToDo:
 // -

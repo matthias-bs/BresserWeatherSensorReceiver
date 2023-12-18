@@ -77,6 +77,7 @@
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231202 Changed reception to interrupt mode to fix issues with CC1101 and SX1262
+// 20231218 Fixed inadvertent end of reception due to transceiver sleep mode
 //
 // ToDo:
 // -
@@ -202,7 +203,9 @@ int16_t WeatherSensor::begin(void)
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())
 {
     const uint32_t timestamp = millis();
-
+    
+    radio.startReceive();
+    
     while ((millis() - timestamp) < timeout)
     {
         int decode_status = getMessage();
@@ -228,7 +231,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                 // No special requirements, one valid message is sufficient
                 if (flags == 0)
                 {
-                    radio.sleep();
+                    radio.standby();
                     return true;
                 }
 
@@ -237,7 +240,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                 {
                     if (sensor[i].complete || !(flags & DATA_COMPLETE))
                     {
-                        radio.sleep();
+                        radio.standby();
                         return true;
                     }
                 }
@@ -250,7 +253,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                 // At least one sensor valid and complete
                 else if (sensor[i].complete)
                 {
-                    radio.sleep();
+                    radio.standby();
                     return true;
                 }
             } // for (int i=0; i<NUM_SENSORS; i++)
@@ -258,7 +261,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
             // All slots required (valid AND complete)
             if ((flags & DATA_ALL_SLOTS) && all_slots_valid && all_slots_complete)
             {
-                radio.sleep();
+                radio.standby();
                 return true;
             }
 
@@ -266,7 +269,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
     }     //  while ((millis() - timestamp) < timeout)
 
     // Timeout
-    radio.sleep();
+    radio.standby();
     return false;
 }
 

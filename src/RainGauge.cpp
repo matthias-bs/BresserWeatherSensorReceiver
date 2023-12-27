@@ -39,6 +39,7 @@
 // 20220830 Created
 // 20230716 Implemented sensor startup handling
 // 20230817 Implemented partial reset
+// 20231227 Added prerequisites for storing rain data in preferences
 //
 // ToDo: 
 // -
@@ -46,7 +47,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
+#include "WeatherSensorCfg.h"
 #include "RainGauge.h"
+
+#if defined(RAINGAUGE_USE_PREFS)
+    #include <Preferences.h>
+#endif
 
 const int SECONDS_PER_HOUR = 3600;
 const int SECONDS_PER_DAY  = 86400;
@@ -113,6 +119,9 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainOvf = 0
 };
 
+#if defined(RAINGAUGE_USE_PREFS)
+static Preferences preferences;
+#endif
 
 /**
  * \verbatim
@@ -223,6 +232,57 @@ RainGauge::init(tm t, float rain)
     nvData.tail = 0;
     nvData.tsDayBegin = t.tm_wday;
 }
+
+#if defined(RAINGAUGE_USE_PREFS)
+void
+RainGauge::prefs_load(void)
+{
+    preferences.begin("BWS-RAIN", false);
+    nvData.startupPrev    = preferences.getBool("startupPrev", false);
+    nvData.rainStartup    = preferences.getFloat("rainStartup", 0);
+    nvData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
+    nvData.rainDayBegin   = preferences.getFloat("rainDayBegin", 0);
+    nvData.tsWeekBegin    = preferences.getUChar("tsWeekBegin", 0xFF);
+    nvData.rainWeekBegin  = preferences.getFloat("rainWeekBegin", 0);
+    nvData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
+    nvData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
+    nvData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
+    nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
+    nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
+
+    //preferences.getBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
+    log_d("Preferences: startupPrev    =%d", nvData.startupPrev);
+    log_d("Preferences: rainStartup    =%d", nvData.rainStartup);
+    log_d("Preferences: tsDayBegin     =%d", nvData.tsDayBegin);
+    log_d("Preferences: rainDayBegin   =%f", nvData.rainDayBegin);
+    log_d("Preferences: tsWeekBegin    =%d", nvData.tsWeekBegin);
+    log_d("Preferences: rainWeekBegin  =%f", nvData.rainWeekBegin);
+    log_d("Preferences: wdayPrev       =%d", nvData.wdayPrev);
+    log_d("Preferences: tsMonthBegin   =%d", nvData.tsMonthBegin);
+    log_d("Preferences: rainMonthBegin =%f", nvData.rainMonthBegin);
+    log_d("Preferences: rainPrev       =%f", nvData.rainPrev);
+    log_d("Preferences: rainOvf        =%d", nvData.rainOvf);
+    preferences.end();
+}
+
+void
+RainGauge::prefs_save(void)
+{
+    preferences.begin("BWS-RAIN", false);
+    preferences.putBool("startupPrev", nvData.startupPrev);
+    preferences.getFloat("rainStartup", nvData.rainStartup);
+    preferences.getUChar("tsDayBegin", nvData.tsDayBegin);
+    preferences.getFloat("rainDayBegin", nvData.tsDayBegin);
+    preferences.getUChar("tsWeekBegin", nvData.tsWeekBegin);
+    preferences.getFloat("rainWeekBegin", nvData.rainWeekBegin);
+    preferences.getUChar("wdayPrev", nvData.wdayPrev);
+    preferences.getUChar("tsMonthBegin", nvData.tsMonthBegin);
+    preferences.getFloat("rainMonthBegin", nvData.rainMonthBegin);
+    preferences.getFloat("rainPrev", nvData.rainPrev);
+    preferences.getUShort("rainOvf", nvData.rainOvf);
+    preferences.end();
+}
+#endif
 
 uint32_t
 RainGauge::timeStamp(tm t)

@@ -63,7 +63,6 @@
 #endif
 #include "WeatherSensorCfg.h"
 
-#define LIGHTNING_USE_PREFS
 
 /**
  * \def
@@ -109,7 +108,7 @@ public:
      * 
      * \param count     number of events
      */
-    void  hist_init(uint16_t count = -1);
+    void  hist_init(int16_t count = -1);
     
     #if defined(LIGHTNING_USE_PREFS)
     void prefs_load(void);
@@ -129,7 +128,7 @@ public:
      * 
      * \param lightningCountMax overflow value; when reached, the sensor's counter is reset to zero
      */  
-    void  update(time_t timestamp, int count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
+    void  update(time_t timestamp, int16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
     
     
     /**

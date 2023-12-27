@@ -86,7 +86,7 @@ void loop()
 
     if (decode_status == DECODE_OK) {
         Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
-            (unsigned int)ws.sensor[i].sensor_id,
+            static_cast<int> (ws.sensor[i].sensor_id),
             ws.sensor[i].s_type,
             ws.sensor[i].chan,
             ws.sensor[i].startup,

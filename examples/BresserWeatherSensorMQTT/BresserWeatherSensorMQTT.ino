@@ -626,7 +626,7 @@ void publishWeatherdata(bool complete)
         // Try to map sensor ID to name to make MQTT topic explanatory
         String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
         if (sizeof(sensor_map) > 0) {
-          for (int n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+          for (size_t n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
             if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
               sensor_str = String(sensor_map[n].name.c_str());
               break;

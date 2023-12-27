@@ -86,6 +86,8 @@
 // 20230826 Added hourly (past 60 minutes) rainfall as 'rain_h'
 // 20231030 Fixed and improved mapping of sensor IDs to names
 //          Refactored struct Sensor
+// 20231103 Improved handling of time and date
+// 20231110 Fixed false double reset detection on wake-up from deep sleep
 //
 // ToDo:
 //
@@ -109,8 +111,28 @@
 
 #include <Arduino.h>
 
+#if CONFIG_IDF_TARGET_ESP32 // ESP32/PICO-D4
+#include "esp32/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S2
+#include "esp32s2/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32C3
+#include "esp32c3/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32S3
+#include "esp32s3/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32C6
+#include "esp32c6/rom/rtc.h"
+#elif CONFIG_IDF_TARGET_ESP32H2
+#include "esp32h2/rom/rtc.h"
+#else 
+#if !defined(ESP8266)
+#error Target CONFIG_IDF_TARGET is not supported
+#endif
+#endif
+
+
 // Library Defines - Need to be defined before library import
 #define ESP_DRD_USE_SPIFFS true
+#define DOUBLERESETDETECTOR_DEBUG true
 
 // BEGIN User specific options
 // #define LED_EN                  // Enable LED indicating successful data reception
@@ -129,6 +151,8 @@
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 // #define USE_SECUREWIFI          // use secure WIFI
 #define USE_WIFI // use non-secure WIFI
+// Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 // Stop reception when data of at least one sensor is complete
 #define RX_STRATEGY DATA_COMPLETE
@@ -140,7 +164,7 @@
 
 // Number of seconds after reset during which a
 // subseqent reset will be considered a double reset.
-#define DRD_TIMEOUT 10
+#define DRD_TIMEOUT 5
 
 // RTC Memory Address for the DoubleResetDetector to use
 #define DRD_ADDRESS 0
@@ -202,7 +226,7 @@
 const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr";
 
 // Map sensor IDs to Names
-SensorMap sensor_map[NUM_SENSORS] = {
+SensorMap sensor_map[] = {
     {0x39582376, "WeatherSensor"}
     //,{0x83750871, "SoilMoisture-1"}
 };
@@ -337,11 +361,39 @@ MQTTClient client(PAYLOAD_SIZE);
 
 uint32_t lastMillis = 0;
 uint32_t statusPublishPreviousMillis = 0;
-time_t now;
 
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
 
+/*! 
+ * \brief Set RTC
+ *
+ * \param epoch Time since epoch
+ * \param ms unused
+ */
+void setTime(unsigned long epoch, int ms) {
+  struct timeval tv;
+  
+  if (epoch > 2082758399){
+	  tv.tv_sec = epoch - 2082758399;  // epoch time (seconds)
+  } else {
+	  tv.tv_sec = epoch;  // epoch time (seconds)
+  }
+  tv.tv_usec = ms;    // microseconds
+  settimeofday(&tv, NULL);
+}
+
+/// Print date and time (i.e. local time)
+void printDateTime(void) {
+        struct tm timeinfo;
+        char tbuf[25];
+        
+        time_t tnow;
+        time(&tnow);
+        localtime_r(&tnow, &timeinfo);
+        strftime(tbuf, 25, "%Y-%m-%d %H:%M:%S", &timeinfo);
+        log_i("%s", tbuf);
+}
 /*!
  * \brief Callback notifying us of the need to save config
  */
@@ -354,7 +406,7 @@ void saveConfigCallback()
 /*!
  * \brief Wait for WiFi connection
  *
- * \param wifi_retres   max. no. of retries
+ * \param wifi_retries   max. no. of retries
  * \param wifi_delay    delay in ms before each attemüt
  */
 void wifi_wait(int wifi_retries, int wifi_delay)
@@ -538,17 +590,25 @@ void mqtt_setup(void)
     // Note: TLS security needs correct time
     log_i("Setting time using SNTP");
     configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
-    now = time(nullptr);
+    time_t now = time(nullptr);
+    int retries = 10;
     while (now < 1510592825)
     {
+        if (--retries == 0)
+            break;
         delay(500);
         Serial.print(".");
         now = time(nullptr);
     }
-    log_i("\ndone!");
+    if (retries == 0) {
+        log_w("\nSetting time using SNTP failed!");
+    } else {
+        log_i("\ndone!");
+        setTime(time(nullptr), 0);
+    }
     struct tm timeinfo;
     gmtime_r(&now, &timeinfo);
-    log_i("Current time: %s", asctime(&timeinfo));
+    log_i("Current time (GMT): %s", asctime(&timeinfo));
 
 #if defined(ESP8266)
 #ifdef CHECK_CA_ROOT
@@ -648,7 +708,8 @@ void publishWeatherdata(bool complete)
         if (weatherSensor.sensor[i].w.rain_ok)
         {
             struct tm timeinfo;
-            gmtime_r(&now, &timeinfo);
+            time_t now = time(nullptr);
+            localtime_r(&now, &timeinfo);
             rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
         }
 
@@ -657,9 +718,7 @@ void publishWeatherdata(bool complete)
         mqtt_payload = "{";
         mqtt_payload2 = "{";
         mqtt_payload += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
-#ifdef BRESSER_6_IN_1
         mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
-#endif
         mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
 
         if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
@@ -674,7 +733,10 @@ void publishWeatherdata(bool complete)
             mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
             mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
         }
-        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) || (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || (SENSOR_TYPE_POOL_THERMO))
+        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
 
             if (weatherSensor.sensor[i].w.temp_ok || complete)
@@ -737,17 +799,14 @@ void publishWeatherdata(bool complete)
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
-        String sensor_str;
-        for (int n = 0; n < NUM_SENSORS; n++)
-        {
-            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id)
-            {
-                sensor_str = String(sensor_map[n].name.c_str());
+        String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
+        if (sizeof(sensor_map) > 0) {
+          for (size_t n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
+            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
+              sensor_str = String(sensor_map[n].name.c_str());
+              break;
             }
-            else
-            {
-                sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
-            }
+          }
         }
 
         String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
@@ -809,6 +868,16 @@ void setup()
     Serial.setDebugOutput(true);
     log_i("\n\n%s\n", sketch_id);
 
+    // Detect reset reason:
+    // see
+    // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
+    log_d("CPU0 reset reason: %d", rtc_get_reset_reason(0));
+    log_d("CPU1 reset reason: %d", rtc_get_reset_reason(1));
+
+    // Set time zone
+    setenv("TZ", TZ_INFO, 1);
+    printDateTime();
+
 #ifdef LED_EN
     // Configure LED output pins
     pinMode(LED_GPIO, OUTPUT);
@@ -832,7 +901,17 @@ void setup()
     mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
-    if (drd->detectDoubleReset())
+
+    #if defined(ESP32)
+        bool hw_reset = (rtc_get_reset_reason(0) == 1);
+    #elif defined(ESP8266)
+        rst_info *resetInfo;
+        resetInfo = ESP.getResetInfoPtr();
+        bool hw_reset = (resetInfo->reason == REASON_EXT_SYS_RST);
+    #endif
+
+    // HW power-on/HW reset AND DoubleReset
+    if (hw_reset && drd->detectDoubleReset())
     {
         Serial.println(F("Forcing config mode as there was a Double reset detected"));
         forceConfig = true;

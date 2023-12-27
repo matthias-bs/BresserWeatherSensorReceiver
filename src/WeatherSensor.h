@@ -65,6 +65,9 @@
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor, P/N 7009970
 //          Modified device type definitions
 // 20231030 Refactored sensor data using a union to save memory
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+//          for negative temperatures by fix (6-in-1 decoder)
+// 20231227 Added sleep()
 //
 // ToDo:
 // -
@@ -152,6 +155,10 @@ class WeatherSensor {
         */
         int16_t begin(void);
 
+        /*!
+        \brief Set transceiver into sleep mode
+        */
+        void sleep(void);
 
         /*!
         \brief Wait for reception of data or occurrance of timeout.
@@ -195,30 +202,25 @@ class WeatherSensor {
             bool     uv_ok = false;           //!< uv radiation o.k. (only 6-in-1)
             bool     wind_ok = false;         //!< wind speed/direction o.k. (only 6-in-1)
             bool     rain_ok = false;         //!< rain gauge level o.k.
-            float    temp_c;                  //!< temperature in degC
-            float    light_klx;               //!< Light KLux (only 7-in-1)
-            float    light_lux;               //!< Light lux (only 7-in-1)
-            float    uv;                      //!< uv radiation (only 6-in-1)
-            float    rain_mm;                 //!< rain gauge level in mm
+            float    temp_c = 0.0;            //!< temperature in degC
+            float    light_klx = 0.0;         //!< Light KLux (only 7-in-1)
+            float    light_lux = 0.0;         //!< Light lux (only 7-in-1)
+            float    uv = 0.0;                //!< uv radiation (only 6-in-1)
+            float    rain_mm = 0.0;           //!< rain gauge level in mm
             #ifdef WIND_DATA_FLOATINGPOINT   
-            float    wind_direction_deg;      //!< wind direction in deg
-            float    wind_gust_meter_sec;     //!< wind speed (gusts) in m/s
-            float    wind_avg_meter_sec;      //!< wind speed (avg)   in m/s
+            float    wind_direction_deg = 0.0;  //!< wind direction in deg
+            float    wind_gust_meter_sec = 0.0; //!< wind speed (gusts) in m/s
+            float    wind_avg_meter_sec = 0.0;  //!< wind speed (avg)   in m/s
             #endif
             #ifdef WIND_DATA_FIXEDPOINT
             // For LoRa_Serialization:
             //   fixed point integer with 1 decimal -
             //   saves two bytes compared to "RawFloat"
-            uint16_t wind_direction_deg_fp1;  //!< wind direction in deg (fixed point int w. 1 decimal)
-            uint16_t wind_gust_meter_sec_fp1; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
-            uint16_t wind_avg_meter_sec_fp1;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_direction_deg_fp1 = 0;  //!< wind direction in deg (fixed point int w. 1 decimal)
+            uint16_t wind_gust_meter_sec_fp1 = 0; //!< wind speed (gusts) in m/s (fixed point int w. 1 decimal)
+            uint16_t wind_avg_meter_sec_fp1 = 0;  //!< wind speed (avg)   in m/s (fixed point int w. 1 decimal)
             #endif
-            uint8_t  humidity;                //!< humidity in %
-
-            Weather() {
-                memset(this, 0, sizeof(*this));
-            };
-
+            uint8_t  humidity = 0;                //!< humidity in %
         };
 
         struct Soil {
@@ -249,14 +251,14 @@ class WeatherSensor {
          * \brief sensor data and status flags
          */
         struct Sensor {
-            uint32_t sensor_id;            //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
-            float    rssi;                 //!< received signal strength indicator in dBm
-            uint8_t  s_type;               //!< sensor type
-            uint8_t  chan;                 //!< channel
-            bool     startup = false;      //!< startup after reset / battery change
-            bool     battery_ok = false;   //!< battery o.k.
-            bool     valid;                //!< data valid (but not necessarily complete)
-            bool     complete;             //!< data is split into two separate messages is complete (only 6-in-1 WS)
+            uint32_t sensor_id;        //!< sensor ID (5-in-1: 1 byte / 6-in-1: 4 bytes / 7-in-1: 2 bytes)
+            float    rssi;             //!< received signal strength indicator in dBm
+            uint8_t  s_type;           //!< sensor type
+            uint8_t  chan;             //!< channel
+            bool     startup = false;  //!< startup after reset / battery change
+            bool     battery_ok;       //!< battery o.k.
+            bool     valid;            //!< data valid (but not necessarily complete)
+            bool     complete;         //!< data is split into two separate messages is complete (only 6-in-1 WS)
             union {
                 struct Weather      w;
                 struct Soil         soil;
@@ -268,12 +270,12 @@ class WeatherSensor {
             Sensor ()
             {
                 memset(this, 0, sizeof(*this));
-            }
+            };
         };
 
         typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
         sensor_t sensor[NUM_SENSORS];      //!< sensor data array
-        float    rssi;                     //!< received signal strength indicator in dBm
+        float    rssi = 0.0;               //!< received signal strength indicator in dBm
 
 
         /*!
@@ -321,16 +323,6 @@ class WeatherSensor {
          * \returns         slot (or -1 if not found)
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
-
-        /*!
-         * Check if sensor ID is in sensor_ids_decode3in1[]
-         *
-         * \param id        sensor ID
-         *
-         * \returns         true if sensor is in sensor_ids_decode3in1[],
-         *                  false otherwise 
-         */
-        bool is_decode3in1(uint32_t id);
         
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array

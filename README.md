@@ -1,5 +1,3 @@
-:warning: **With CC1101 please use [RadioLib v6.1.0](https://github.com/jgromes/RadioLib/releases/tag/6.1.0) instead of [RadioLib v6.2.0](https://github.com/jgromes/RadioLib/releases/tag/6.2.0)! See https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/91.**
-
 # BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->
 [![CppUTest](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml)
@@ -7,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/LICENSE)
 [![arduino-library-badge](https://www.ardu-badge.com/badge/BresserWeatherSensorReceiver.svg?)](https://www.ardu-badge.com/BresserWeatherSensorReceiver)
 
-Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101 or SX1276/RFM95W
+Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W or SX1262
 
 **See the [Wiki](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki) for additional information.**
 
@@ -24,14 +22,14 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | ------------- | ---- | ------------------------------- |
 | 7002510..12, 9602510   | Weather Station | decodeBresser**5In1**Payload()  |
 | 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
-| *7002531*       | *3-in-1 Professional Wind Gauge / Anemometer* | *decodeBresser**6In1**Payload()* **1)** |
+| 7002531       | 3-in-1 Professional Wind Gauge / Anemometer | decodeBresser**6In1**Payload() |
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009970       | Air Quality Sensor PM 2.5 / PM 10 | decodeBresser**7In1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7009973       | Pool / Spa Thermometer           | decodeBresser**6In1**Payload() |
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
-| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **3)** |
+| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **1)** |
 | 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
 | 7003210       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
@@ -47,36 +45,36 @@ Some guesswork:
 | 790*             | Weather Station Base (Replacement) |
 | 700[99]*         | Accessory Sensor |
 
-**1)** Manual configuration required, UV flag is set erroneously; see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/42
+**1)** Work in progress
 
 **2)** The part number is specific to the actual variant, i.e. some more characters are appended
 
-**3)** Work in progress
 
 ## Configuration
 
 ### Configuration by selecting a supported Board in the Arduino IDE
 
-By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of your choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below.
+By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of your choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below. In some cases (**bold** entries in the table below) an additional define has to be enabled manually in `WeatherSensorCfg.h`.
 
 If you are not using the Arduino IDE, you can use the defines in the table below with your specific tool chain to get the same result.
 
 If this is not what you need, you have to switch to **Manual Configuration**
 
-   | Setup                                                          | Board              | Board Revision               | Define                 | Radio Module | Notes    |
+   | Setup                                                          | Board              | Board Revision               | Defines<br>bold: to be enabled manually in `WeatherSensorCfg.h` | Radio Module | Notes    |
    | -------------------------------------------------------------- | ------------------ | ---------------------------- | ---------------------- | -------- | ------- |
    | [LILYGO®TTGO-LORA32 V1](https://github.com/Xinyuan-LilyGo/TTGO-LoRa-Series) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
    | [LILYGO®TTGO-LORA32 V2](https://github.com/LilyGO/TTGO-LORA32) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32 V2.1](https://www.lilygo.cc/products/lora3?variant=42272562282677) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
-   | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick  | SX1276 | - |
+   | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick & **USE_SX1276** | SX1276 | - |
+   | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick & **USE_SX1262** | SX1262 | **not tested** |
    | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_heltec_wifi_lora_32_V2 | SX1276 | - |
+   | [Heltec WiFi LoRa 32 V3](https://heltec.org/project/wifi-lora-32-v3/)  | "Heltec WiFi LoRa 32(V3)" | n.a.             | ARDUINO_heltec_wifi_32_lora_V3 | SX1262 | - |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |
    | [Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-esp32-or-thingpulse-epulse-feather-with-adafruit-lora-radio-featherwing)                                | "Adafruit ESP32 Feather" | n.a.               | ARDUINO_FEATHER_ESP32   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS<br><br>See [#55](https://github.com/matthias-bs/BresserWeatherSensorTTN/issues/55) for ePulse Feather battery voltage divider hint. |
- | [DFRobot FireBeetle with FireBeetle Cover LoRa Radio 868MHz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#dfrobot-firebeetle-esp32-with-firebeetle-cover-lora-radio-868mhz)                               | "FireBeetle-ESP32" | n.a.               | ARDUINO_ESP32_DEV & **FIREBEETLE_ESP32_COVER_LORA**<sup>1</sup>   | SX1276 (LoRa1276) | Wiring on the cover: <br>D2 to RESET<br>D3 to DIO0<br>D4 to CS<br>D5 to DIO1<br><br>Additional connections required for battery voltage measurement. |
+ | [DFRobot FireBeetle with FireBeetle Cover LoRa Radio 868MHz](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#dfrobot-firebeetle-esp32-with-firebeetle-cover-lora-radio-868mhz)                               | "FireBeetle-ESP32" | n.a.               | **FIREBEETLE_ESP32_COVER_LORA**   | SX1276 (LoRa1276) | Wiring on the cover: <br>D2 to RESET<br>D3 to DIO0<br>D4 to CS<br>D5 to DIO1<br><br>Additional connections required for battery voltage measurement. |
  | [Adafruit Feather RP2040 with Adafruit LoRa Radio FeatherWing](https://www.adafruit.com/product/4884)                                | "Adafruit Feather RP2040" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_RP2040   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS<br><br>External voltage divider required for battery voltage measurement. |
  | [Adafruit Feather 32u4 RFM95 LoRa Radio](https://www.adafruit.com/product/3078)      | "Adafruit Feather 32u4" | n.a.                       | ARDUINO_AVR_FEATHER32U4     | SX1276 (RFM95W) | see [notes](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-32u4-rfm95-lora-radio)       |
 
-<sup>1</sup> Additional `#define` in `WeatherSensorCfg`.
 
 The preprocessor will provide some output regarding the selected configuration if enabled in the Arduino IDE's Preferences ("Verbose Output"), e.g. 
 ```

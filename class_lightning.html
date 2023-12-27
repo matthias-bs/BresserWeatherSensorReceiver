@@ -100,14 +100,20 @@ $(document).ready(function(){initNavTree('class_lightning.html',''); initResizab
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af73224d91b7318c3769ca126bd37e684"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#af73224d91b7318c3769ca126bd37e684">reset</a> (void)</td></tr>
 <tr class="separator:af73224d91b7318c3769ca126bd37e684"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae719a2e99534bd6085a08a9a686534b0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#ae719a2e99534bd6085a08a9a686534b0">init</a> (uint16_t count)</td></tr>
-<tr class="separator:ae719a2e99534bd6085a08a9a686534b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3675565db225668656848912b4bd8e84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a3675565db225668656848912b4bd8e84">hist_init</a> (uint16_t count=-1)</td></tr>
+<tr class="separator:a3675565db225668656848912b4bd8e84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affdee0afc753eb16bbc749c95368d2fc"><td class="memItemLeft" align="right" valign="top"><a id="affdee0afc753eb16bbc749c95368d2fc"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>prefs_load</b> (void)</td></tr>
+<tr class="separator:affdee0afc753eb16bbc749c95368d2fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a750488bc843b97638bfcee9a280d1a39"><td class="memItemLeft" align="right" valign="top"><a id="a750488bc843b97638bfcee9a280d1a39"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>prefs_save</b> (void)</td></tr>
+<tr class="separator:a750488bc843b97638bfcee9a280d1a39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab8d18c42f99de5c2c61b4d2a84404c2d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#ab8d18c42f99de5c2c61b4d2a84404c2d">update</a> (time_t timestamp, int count, uint8_t distance, bool startup=false)</td></tr>
 <tr class="memdesc:ab8d18c42f99de5c2c61b4d2a84404c2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update lightning data.  <a href="class_lightning.html#ab8d18c42f99de5c2c61b4d2a84404c2d">More...</a><br /></td></tr>
 <tr class="separator:ab8d18c42f99de5c2c61b4d2a84404c2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a953ad9e64d03512e2bc3dafa6b0a9c32"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a953ad9e64d03512e2bc3dafa6b0a9c32">pastHour</a> (time_t timestamp, int &amp;events)</td></tr>
-<tr class="memdesc:a953ad9e64d03512e2bc3dafa6b0a9c32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of lightning events during past 60 minutes.  <a href="class_lightning.html#a953ad9e64d03512e2bc3dafa6b0a9c32">More...</a><br /></td></tr>
-<tr class="separator:a953ad9e64d03512e2bc3dafa6b0a9c32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b5531fadf8a9c8905eeb8064aa99148"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a8b5531fadf8a9c8905eeb8064aa99148">pastHour</a> (int &amp;events)</td></tr>
+<tr class="memdesc:a8b5531fadf8a9c8905eeb8064aa99148"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of lightning events during past 60 minutes.  <a href="class_lightning.html#a8b5531fadf8a9c8905eeb8064aa99148">More...</a><br /></td></tr>
+<tr class="separator:a8b5531fadf8a9c8905eeb8064aa99148"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae04597ca4ce1c067c842fd66382fc022"><td class="memItemLeft" align="right" valign="top"><a id="ae04597ca4ce1c067c842fd66382fc022"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>lastCycle</b> (void)</td></tr>
 <tr class="separator:ae04597ca4ce1c067c842fd66382fc022"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -124,33 +130,33 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>countCurr</b></td></
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Calculation number of lightning events during last sensor update cycle and during last hour (past 60 minutes); storing timestamp and distance of last event. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae719a2e99534bd6085a08a9a686534b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae719a2e99534bd6085a08a9a686534b0">&#9670;&nbsp;</a></span>init()</h2>
+<a id="a3675565db225668656848912b4bd8e84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3675565db225668656848912b4bd8e84">&#9670;&nbsp;</a></span>hist_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void Lightning::init </td>
+          <td class="memname">void Lightning::hist_init </td>
           <td>(</td>
           <td class="paramtype">uint16_t&#160;</td>
-          <td class="paramname"><em>count</em></td><td>)</td>
+          <td class="paramname"><em>count</em> = <code>-1</code></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initialize memory for hourly (past 60 minutes) events</p>
+<p>Initialize histogram of hourly (past 60 minutes) events</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">count</td><td>accumulated number of events </td></tr>
+    <tr><td class="paramname">count</td><td>number of events </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a953ad9e64d03512e2bc3dafa6b0a9c32"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a953ad9e64d03512e2bc3dafa6b0a9c32">&#9670;&nbsp;</a></span>pastHour()</h2>
+<a id="a8b5531fadf8a9c8905eeb8064aa99148"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b5531fadf8a9c8905eeb8064aa99148">&#9670;&nbsp;</a></span>pastHour()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -158,19 +164,9 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>countCurr</b></td></
         <tr>
           <td class="memname">Lightning::pastHour </td>
           <td>(</td>
-          <td class="paramtype">time_t&#160;</td>
-          <td class="paramname"><em>timestamp</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">int &amp;&#160;</td>
-          <td class="paramname"><em>events</em>&#160;</td>
-        </tr>
-        <tr>
+          <td class="paramname"><em>events</em></td><td>)</td>
           <td></td>
-          <td>)</td>
-          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -178,7 +174,6 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>countCurr</b></td></
 <p>Get number of lightning events during past 60 minutes. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">timestamp</td><td>current time </td></tr>
     <tr><td class="paramname">events</td><td>return number of events during past 60 minutes</td></tr>
   </table>
   </dd>

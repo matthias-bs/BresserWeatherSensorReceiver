@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reset_84',['reset',['../class_lightning.html#af73224d91b7318c3769ca126bd37e684',1,'Lightning::reset()'],['../class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76',1,'RainGauge::reset()']]]
+  ['pasthour_85',['pastHour',['../class_lightning.html#a8b5531fadf8a9c8905eeb8064aa99148',1,'Lightning::pastHour()'],['../class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc',1,'RainGauge::pastHour()']]]
 ];

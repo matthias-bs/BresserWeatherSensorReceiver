@@ -534,7 +534,7 @@ void publishWeatherdata(bool complete)
             mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
         }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
             mqtt_payload += String(",\"lightning_count\":") + String(weatherSensor.sensor[i].lgt.strike_count);
             mqtt_payload += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lgt.distance_km);

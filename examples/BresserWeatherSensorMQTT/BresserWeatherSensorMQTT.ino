@@ -103,6 +103,7 @@
 // 20231030 Fixed and improved mapping of sensor IDs to names
 //          Refactored struct Sensor
 // 20231103 Improved handling of time and date
+// 20231105 Added lightning sensor data post-processing
 //
 // ToDo:
 //
@@ -191,6 +192,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
 #include "RainGauge.h"
+#include "Lightning.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
 #define JSON_FLOAT(x) String("\"") + x + String("\"")
@@ -286,6 +288,7 @@ static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:9
 
 WeatherSensor weatherSensor;
 RainGauge rainGauge;
+Lightning lightning;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[] = "status";
@@ -539,12 +542,21 @@ void publishWeatherdata(bool complete)
             mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
         }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
             mqtt_payload += String(",\"lightning_count\":") + String(weatherSensor.sensor[i].lgt.strike_count);
             mqtt_payload += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lgt.distance_km);
             mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
             mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
+            struct tm timeinfo;
+            time_t now = time(nullptr);
+            localtime_r(&now, &timeinfo);
+            lightning.update(
+                now, 
+                weatherSensor.sensor[i].lgt.strike_count,
+                weatherSensor.sensor[i].lgt.distance_km,
+                weatherSensor.sensor[i].startup
+            );
         }
         else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||

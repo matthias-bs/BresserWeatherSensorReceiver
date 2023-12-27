@@ -46,7 +46,8 @@
 //
 // History:
 //
-// 20220721 Created
+// 20230721 Created
+// 20231105 Added data storage via Preferences, modified history implementation
 //
 // ToDo: 
 // - Store non-volatile data in NVS Flash instead of RTC RAM
@@ -61,6 +62,8 @@
   #include <sys/time.h>
 #endif
 #include "WeatherSensorCfg.h"
+
+#define LIGHTNING_USE_PREFS
 
 /**
  * \def
@@ -102,13 +105,17 @@ public:
     
     
     /**
-     * Initialize memory for hourly (past 60 minutes) events
+     * Initialize histogram of hourly (past 60 minutes) events
      * 
-     * \param count     accumulated number of events
+     * \param count     number of events
      */
-    void  init(uint16_t count);
+    void  hist_init(uint16_t count = -1);
     
-    
+    #if defined(LIGHTNING_USE_PREFS)
+    void prefs_load(void);
+    void prefs_save(void);
+    #endif
+
     /**
      * \fn update
      * 
@@ -130,12 +137,11 @@ public:
      * 
      * \brief Get number of lightning events during past 60 minutes
      * 
-     * \param timestamp     current time
      * \param events        return number of events during past 60 minutes
      * 
      * \return true if valid
      */
-    bool pastHour(time_t timestamp, int &events);
+    bool pastHour(int &events);
 
     /*
      * \fn lastCycle

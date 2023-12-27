@@ -149,16 +149,6 @@ typedef struct SensorMap {
 class WeatherSensor {
     public:
         /*!
-        \brief Constructor.
-
-        */
-        /*
-        WeatherSensor()
-        {
-            //memset(this, 0, sizeof(*this));
-        };
-        */
-        /*!
         \brief Presence check and initialization of radio module.
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).

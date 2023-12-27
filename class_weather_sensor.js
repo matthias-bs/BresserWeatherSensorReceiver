@@ -15,6 +15,7 @@ var class_weather_sensor =
     [ "genMessage", "class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0", null ],
     [ "getData", "class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a", null ],
     [ "getMessage", "class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf", null ],
+    [ "sleep", "class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794", null ],
     [ "rssi", "class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e", null ],
     [ "sensor", "class_weather_sensor.html#ac3edc5eaae93e8289f0267d56fa0a44a", null ]
 ];

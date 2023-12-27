@@ -526,7 +526,11 @@ void publishWeatherdata(bool complete)
             struct tm timeinfo;
             time_t now = time(nullptr);
             localtime_r(&now, &timeinfo);
+            #ifdef RAINGAUGE_OLD
             rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
+            #else
+            rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
+            #endif
         }
 
         // Example:

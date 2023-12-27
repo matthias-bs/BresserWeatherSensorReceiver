@@ -146,16 +146,6 @@ typedef struct SensorMap {
 class WeatherSensor {
     public:
         /*!
-        \brief Constructor.
-
-        */
-       /*
-        WeatherSensor()
-        {
-            memset(this, 0, sizeof(*this));
-        };
-        */
-        /*!
         \brief Presence check and initialization of radio module.
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
@@ -232,15 +222,11 @@ class WeatherSensor {
         };
 
         struct Soil {
-            // TODO needed?
-            //bool     temp_ok = false;      //!< temperature o.k. (only 6-in-1)
-            //bool     moisture_ok = false;   //!< moisture o.k. (only 6-in-1)
             float    temp_c;                //!< temperature in degC
             uint8_t  moisture;              //!< moisture in % (only 6-in-1)
         };
 
         struct Lightning {
-            //bool     lightning_ok = false;  //!< lightning o.k. (only lightning)
             uint8_t  distance_km;           //!< lightning distance in km (only lightning)
             uint8_t  strike_count;          //!< lightning strike counter (only lightning)
             uint16_t unknown1;              //!< unknown part 1
@@ -249,12 +235,10 @@ class WeatherSensor {
         };
 
         struct Leakage {
-            //bool     leakage_ok = false;   //!< water leakage o.k. (only water leackage)
             bool     alarm;                //!< water leakage alarm (only water leakage)
         };
 
         struct AirPM {
-            //bool     pm_ok = false;        //!< air quality (particle matter) o.k. (only 7-in-1)
             uint16_t pm_2_5;               //!< air quality PM2.5 in µg/m³
             uint16_t pm_10;                //!< air quality PM10  in µg/m³
         };

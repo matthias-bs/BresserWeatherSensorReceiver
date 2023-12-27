@@ -237,30 +237,30 @@ void
 RainGauge::prefs_load(void)
 {
     preferences.begin("BWS-RAIN", false);
-    nvsData.startupPrev    = preferences.getBool("startupPrev", false);
-    nvsData.rainStartup    = preferences.getFloat("rainStartup", 0);
-    nvsData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
-    nvsData.rainDayBegin   = preferences.getFloat("rainDayBegin", 0);
-    nvsData.tsWeekBegin    = preferences.getUChar("tsWeekBegin", 0xFF);
-    nvsData.rainWeekBegin  = preferences.getFloat("rainWeekBegin", 0);
-    nvsData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
-    nvsData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
-    nvsData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
-    nvsData.rainPrev       = preferences.getFloat("rainPrev", 0);
-    nvsData.rainOvf        = preferences.getUShort("rainOvf", 0);
+    nvData.startupPrev    = preferences.getBool("startupPrev", false);
+    nvData.rainStartup    = preferences.getFloat("rainStartup", 0);
+    nvData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
+    nvData.rainDayBegin   = preferences.getFloat("rainDayBegin", 0);
+    nvData.tsWeekBegin    = preferences.getUChar("tsWeekBegin", 0xFF);
+    nvData.rainWeekBegin  = preferences.getFloat("rainWeekBegin", 0);
+    nvData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
+    nvData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
+    nvData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
+    nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
+    nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
 
     //preferences.getBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
-    log_d("Preferences: startupPrev    =%d", nvsData.startupPrev);
-    log_d("Preferences: rainStartup    =%d", nvsData.rainStartup);
-    log_d("Preferences: tsDayBegin     =%d", nvsData.tsDayBegin);
-    log_d("Preferences: rainDayBegin   =%f", nvsData.rainDayBegin);
-    log_d("Preferences: tsWeekBegin    =%d", nvsData.tsWeekBegin);
-    log_d("Preferences: rainWeekBegin  =%f", nvsData.rainWeekBegin);
-    log_d("Preferences: wdayPrev       =%d", nvsData.wdayPrev);
-    log_d("Preferences: tsMonthBegin   =%d", nvsData.tsMonthBegin);
-    log_d("Preferences: rainMonthBegin =%f", nvsData.rainMonthBegin);
-    log_d("Preferences: rainPrev       =%f", nvsData.rainPrev);
-    log_d("Preferences: rainOvf        =%d", nvsData.rainOvf);
+    log_d("Preferences: startupPrev    =%d", nvData.startupPrev);
+    log_d("Preferences: rainStartup    =%d", nvData.rainStartup);
+    log_d("Preferences: tsDayBegin     =%d", nvData.tsDayBegin);
+    log_d("Preferences: rainDayBegin   =%f", nvData.rainDayBegin);
+    log_d("Preferences: tsWeekBegin    =%d", nvData.tsWeekBegin);
+    log_d("Preferences: rainWeekBegin  =%f", nvData.rainWeekBegin);
+    log_d("Preferences: wdayPrev       =%d", nvData.wdayPrev);
+    log_d("Preferences: tsMonthBegin   =%d", nvData.tsMonthBegin);
+    log_d("Preferences: rainMonthBegin =%f", nvData.rainMonthBegin);
+    log_d("Preferences: rainPrev       =%f", nvData.rainPrev);
+    log_d("Preferences: rainOvf        =%d", nvData.rainOvf);
     preferences.end();
 }
 
@@ -268,17 +268,17 @@ void
 RainGauge::prefs_save(void)
 {
     preferences.begin("BWS-RAIN", false);
-    preferences.putBool("startupPrev", nvsData.startupPrev);
-    preferences.getFloat("rainStartup", nvsData.rainStartup);
-    preferences.getUChar("tsDayBegin", preferences.tsDayBegin);
-    preferences.getFloat("rainDayBegin", nvsData.tsDayBegin);
-    preferences.getUChar("tsWeekBegin", nvsData.tsWeekBegin);
-    preferences.getFloat("rainWeekBegin", nvsData.rainWeekBegin);
-    preferences.getUChar("wdayPrev", nvsData.wdayPrev);
-    preferences.getUChar("tsMonthBegin", nvsData.tsMonthBegin);
-    preferences.getFloat("rainMonthBegin", nvsData.rainMonthBegin);
-    preferences.getFloat("rainPrev", nvsData.rainPrev);
-    preferences.getUShort("rainOvf", nvsData.rainOvf);
+    preferences.putBool("startupPrev", nvData.startupPrev);
+    preferences.getFloat("rainStartup", nvData.rainStartup);
+    preferences.getUChar("tsDayBegin", nvData.tsDayBegin);
+    preferences.getFloat("rainDayBegin", nvData.tsDayBegin);
+    preferences.getUChar("tsWeekBegin", nvData.tsWeekBegin);
+    preferences.getFloat("rainWeekBegin", nvData.rainWeekBegin);
+    preferences.getUChar("wdayPrev", nvData.wdayPrev);
+    preferences.getUChar("tsMonthBegin", nvData.tsMonthBegin);
+    preferences.getFloat("rainMonthBegin", nvData.rainMonthBegin);
+    preferences.getFloat("rainPrev", nvData.rainPrev);
+    preferences.getUShort("rainOvf", nvData.rainOvf);
     preferences.end();
 }
 #endif

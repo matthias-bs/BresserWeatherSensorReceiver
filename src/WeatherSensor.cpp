@@ -72,6 +72,7 @@
 //          Modified decoding of sensor type (to raw, non de-whitened data)
 // 20231028 Fixed startup flag polarity in 7-in-1, lightning and leakage decoder
 // 20231030 Refactored sensor data using a union to save memory
+// 20231112 Added setting of rain_ok in genMessage()
 //
 // ToDo:
 // -
@@ -327,6 +328,7 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
             sensor[i].w.wind_avg_meter_sec_fp1  = 33;
         #endif
         sensor[i].w.wind_ok                 = true;
+        sensor[i].w.rain_ok                 = true;
         sensor[i].w.rain_mm                 = 9.9f;
     }
     else if (s_type == SENSOR_TYPE_LIGHTNING) {

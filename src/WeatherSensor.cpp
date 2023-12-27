@@ -78,6 +78,7 @@
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231202 Changed reception to interrupt mode to fix issues with CC1101 and SX1262
 // 20231218 Fixed inadvertent end of reception due to transceiver sleep mode
+// 20231227 Added sleep()
 //
 // ToDo:
 // -
@@ -198,6 +199,11 @@ int16_t WeatherSensor::begin(void)
     }
 
     return state;
+}
+
+void WeatherSensor::sleep(void)
+{
+    radio.sleep();
 }
 
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())

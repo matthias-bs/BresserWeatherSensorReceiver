@@ -127,66 +127,73 @@ $(document).ready(function(){initNavTree('_rain_gauge_8h_source.html',''); initR
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">// 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">// 20230716 Implemented sensor startup handling</span></div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">// 20230817 Implemented partial reset</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">// ToDo: </span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">// -</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">//</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="preprocessor">#include &quot;time.h&quot;</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#if defined(ESP32) || defined(ESP8266)</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">  #include &lt;sys/time.h&gt;</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#define RAINGAUGE_MAX_VALUE 100</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">//#define RAINGAUGE_MAX_VALUE 20000</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#define RAINGAUGE_BUF_SIZE 11</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="preprocessor"> #define RESET_RAIN_H 1</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="preprocessor"> #define RESET_RAIN_D 2</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor"> #define RESET_RAIN_W 4</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor"> #define RESET_RAIN_M 8</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">//#define _DEBUG_CIRCULAR_BUFFER_</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="class_rain_gauge.html">   91</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_rain_gauge.html">RainGauge</a> {</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordtype">float</span> rainCurr;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    </div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <a class="code" href="class_rain_gauge.html">RainGauge</a>() {};</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#ifdef _DEBUG_CIRCULAR_BUFFER_</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    <span class="keywordtype">void</span>  printCircularBuffer(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    </div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">reset</a>(uint8_t flags=0xF);</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;    </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">init</a>(tm t, <span class="keywordtype">float</span> rain);</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    </div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">update</a>(tm timeinfo, <span class="keywordtype">float</span> rain, <span class="keywordtype">bool</span> startup = <span class="keyword">false</span>, <span class="keywordtype">float</span> raingaugeMax = RAINGAUGE_MAX_VALUE);</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    </div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    </div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">pastHour</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    </div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">currentDay</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    </div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a3cd37e5f8cdd7f36624f1e5a8f6c7c86">currentWeek</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a4271e4dbd292f17c368f1d78cf9b3c5e">currentMonth</a>(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    uint32_t timeStamp(tm t);</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;};</div>
-<div class="ttc" id="aclass_rain_gauge_html"><div class="ttname"><a href="class_rain_gauge.html">RainGauge</a></div><div class="ttdoc">Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall.</div><div class="ttdef"><b>Definition:</b> RainGauge.h:91</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a2632d98a1b617ae6a2ff5d7cfbe03c91"><div class="ttname"><a href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">RainGauge::update</a></div><div class="ttdeci">void update(tm timeinfo, float rain, bool startup=false, float raingaugeMax=RAINGAUGE_MAX_VALUE)</div><div class="ttdoc">Update rain gauge statistics.</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:247</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a3cd37e5f8cdd7f36624f1e5a8f6c7c86"><div class="ttname"><a href="class_rain_gauge.html#a3cd37e5f8cdd7f36624f1e5a8f6c7c86">RainGauge::currentWeek</a></div><div class="ttdeci">float currentWeek(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:352</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a4271e4dbd292f17c368f1d78cf9b3c5e"><div class="ttname"><a href="class_rain_gauge.html#a4271e4dbd292f17c368f1d78cf9b3c5e">RainGauge::currentMonth</a></div><div class="ttdeci">float currentMonth(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:358</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a7a3e7c4b47d59c707543df9e0db26574"><div class="ttname"><a href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">RainGauge::currentDay</a></div><div class="ttdeci">float currentDay(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:346</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a827cc988c73770c9af6a96077e19db76"><div class="ttname"><a href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">RainGauge::reset</a></div><div class="ttdeci">void reset(uint8_t flags=0xF)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:181</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_a8635f7cda13cf9a5f9e72f2f1ba81ecc"><div class="ttname"><a href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">RainGauge::pastHour</a></div><div class="ttdeci">float pastHour(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:340</div></div>
-<div class="ttc" id="aclass_rain_gauge_html_ab32d6ff89366d290a5c264a51f950070"><div class="ttname"><a href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">RainGauge::init</a></div><div class="ttdeci">void init(tm t, float rain)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:212</div></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">// 20231227 Added prerequisites for storing rain data in preferences</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">// ToDo: </span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">// -</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">//</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#include &quot;time.h&quot;</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="preprocessor">#if defined(ESP32) || defined(ESP8266)</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="preprocessor">  #include &lt;sys/time.h&gt;</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160; </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#define RAINGAUGE_USE_PREFS</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="preprocessor">#define RAINGAUGE_MAX_VALUE 100</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">//#define RAINGAUGE_MAX_VALUE 20000</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="preprocessor">#define RAINGAUGE_BUF_SIZE 11</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="preprocessor"> #define RESET_RAIN_H 1</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor"> #define RESET_RAIN_D 2</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor"> #define RESET_RAIN_W 4</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor"> #define RESET_RAIN_M 8</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">//#define _DEBUG_CIRCULAR_BUFFER_</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno"><a class="line" href="class_rain_gauge.html">   94</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_rain_gauge.html">RainGauge</a> {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    <span class="keywordtype">float</span> rainCurr;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    <a class="code" href="class_rain_gauge.html">RainGauge</a>() {};</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="preprocessor">#ifdef _DEBUG_CIRCULAR_BUFFER_</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="keywordtype">void</span>  printCircularBuffer(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">reset</a>(uint8_t flags=0xF);</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    </div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">init</a>(tm t, <span class="keywordtype">float</span> rain);</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    </div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="preprocessor">    #if defined(RAINGAUGE_USE_PREFS)</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keywordtype">void</span> prefs_load(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordtype">void</span> prefs_save(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">    #endif</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    <span class="keywordtype">void</span>  <a class="code" href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">update</a>(tm timeinfo, <span class="keywordtype">float</span> rain, <span class="keywordtype">bool</span> startup = <span class="keyword">false</span>, <span class="keywordtype">float</span> raingaugeMax = RAINGAUGE_MAX_VALUE);</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    </div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    </div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">pastHour</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;    </div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">currentDay</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    </div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a3cd37e5f8cdd7f36624f1e5a8f6c7c86">currentWeek</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    </div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    <span class="keywordtype">float</span> <a class="code" href="class_rain_gauge.html#a4271e4dbd292f17c368f1d78cf9b3c5e">currentMonth</a>(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    </div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    uint32_t timeStamp(tm t);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;};</div>
+<div class="ttc" id="aclass_rain_gauge_html"><div class="ttname"><a href="class_rain_gauge.html">RainGauge</a></div><div class="ttdoc">Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall.</div><div class="ttdef"><b>Definition:</b> RainGauge.h:94</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a2632d98a1b617ae6a2ff5d7cfbe03c91"><div class="ttname"><a href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">RainGauge::update</a></div><div class="ttdeci">void update(tm timeinfo, float rain, bool startup=false, float raingaugeMax=RAINGAUGE_MAX_VALUE)</div><div class="ttdoc">Update rain gauge statistics.</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:307</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a3cd37e5f8cdd7f36624f1e5a8f6c7c86"><div class="ttname"><a href="class_rain_gauge.html#a3cd37e5f8cdd7f36624f1e5a8f6c7c86">RainGauge::currentWeek</a></div><div class="ttdeci">float currentWeek(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:412</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a4271e4dbd292f17c368f1d78cf9b3c5e"><div class="ttname"><a href="class_rain_gauge.html#a4271e4dbd292f17c368f1d78cf9b3c5e">RainGauge::currentMonth</a></div><div class="ttdeci">float currentMonth(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:418</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a7a3e7c4b47d59c707543df9e0db26574"><div class="ttname"><a href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">RainGauge::currentDay</a></div><div class="ttdeci">float currentDay(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:406</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a827cc988c73770c9af6a96077e19db76"><div class="ttname"><a href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">RainGauge::reset</a></div><div class="ttdeci">void reset(uint8_t flags=0xF)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:190</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_a8635f7cda13cf9a5f9e72f2f1ba81ecc"><div class="ttname"><a href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">RainGauge::pastHour</a></div><div class="ttdeci">float pastHour(void)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:400</div></div>
+<div class="ttc" id="aclass_rain_gauge_html_ab32d6ff89366d290a5c264a51f950070"><div class="ttname"><a href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">RainGauge::init</a></div><div class="ttdeci">void init(tm t, float rain)</div><div class="ttdef"><b>Definition:</b> RainGauge.cpp:221</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

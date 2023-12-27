@@ -40,6 +40,7 @@
 // 20230330 Added changes for Adafruit Feather 32u4 LoRa Radio
 // 20230716 Implemented sensor startup handling
 // 20230817 Implemented partial reset
+// 20231227 Added prerequisites for storing rain data in preferences
 //
 // ToDo: 
 // -
@@ -50,6 +51,8 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
+
+#define RAINGAUGE_USE_PREFS
 
 /**
  * \def
@@ -111,7 +114,11 @@ public:
      */
     void  init(tm t, float rain);
     
-    
+    #if defined(RAINGAUGE_USE_PREFS)
+    void prefs_load(void);
+    void prefs_save(void);
+    #endif
+
     /**
      * \fn update
      * 

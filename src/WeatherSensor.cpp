@@ -193,7 +193,7 @@ int16_t WeatherSensor::begin(void)
     state = radio.startReceive();
     if (state != RADIOLIB_ERR_NONE)
     {
-        log_e("%s startReceive() failed, code %d", state);
+        log_e("%s startReceive() failed, code %d", RECEIVER_CHIP, state);
         while (true)
             ;
     }

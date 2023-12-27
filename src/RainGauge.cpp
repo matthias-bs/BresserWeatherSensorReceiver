@@ -47,8 +47,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
-#include <Preferences.h>
 #include "RainGauge.h"
+
+#if defined(RAINGAUGE_USE_PREFS)
+    #include <Preferences.h>
+#endif
 
 const int SECONDS_PER_HOUR = 3600;
 const int SECONDS_PER_DAY  = 86400;

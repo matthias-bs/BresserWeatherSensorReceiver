@@ -41,6 +41,8 @@
 // 20230716 Implemented sensor startup handling
 // 20230817 Implemented partial reset
 // 20231227 Added prerequisites for storing rain data in preferences
+// 20231218 Implemented storing of rain data in preferences, 
+//          new algotrithm for past 60 minutes rainfall
 //
 // ToDo: 
 // -
@@ -52,7 +54,6 @@
   #include <sys/time.h>
 #endif
 
-#define RAINGAUGE_USE_PREFS
 
 /**
  * \def
@@ -61,6 +62,20 @@
  */
 #define RAINGAUGE_MAX_VALUE 100
 //#define RAINGAUGE_MAX_VALUE 20000
+
+/**
+ * \def
+ * 
+ * Lightning sensor update rate [min]
+ */
+#define RAINGAUGE_UPD_RATE 6
+
+/**
+ * \def
+ * 
+ * Set to 3600 [sec] / update_rate_rate [sec]
+ */
+#define RAIN_HIST_SIZE 10
 
 /**
  * \def
@@ -110,10 +125,17 @@ public:
     
     
     /**
+     * OLD:
      * Initialize circular buffer for hourly (past 60 minutes) rainfall
      */
     void  init(tm t, float rain);
     
+    /**
+     * NEW:
+     * Initialize history buffer for hourly (past 60 minutes) rainfall
+     */
+    void hist_init(int32_t rain = -1);
+
     #if defined(RAINGAUGE_USE_PREFS)
     void prefs_load(void);
     void prefs_save(void);
@@ -131,9 +153,12 @@ public:
      * \param startup      sensor startup flag
      * 
      * \param rainGaugeMax overflow value; when reached, the rain gauge is reset to zero
-     */  
+     */
+    #ifdef RAINGAUGE_OLD
     void  update(tm timeinfo, float rain, bool startup = false, float raingaugeMax = RAINGAUGE_MAX_VALUE);
-    
+    #else
+    void  update(time_t ts, float rain, bool startup = false, float raingaugeMax = RAINGAUGE_MAX_VALUE);
+    #endif
     
     /**
      * Rainfall during past 60 minutes

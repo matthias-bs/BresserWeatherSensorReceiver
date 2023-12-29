@@ -560,6 +560,13 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
     #endif
 }
 
+#ifdef RAINGAUGE_OLD
+float
+RainGauge::pastHour(void)
+{
+    return (float)(0.1 * (nvData.rainBuf[nvData.head] - nvData.rainBuf[nvData.tail]));
+}
+#else
 float
 RainGauge::pastHour(void)
 {
@@ -595,6 +602,7 @@ RainGauge::pastHour(void)
 
     return (float)(0.1 * (nvData.hist[idx] - nvData.hist[idx2]));
 }
+#endif
 
 float
 RainGauge::currentDay(void)

@@ -607,17 +607,26 @@ RainGauge::pastHour(void)
 float
 RainGauge::currentDay(void)
 {
+    if (nvData.rainDayBegin == -1)
+        return -1;
+    
     return rainCurr - nvData.rainDayBegin;
 }
 
 float
 RainGauge::currentWeek(void)
 {
+    if (nvData.rainWeekBegin == -1)
+        return -1;
+    
     return rainCurr - nvData.rainWeekBegin;
 }
 
 float
 RainGauge::currentMonth(void)
 {
+    if (nvData.rainMonthBegin == -1)
+        return -1;
+    
     return rainCurr - nvData.rainMonthBegin;
 }

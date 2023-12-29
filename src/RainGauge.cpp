@@ -296,13 +296,13 @@ RainGauge::prefs_load(void)
 {
     preferences.begin("BWS-RAIN", false);
     nvData.lastUpdate     = preferences.getULong64("lastUpdate", -1);
-    preferences.getBytes("hist", nvData.hist, sizeof(nvData.hist));
-    // TODO Optimization: Reduces number of Flash writes
-    // for (int i=0; i<RAINGAUGE_HIST_SIZE; i++) {
-    //     char buf[7];
-    //     sprintf(buf, "hist%02d", i);
-    //     nvData.hist[i] = preferences.getInt(buf, -1);
-    // }
+    // Optimization: Reduces number of Flash writes
+    // preferences.getBytes("hist", nvData.hist, sizeof(nvData.hist));
+    for (int i=0; i<RAIN_HIST_SIZE; i++) {
+        char buf[7];
+        sprintf(buf, "hist%02d", i);
+        nvData.hist[i] = preferences.getInt(buf, -1);
+    }
     nvData.startupPrev    = preferences.getBool("startupPrev", false);
     nvData.rainStartup    = preferences.getFloat("rainStartup", 0);
     nvData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
@@ -335,13 +335,13 @@ RainGauge::prefs_save(void)
 {
     preferences.begin("BWS-RAIN", false);
     preferences.putULong64("lastUpdate", nvData.lastUpdate);
-    preferences.putBytes("hist", nvData.hist, sizeof(nvData.hist));
-    // TODO Optimization: Reduces number of Flash writes
-    // for (int i=0; i<RAINGAUGE_HIST_SIZE; i++) {
-    //     char buf[7];
-    //     sprintf(buf, "hist%02d", i);
-    //     preferences.putInt(buf, nvData.hist[i]);
-    // }
+    // Optimization: Reduces number of Flash writes
+    // preferences.putBytes("hist", nvData.hist, sizeof(nvData.hist));
+    for (int i=0; i<RAIN_HIST_SIZE; i++) {
+        char buf[7];
+        sprintf(buf, "hist%02d", i);
+        preferences.putInt(buf, nvData.hist[i]);
+    }
     preferences.putBool("startupPrev", nvData.startupPrev);
     preferences.putFloat("rainStartup", nvData.rainStartup);
     preferences.putUChar("tsDayBegin", nvData.tsDayBegin);

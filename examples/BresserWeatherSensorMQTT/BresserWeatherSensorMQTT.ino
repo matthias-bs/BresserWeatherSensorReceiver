@@ -104,6 +104,7 @@
 //          Refactored struct Sensor
 // 20231103 Improved handling of time and date
 // 20231105 Added lightning sensor data post-processing
+// 20231228 Fixed entering sleep mode befor sensor data was published
 //
 // ToDo:
 //
@@ -770,6 +771,8 @@ void loop()
     }
 
     bool decode_ok = false;
+    bool published_ok = false;
+	
 #ifdef _DEBUG_MQTT_
     decode_ok = weatherSensor.genMessage(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
 #else
@@ -799,14 +802,16 @@ void loop()
     if (millis() - lastMillis > DATA_INTERVAL)
     {
         lastMillis = millis();
-        if (decode_ok)
+        if (decode_ok) {
             publishWeatherdata(false);
+            published_ok = true;
+        }
     }
 
     bool force_sleep = millis() > AWAKE_TIMEOUT;
 
     // Go to sleep only after complete set of data has been sent
-    if (SLEEP_EN && (decode_ok || force_sleep))
+    if (SLEEP_EN && (published_ok || force_sleep))
     {
         if (force_sleep)
         {

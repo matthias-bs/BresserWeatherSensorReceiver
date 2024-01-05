@@ -89,7 +89,7 @@ typedef struct {
 } nvLightning_t;
 
 #if defined(LIGHTNING_USE_PREFS)
-Preferences preferences;
+static Preferences preferences;
 
 nvLightning_t nvLightning = {
     .lastUpdate = 0,

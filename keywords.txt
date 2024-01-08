@@ -9,6 +9,12 @@ DecodeStatus	              KEYWORD1
 WeatherSensor	              KEYWORD1
 SensorMap	                  KEYWORD1
 sensor_t                    KEYWORD1
+Weather                     KEYWORD1
+Soil                        KEYWORD1
+Lightning                   KEYWORD1
+Leakage                     KEYWORD1
+AirPM                       KEYWORD1
+
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -21,9 +27,15 @@ genMessage                  KEYWORD2
 windspeed_ms_to_bft         KEYWORD2
 decodeBresser5In1Payload    KEYWORD2
 decodeBresser6In1Payload    KEYWORD2
+decodeBresser7In1Payload    KEYWORD2
+decodeBresserLightningPayload  KEYWORD2
+decodeBresserLeakagePayload    KEYWORD2
 clearSlots                  KEYWORD2
 findId                      KEYWORD2
 findType                    KEYWORD2
+lfsr_digest16               KEYWORD2
+add_bytes                   KEYWORD2
+crc16                       KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -31,18 +43,31 @@ findType                    KEYWORD2
 
 NUM_SENSORS                 LITERAL1
 _DEBUG_MODE_                LITERAL1
+SENSOR_IDS_EXC              LITERAL1
+SENSOR_IDS_INC              LITERAL1
+WIND_DATA_FLOATINGPOINT     LITERAL1
+WIND_DATA_FIXEDPOINT        LITERAL1
 BRESSER_5_IN_1              LITERAL1
 BRESSER_6_IN_1	            LITERAL1
+BRESSER_7_IN_1              LITERAL1
+BRESSER_LIGHTNING           LITERAL1
+BRESSER_LEAKAGE             LITERAL1
 USE_CC1101                  LITERAL1
 USE_SX1276                  LITERAL1
+USE_SX1262                  LITERAL1
 PIN_RECEIVER_CS             LITERAL1
 PIN_RECEIVER_IRQ            LITERAL1    
 PIN_RECEIVER_GPIO           LITERAL1
 PIN_RECEIVER_RESET          LITERAL1
 SENSOR_TYPE_WEATHER0        LITERAL1
 SENSOR_TYPE_WEATHER1        LITERAL1
+SENSOR_TYPE_THERMO_HYGRO    LITERAL1
+SENSOR_TYPE_POOL_THERMO     LITERAL1
 SENSOR_TYPE_SOIL            LITERAL1
+SENSOR_TYPE_LEAKAGE         LITERAL1
+SENSOR_TYPE_AIR_PM          LITERAL1
 SENSOR_TYPE_RAIN            LITERAL1
+SENSOR_TYPE_LIGHTNING       LITERAL1
 DATA_COMPLETE               LITERAL1
 DATA_TYPE                   LITERAL1
 DATA_ALL_SLOTS              LITERAL1
@@ -53,4 +78,3 @@ DECODE_CHK_ERR              LITERAL1
 DECODE_DIG_ERR              LITERAL1
 DECODE_SKIP                 LITERAL1
 DECODE_FULL                 LITERAL1
-

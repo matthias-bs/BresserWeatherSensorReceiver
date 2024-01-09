@@ -174,7 +174,7 @@ class WeatherSensor {
         \param func     Callback function for each loop iteration. (default: NULL)
 
         \returns false: Timeout occurred.
-                 true:  Reception (according to parammeter 'complete') succesful.
+                 true:  Reception (according to parammeter 'complete') successful.
         */
         bool    getData(uint32_t timeout, uint8_t flags = 0, uint8_t type = 0, void (*func)() = NULL);
 

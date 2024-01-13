@@ -136,11 +136,11 @@ void Lightning::prefs_load(void)
         sprintf(buf, "hist%02d", i);
         nvLightning.hist[i] = preferences.getShort(buf, -1);
     }
-    log_d("Preferences: lastUpdate =%lld", nvLightning.lastUpdate);
+    log_d("Preferences: lastUpdate =%s", String(nvLightning.lastUpdate).c_str());
     log_d("Preferences: prevCount  =%d", nvLightning.prevCount);
     log_d("Preferences: events     =%d", nvLightning.events);
     log_d("Preferences: distance   =%d", nvLightning.distance);
-    log_d("Preferences: timestamp  =%lld", nvLightning.timestamp);
+    log_d("Preferences: timestamp  =%s", String(nvLightning.timestamp).c_str());
     preferences.end();
 }
 

@@ -48,10 +48,9 @@
 //
 // 20230721 Created
 // 20231105 Added data storage via Preferences, modified history implementation
+// 20240113 Fixed timestamp format string and hourly history calculation
 //
 // ToDo: 
-// - Store non-volatile data in NVS Flash instead of RTC RAM
-//   (to support ESP8266 and to keep data during power-off)
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -90,7 +89,9 @@ typedef struct {
 
 #if defined(LIGHTNING_USE_PREFS)
 static Preferences preferences;
-
+#else
+RTC_DATA_ATTR
+#endif
 nvLightning_t nvLightning = {
     .lastUpdate = 0,
     .prevCount = -1,
@@ -99,16 +100,7 @@ nvLightning_t nvLightning = {
     .timestamp = 0,
     .hist = {0}
 };
-#else
-RTC_DATA_ATTR nvLightning_t nvLightning = {
-    .lastUpdate = 0,
-    .prevCount = -1,
-    .events = 0,
-    .distance = 0,
-    .timestamp = 0,
-    .hist = {0}
-};
-#endif
+
 
 void
 Lightning::reset(void)
@@ -137,18 +129,18 @@ void Lightning::prefs_load(void)
     nvLightning.events     = preferences.getUShort("events", -1);
     nvLightning.distance   = preferences.getUChar("distance", 0);
     nvLightning.timestamp  = preferences.getULong64("timestamp", 0);
-    preferences.getBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
-    // TODO Optimization: Reduces number of Flash writes
-    // for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
-    //     char buf[7];
-    //     sprintf(buf, "hist%02d", i);
-    //     nvLightning.hist[i] = preferences.getShort(buf, -1);
-    // }
-    log_d("Preferences: lastUpdate =%llu", nvLightning.lastUpdate);
+    //preferences.getBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
+    // Optimization: Reduces number of Flash writes
+    for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
+        char buf[7];
+        sprintf(buf, "hist%02d", i);
+        nvLightning.hist[i] = preferences.getShort(buf, -1);
+    }
+    log_d("Preferences: lastUpdate =%lld", nvLightning.lastUpdate);
     log_d("Preferences: prevCount  =%d", nvLightning.prevCount);
     log_d("Preferences: events     =%d", nvLightning.events);
     log_d("Preferences: distance   =%d", nvLightning.distance);
-    log_d("Preferences: timestamp  =%llu", nvLightning.timestamp);
+    log_d("Preferences: timestamp  =%lld", nvLightning.timestamp);
     preferences.end();
 }
 
@@ -160,13 +152,13 @@ void Lightning::prefs_save(void)
     preferences.putUShort("events", nvLightning.events);
     preferences.putUChar("distance", nvLightning.distance);
     preferences.putULong64("timestamp", nvLightning.timestamp);
-    preferences.putBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
-    // TODO Optimization: Reduces number of Flash writes
-    // for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
-    //     char buf[7];
-    //     sprintf(buf, "hist%02d", i);
-    //     preferences.putShort(buf, nvLightning.hist[i]);
-    // }
+    //preferences.putBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
+    // Optimization: Reduces number of Flash writes
+    for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
+        char buf[7];
+        sprintf(buf, "hist%02d", i);
+        preferences.putShort(buf, nvLightning.hist[i]);
+    }
     preferences.end();
 }
 #endif
@@ -199,7 +191,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     if (count > nvLightning.prevCount) {
         // Save detected event
         nvLightning.events = count - nvLightning.prevCount;
-        nvLightning.prevCount = count;
         nvLightning.distance = distance;
         nvLightning.timestamp = timestamp;
     }
@@ -215,6 +206,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");
+        nvLightning.prevCount = count;
         return; 
     }
 
@@ -245,16 +237,17 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.hist[idx] = -1;
     }
 
-    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
+    #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;
         buf = String("hist[]={");
         for (size_t i=0; i<LIGHTNING_HIST_SIZE; i++) {
             buf += String(nvLightning.hist[i]) + String(", ");
         }
         buf += String("}");
-        log_v("%s", buf.c_str());
+        log_d("%s", buf.c_str());
     #endif
 
+    nvLightning.prevCount = count;
     nvLightning.lastUpdate = timestamp;
     #if defined(LIGHTNING_USE_PREFS)
         prefs_save();

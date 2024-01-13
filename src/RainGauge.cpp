@@ -315,7 +315,7 @@ RainGauge::prefs_load(void)
     nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
     nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
 
-    log_d("Preferences: lastUpdate     =%llu", nvData.lastUpdate);
+    log_d("Preferences: lastUpdate     =%s", String(nvData.lastUpdate).c_str());
     log_d("Preferences: startupPrev    =%d", nvData.startupPrev);
     log_d("Preferences: rainStartup    =%d", nvData.rainStartup);
     log_d("Preferences: tsDayBegin     =%d", nvData.tsDayBegin);

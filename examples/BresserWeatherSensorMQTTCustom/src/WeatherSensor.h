@@ -67,6 +67,7 @@
 // 20231030 Refactored sensor data using a union to save memory
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
+// 20231227 Added sleep()
 //
 // ToDo:
 // -
@@ -148,22 +149,16 @@ typedef struct SensorMap {
 class WeatherSensor {
     public:
         /*!
-        \brief Constructor.
-
-        */
-        /*
-        WeatherSensor()
-        {
-            //memset(this, 0, sizeof(*this));
-        };
-        */
-        /*!
         \brief Presence check and initialization of radio module.
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
         int16_t begin(void);
 
+        /*!
+        \brief Set transceiver into sleep mode
+        */
+        void sleep(void);
 
         /*!
         \brief Wait for reception of data or occurrance of timeout.
@@ -179,7 +174,7 @@ class WeatherSensor {
         \param func     Callback function for each loop iteration. (default: NULL)
 
         \returns false: Timeout occurred.
-                 true:  Reception (according to parammeter 'complete') succesful.
+                 true:  Reception (according to parammeter 'complete') successful.
         */
         bool    getData(uint32_t timeout, uint8_t flags = 0, uint8_t type = 0, void (*func)() = NULL);
 

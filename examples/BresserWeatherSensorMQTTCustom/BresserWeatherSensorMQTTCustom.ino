@@ -809,6 +809,7 @@ void loop()
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);
 #endif
+	weatherSensor.sleep();
         ESP.deepSleep(SLEEP_INTERVAL * 1000);
     }
 } // loop()

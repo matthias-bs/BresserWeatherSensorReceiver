@@ -60,7 +60,7 @@
  * 
  * Set to the value which leads to a reset of the rain gauge output to zero.
  */
-#define RAINGAUGE_MAX_VALUE 100
+#define RAINGAUGE_MAX_VALUE 1000
 //#define RAINGAUGE_MAX_VALUE 20000
 
 /**

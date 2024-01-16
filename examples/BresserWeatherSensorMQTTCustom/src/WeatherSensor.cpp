@@ -78,6 +78,8 @@
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231202 Changed reception to interrupt mode to fix issues with CC1101 and SX1262
 // 20231218 Fixed inadvertent end of reception due to transceiver sleep mode
+// 20231227 Added sleep()
+// 20240116 Fixed counter width and assignment to unknown1 in decodeBresserLightningPayload()
 //
 // ToDo:
 // -
@@ -192,12 +194,17 @@ int16_t WeatherSensor::begin(void)
     state = radio.startReceive();
     if (state != RADIOLIB_ERR_NONE)
     {
-        log_e("%s startReceive() failed, code %d", state);
+        log_e("%s startReceive() failed, code %d", RECEIVER_CHIP, state);
         while (true)
             ;
     }
 
     return state;
+}
+
+void WeatherSensor::sleep(void)
+{
+    radio.sleep();
 }
 
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())
@@ -1207,8 +1214,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     if (status != DECODE_OK)
         return status;
 
-    uint8_t ctr = (msgw[4] << 4) | (msgw[5] & 0xf0) >> 4;
-    log_v("--> CTR RAW: %d  BCD: %d", ctr, ((((msgw[4] & 0xf0) >> 4) * 100) + (msgw[4] & 0x0f) * 10 + ((msgw[5] & 0xf0) >> 4)));
+    uint16_t ctr = (msgw[4] << 4) | (msgw[5] & 0xf0) >> 4;
     uint8_t battery_low = (msgw[5] & 0x08) == 0x00;
     uint16_t unknown1 = ((msgw[5] & 0x0f) << 8) | msgw[6];
     uint8_t distance_km = msgw[7];
@@ -1226,10 +1232,10 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
 
     sensor[slot].lgt.strike_count = ctr;
     sensor[slot].lgt.distance_km = distance_km;
-    sensor[slot].lgt.unknown2 = unknown1;
+    sensor[slot].lgt.unknown1 = unknown1;
     sensor[slot].lgt.unknown2 = unknown2;
 
-    log_d("ID: 0x%04X  TYPE: %d  CTR: %d  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
+    log_d("ID: 0x%04X  TYPE: %d  CTR: %u  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
 
     return DECODE_OK;
 }

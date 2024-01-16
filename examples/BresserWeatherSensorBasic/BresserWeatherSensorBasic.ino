@@ -95,7 +95,7 @@ void loop()
            
         if (ws.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
             // Lightning Sensor
-            Serial.printf("Lightning Counter: [%3d] ", ws.sensor[i].lgt.strike_count);
+            Serial.printf("Lightning Counter: [%4d] ", ws.sensor[i].lgt.strike_count);
             if (ws.sensor[i].lgt.distance_km != 0) {
                 Serial.printf("Distance: [%2dkm] ", ws.sensor[i].lgt.distance_km);
             } else {

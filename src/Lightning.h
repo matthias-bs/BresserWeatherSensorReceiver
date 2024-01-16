@@ -48,12 +48,10 @@
 //
 // 20230721 Created
 // 20231105 Added data storage via Preferences, modified history implementation
+// 20240116 Corrected LIGHTNINGCOUNT_MAX_VALUE
 //
 // ToDo: 
-// - Store non-volatile data in NVS Flash instead of RTC RAM
-//   (to support ESP8266 and to keep data during power-off)
-// - Handle sensor counter overflow and startup flag
-// - Number of strikes during past 60 minutes
+// -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,7 +67,7 @@
  * 
  * Set to the value which leads to a reset of the lightning sensor counter output to zero (overflow).
  */
-#define LIGHTNINGCOUNT_MAX_VALUE 100
+#define LIGHTNINGCOUNT_MAX_VALUE 4000
 
 /**
  * \def

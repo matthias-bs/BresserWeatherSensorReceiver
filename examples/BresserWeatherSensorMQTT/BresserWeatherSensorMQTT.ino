@@ -673,7 +673,7 @@ void publishWeatherdata(bool complete)
 
         if (mqtt_payload2.length() > 2)
         {
-            log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
+            log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload2.c_str());
             client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
         }
     } // for (int i=0; i<NUM_SENSORS; i++)

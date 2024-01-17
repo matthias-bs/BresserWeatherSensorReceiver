@@ -315,18 +315,18 @@ RainGauge::prefs_load(void)
     nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
     nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
 
-    log_d("Preferences: lastUpdate     =%s", String(nvData.lastUpdate).c_str());
-    log_d("Preferences: startupPrev    =%d", nvData.startupPrev);
-    log_d("Preferences: rainStartup    =%d", nvData.rainStartup);
-    log_d("Preferences: tsDayBegin     =%d", nvData.tsDayBegin);
-    log_d("Preferences: rainDayBegin   =%f", nvData.rainDayBegin);
-    log_d("Preferences: tsWeekBegin    =%d", nvData.tsWeekBegin);
-    log_d("Preferences: rainWeekBegin  =%f", nvData.rainWeekBegin);
-    log_d("Preferences: wdayPrev       =%d", nvData.wdayPrev);
-    log_d("Preferences: tsMonthBegin   =%d", nvData.tsMonthBegin);
-    log_d("Preferences: rainMonthBegin =%f", nvData.rainMonthBegin);
-    log_d("Preferences: rainPrev       =%f", nvData.rainPrev);
-    log_d("Preferences: rainOvf        =%d", nvData.rainOvf);
+    log_d("lastUpdate     =%s", String(nvData.lastUpdate).c_str());
+    log_d("startupPrev    =%d", nvData.startupPrev);
+    log_d("rainStartup    =%d", nvData.rainStartup);
+    log_d("tsDayBegin     =%d", nvData.tsDayBegin);
+    log_d("rainDayBegin   =%f", nvData.rainDayBegin);
+    log_d("tsWeekBegin    =%d", nvData.tsWeekBegin);
+    log_d("rainWeekBegin  =%f", nvData.rainWeekBegin);
+    log_d("wdayPrev       =%d", nvData.wdayPrev);
+    log_d("tsMonthBegin   =%d", nvData.tsMonthBegin);
+    log_d("rainMonthBegin =%f", nvData.rainMonthBegin);
+    log_d("rainPrev       =%f", nvData.rainPrev);
+    log_d("rainOvf        =%d", nvData.rainOvf);
     preferences.end();
 }
 

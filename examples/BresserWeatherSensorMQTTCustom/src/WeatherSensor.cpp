@@ -80,6 +80,7 @@
 // 20231218 Fixed inadvertent end of reception due to transceiver sleep mode
 // 20231227 Added sleep()
 // 20240116 Fixed counter width and assignment to unknown1 in decodeBresserLightningPayload()
+// 20240117 Fixed counter decoding (changed from binary to BCD) in decodeBresserLightningPayload()
 //
 // ToDo:
 // -
@@ -1214,7 +1215,9 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     if (status != DECODE_OK)
         return status;
 
-    uint16_t ctr = (msgw[4] << 4) | (msgw[5] & 0xf0) >> 4;
+    // Counter encoded as BCD with most significant digit counting up to 15!
+    // -> Maximum value: 1599
+    uint16_t ctr = (msgw[4] >> 4) * 100 + (msgw[4] & 0xf) * 10 + (msgw[5] >> 4);
     uint8_t battery_low = (msgw[5] & 0x08) == 0x00;
     uint16_t unknown1 = ((msgw[5] & 0x0f) << 8) | msgw[6];
     uint8_t distance_km = msgw[7];

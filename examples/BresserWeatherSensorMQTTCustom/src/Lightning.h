@@ -67,7 +67,7 @@
  * 
  * Set to the value which leads to a reset of the lightning sensor counter output to zero (overflow).
  */
-#define LIGHTNINGCOUNT_MAX_VALUE 4000
+#define LIGHTNINGCOUNT_MAX_VALUE 1600
 
 /**
  * \def

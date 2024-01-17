@@ -452,12 +452,12 @@ void publishWeatherdata(void)
 //
 void publishRadio(void)
 {
-    DynamicJsonDocument payload(PAYLOAD_SIZE);
-    char mqtt_payload[PAYLOAD_SIZE];
+    JsonDocument payload;
+    String mqtt_payload;
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.printf("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
+    Serial.printf("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload.c_str());
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }

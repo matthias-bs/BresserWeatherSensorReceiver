@@ -661,13 +661,7 @@ void publishWeatherdata(bool complete)
         // sensor data
         mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
 
-#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
-        char mqtt_topic_tmp[TOPIC_SIZE];
-        char mqtt_payload_tmp[PAYLOAD_SIZE];
-        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
-        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
-#endif
-        log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+        log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
         client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), false, 0);
 
         // sensor specific RSSI
@@ -677,13 +671,9 @@ void publishWeatherdata(bool complete)
         // extra data
         mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
 
-#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
-        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
-        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
-#endif
         if (mqtt_payload2.length() > 2)
         {
-            log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+            log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
             client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
         }
     } // for (int i=0; i<NUM_SENSORS; i++)
@@ -695,12 +685,12 @@ void publishWeatherdata(bool complete)
 //
 void publishRadio(void)
 {
-    DynamicJsonDocument payload(PAYLOAD_SIZE);
-    char mqtt_payload[PAYLOAD_SIZE];
+    JsonDocument payload;
+    String mqtt_payload;
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload.c_str());
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }

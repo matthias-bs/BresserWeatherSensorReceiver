@@ -42,9 +42,15 @@
 // 20231227 Added prerequisites for storing rain data in preferences
 // 20231218 Implemented storing of rain data in preferences, 
 //          new algotrithm for past 60 minutes rainfall
+// 20240118 Changed raingaugeMax to class member set by constructor
+//          Modified startup/overflow handling
 //
 // ToDo: 
 // -
+//
+// Notes:
+// - Extreme values of rainfall: https://en.wikipedia.org/wiki/List_of_weather_records#Rain
+//   (for variable widths and evaluation of rain gauge overflows)
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -229,7 +235,7 @@ RainGauge::reset(uint8_t flags)
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
         nvData.startupPrev    = false;
         nvData.rainStartup    = 0;
-        nvData.rainPrev       = 0;
+        nvData.rainPrev       = -1;
         nvData.rainOvf        = 0;
         rainCurr              = 0;
         preferences.putBool("startupPrev", nvData.startupPrev);
@@ -259,13 +265,14 @@ RainGauge::reset(uint8_t flags)
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
         nvData.startupPrev    = false;
         nvData.rainStartup    = 0;
-        nvData.rainPrev       = 0;
+        nvData.rainPrev       = -1;
         nvData.rainOvf        = 0;
         rainCurr              = 0;
     }
 #endif
 }
 
+#ifdef RAINGAUGE_OLD
 void
 RainGauge::init(tm t, float rain)
 {
@@ -281,6 +288,7 @@ RainGauge::init(tm t, float rain)
     nvData.tail = 0;
     nvData.tsDayBegin = t.tm_wday;
 }
+#endif
 
 void
 RainGauge::hist_init(int32_t rain)
@@ -312,7 +320,7 @@ RainGauge::prefs_load(void)
     nvData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
     nvData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
     nvData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
-    nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
+    nvData.rainPrev       = preferences.getFloat("rainPrev", -1);
     nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
 
     log_d("lastUpdate     =%s", String(nvData.lastUpdate).c_str());
@@ -357,6 +365,7 @@ RainGauge::prefs_save(void)
 }
 #endif
 
+#ifdef RAINGAUGE_OLD
 uint32_t
 RainGauge::timeStamp(tm t)
 {
@@ -375,29 +384,33 @@ RainGauge::timeStamp(tm t)
     
     return (uint32_t)ts;
 }
+#endif
 
 #ifdef RAINGAUGE_OLD
 void
-RainGauge::update(tm t, float rain, bool startup, float raingaugeMax)
+RainGauge::update(tm t, float rain, bool startup)
 #else
 void
-RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax)
+RainGauge::update(time_t timestamp, float rain, bool startup)
 #endif
 {
     #if defined(RAINGAUGE_USE_PREFS)
         prefs_load();
     #endif
     
+#ifndef RAINGAUGE_OLD
     struct tm t;
-
+    
     localtime_r(&timestamp, &t);
+#endif
 
     if (nvData.lastUpdate == -1) {
         // Initialize histogram
         hist_init();
     }
-    if ((nvData.rainPrev == 0) || (rain < nvData.rainPrev)) {
-        // No previous count, counter reset or counter overflow
+
+    if (nvData.rainPrev == -1) {
+        // No previous count or counter reset
         nvData.rainPrev = rain;
         nvData.lastUpdate = timestamp;
         
@@ -407,14 +420,9 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
         return;
     }
 
-#ifdef RAINGAUGE_OLD
-    uint8_t  head_tmp; // circular buffer; temporary head index
-
-    // Seconds since Midnight
-    uint32_t ts = timeStamp(t);
-#endif
-
-    if (rain < nvData.rainPrev) {
+    rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
+    
+    if (rainCurr < nvData.rainPrev) {
        // Startup change 0->1 detected
        if (!nvData.startupPrev && startup) {
            // Save last rain value before startup
@@ -423,10 +431,17 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
            nvData.rainOvf++;
        }
     }
-   
-    nvData.startupPrev = startup;
     
+    nvData.startupPrev = startup;
     rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
+
+#ifdef RAINGAUGE_OLD
+    uint8_t  head_tmp; // circular buffer; temporary head index
+
+    // Seconds since Midnight
+    uint32_t ts = timeStamp(t);
+#endif
+
 
     // Check if no saved data is available yet
     if (nvData.wdayPrev == 0xFF) {

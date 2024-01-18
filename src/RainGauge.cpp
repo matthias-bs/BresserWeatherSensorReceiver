@@ -95,7 +95,7 @@ typedef struct {
 
     /* Sensor startup handling */
     bool      startupPrev; // previous state of startup
-    float     rainStartup; // rain gauge before startup 
+    float     rainPreStartup; // previous rain gauge reading (before startup)
 
     /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
     uint8_t   tsDayBegin; // day of week
@@ -111,7 +111,7 @@ typedef struct {
     float     rainMonthBegin; // rain gauge @ begin of month
 
     float     rainPrev;  // rain gauge at previous run - to detect overflow
-    uint16_t  rainOvf; // number of rain gauge overflows
+    float     rainAcc; // accumulated rain (overflows and startups)
 } nvData_t;
 
 
@@ -123,7 +123,7 @@ RTC_DATA_ATTR nvData_t nvData = {
    .head = 0,
    .tail = 0,
    .startupPrev = false,
-   .rainStartup = 0,
+   .rainPreStartup = 0,
    .tsDayBegin = 0xFF,
    .rainDayBegin = 0,
    .tsWeekBegin = 0xFF,
@@ -132,7 +132,7 @@ RTC_DATA_ATTR nvData_t nvData = {
    .tsMonthBegin = 0xFF,
    .rainMonthBegin = 0,
    .rainPrev = 0,
-   .rainOvf = 0
+   .rainAcc = 0
 };
 
 #if defined(RAINGAUGE_USE_PREFS)
@@ -233,15 +233,15 @@ RainGauge::reset(uint8_t flags)
     }
 
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
-        nvData.startupPrev    = false;
-        nvData.rainStartup    = 0;
-        nvData.rainPrev       = -1;
-        nvData.rainOvf        = 0;
-        rainCurr              = 0;
+        nvData.startupPrev       = false;
+        nvData.rainPreStartup    = 0;
+        nvData.rainPrev          = -1;
+        nvData.rainAcc           = 0;
+        rainCurr                 = 0;
         preferences.putBool("startupPrev", nvData.startupPrev);
-        preferences.putFloat("rainStartup", nvData.rainStartup);
+        preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
         preferences.putFloat("rainPrev", nvData.rainPrev);
-        preferences.putUShort("rainOvf", nvData.rainOvf);
+        preferences.putFloat("rainAcc", nvData.rainAcc);
     }    
     preferences.end();
 #else
@@ -263,11 +263,11 @@ RainGauge::reset(uint8_t flags)
     }
 
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
-        nvData.startupPrev    = false;
-        nvData.rainStartup    = 0;
-        nvData.rainPrev       = -1;
-        nvData.rainOvf        = 0;
-        rainCurr              = 0;
+        nvData.startupPrev       = false;
+        nvData.rainPreStartup    = 0;
+        nvData.rainPrev          = -1;
+        nvData.rainAcc           = 0;
+        rainCurr                 = 0;
     }
 #endif
 }
@@ -311,30 +311,30 @@ RainGauge::prefs_load(void)
         sprintf(buf, "hist%02d", i);
         nvData.hist[i] = preferences.getInt(buf, -1);
     }
-    nvData.startupPrev    = preferences.getBool("startupPrev", false);
-    nvData.rainStartup    = preferences.getFloat("rainStartup", 0);
-    nvData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
-    nvData.rainDayBegin   = preferences.getFloat("rainDayBegin", 0);
-    nvData.tsWeekBegin    = preferences.getUChar("tsWeekBegin", 0xFF);
-    nvData.rainWeekBegin  = preferences.getFloat("rainWeekBegin", 0);
-    nvData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
-    nvData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
-    nvData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
-    nvData.rainPrev       = preferences.getFloat("rainPrev", -1);
-    nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
+    nvData.startupPrev       = preferences.getBool("startupPrev", false);
+    nvData.rainPreStartup    = preferences.getFloat("rainPreStartup", 0);
+    nvData.tsDayBegin        = preferences.getUChar("tsDayBegin", 0xFF);
+    nvData.rainDayBegin      = preferences.getFloat("rainDayBegin", 0);
+    nvData.tsWeekBegin       = preferences.getUChar("tsWeekBegin", 0xFF);
+    nvData.rainWeekBegin     = preferences.getFloat("rainWeekBegin", 0);
+    nvData.wdayPrev          = preferences.getUChar("wdayPrev", 0xFF);
+    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0);
+    nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
+    nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
+    nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
 
-    log_d("lastUpdate     =%s", String(nvData.lastUpdate).c_str());
-    log_d("startupPrev    =%d", nvData.startupPrev);
-    log_d("rainStartup    =%d", nvData.rainStartup);
-    log_d("tsDayBegin     =%d", nvData.tsDayBegin);
-    log_d("rainDayBegin   =%f", nvData.rainDayBegin);
-    log_d("tsWeekBegin    =%d", nvData.tsWeekBegin);
-    log_d("rainWeekBegin  =%f", nvData.rainWeekBegin);
-    log_d("wdayPrev       =%d", nvData.wdayPrev);
-    log_d("tsMonthBegin   =%d", nvData.tsMonthBegin);
-    log_d("rainMonthBegin =%f", nvData.rainMonthBegin);
-    log_d("rainPrev       =%f", nvData.rainPrev);
-    log_d("rainOvf        =%d", nvData.rainOvf);
+    log_d("lastUpdate        =%s", String(nvData.lastUpdate).c_str());
+    log_d("startupPrev       =%d", nvData.startupPrev);
+    log_d("rainPreStartup    =%f", nvData.rainPreStartup);
+    log_d("tsDayBegin        =%d", nvData.tsDayBegin);
+    log_d("rainDayBegin      =%f", nvData.rainDayBegin);
+    log_d("tsWeekBegin       =%d", nvData.tsWeekBegin);
+    log_d("rainWeekBegin     =%f", nvData.rainWeekBegin);
+    log_d("wdayPrev          =%d", nvData.wdayPrev);
+    log_d("tsMonthBegin      =%d", nvData.tsMonthBegin);
+    log_d("rainMonthBegin    =%f", nvData.rainMonthBegin);
+    log_d("rainPrev          =%f", nvData.rainPrev);
+    log_d("rainAcc           =%f", nvData.rainAcc);
     preferences.end();
 }
 
@@ -351,7 +351,7 @@ RainGauge::prefs_save(void)
         preferences.putInt(buf, nvData.hist[i]);
     }
     preferences.putBool("startupPrev", nvData.startupPrev);
-    preferences.putFloat("rainStartup", nvData.rainStartup);
+    preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
     preferences.putUChar("tsDayBegin", nvData.tsDayBegin);
     preferences.putFloat("rainDayBegin", nvData.rainDayBegin);
     preferences.putUChar("tsWeekBegin", nvData.tsWeekBegin);
@@ -360,7 +360,7 @@ RainGauge::prefs_save(void)
     preferences.putUChar("tsMonthBegin", nvData.tsMonthBegin);
     preferences.putFloat("rainMonthBegin", nvData.rainMonthBegin);
     preferences.putFloat("rainPrev", nvData.rainPrev);
-    preferences.putUShort("rainOvf", nvData.rainOvf);
+    preferences.putFloat("rainAcc", nvData.rainAcc);
     preferences.end();
 }
 #endif
@@ -420,20 +420,22 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         return;
     }
 
-    rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
+    rainCurr = nvData.rainAcc + rain;
     
     if (rainCurr < nvData.rainPrev) {
        // Startup change 0->1 detected
        if (!nvData.startupPrev && startup) {
-           // Save last rain value before startup
-           nvData.rainStartup = nvData.rainPrev;
+           // Add last rain gauge reading before startup
+           nvData.rainAcc += nvData.rainPreStartup;
        } else {
-           nvData.rainOvf++;
+           // Add counter overflow
+           nvData.rainAcc += raingaugeMax;
        }
     }
     
+    rainCurr = nvData.rainAcc + rain;
     nvData.startupPrev = startup;
-    rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
+    nvData.rainPreStartup = rain;
 
 #ifdef RAINGAUGE_OLD
     uint8_t  head_tmp; // circular buffer; temporary head index

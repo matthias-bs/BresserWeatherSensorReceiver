@@ -43,6 +43,7 @@
 // 20231227 Added prerequisites for storing rain data in preferences
 // 20231218 Implemented storing of rain data in preferences, 
 //          new algotrithm for past 60 minutes rainfall
+// 20240118 Changed raingaugeMax to class member set by constructor
 //
 // ToDo: 
 // -
@@ -107,10 +108,15 @@
  * Additionally overflow of the rain gauge is handled when reaching RAINGAUGE_MAX_VALUE. 
  */
 class RainGauge {
-public:
+private:
     float rainCurr;
-    
-    RainGauge() {};
+    float raingaugeMax;
+
+public:
+    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE) :
+        raingaugeMax(raingauge_max)
+    {};
+
 #ifdef _DEBUG_CIRCULAR_BUFFER_
     /**
      * Print circular buffer for rainfall of past 60 minutes
@@ -121,26 +127,29 @@ public:
     /**
      * Reset non-volatile data and current rain counter value
      */
-    void  reset(uint8_t flags=0xF);
+    void reset(uint8_t flags=0xF);
     
-    
+    #ifdef RAINGAUGE_OLD
     /**
      * OLD:
      * Initialize circular buffer for hourly (past 60 minutes) rainfall
      */
     void  init(tm t, float rain);
-    
+    #else
     /**
      * NEW:
      * Initialize history buffer for hourly (past 60 minutes) rainfall
      */
     void hist_init(int32_t rain = -1);
+    #endif
 
     #if defined(RAINGAUGE_USE_PREFS)
     void prefs_load(void);
     void prefs_save(void);
     #endif
 
+
+    #ifdef RAINGAUGE_OLD
     /**
      * \fn update
      * 
@@ -151,13 +160,21 @@ public:
      * \param rain         rain gauge raw value
      * 
      * \param startup      sensor startup flag
-     * 
-     * \param rainGaugeMax overflow value; when reached, the rain gauge is reset to zero
      */
-    #ifdef RAINGAUGE_OLD
-    void  update(tm timeinfo, float rain, bool startup = false, float raingaugeMax = RAINGAUGE_MAX_VALUE);
+    void  update(tm timeinfo, float rain, bool startup = false);
     #else
-    void  update(time_t ts, float rain, bool startup = false, float raingaugeMax = RAINGAUGE_MAX_VALUE);
+    /**
+     * \fn update
+     * 
+     * \brief Update rain gauge statistics
+     * 
+     * \param ts           timestamp
+     * 
+     * \param rain         rain gauge raw value
+     * 
+     * \param startup      sensor startup flag
+     */
+    void  update(time_t ts, float rain, bool startup = false);
     #endif
     
     /**
@@ -181,6 +198,7 @@ public:
     float currentMonth(void);
     
 private:
+    #ifdef RAINGAUGE_OLD
     /**
      * Calculate seconds since midnight from given time and date
      *
@@ -189,4 +207,5 @@ private:
      * \returns Seconds since midnight
      */
     uint32_t timeStamp(tm t);
+    #endif
 };

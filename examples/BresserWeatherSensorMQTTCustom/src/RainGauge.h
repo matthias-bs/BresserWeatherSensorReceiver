@@ -47,6 +47,7 @@
 // 20240119 Changed preferences to class member
 //          Modified update at the same index as before
 //          Modified pastHour() algorithm and added features
+//          Changed hist[] width
 //
 // ToDo: 
 // -
@@ -166,7 +167,7 @@ public:
      * NEW:
      * Initialize history buffer for hourly (past 60 minutes) rainfall
      */
-    void hist_init(int32_t rain = -1);
+    void hist_init(int16_t rain = -1);
     #endif
 
     #if defined(RAINGAUGE_USE_PREFS)

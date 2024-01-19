@@ -203,6 +203,15 @@ public:
     void  update(time_t ts, float rain, bool startup = false);
     #endif
     
+    #ifdef RAINGAUGE_OLD
+    /**
+     * Rainfall during past 60 minutes
+     * 
+     * \returns amount of rain during past 60 minutes
+     */
+    float pastHour(void);
+
+    #else
     /**
      * Rainfall during past 60 minutes
      * 
@@ -212,7 +221,8 @@ public:
      * \returns amount of rain during past 60 minutes
      */
     float pastHour(bool *valid = nullptr, int *quality = nullptr);
-    
+    #endif
+
     /**
      * Rainfall of current calendar day
      * 

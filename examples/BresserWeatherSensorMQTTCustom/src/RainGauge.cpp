@@ -208,7 +208,12 @@ RainGauge::reset(uint8_t flags)
 #if defined(RAINGAUGE_USE_PREFS)
     preferences.begin("BWS-RAIN", false);
     if (flags & RESET_RAIN_H) {
+        #ifdef RAINGAUGE_OLD
+        nvData.head           = 0;
+        nvData.tail           = 0;
+        #else
         hist_init(-1);
+        #endif
     }
     if (flags & RESET_RAIN_D) {
         nvData.tsDayBegin     = 0xFF;
@@ -287,6 +292,7 @@ RainGauge::init(tm t, float rain)
 }
 #endif
 
+#ifndef RAINGAUGE_OLD
 void
 RainGauge::hist_init(int32_t rain)
 {
@@ -294,6 +300,7 @@ RainGauge::hist_init(int32_t rain)
         nvData.hist[i] = rain;
     }
 }
+#endif
 
 #if defined(RAINGAUGE_USE_PREFS)
 void
@@ -403,13 +410,22 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
     if (nvData.lastUpdate == -1) {
         // Initialize histogram
+        #ifdef RAINGAUGE_OLD
+        nvData.head = 0;
+        nvData.tail = 0;
+        nvData.tsDayBegin = t.tm_wday;
+        #else
         hist_init();
+        #endif
     }
 
     if (nvData.rainPrev == -1) {
         // No previous count or counter reset
         nvData.rainPrev = rain;
+
+        #ifndef RAINGAUGE_OLD
         nvData.lastUpdate = timestamp;
+        #endif
         
         #if defined(RAINGAUGE_USE_PREFS)
             prefs_save();

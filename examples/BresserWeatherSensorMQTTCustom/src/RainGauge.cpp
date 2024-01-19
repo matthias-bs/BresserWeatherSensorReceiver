@@ -42,9 +42,18 @@
 // 20231227 Added prerequisites for storing rain data in preferences
 // 20231218 Implemented storing of rain data in preferences, 
 //          new algotrithm for past 60 minutes rainfall
+// 20240118 Changed raingaugeMax to class member set by constructor
+//          Modified startup/overflow handling
+// 20240119 Changed preferences to class member
+//          Modified update at the same index as before
+//          Modified pastHour() algorithm and added features
 //
 // ToDo: 
 // -
+//
+// Notes:
+// - Extreme values of rainfall: https://en.wikipedia.org/wiki/List_of_weather_records#Rain
+//   (for variable widths and evaluation of rain gauge overflows)
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -52,9 +61,6 @@
 #include "WeatherSensorCfg.h"
 #include "RainGauge.h"
 
-#if defined(RAINGAUGE_USE_PREFS)
-    #include <Preferences.h>
-#endif
 
 const int SECONDS_PER_HOUR = 3600;
 const int SECONDS_PER_DAY  = 86400;
@@ -89,7 +95,7 @@ typedef struct {
 
     /* Sensor startup handling */
     bool      startupPrev; // previous state of startup
-    float     rainStartup; // rain gauge before startup 
+    float     rainPreStartup; // previous rain gauge reading (before startup)
 
     /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
     uint8_t   tsDayBegin; // day of week
@@ -105,7 +111,7 @@ typedef struct {
     float     rainMonthBegin; // rain gauge @ begin of month
 
     float     rainPrev;  // rain gauge at previous run - to detect overflow
-    uint16_t  rainOvf; // number of rain gauge overflows
+    float     rainAcc; // accumulated rain (overflows and startups)
 } nvData_t;
 
 
@@ -117,7 +123,7 @@ RTC_DATA_ATTR nvData_t nvData = {
    .head = 0,
    .tail = 0,
    .startupPrev = false,
-   .rainStartup = 0,
+   .rainPreStartup = 0,
    .tsDayBegin = 0xFF,
    .rainDayBegin = 0,
    .tsWeekBegin = 0xFF,
@@ -126,12 +132,9 @@ RTC_DATA_ATTR nvData_t nvData = {
    .tsMonthBegin = 0xFF,
    .rainMonthBegin = 0,
    .rainPrev = 0,
-   .rainOvf = 0
+   .rainAcc = 0
 };
 
-#if defined(RAINGAUGE_USE_PREFS)
-static Preferences preferences;
-#endif
 
 /**
  * \verbatim
@@ -227,15 +230,15 @@ RainGauge::reset(uint8_t flags)
     }
 
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
-        nvData.startupPrev    = false;
-        nvData.rainStartup    = 0;
-        nvData.rainPrev       = 0;
-        nvData.rainOvf        = 0;
-        rainCurr              = 0;
+        nvData.startupPrev       = false;
+        nvData.rainPreStartup    = 0;
+        nvData.rainPrev          = -1;
+        nvData.rainAcc           = 0;
+        rainCurr                 = 0;
         preferences.putBool("startupPrev", nvData.startupPrev);
-        preferences.putFloat("rainStartup", nvData.rainStartup);
+        preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
         preferences.putFloat("rainPrev", nvData.rainPrev);
-        preferences.putUShort("rainOvf", nvData.rainOvf);
+        preferences.putFloat("rainAcc", nvData.rainAcc);
     }    
     preferences.end();
 #else
@@ -257,15 +260,16 @@ RainGauge::reset(uint8_t flags)
     }
 
     if (flags == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
-        nvData.startupPrev    = false;
-        nvData.rainStartup    = 0;
-        nvData.rainPrev       = 0;
-        nvData.rainOvf        = 0;
-        rainCurr              = 0;
+        nvData.startupPrev       = false;
+        nvData.rainPreStartup    = 0;
+        nvData.rainPrev          = -1;
+        nvData.rainAcc           = 0;
+        rainCurr                 = 0;
     }
 #endif
 }
 
+#ifdef RAINGAUGE_OLD
 void
 RainGauge::init(tm t, float rain)
 {
@@ -281,6 +285,7 @@ RainGauge::init(tm t, float rain)
     nvData.tail = 0;
     nvData.tsDayBegin = t.tm_wday;
 }
+#endif
 
 void
 RainGauge::hist_init(int32_t rain)
@@ -303,30 +308,30 @@ RainGauge::prefs_load(void)
         sprintf(buf, "hist%02d", i);
         nvData.hist[i] = preferences.getInt(buf, -1);
     }
-    nvData.startupPrev    = preferences.getBool("startupPrev", false);
-    nvData.rainStartup    = preferences.getFloat("rainStartup", 0);
-    nvData.tsDayBegin     = preferences.getUChar("tsDayBegin", 0xFF);
-    nvData.rainDayBegin   = preferences.getFloat("rainDayBegin", 0);
-    nvData.tsWeekBegin    = preferences.getUChar("tsWeekBegin", 0xFF);
-    nvData.rainWeekBegin  = preferences.getFloat("rainWeekBegin", 0);
-    nvData.wdayPrev       = preferences.getUChar("wdayPrev", 0xFF);
-    nvData.tsMonthBegin   = preferences.getUChar("tsMonthBegin", 0);
-    nvData.rainMonthBegin = preferences.getFloat("rainMonthBegin", 0);
-    nvData.rainPrev       = preferences.getFloat("rainPrev", 0);
-    nvData.rainOvf        = preferences.getUShort("rainOvf", 0);
+    nvData.startupPrev       = preferences.getBool("startupPrev", false);
+    nvData.rainPreStartup    = preferences.getFloat("rainPreStartup", 0);
+    nvData.tsDayBegin        = preferences.getUChar("tsDayBegin", 0xFF);
+    nvData.rainDayBegin      = preferences.getFloat("rainDayBegin", 0);
+    nvData.tsWeekBegin       = preferences.getUChar("tsWeekBegin", 0xFF);
+    nvData.rainWeekBegin     = preferences.getFloat("rainWeekBegin", 0);
+    nvData.wdayPrev          = preferences.getUChar("wdayPrev", 0xFF);
+    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0);
+    nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
+    nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
+    nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
 
-    log_d("lastUpdate     =%s", String(nvData.lastUpdate).c_str());
-    log_d("startupPrev    =%d", nvData.startupPrev);
-    log_d("rainStartup    =%d", nvData.rainStartup);
-    log_d("tsDayBegin     =%d", nvData.tsDayBegin);
-    log_d("rainDayBegin   =%f", nvData.rainDayBegin);
-    log_d("tsWeekBegin    =%d", nvData.tsWeekBegin);
-    log_d("rainWeekBegin  =%f", nvData.rainWeekBegin);
-    log_d("wdayPrev       =%d", nvData.wdayPrev);
-    log_d("tsMonthBegin   =%d", nvData.tsMonthBegin);
-    log_d("rainMonthBegin =%f", nvData.rainMonthBegin);
-    log_d("rainPrev       =%f", nvData.rainPrev);
-    log_d("rainOvf        =%d", nvData.rainOvf);
+    log_d("lastUpdate        =%s", String(nvData.lastUpdate).c_str());
+    log_d("startupPrev       =%d", nvData.startupPrev);
+    log_d("rainPreStartup    =%f", nvData.rainPreStartup);
+    log_d("tsDayBegin        =%d", nvData.tsDayBegin);
+    log_d("rainDayBegin      =%f", nvData.rainDayBegin);
+    log_d("tsWeekBegin       =%d", nvData.tsWeekBegin);
+    log_d("rainWeekBegin     =%f", nvData.rainWeekBegin);
+    log_d("wdayPrev          =%d", nvData.wdayPrev);
+    log_d("tsMonthBegin      =%d", nvData.tsMonthBegin);
+    log_d("rainMonthBegin    =%f", nvData.rainMonthBegin);
+    log_d("rainPrev          =%f", nvData.rainPrev);
+    log_d("rainAcc           =%f", nvData.rainAcc);
     preferences.end();
 }
 
@@ -343,7 +348,7 @@ RainGauge::prefs_save(void)
         preferences.putInt(buf, nvData.hist[i]);
     }
     preferences.putBool("startupPrev", nvData.startupPrev);
-    preferences.putFloat("rainStartup", nvData.rainStartup);
+    preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
     preferences.putUChar("tsDayBegin", nvData.tsDayBegin);
     preferences.putFloat("rainDayBegin", nvData.rainDayBegin);
     preferences.putUChar("tsWeekBegin", nvData.tsWeekBegin);
@@ -352,11 +357,12 @@ RainGauge::prefs_save(void)
     preferences.putUChar("tsMonthBegin", nvData.tsMonthBegin);
     preferences.putFloat("rainMonthBegin", nvData.rainMonthBegin);
     preferences.putFloat("rainPrev", nvData.rainPrev);
-    preferences.putUShort("rainOvf", nvData.rainOvf);
+    preferences.putFloat("rainAcc", nvData.rainAcc);
     preferences.end();
 }
 #endif
 
+#ifdef RAINGAUGE_OLD
 uint32_t
 RainGauge::timeStamp(tm t)
 {
@@ -375,29 +381,33 @@ RainGauge::timeStamp(tm t)
     
     return (uint32_t)ts;
 }
+#endif
 
 #ifdef RAINGAUGE_OLD
 void
-RainGauge::update(tm t, float rain, bool startup, float raingaugeMax)
+RainGauge::update(tm t, float rain, bool startup)
 #else
 void
-RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax)
+RainGauge::update(time_t timestamp, float rain, bool startup)
 #endif
 {
     #if defined(RAINGAUGE_USE_PREFS)
         prefs_load();
     #endif
     
+#ifndef RAINGAUGE_OLD
     struct tm t;
-
+    
     localtime_r(&timestamp, &t);
+#endif
 
     if (nvData.lastUpdate == -1) {
         // Initialize histogram
         hist_init();
     }
-    if ((nvData.rainPrev == 0) || (rain < nvData.rainPrev)) {
-        // No previous count, counter reset or counter overflow
+
+    if (nvData.rainPrev == -1) {
+        // No previous count or counter reset
         nvData.rainPrev = rain;
         nvData.lastUpdate = timestamp;
         
@@ -407,6 +417,25 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
         return;
     }
 
+    rainCurr = nvData.rainAcc + rain;
+    
+    if (rainCurr < nvData.rainPrev) {
+       // Startup change 0->1 detected
+       if (!nvData.startupPrev && startup) {
+           // Add last rain gauge reading before startup
+           nvData.rainAcc += nvData.rainPreStartup;
+       } else {
+           // Add counter overflow
+           nvData.rainAcc += raingaugeMax;
+       }
+    }
+    
+    rainCurr = nvData.rainAcc + rain;
+    nvData.startupPrev = startup;
+    nvData.rainPreStartup = rain;
+
+    float rainDelta = rainCurr - nvData.rainPrev;
+
 #ifdef RAINGAUGE_OLD
     uint8_t  head_tmp; // circular buffer; temporary head index
 
@@ -414,19 +443,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
     uint32_t ts = timeStamp(t);
 #endif
 
-    if (rain < nvData.rainPrev) {
-       // Startup change 0->1 detected
-       if (!nvData.startupPrev && startup) {
-           // Save last rain value before startup
-           nvData.rainStartup = nvData.rainPrev;
-       } else {
-           nvData.rainOvf++;
-       }
-    }
-   
-    nvData.startupPrev = startup;
-    
-    rainCurr = (nvData.rainOvf * raingaugeMax) + nvData.rainStartup + rain;
 
     // Check if no saved data is available yet
     if (nvData.wdayPrev == 0xFF) {
@@ -488,11 +504,17 @@ RainGauge::update(time_t timestamp, float rain, bool startup, float raingaugeMax
     int min = timeinfo.tm_min;
     int idx = min / RAINGAUGE_UPD_RATE;
 
-    if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
-        // Add entry to history or update entry
-        nvData.hist[idx] = rainCurr * 10;
+    if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
+        // Same index as before, add new delta
+        nvData.hist[idx] += rainDelta * 10;
         nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%.1f", idx, rainCurr);
+        log_d("hist[%d]=%.1f (upd)", idx, nvData.hist[idx] * 0.1);
+    }
+    else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
+        // Next index, write delta
+        nvData.hist[idx] = rainDelta * 10;
+        nvData.lastUpdate = timestamp;
+        log_d("hist[%d]=%.1f (new)", idx, nvData.hist[idx] * 0.1);
     }
 
     // Mark all history entries in interval [expected_index, current_index) as invalid
@@ -568,39 +590,33 @@ RainGauge::pastHour(void)
 }
 #else
 float
-RainGauge::pastHour(void)
+RainGauge::pastHour(bool *valid, int *quality)
 {
-    struct tm timeinfo;
-    //localtime_r(&nvData.lastUpdate, &timeinfo);
-    time_t now = time(nullptr);
-    localtime_r(&now, &timeinfo);
+    int _quality = 0;
+    float res = 0;
 
-    int min = timeinfo.tm_min;
-    int idx = min / RAINGAUGE_UPD_RATE;
-    log_d("hist[%d]=%.1f", idx, nvData.hist[idx] * 0.1);
-
-    if (nvData.hist[idx] == -1) {
-        // No valid entry at current time
-        return -1;
-    }
-
-    // Find oldest valid entry in history buffer
-    int idx2;
-    for (int i = 1; i<=RAIN_HIST_SIZE-1; i++) {
-        idx2 = idx + i;
-        if (idx2 > RAIN_HIST_SIZE-1) {
-            idx2 -= RAIN_HIST_SIZE;
+    // Sum of all valid entries
+    for (size_t i=0; i<RAIN_HIST_SIZE; i++){
+        if (nvData.hist[i] != -1) {
+            res += nvData.hist[i];
+            _quality++;
         }
-        log_d("hist[%d]=%.1f", idx2, nvData.hist[idx2] * 0.1);
-        if (nvData.hist[idx2] > -1)
-            break;
-    }
-    if (nvData.hist[idx2] == -1) {
-        // No valid previous entry
-        return -1;
     }
 
-    return (float)(0.1 * (nvData.hist[idx] - nvData.hist[idx2]));
+    // Optional: return quality indication
+    if (quality)
+        *quality = _quality;
+    
+    // Optional: return valid flag
+    if (valid) {
+        if (_quality >= qualityThreshold) {
+            *valid = true;
+        } else {
+            *valid = false;
+        }
+    }
+
+    return res;
 }
 #endif
 

@@ -22,15 +22,15 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | ------------- | ---- | ------------------------------- |
 | 7002510..12, 9602510   | Weather Station | decodeBresser**5In1**Payload()  |
 | 7902510..12   | Weather Station (Base) | decodeBresser**5In1**Payload()  |
-| 7002531       | 3-in-1 Professional Wind Gauge / Anemometer | decodeBresser**6In1**Payload() |
+| 7002531       | 3-in-1 Professional Wind Gauge / Anemometer | decodeBresser**6In1**Payload() **1)** |
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009970       | Air Quality Sensor PM 2.5 / PM 10 | decodeBresser**7In1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7009973       | Pool / Spa Thermometer           | decodeBresser**6In1**Payload() |
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
-| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **1)** |
-| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **2)** |
+| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **2)** |
+| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **3)** |
 | 7003210       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
@@ -45,9 +45,11 @@ Some guesswork:
 | 790*             | Weather Station Base (Replacement) |
 | 700[99]*         | Accessory Sensor |
 
-**1)** Work in progress
+**1)** The flag `DATA_COMPLETE` must not be set in `getData()`, otherwise the return value would always indicate a timeout. (I.e. use `#define RX_STRATEGY 0` in some of the example sketches.)
 
-**2)** The part number is specific to the actual variant, i.e. some more characters are appended
+**2)** Work in progress
+
+**3)** The part number is specific to the actual variant, i.e. some more characters are appended
 
 
 ## Configuration
@@ -66,7 +68,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®TTGO-LORA32 V2](https://github.com/LilyGO/TTGO-LORA32) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32 V2.1](https://www.lilygo.cc/products/lora3?variant=42272562282677) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick & **USE_SX1276** | SX1276 | - |
-   | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick & **USE_SX1262** | SX1262 | **not tested** |
+   | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_heltec_wireless_stick & **USE_SX1262** | SX1262 | see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/80#issuecomment-1890555789 |
    | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_heltec_wifi_lora_32_V2 | SX1276 | - |
    | [Heltec WiFi LoRa 32 V3](https://heltec.org/project/wifi-lora-32-v3/)  | "Heltec WiFi LoRa 32(V3)" | n.a.             | ARDUINO_heltec_wifi_32_lora_V3 | SX1262 | - |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |

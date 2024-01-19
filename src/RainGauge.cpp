@@ -44,6 +44,9 @@
 //          new algotrithm for past 60 minutes rainfall
 // 20240118 Changed raingaugeMax to class member set by constructor
 //          Modified startup/overflow handling
+// 20240119 Changed preferences to class member
+//          Modified update at the same index as before
+//          Modified pastHour() algorithm and added features
 //
 // ToDo: 
 // -
@@ -431,6 +434,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     nvData.startupPrev = startup;
     nvData.rainPreStartup = rain;
 
+    float rainDelta = rainCurr - nvData.rainPrev;
+
 #ifdef RAINGAUGE_OLD
     uint8_t  head_tmp; // circular buffer; temporary head index
 
@@ -499,11 +504,17 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     int min = timeinfo.tm_min;
     int idx = min / RAINGAUGE_UPD_RATE;
 
-    if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
-        // Add entry to history or update entry
-        nvData.hist[idx] = rainCurr * 10;
+    if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
+        // Same index as before, add new delta
+        nvData.hist[idx] += rainDelta * 10;
         nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%.1f", idx, rainCurr);
+        log_d("hist[%d]=%.1f (upd)", idx, nvData.hist[idx] * 0.1);
+    }
+    else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
+        // Next index, write delta
+        nvData.hist[idx] = rainDelta * 10;
+        nvData.lastUpdate = timestamp;
+        log_d("hist[%d]=%.1f (new)", idx, nvData.hist[idx] * 0.1);
     }
 
     // Mark all history entries in interval [expected_index, current_index) as invalid
@@ -579,39 +590,34 @@ RainGauge::pastHour(void)
 }
 #else
 float
-RainGauge::pastHour(void)
+RainGauge::pastHour(bool *valid, int *quality)
 {
-    struct tm timeinfo;
-    //localtime_r(&nvData.lastUpdate, &timeinfo);
-    time_t now = time(nullptr);
-    localtime_r(&now, &timeinfo);
+    bool _valid = false;
+    int _quality = 0;
+    float res = 0;
 
-    int min = timeinfo.tm_min;
-    int idx = min / RAINGAUGE_UPD_RATE;
-    log_d("hist[%d]=%.1f", idx, nvData.hist[idx] * 0.1);
-
-    if (nvData.hist[idx] == -1) {
-        // No valid entry at current time
-        return -1;
-    }
-
-    // Find oldest valid entry in history buffer
-    int idx2;
-    for (int i = 1; i<=RAIN_HIST_SIZE-1; i++) {
-        idx2 = idx + i;
-        if (idx2 > RAIN_HIST_SIZE-1) {
-            idx2 -= RAIN_HIST_SIZE;
+    // Sum of all valid entries
+    for (size_t i=0; i<RAIN_HIST_SIZE; i++){
+        if (nvData.hist[i] != -1) {
+            res += nvData.hist[i];
+            _quality++;
         }
-        log_d("hist[%d]=%.1f", idx2, nvData.hist[idx2] * 0.1);
-        if (nvData.hist[idx2] > -1)
-            break;
-    }
-    if (nvData.hist[idx2] == -1) {
-        // No valid previous entry
-        return -1;
     }
 
-    return (float)(0.1 * (nvData.hist[idx] - nvData.hist[idx2]));
+    // Optional: return quality indication
+    if (quality)
+        *quality = _quality;
+    
+    // Optional: return valid flag
+    if (valid) {
+        if (_quality >= qualityThreshold) {
+            *valid = true;
+        } else {
+            *valid = false;
+        }
+    }
+
+    return res;
 }
 #endif
 

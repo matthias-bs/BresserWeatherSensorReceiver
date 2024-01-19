@@ -44,6 +44,9 @@
 // 20231218 Implemented storing of rain data in preferences, 
 //          new algotrithm for past 60 minutes rainfall
 // 20240118 Changed raingaugeMax to class member set by constructor
+// 20240119 Changed preferences to class member
+//          Modified update at the same index as before
+//          Modified pastHour() algorithm and added features
 //
 // ToDo: 
 // -
@@ -84,8 +87,15 @@
  * \def
  * 
  * Set to (3600 [sec] / update_rate_rate [sec]) + 1
- */ 
+ */
 #define RAINGAUGE_BUF_SIZE 11
+
+/**
+ * \def
+ * 
+ * Number of valid rain_hist entries required for valid result
+ */
+#define DEFAULT_QUALITY_THRESHOLD 8
 
 /**
  * \defgroup Reset rain counters
@@ -113,14 +123,22 @@ class RainGauge {
 private:
     float rainCurr;
     float raingaugeMax;
+    int qualityThreshold;
 
     #if defined(RAINGAUGE_USE_PREFS)
     Preferences preferences;
     #endif
 
 public:
-    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE) :
-        raingaugeMax(raingauge_max)
+    /**
+     * Constructor
+     * 
+     * \param raingauge_max     raingauge value which causes a counter overflow
+     * \param quality_threshold number of valid rain_hist entries required for valid pastHour() result
+     */
+    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+        raingaugeMax(raingauge_max),
+        qualityThreshold(quality_threshold)
     {};
 
 #ifdef _DEBUG_CIRCULAR_BUFFER_
@@ -132,6 +150,8 @@ public:
     
     /**
      * Reset non-volatile data and current rain counter value
+     * 
+     * \param flags Flags defining what to reset:
      */
     void reset(uint8_t flags=0xF);
     
@@ -176,7 +196,7 @@ public:
      * 
      * \param ts           timestamp
      * 
-     * \param rain         rain gauge raw value
+     * \param rain         rain gauge raw value (in mm/m²)
      * 
      * \param startup      sensor startup flag
      */
@@ -185,21 +205,32 @@ public:
     
     /**
      * Rainfall during past 60 minutes
+     * 
+     * \param valid     number of valid entries in rain_hist >= qualityThreshold
+     * \param quality   number of valid entries in rain_hist
+     * 
+     * \returns amount of rain during past 60 minutes
      */
-    float pastHour(void);
+    float pastHour(bool *valid = nullptr, int *quality = nullptr);
     
     /**
      * Rainfall of current calendar day
+     * 
+     * \returns amount of rain
      */
     float currentDay(void);
     
     /**
      * Rainfall of current calendar week
+     * 
+     * \returns amount of rain
      */
     float currentWeek(void);
     
     /**
      * Rainfall of current calendar month
+     * 
+     * \returns amount of rain
      */
     float currentMonth(void);
     

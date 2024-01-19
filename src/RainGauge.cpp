@@ -58,9 +58,6 @@
 #include "WeatherSensorCfg.h"
 #include "RainGauge.h"
 
-#if defined(RAINGAUGE_USE_PREFS)
-    #include <Preferences.h>
-#endif
 
 const int SECONDS_PER_HOUR = 3600;
 const int SECONDS_PER_DAY  = 86400;
@@ -135,9 +132,6 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainAcc = 0
 };
 
-#if defined(RAINGAUGE_USE_PREFS)
-static Preferences preferences;
-#endif
 
 /**
  * \verbatim

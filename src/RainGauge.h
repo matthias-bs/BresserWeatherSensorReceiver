@@ -54,7 +54,9 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
-
+#if defined(RAINGAUGE_USE_PREFS)
+    #include <Preferences.h>
+#endif
 
 /**
  * \def
@@ -111,6 +113,10 @@ class RainGauge {
 private:
     float rainCurr;
     float raingaugeMax;
+
+    #if defined(RAINGAUGE_USE_PREFS)
+    Preferences preferences;
+    #endif
 
 public:
     RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE) :

@@ -3,8 +3,8 @@
 //
 // Post-processing of lightning sensor data
 //
-// Input:   
-//     * Timestamp (time and date)
+// Input:
+//     * Timestamp
 //     * Sensor startup flag
 //     * Accumulated lightning event counter
 //     * Estimated distance of last strike
@@ -12,9 +12,10 @@
 // Output:
 //     * Number of events during last update cycle
 //     * Timestamp of last event
-//     * Number of strikes during past 60 minutes (TBD)
+//     * Number of strikes during past 60 minutes
 //
-// Non-volatile data is stored in the ESP32's RTC RAM to allow retention during deep sleep mode.
+// Non-volatile data is stored in the ESP32's RTC RAM or in Preferences (Flash FS)
+// to allow retention during deep sleep mode.
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -49,6 +50,7 @@
 // 20230721 Created
 // 20231105 Added data storage via Preferences, modified history implementation
 // 20240116 Corrected LIGHTNINGCOUNT_MAX_VALUE
+// 20240119 Changed preferences to class member
 //
 // ToDo: 
 // -
@@ -60,6 +62,11 @@
   #include <sys/time.h>
 #endif
 #include "WeatherSensorCfg.h"
+
+#if defined(LIGHTNING_USE_PREFS)
+#include <Preferences.h>
+#endif
+
 
 
 /**
@@ -90,9 +97,14 @@
  *        during last hour (past 60 minutes); storing timestamp and distance of last event.
  */
 class Lightning {
-public:
+
+private:
+    #if defined(LIGHTNING_USE_PREFS)
+    Preferences preferences;
+    #endif
     float countCurr;
-    
+
+public:    
     Lightning() {};
     
     /**

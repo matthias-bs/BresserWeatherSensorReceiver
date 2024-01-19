@@ -3,8 +3,8 @@
 //
 // Post-processing of lightning sensor data
 //
-// Input:   
-//     * Timestamp (time and date)
+// Input:
+//     * Timestamp
 //     * Sensor startup flag
 //     * Accumulated lightning event counter
 //     * Estimated distance of last strike
@@ -12,9 +12,10 @@
 // Output:
 //     * Number of events during last update cycle
 //     * Timestamp of last event
-//     * Number of strikes during past 60 minutes  
+//     * Number of strikes during past 60 minutes
 //
-// Non-volatile data is stored in the ESP32's RTC RAM to allow retention during deep sleep mode.
+// Non-volatile data is stored in the ESP32's RTC RAM or in Preferences (Flash FS)
+// to allow retention during deep sleep mode.
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -50,6 +51,7 @@
 // 20231105 Added data storage via Preferences, modified history implementation
 // 20240113 Fixed timestamp format string and hourly history calculation
 // 20240114 Implemented counter overflow and startup handling
+// 20240119 Changed preferences to class member
 //
 // ToDo: 
 //
@@ -61,10 +63,6 @@
 
 #include <Arduino.h>
 #include "Lightning.h"
-
-#if defined(LIGHTNING_USE_PREFS)
-#include <Preferences.h>
-#endif
 
 #if !defined(ESP32) && !defined(LIGHTNING_USE_PREFS)
    #pragma message("Lightning with SLEEP_EN and data in RTC RAM only supported on ESP32!")
@@ -95,9 +93,7 @@ typedef struct {
 
 } nvLightning_t;
 
-#if defined(LIGHTNING_USE_PREFS)
-static Preferences preferences;
-#else
+#if !defined(LIGHTNING_USE_PREFS)
 RTC_DATA_ATTR
 #endif
 nvLightning_t nvLightning = {

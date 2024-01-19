@@ -1,6 +1,6 @@
 {
   "name": "BresserWeatherSensorReceiver",
-  "version": "0.20.1",
+  "version": "0.21.0",
   "description": "Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W or SX1262",
   "main": "WeatherSensor.cpp",
   "frameworks": "arduino",
@@ -19,10 +19,10 @@
   },
   "homepage": "https://github.com/matthias-bs/BresserWeatherSensorReceiver#README",
   "dependencies": {
-    "RadioLib": "jgromes/RadioLib#semver:^6.3.0",
+    "RadioLib": "jgromes/RadioLib#semver:^6.4.0",
     "lora-serialization": "thesolarnomad/lora-serialization#semver:^3.1.0",
     "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.1",
-    "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.0.0",
+    "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.0.2",
     "WiFiManager": "tzapu/WiFiManager#semver:2.0.16-rc.2",
     "ESP_DoubleResetDetector": "khoih-prog/ESP_DoubleResetDetector#semver:1.3.2",
     "Preferences": "vshymanskyy/Preferences#semver:^2.1.0"

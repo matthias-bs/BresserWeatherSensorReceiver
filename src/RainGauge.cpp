@@ -592,7 +592,6 @@ RainGauge::pastHour(void)
 float
 RainGauge::pastHour(bool *valid, int *quality)
 {
-    bool _valid = false;
     int _quality = 0;
     float res = 0;
 

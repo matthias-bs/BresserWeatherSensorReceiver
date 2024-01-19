@@ -90,6 +90,26 @@
 
 
 // ------------------------------------------------------------------------------------------------
+// --- Rain Gauge / Lightning sensor data retention during deep sleep ---
+// ------------------------------------------------------------------------------------------------
+
+//#define RAINGAUGE_OLD // Use old implementation
+
+#if defined(ESP32)
+    // Option: Comment out to save data in RTC RAM
+    // N.B.:
+    // ESP8266 has RTC RAM, too, but access is different from ESP32
+    // and currently not implemented here
+    #define RAINGAUGE_USE_PREFS
+    #define LIGHTNING_USE_PREFS
+#else
+    // Using Preferences is mandatory on other architectures (e.g. RP2040)
+    #define RAINGAUGE_USE_PREFS
+    #define LIGHTNING_USE_PREFS
+#endif
+
+
+// ------------------------------------------------------------------------------------------------
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
 // Use pinning for LoRaWAN Node

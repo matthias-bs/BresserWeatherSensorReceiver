@@ -68,6 +68,7 @@
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231227 Added sleep()
+// 20240116 Fixed width of Lightning.strike_count
 //
 // ToDo:
 // -
@@ -230,7 +231,7 @@ class WeatherSensor {
 
         struct Lightning {
             uint8_t  distance_km;           //!< lightning distance in km (only lightning)
-            uint8_t  strike_count;          //!< lightning strike counter (only lightning)
+            uint16_t strike_count;          //!< lightning strike counter (only lightning)
             uint16_t unknown1;              //!< unknown part 1
             uint16_t unknown2;              //!< unknown part 2
 

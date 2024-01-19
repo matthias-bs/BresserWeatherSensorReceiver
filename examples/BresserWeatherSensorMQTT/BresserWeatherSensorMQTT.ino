@@ -104,7 +104,8 @@
 //          Refactored struct Sensor
 // 20231103 Improved handling of time and date
 // 20231105 Added lightning sensor data post-processing
-// 20231228 Fixed entering sleep mode befor sensor data was published
+// 20231228 Fixed entering sleep mode before sensor data was published
+// 20240113 Added post-processed lightning data to payload
 //
 // ToDo:
 //
@@ -129,7 +130,7 @@
 #define LED_EN                // Enable LED indicating successful data reception
 #define LED_GPIO 2            // LED pin
 #define TIMEZONE 1            // UTC + TIMEZONE
-#define PAYLOAD_SIZE 255      // maximum MQTT message size
+#define PAYLOAD_SIZE 300      // maximum MQTT message size
 #define TOPIC_SIZE 60         // maximum MQTT topic size (debug output only)
 #define HOSTNAME_SIZE 30      // maximum hostname size
 #define RX_TIMEOUT 90000      // sensor receive timeout [ms]
@@ -527,7 +528,11 @@ void publishWeatherdata(bool complete)
             struct tm timeinfo;
             time_t now = time(nullptr);
             localtime_r(&now, &timeinfo);
+            #ifdef RAINGAUGE_OLD
             rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
+            #else
+            rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
+            #endif
         }
 
         // Example:
@@ -558,6 +563,21 @@ void publishWeatherdata(bool complete)
                 weatherSensor.sensor[i].lgt.distance_km,
                 weatherSensor.sensor[i].startup
             );
+            int events;
+            if (lightning.pastHour(events)) {
+                mqtt_payload += String(",\"lightning_hr\":") + String(events);
+            }
+            time_t timestamp;
+            uint8_t distance;
+            if (lightning.lastEvent(timestamp, events, distance)) {
+                char tbuf[25];
+                struct tm timeinfo;
+                gmtime_r(&timestamp, &timeinfo);
+                strftime(tbuf, 25, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
+                mqtt_payload += String(",\"lightning_event_time\":\"") + String(tbuf) + String("\"");
+                mqtt_payload += String(",\"lightning_event_count\":") + String(events);
+                mqtt_payload += String(",\"lightning_event_distance_km\":") + String(distance);
+            }
         }
         else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
@@ -615,11 +635,11 @@ void publishWeatherdata(bool complete)
         mqtt_payload += String("}");
         mqtt_payload2 += String("}");
 
-        if (mqtt_payload.length() > PAYLOAD_SIZE)
+        if (mqtt_payload.length() >= PAYLOAD_SIZE)
         {
             log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
         }
-        if (mqtt_payload2.length() > PAYLOAD_SIZE)
+        if (mqtt_payload2.length() >= PAYLOAD_SIZE)
         {
             log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
         }
@@ -641,13 +661,7 @@ void publishWeatherdata(bool complete)
         // sensor data
         mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
 
-#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
-        char mqtt_topic_tmp[TOPIC_SIZE];
-        char mqtt_payload_tmp[PAYLOAD_SIZE];
-        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
-        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload.c_str());
-#endif
-        log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+        log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
         client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), false, 0);
 
         // sensor specific RSSI
@@ -657,13 +671,9 @@ void publishWeatherdata(bool complete)
         // extra data
         mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
 
-#if CORE_DEBUG_LEVEL != ARDUHAL_LOG_LEVEL_NONE
-        snprintf(mqtt_topic_tmp, TOPIC_SIZE, mqtt_topic.c_str());
-        snprintf(mqtt_payload_tmp, PAYLOAD_SIZE, mqtt_payload2.c_str());
-#endif
         if (mqtt_payload2.length() > 2)
         {
-            log_i("%s: %s\n", mqtt_topic_tmp, mqtt_payload_tmp);
+            log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload2.c_str());
             client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
         }
     } // for (int i=0; i<NUM_SENSORS; i++)
@@ -675,12 +685,12 @@ void publishWeatherdata(bool complete)
 //
 void publishRadio(void)
 {
-    DynamicJsonDocument payload(PAYLOAD_SIZE);
-    char mqtt_payload[PAYLOAD_SIZE];
+    JsonDocument payload;
+    String mqtt_payload;
 
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload);
+    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload.c_str());
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
@@ -772,7 +782,7 @@ void loop()
 
     bool decode_ok = false;
     bool published_ok = false;
-	
+
 #ifdef _DEBUG_MQTT_
     decode_ok = weatherSensor.genMessage(0 /* slot */, 0x01234567 /* ID */, 1 /* type */, 0 /* channel */);
 #else

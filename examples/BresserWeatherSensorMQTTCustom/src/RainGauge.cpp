@@ -85,7 +85,7 @@ typedef struct {
     time_t    lastUpdate;
 
     /* NEW: Data of past 60 minutes */
-    int32_t   hist[RAIN_HIST_SIZE];
+    int16_t   hist[RAIN_HIST_SIZE];
 
     /* OLD: rainfall during past hour - circular buffer */
     uint32_t  tsBuf[RAINGAUGE_BUF_SIZE];
@@ -212,7 +212,7 @@ RainGauge::reset(uint8_t flags)
         nvData.head           = 0;
         nvData.tail           = 0;
         #else
-        hist_init(-1);
+        hist_init();
         #endif
     }
     if (flags & RESET_RAIN_D) {
@@ -294,7 +294,7 @@ RainGauge::init(tm t, float rain)
 
 #ifndef RAINGAUGE_OLD
 void
-RainGauge::hist_init(int32_t rain)
+RainGauge::hist_init(int16_t rain)
 {
     for (int i=0; i<RAIN_HIST_SIZE; i++) {
         nvData.hist[i] = rain;
@@ -313,7 +313,7 @@ RainGauge::prefs_load(void)
     for (int i=0; i<RAIN_HIST_SIZE; i++) {
         char buf[7];
         sprintf(buf, "hist%02d", i);
-        nvData.hist[i] = preferences.getInt(buf, -1);
+        nvData.hist[i] = preferences.getShort(buf, -1);
     }
     nvData.startupPrev       = preferences.getBool("startupPrev", false);
     nvData.rainPreStartup    = preferences.getFloat("rainPreStartup", 0);
@@ -352,7 +352,7 @@ RainGauge::prefs_save(void)
     for (int i=0; i<RAIN_HIST_SIZE; i++) {
         char buf[7];
         sprintf(buf, "hist%02d", i);
-        preferences.putInt(buf, nvData.hist[i]);
+        preferences.putShort(buf, nvData.hist[i]);
     }
     preferences.putBool("startupPrev", nvData.startupPrev);
     preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
@@ -522,15 +522,17 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
     if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
         // Same index as before, add new delta
-        nvData.hist[idx] += rainDelta * 10;
+        if (nvData.hist[idx] < 0)
+            nvData.hist[idx] = 0;
+        nvData.hist[idx] += static_cast<int16_t>(rainDelta * 10);
         nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%.1f (upd)", idx, nvData.hist[idx] * 0.1);
+        log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
     }
     else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
         // Next index, write delta
-        nvData.hist[idx] = rainDelta * 10;
+        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 10);
         nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%.1f (new)", idx, nvData.hist[idx] * 0.1);
+        log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
     }
 
     // Mark all history entries in interval [expected_index, current_index) as invalid
@@ -613,8 +615,8 @@ RainGauge::pastHour(bool *valid, int *quality)
 
     // Sum of all valid entries
     for (size_t i=0; i<RAIN_HIST_SIZE; i++){
-        if (nvData.hist[i] != -1) {
-            res += nvData.hist[i];
+        if (nvData.hist[i] >= 0) {
+            res += nvData.hist[i] * 0.1;
             _quality++;
         }
     }

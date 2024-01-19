@@ -13,7 +13,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 1. 7-in-1-Decoder 
 2. 6-in-1-Decoder
 3. 5-in-1 Decoder
-4. Lightning Sensor Decoder (work in progress)
+4. Lightning Sensor Decoder
 5. Water Leakage Sensor Decoder
 
 (The Bresser 5-in-1 Weather Stations seem to use two different protocols - 5-in-1 and 6-in-1.)

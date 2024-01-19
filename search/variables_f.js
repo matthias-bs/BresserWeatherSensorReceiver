@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wind_5fok_119',['wind_ok',['../struct_weather_sensor_1_1_weather.html#aa3808f22671713aa03bf42aa0cc86e9d',1,'WeatherSensor::Weather']]]
+  ['valid_129',['valid',['../struct_weather_sensor_1_1_sensor.html#ae28084d05f7e81b1c3a1b2cff859315a',1,'WeatherSensor::Sensor']]]
 ];

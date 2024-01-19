@@ -84,7 +84,6 @@ $(document).ready(function(){initNavTree('class_rain_gauge.html',''); initResiza
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="class_rain_gauge-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">RainGauge Class Reference</div>  </div>
@@ -98,38 +97,73 @@ $(document).ready(function(){initNavTree('class_rain_gauge.html',''); initResiza
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:a51b32e66ca53558e4973667e1ff5fd90"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a51b32e66ca53558e4973667e1ff5fd90">RainGauge</a> (const float raingauge_max=RAINGAUGE_MAX_VALUE, const int quality_threshold=DEFAULT_QUALITY_THRESHOLD)</td></tr>
+<tr class="separator:a51b32e66ca53558e4973667e1ff5fd90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a827cc988c73770c9af6a96077e19db76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">reset</a> (uint8_t flags=0xF)</td></tr>
 <tr class="separator:a827cc988c73770c9af6a96077e19db76"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab32d6ff89366d290a5c264a51f950070"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#ab32d6ff89366d290a5c264a51f950070">init</a> (tm t, float rain)</td></tr>
-<tr class="separator:ab32d6ff89366d290a5c264a51f950070"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab360f1b58b3611b453172e0d7d1659b2"><td class="memItemLeft" align="right" valign="top"><a id="ab360f1b58b3611b453172e0d7d1659b2"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>prefs_load</b> (void)</td></tr>
-<tr class="separator:ab360f1b58b3611b453172e0d7d1659b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ccf17b362e3a5b63e2b29e762ae1e2b"><td class="memItemLeft" align="right" valign="top"><a id="a8ccf17b362e3a5b63e2b29e762ae1e2b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>prefs_save</b> (void)</td></tr>
-<tr class="separator:a8ccf17b362e3a5b63e2b29e762ae1e2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">update</a> (tm timeinfo, float rain, bool startup=false, float raingaugeMax=RAINGAUGE_MAX_VALUE)</td></tr>
-<tr class="memdesc:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update rain gauge statistics.  <a href="class_rain_gauge.html#a2632d98a1b617ae6a2ff5d7cfbe03c91">More...</a><br /></td></tr>
-<tr class="separator:a2632d98a1b617ae6a2ff5d7cfbe03c91"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8635f7cda13cf9a5f9e72f2f1ba81ecc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a8635f7cda13cf9a5f9e72f2f1ba81ecc">pastHour</a> (void)</td></tr>
-<tr class="separator:a8635f7cda13cf9a5f9e72f2f1ba81ecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a505d07a7ea924cfa32e958b7b00152db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a505d07a7ea924cfa32e958b7b00152db">hist_init</a> (int16_t rain=-1)</td></tr>
+<tr class="separator:a505d07a7ea924cfa32e958b7b00152db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7f06c6128b652c3ce86d9575eb16ca9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#af7f06c6128b652c3ce86d9575eb16ca9">update</a> (time_t ts, float rain, bool startup=false)</td></tr>
+<tr class="memdesc:af7f06c6128b652c3ce86d9575eb16ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update rain gauge statistics.  <a href="class_rain_gauge.html#af7f06c6128b652c3ce86d9575eb16ca9">More...</a><br /></td></tr>
+<tr class="separator:af7f06c6128b652c3ce86d9575eb16ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e103eb477aa3b0caedab366017af2dc"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a3e103eb477aa3b0caedab366017af2dc">pastHour</a> (bool *valid=nullptr, int *quality=nullptr)</td></tr>
+<tr class="separator:a3e103eb477aa3b0caedab366017af2dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a3e7c4b47d59c707543df9e0db26574"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a7a3e7c4b47d59c707543df9e0db26574">currentDay</a> (void)</td></tr>
 <tr class="separator:a7a3e7c4b47d59c707543df9e0db26574"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cd37e5f8cdd7f36624f1e5a8f6c7c86"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a3cd37e5f8cdd7f36624f1e5a8f6c7c86">currentWeek</a> (void)</td></tr>
 <tr class="separator:a3cd37e5f8cdd7f36624f1e5a8f6c7c86"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4271e4dbd292f17c368f1d78cf9b3c5e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a4271e4dbd292f17c368f1d78cf9b3c5e">currentMonth</a> (void)</td></tr>
 <tr class="separator:a4271e4dbd292f17c368f1d78cf9b3c5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a636e150f6d40bbc35f8d68cf123c271f"><td class="memItemLeft" align="right" valign="top"><a id="a636e150f6d40bbc35f8d68cf123c271f"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></tr>
-<tr class="separator:a636e150f6d40bbc35f8d68cf123c271f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall. </p>
 <p>Additionally overflow of the rain gauge is handled when reaching RAINGAUGE_MAX_VALUE. </p>
-</div><h2 class="groupheader">Member Function Documentation</h2>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a51b32e66ca53558e4973667e1ff5fd90"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51b32e66ca53558e4973667e1ff5fd90">&#9670;&nbsp;</a></span>RainGauge()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">RainGauge::RainGauge </td>
+          <td>(</td>
+          <td class="paramtype">const float&#160;</td>
+          <td class="paramname"><em>raingauge_max</em> = <code>RAINGAUGE_MAX_VALUE</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int&#160;</td>
+          <td class="paramname"><em>quality_threshold</em> = <code>DEFAULT_QUALITY_THRESHOLD</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Constructor</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">raingauge_max</td><td>raingauge value which causes a counter overflow </td></tr>
+    <tr><td class="paramname">quality_threshold</td><td>number of valid rain_hist entries required for valid <a class="el" href="class_rain_gauge.html#a3e103eb477aa3b0caedab366017af2dc">pastHour()</a> result </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
 <a id="a7a3e7c4b47d59c707543df9e0db26574"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7a3e7c4b47d59c707543df9e0db26574">&#9670;&nbsp;</a></span>currentDay()</h2>
 
@@ -145,7 +179,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Rainfall of current calendar day </p>
+<p>Rainfall of current calendar day</p>
+<dl class="section return"><dt>Returns</dt><dd>amount of rain </dd></dl>
 
 </div>
 </div>
@@ -164,7 +199,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Rainfall of current calendar month </p>
+<p>Rainfall of current calendar month</p>
+<dl class="section return"><dt>Returns</dt><dd>amount of rain </dd></dl>
 
 </div>
 </div>
@@ -183,27 +219,47 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Rainfall of current calendar week </p>
+<p>Rainfall of current calendar week</p>
+<dl class="section return"><dt>Returns</dt><dd>amount of rain </dd></dl>
 
 </div>
 </div>
-<a id="ab32d6ff89366d290a5c264a51f950070"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab32d6ff89366d290a5c264a51f950070">&#9670;&nbsp;</a></span>init()</h2>
+<a id="a505d07a7ea924cfa32e958b7b00152db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a505d07a7ea924cfa32e958b7b00152db">&#9670;&nbsp;</a></span>hist_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void RainGauge::init </td>
+          <td class="memname">void RainGauge::hist_init </td>
           <td>(</td>
-          <td class="paramtype">tm&#160;</td>
-          <td class="paramname"><em>t</em>, </td>
+          <td class="paramtype">int16_t&#160;</td>
+          <td class="paramname"><em>rain</em> = <code>-1</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>NEW: Initialize history buffer for hourly (past 60 minutes) rainfall </p>
+
+</div>
+</div>
+<a id="a3e103eb477aa3b0caedab366017af2dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3e103eb477aa3b0caedab366017af2dc">&#9670;&nbsp;</a></span>pastHour()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float RainGauge::pastHour </td>
+          <td>(</td>
+          <td class="paramtype">bool *&#160;</td>
+          <td class="paramname"><em>valid</em> = <code>nullptr</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>rain</em>&#160;</td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>quality</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -212,26 +268,15 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Initialize circular buffer for hourly (past 60 minutes) rainfall </p>
-
-</div>
-</div>
-<a id="a8635f7cda13cf9a5f9e72f2f1ba81ecc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8635f7cda13cf9a5f9e72f2f1ba81ecc">&#9670;&nbsp;</a></span>pastHour()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">float RainGauge::pastHour </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Rainfall during past 60 minutes </p>
+<p>Rainfall during past 60 minutes</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">valid</td><td>number of valid entries in rain_hist &gt;= qualityThreshold </td></tr>
+    <tr><td class="paramname">quality</td><td>number of valid entries in rain_hist</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>amount of rain during past 60 minutes </dd></dl>
 
 </div>
 </div>
@@ -251,8 +296,17 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
       </table>
 </div><div class="memdoc">
 <p>Reset non-volatile data and current rain counter value</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">flags</td><td>Flags defining what to reset:</td></tr>
+  </table>
+  </dd>
+</dl>
 <pre class="fragment">* Total rainfall in the past hour
 * -------------------------------
+* 
+* OLD:
+* ----
 * To determine the rainfall in the past hour, timestamps (ts) and rain gauge values (rain) 
 * are stored in a circular buffer:
 *
@@ -289,8 +343,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
 * </pre> 
 </div>
 </div>
-<a id="a2632d98a1b617ae6a2ff5d7cfbe03c91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2632d98a1b617ae6a2ff5d7cfbe03c91">&#9670;&nbsp;</a></span>update()</h2>
+<a id="af7f06c6128b652c3ce86d9575eb16ca9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7f06c6128b652c3ce86d9575eb16ca9">&#9670;&nbsp;</a></span>update()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -298,8 +352,8 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
         <tr>
           <td class="memname">RainGauge::update </td>
           <td>(</td>
-          <td class="paramtype">tm&#160;</td>
-          <td class="paramname"><em>timeinfo</em>, </td>
+          <td class="paramtype">time_t&#160;</td>
+          <td class="paramname"><em>ts</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -311,13 +365,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>startup</em> = <code>false</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float&#160;</td>
-          <td class="paramname"><em>raingaugeMax</em> = <code>RAINGAUGE_MAX_VALUE</code>&#160;</td>
+          <td class="paramname"><em>startup</em> = <code>false</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -330,10 +378,9 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainCurr</b></td></t
 <p>Update rain gauge statistics. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">timeinfo</td><td>date and time (struct tm)</td></tr>
-    <tr><td class="paramname">rain</td><td>rain gauge raw value</td></tr>
-    <tr><td class="paramname">startup</td><td>sensor startup flag</td></tr>
-    <tr><td class="paramname">rainGaugeMax</td><td>overflow value; when reached, the rain gauge is reset to zero </td></tr>
+    <tr><td class="paramname">ts</td><td>timestamp</td></tr>
+    <tr><td class="paramname">rain</td><td>rain gauge raw value (in mm/m²)</td></tr>
+    <tr><td class="paramname">startup</td><td>sensor startup flag </td></tr>
   </table>
   </dd>
 </dl>

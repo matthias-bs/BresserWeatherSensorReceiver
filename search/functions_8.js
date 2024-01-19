@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['reset_86',['reset',['../class_lightning.html#af73224d91b7318c3769ca126bd37e684',1,'Lightning::reset()'],['../class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76',1,'RainGauge::reset()']]]
+  ['sleep_92',['sleep',['../class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794',1,'WeatherSensor']]]
 ];

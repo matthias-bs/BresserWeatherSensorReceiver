@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['hist_5finit_83',['hist_init',['../class_lightning.html#a3675565db225668656848912b4bd8e84',1,'Lightning']]]
+  ['hist_5finit_88',['hist_init',['../class_lightning.html#abd08eac418bb1b608624fc7ca98d7a4e',1,'Lightning::hist_init()'],['../class_rain_gauge.html#a505d07a7ea924cfa32e958b7b00152db',1,'RainGauge::hist_init()']]]
 ];

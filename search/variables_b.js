@@ -1,8 +1,6 @@
 var searchData=
 [
-  ['s_5ftype_107',['s_type',['../struct_weather_sensor_1_1_sensor.html#aabf3f23ee4b7db05580765f7ce392838',1,'WeatherSensor::Sensor']]],
-  ['sensor_108',['sensor',['../class_weather_sensor.html#ac3edc5eaae93e8289f0267d56fa0a44a',1,'WeatherSensor']]],
-  ['sensor_5fid_109',['sensor_id',['../struct_weather_sensor_1_1_sensor.html#abbf124d4f3f1792ff596b7dd03b9cd94',1,'WeatherSensor::Sensor']]],
-  ['startup_110',['startup',['../struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4',1,'WeatherSensor::Sensor']]],
-  ['strike_5fcount_111',['strike_count',['../struct_weather_sensor_1_1_lightning.html#a05ee6c2ff90ebab94d0fc0e6b2b49082',1,'WeatherSensor::Lightning']]]
+  ['rain_5fmm_113',['rain_mm',['../struct_weather_sensor_1_1_weather.html#abdf1192fe5832df7fd58bd6a2bae5f89',1,'WeatherSensor::Weather']]],
+  ['rain_5fok_114',['rain_ok',['../struct_weather_sensor_1_1_weather.html#af1d64d0082a746f487b71134dc6eb186',1,'WeatherSensor::Weather']]],
+  ['rssi_115',['rssi',['../struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1',1,'WeatherSensor::Sensor::rssi()'],['../class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e',1,'WeatherSensor::rssi()']]]
 ];

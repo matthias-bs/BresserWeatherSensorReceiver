@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['name_28',['name',['../struct_sensor_map.html#a67056237cfe5029dfebc682216edc524',1,'SensorMap']]],
-  ['nvdata_5ft_29',['nvData_t',['../structnv_data__t.html',1,'']]],
-  ['nvlightning_5ft_30',['nvLightning_t',['../structnv_lightning__t.html',1,'']]]
+  ['moisture_29',['moisture',['../struct_weather_sensor_1_1_soil.html#adb04b7368a78fae492a87b3bd0b734da',1,'WeatherSensor::Soil']]]
 ];

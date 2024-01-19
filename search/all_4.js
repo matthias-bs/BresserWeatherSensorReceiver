@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['findid_12',['findId',['../class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989',1,'WeatherSensor']]],
-  ['findtype_13',['findType',['../class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa',1,'WeatherSensor']]]
+  ['events_13',['events',['../structnv_lightning__t.html#aa88d633c6b27f6a9c5215858fa5130b8',1,'nvLightning_t']]]
 ];

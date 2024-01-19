@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['hist_5finit_17',['hist_init',['../class_lightning.html#a3675565db225668656848912b4bd8e84',1,'Lightning']]],
-  ['humidity_18',['humidity',['../struct_weather_sensor_1_1_weather.html#a6d6b2a367f2d206722bb93486679f19b',1,'WeatherSensor::Weather']]],
-  ['humidity_5fok_19',['humidity_ok',['../struct_weather_sensor_1_1_weather.html#a9ab54478c197fa9cfded3e5d7699a919',1,'WeatherSensor::Weather']]]
+  ['genmessage_16',['genMessage',['../class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0',1,'WeatherSensor']]],
+  ['getdata_17',['getData',['../class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a',1,'WeatherSensor']]],
+  ['getmessage_18',['getMessage',['../class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf',1,'WeatherSensor']]]
 ];

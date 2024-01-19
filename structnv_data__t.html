@@ -92,6 +92,12 @@ $(document).ready(function(){initNavTree('structnv_data__t.html',''); initResiza
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a8b8785eec7e2407de8e8e7c7fa940ee0"><td class="memItemLeft" align="right" valign="top"><a id="a8b8785eec7e2407de8e8e7c7fa940ee0"></a>
+time_t&#160;</td><td class="memItemRight" valign="bottom"><b>lastUpdate</b></td></tr>
+<tr class="separator:a8b8785eec7e2407de8e8e7c7fa940ee0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec7ef2b2900246a5aca2b3992583a687"><td class="memItemLeft" align="right" valign="top"><a id="aec7ef2b2900246a5aca2b3992583a687"></a>
+int16_t&#160;</td><td class="memItemRight" valign="bottom"><b>hist</b> [RAIN_HIST_SIZE]</td></tr>
+<tr class="separator:aec7ef2b2900246a5aca2b3992583a687"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05848747a63f4d3219f26e357a2664ee"><td class="memItemLeft" align="right" valign="top"><a id="a05848747a63f4d3219f26e357a2664ee"></a>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>tsBuf</b> [RAINGAUGE_BUF_SIZE]</td></tr>
 <tr class="separator:a05848747a63f4d3219f26e357a2664ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -107,9 +113,9 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>tail</b></td></tr>
 <tr class="memitem:a3052ffde415dee182505cd2b761cc060"><td class="memItemLeft" align="right" valign="top"><a id="a3052ffde415dee182505cd2b761cc060"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>startupPrev</b></td></tr>
 <tr class="separator:a3052ffde415dee182505cd2b761cc060"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa51838132c5a3f579dea09fa381def02"><td class="memItemLeft" align="right" valign="top"><a id="aa51838132c5a3f579dea09fa381def02"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>rainStartup</b></td></tr>
-<tr class="separator:aa51838132c5a3f579dea09fa381def02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a227808207172128d4bcaa0ea3d516775"><td class="memItemLeft" align="right" valign="top"><a id="a227808207172128d4bcaa0ea3d516775"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>rainPreStartup</b></td></tr>
+<tr class="separator:a227808207172128d4bcaa0ea3d516775"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a489817e2d07b8a4b2ad81f68d152db"><td class="memItemLeft" align="right" valign="top"><a id="a1a489817e2d07b8a4b2ad81f68d152db"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>tsDayBegin</b></td></tr>
 <tr class="separator:a1a489817e2d07b8a4b2ad81f68d152db"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,9 +140,9 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rainMonthBegin</b></
 <tr class="memitem:a46bc68954b5c06d06425dc046c3d7b93"><td class="memItemLeft" align="right" valign="top"><a id="a46bc68954b5c06d06425dc046c3d7b93"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><b>rainPrev</b></td></tr>
 <tr class="separator:a46bc68954b5c06d06425dc046c3d7b93"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a947b9cf4c9c3f1d40d7c493af3612a5b"><td class="memItemLeft" align="right" valign="top"><a id="a947b9cf4c9c3f1d40d7c493af3612a5b"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>rainOvf</b></td></tr>
-<tr class="separator:a947b9cf4c9c3f1d40d7c493af3612a5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d9f87e95625e09f1c30c08f8363354b"><td class="memItemLeft" align="right" valign="top"><a id="a0d9f87e95625e09f1c30c08f8363354b"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>rainAcc</b></td></tr>
+<tr class="separator:a0d9f87e95625e09f1c30c08f8363354b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>src/RainGauge.cpp</li>

@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['weather_58',['Weather',['../struct_weather_sensor_1_1_weather.html',1,'WeatherSensor']]],
-  ['weathersensor_59',['WeatherSensor',['../class_weather_sensor.html',1,'']]],
-  ['wind_5fok_60',['wind_ok',['../struct_weather_sensor_1_1_weather.html#aa3808f22671713aa03bf42aa0cc86e9d',1,'WeatherSensor::Weather']]]
+  ['valid_62',['valid',['../struct_weather_sensor_1_1_sensor.html#ae28084d05f7e81b1c3a1b2cff859315a',1,'WeatherSensor::Sensor']]]
 ];

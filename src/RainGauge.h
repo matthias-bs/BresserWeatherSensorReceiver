@@ -49,6 +49,7 @@
 //          Modified pastHour() algorithm and added features
 //          Changed hist[] width
 // 20240120 Added set_max()
+//          Removed old implementation
 //
 // ToDo: 
 // -
@@ -85,12 +86,6 @@
  */
 #define RAIN_HIST_SIZE 10
 
-/**
- * \def
- * 
- * Set to (3600 [sec] / update_rate_rate [sec]) + 1
- */
-#define RAINGAUGE_BUF_SIZE 11
 
 /**
  * \def
@@ -106,12 +101,6 @@
  #define RESET_RAIN_D 2
  #define RESET_RAIN_W 4
  #define RESET_RAIN_M 8
-
-/**
- * \def
- * Enable printing of circular buffer data and head/tail indices.
- */
-//#define _DEBUG_CIRCULAR_BUFFER_
 
 
 /**
@@ -152,13 +141,6 @@ public:
     {
         raingaugeMax = raingauge_max;
     }
-
-#ifdef _DEBUG_CIRCULAR_BUFFER_
-    /**
-     * Print circular buffer for rainfall of past 60 minutes
-     */
-    void  printCircularBuffer(void);
-#endif
     
     /**
      * Reset non-volatile data and current rain counter value
@@ -167,40 +149,16 @@ public:
      */
     void reset(uint8_t flags=0xF);
     
-    #ifdef RAINGAUGE_OLD
     /**
-     * OLD:
-     * Initialize circular buffer for hourly (past 60 minutes) rainfall
-     */
-    void  init(tm t, float rain);
-    #else
-    /**
-     * NEW:
      * Initialize history buffer for hourly (past 60 minutes) rainfall
      */
     void hist_init(int16_t rain = -1);
-    #endif
 
     #if defined(RAINGAUGE_USE_PREFS)
     void prefs_load(void);
     void prefs_save(void);
     #endif
 
-
-    #ifdef RAINGAUGE_OLD
-    /**
-     * \fn update
-     * 
-     * \brief Update rain gauge statistics
-     * 
-     * \param timeinfo     date and time (struct tm)
-     * 
-     * \param rain         rain gauge raw value
-     * 
-     * \param startup      sensor startup flag
-     */
-    void  update(tm timeinfo, float rain, bool startup = false);
-    #else
     /**
      * \fn update
      * 
@@ -213,17 +171,7 @@ public:
      * \param startup      sensor startup flag
      */
     void  update(time_t ts, float rain, bool startup = false);
-    #endif
     
-    #ifdef RAINGAUGE_OLD
-    /**
-     * Rainfall during past 60 minutes
-     * 
-     * \returns amount of rain during past 60 minutes
-     */
-    float pastHour(void);
-
-    #else
     /**
      * Rainfall during past 60 minutes
      * 
@@ -233,7 +181,6 @@ public:
      * \returns amount of rain during past 60 minutes
      */
     float pastHour(bool *valid = nullptr, int *quality = nullptr);
-    #endif
 
     /**
      * Rainfall of current calendar day
@@ -255,16 +202,4 @@ public:
      * \returns amount of rain
      */
     float currentMonth(void);
-    
-private:
-    #ifdef RAINGAUGE_OLD
-    /**
-     * Calculate seconds since midnight from given time and date
-     *
-     * \param t date and time (struct tm)
-     * 
-     * \returns Seconds since midnight
-     */
-    uint32_t timeStamp(tm t);
-    #endif
 };

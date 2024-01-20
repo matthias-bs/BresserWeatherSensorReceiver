@@ -99,6 +99,8 @@ $(document).ready(function(){initNavTree('class_rain_gauge.html',''); initResiza
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a51b32e66ca53558e4973667e1ff5fd90"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a51b32e66ca53558e4973667e1ff5fd90">RainGauge</a> (const float raingauge_max=RAINGAUGE_MAX_VALUE, const int quality_threshold=DEFAULT_QUALITY_THRESHOLD)</td></tr>
 <tr class="separator:a51b32e66ca53558e4973667e1ff5fd90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77efc11e951f426af6f9e44ddbfde299"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a77efc11e951f426af6f9e44ddbfde299">set_max</a> (float raingauge_max)</td></tr>
+<tr class="separator:a77efc11e951f426af6f9e44ddbfde299"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a827cc988c73770c9af6a96077e19db76"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a827cc988c73770c9af6a96077e19db76">reset</a> (uint8_t flags=0xF)</td></tr>
 <tr class="separator:a827cc988c73770c9af6a96077e19db76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a505d07a7ea924cfa32e958b7b00152db"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_rain_gauge.html#a505d07a7ea924cfa32e958b7b00152db">hist_init</a> (int16_t rain=-1)</td></tr>
@@ -341,6 +343,39 @@ Public Member Functions</h2></td></tr>
 * - Timestamps are stored as seconds since midnight; the discontinuity between days
 *   is handled when stale entries are removed. 
 * </pre> 
+</div>
+</div>
+<a id="a77efc11e951f426af6f9e44ddbfde299"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a77efc11e951f426af6f9e44ddbfde299">&#9670;&nbsp;</a></span>set_max()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RainGauge::set_max </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>raingauge_max</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Set maximum rain counter value</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">raingauge_max</td><td>raingauge value which causes a counter overflow </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="af7f06c6128b652c3ce86d9575eb16ca9"></a>

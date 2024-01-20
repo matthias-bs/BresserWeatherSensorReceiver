@@ -48,6 +48,7 @@
 //          Modified update at the same index as before
 //          Modified pastHour() algorithm and added features
 //          Changed hist[] width
+// 20240120 Added set_max()
 //
 // ToDo: 
 // -
@@ -141,6 +142,16 @@ public:
         raingaugeMax(raingauge_max),
         qualityThreshold(quality_threshold)
     {};
+
+    /**
+     * Set maximum rain counter value
+     * 
+     * \param raingauge_max     raingauge value which causes a counter overflow
+     */
+    void set_max(float raingauge_max)
+    {
+        raingaugeMax = raingauge_max;
+    }
 
 #ifdef _DEBUG_CIRCULAR_BUFFER_
     /**

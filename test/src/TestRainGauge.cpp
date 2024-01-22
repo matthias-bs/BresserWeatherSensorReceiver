@@ -69,6 +69,7 @@
 
 static void setTime(const char *time, tm &tm, time_t &ts)
 {
+  tm = {0};
   strptime(time, "%Y-%m-%d %H:%M", &tm);
   tm.tm_isdst = -1;
   ts = mktime(&tm);

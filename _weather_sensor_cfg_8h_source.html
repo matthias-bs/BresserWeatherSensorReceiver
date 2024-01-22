@@ -179,7 +179,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">// --- Rain Gauge / Lightning sensor data retention during deep sleep ---</span></div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">// ------------------------------------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#if !defined(UNIT_TESTING)</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="preprocessor">#if !defined(INSIDE_UNITTEST)</span></div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="preprocessor">    #if defined(ESP32)</span></div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="comment">// Option: Comment out to save data in RTC RAM</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="comment">// N.B.:</span></div>

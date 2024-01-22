@@ -319,6 +319,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     nvData.rainPreStartup = rain;
 
     float rainDelta = rainCurr - nvData.rainPrev;
+    log_d("rainDelta: %.1f", rainDelta);
 
     // Check if no saved data is available yet
     if (nvData.wdayPrev == 0xFF) {
@@ -388,7 +389,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     // or no saved data is available yet
     if ((t.tm_wday != nvData.tsDayBegin) || 
         (nvData.tsDayBegin == 0xFF)) {
-        log_d("tm_wday %d, tsDayBegin: %d", t.tm_wday, nvData.tsDayBegin);
 
         // save timestamp
         nvData.tsDayBegin = t.tm_wday;

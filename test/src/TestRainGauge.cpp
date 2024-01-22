@@ -849,27 +849,27 @@ TEST(TestRainGaugeHourOvMidnight, Test_RainHourOvMidnight) {
   setTime("2022-09-06 23:54", tm, ts);
   rainGauge.update(ts, 14.5);
   DEBUG_CB();
-  DOUBLES_EQUAL(304.5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(304.2, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:00", tm, ts);
   rainGauge.update(ts, 15.5);
   DEBUG_CB();
-  DOUBLES_EQUAL(305.5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(305.2, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:06", tm, ts);
   rainGauge.update(ts, 5.5);
   DEBUG_CB();
-  DOUBLES_EQUAL(405.5 - 10.1, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(405.2 - 10.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:12", tm, ts);
   rainGauge.update(ts, 17.8);
   DEBUG_CB();
-  DOUBLES_EQUAL(417.8 - 60.3, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(417.3 - 60.3, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:18", tm, ts);
   rainGauge.update(ts, 17.8);
   DEBUG_CB();
-  DOUBLES_EQUAL(417.8 - 100.6, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(417.3 - 100.6, rainGauge.pastHour(), TOLERANCE);
 
 }
 

@@ -63,7 +63,7 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     #include <Preferences.h>
 #endif
 
@@ -169,7 +169,7 @@ private:
         .rainAcc = 0
     };
     #endif
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
 
@@ -207,7 +207,7 @@ public:
      */
     void hist_init(int16_t rain = -1);
 
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
     void prefs_save(void);
     #endif

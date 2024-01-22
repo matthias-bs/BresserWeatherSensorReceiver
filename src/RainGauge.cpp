@@ -66,7 +66,7 @@
 #include "RainGauge.h"
 
 
-#if !defined(RAINGAUGE_USE_PREFS) && !defined(UNIT_TESTING)
+#if !defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
 RTC_DATA_ATTR nvData_t nvData = {
    .lastUpdate = 0,
    .hist = {-1},
@@ -131,7 +131,7 @@ RTC_DATA_ATTR nvData_t nvData = {
 void
 RainGauge::reset(uint8_t flags)
 {
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     preferences.begin("BWS-RAIN", false);
     if (flags & RESET_RAIN_H) {
         hist_init();
@@ -207,7 +207,7 @@ RainGauge::hist_init(int16_t rain)
     }
 }
 
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
 void
 RainGauge::prefs_load(void)
 {
@@ -278,7 +278,7 @@ RainGauge::prefs_save(void)
 void
 RainGauge::update(time_t timestamp, float rain, bool startup)
 {
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
         prefs_load();
     #endif
 
@@ -295,7 +295,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.rainPrev = rain;
         nvData.lastUpdate = timestamp;
         
-        #if defined(RAINGAUGE_USE_PREFS)
+        #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
         return;
@@ -423,7 +423,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
     nvData.rainPrev = rainCurr;
 
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
 }

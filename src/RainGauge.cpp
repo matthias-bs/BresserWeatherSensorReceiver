@@ -354,13 +354,13 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         // Same index as before, add new delta
         if (nvData.hist[idx] < 0)
             nvData.hist[idx] = 0;
-        nvData.hist[idx] += static_cast<int16_t>(rainDelta * 10);
+        nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
         nvData.lastUpdate = timestamp;
         log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
     }
     else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
         // Next index, write delta
-        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 10);
+        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
         nvData.lastUpdate = timestamp;
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
     }
@@ -439,7 +439,7 @@ RainGauge::pastHour(bool *valid, int *quality)
     // Sum of all valid entries
     for (size_t i=0; i<RAIN_HIST_SIZE; i++){
         if (nvData.hist[i] >= 0) {
-            res += nvData.hist[i] * 0.1;
+            res += nvData.hist[i] * 0.01;
             _quality++;
         }
     }

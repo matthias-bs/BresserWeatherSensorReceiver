@@ -922,7 +922,7 @@ TEST(TestRainGaugeDailyOv, Test_RainDailyOv) {
  * Test weekly rainfall (with rain gauge overflow)
  */
 TEST(TestRainGaugeWeeklyOv, Test_RainWeeklyOv) {
-  static RainGauge rainGauge(100)(100);
+  static RainGauge rainGauge(100);
   rainGauge.reset();
 
   tm        tm;

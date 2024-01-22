@@ -61,7 +61,9 @@ static Lightning lightning;
 
 static void setTime(const char *time, tm &tm, time_t &ts)
 {
+  tm = {0};
   strptime(time, "%Y-%m-%d %H:%M", &tm);
+  tm.tm_isdst = -1;
   ts = mktime(&tm);
 }
 
@@ -101,7 +103,6 @@ TEST_GROUP(TG_LightningSkip) {
   }
 };
 
-#if 0
 /*
  * Test basic lightning functions
  */
@@ -159,7 +160,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_FALSE(res);
 }
 
-
+#if 0
 /*
  * Test hourly lightning events
  */

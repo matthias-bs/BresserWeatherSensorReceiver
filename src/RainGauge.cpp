@@ -298,7 +298,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
-        return;
+        //return;
     }
 
     rainCurr = nvData.rainAcc + rain;

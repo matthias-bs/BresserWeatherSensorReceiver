@@ -132,7 +132,6 @@ foreach $line (<INFO>) {			# read line by line
   printf(   "  // $timestr -> $rain; H: $hourly; D: $daily; W: $weekly; M: $monthly\n");
   printf( qq{  setTime("$timestr", tm, ts);\n} );
   printf( qq{  rainGauge.update(tm, $rain_acc);\n} );
-  printf( qq{  DEBUG_CB();\n});
   printf( qq{  DOUBLES_EQUAL(%7.1f, rainGauge.pastHour(),     TOLERANCE);\n}, $hourly);
   printf( qq{  DOUBLES_EQUAL(%7.1f, rainGauge.currentDay(),   TOLERANCE);\n}, $daily);
   printf( qq{  DOUBLES_EQUAL(%7.1f, rainGauge.currentWeek(),  TOLERANCE);\n}, $weekly);

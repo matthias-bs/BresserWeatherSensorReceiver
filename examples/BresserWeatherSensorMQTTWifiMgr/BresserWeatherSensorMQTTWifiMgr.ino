@@ -42,6 +42,7 @@
 //
 // MQTT subscriptions:
 //     <base_topic>/reset <flags>   reset rain counters (see RainGauge.h for <flags>)
+//                                  reset lightning post-processing (flags & 0x10)
 //
 // $ via LWT
 //
@@ -89,6 +90,7 @@
 // 20231103 Improved handling of time and date
 // 20231110 Fixed false double reset detection on wake-up from deep sleep
 // 20240113 Added lightning data post-processing
+// 20240122 Added lightning post-processing reset
 //
 // ToDo:
 //
@@ -677,9 +679,12 @@ void messageReceived(String &topic, String &payload)
 {
     if (topic == mqttSubReset)
     {
-        uint8_t flags = payload.toInt() & 0xF;
+        uint8_t flags = payload.toInt() & 0xFF;
         log_d("MQTT msg received: reset(0x%X)", flags);
         rainGauge.reset(flags);
+        if (flags & 0x10) {
+            lightning.reset();
+        }
     }
 }
 

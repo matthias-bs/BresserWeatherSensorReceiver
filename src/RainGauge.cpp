@@ -51,6 +51,7 @@
 // 20240122 Changed scope of nvData -
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
+//          Improvements
 //
 // ToDo: 
 // -
@@ -476,7 +477,6 @@ RainGauge::currentDay(void)
     if (nvData.rainDayBegin == -1)
         return -1;
     
-    log_d("rainCurr: %f, rainDayBegin: %f", rainCurr, nvData.rainDayBegin);
     return rainCurr - nvData.rainDayBegin;
 }
 

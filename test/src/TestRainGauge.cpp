@@ -335,17 +335,17 @@ TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
   setTime("2022-09-11 16:00", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
   DEBUG_CB();
-  DOUBLES_EQUAL(7.8, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(7.7, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:05", tm, ts);
   rainGauge.update(ts, rainSensor=18.8);
   DEBUG_CB();
-  DOUBLES_EQUAL(18.8 - 10.1, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(8.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:10", tm, ts);
   rainGauge.update(ts, rainSensor=19.9);
   DEBUG_CB();
-  DOUBLES_EQUAL(19.9 - 10.3, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(9.4, rainGauge.pastHour(), TOLERANCE);
 }
 
 

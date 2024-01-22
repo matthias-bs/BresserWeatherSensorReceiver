@@ -55,10 +55,6 @@
   #define DEBUG_CB() {}
 #endif
 
-
-
-static RainGauge rainGauge;
-
 /**
  * \example
  * struct tm tm;
@@ -92,6 +88,8 @@ TEST_GROUP(TestRainGaugePotteryFields) {
  * Test rainfall during past hour (no rain gauge overflow)
  */
 TEST(TestRainGaugePotteryFields, Test_PotteryFields) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
   tm        tm;
   time_t    ts;
 

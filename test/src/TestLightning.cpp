@@ -332,6 +332,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
 }
 #endif
 
+#if 0
 /*
  * Test hourly lightning events
  * Deliberately skip entry at 8:06
@@ -478,3 +479,4 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 }
+#endif

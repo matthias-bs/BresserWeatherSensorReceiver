@@ -152,7 +152,7 @@ private:
     float raingaugeMax;
     int qualityThreshold;
 
-    #if defined(RAINGAUGE_USE_PREFS) || defined(UNIT_TESTING)
+    #if defined(RAINGAUGE_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvData_t nvData = {
         .lastUpdate = 0,
         .hist = {-1},

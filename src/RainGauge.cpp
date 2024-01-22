@@ -48,6 +48,9 @@
 //          Modified update at the same index as before
 //          Modified pastHour() algorithm and added features
 // 20240120 Removed old implementation
+// 20240122 Changed scope of nvData -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
 //
 // ToDo: 
 // -
@@ -63,53 +66,7 @@
 #include "RainGauge.h"
 
 
-const int SECONDS_PER_HOUR = 3600;
-const int SECONDS_PER_DAY  = 86400;
-
-#ifndef RTC_DATA_ATTR
-   #define RTC_DATA_ATTR static
-#endif
-#if !defined(ESP32) && !defined(RAINGAUGE_USE_PREFS)
-   #pragma message("RainGauge with SLEEP_EN only supported on ESP32!")
-#endif
-
-
-/**
- * \typedef nvData_t
- *
- * \brief Data structure for rain statistics to be stored in non-volatile memory
- *
- * On ESP32, this data is stored in the RTC RAM. 
- */
-typedef struct {
-    /* Timestamp of last update */
-    time_t    lastUpdate;
-
-    /* Data of past 60 minutes */
-    int16_t   hist[RAIN_HIST_SIZE];
-
-    /* Sensor startup handling */
-    bool      startupPrev; // previous state of startup
-    float     rainPreStartup; // previous rain gauge reading (before startup)
-
-    /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
-    uint8_t   tsDayBegin; // day of week
-    float     rainDayBegin; // rain gauge @ begin of day
-
-    /* Rainfall of current week (can start anytime, but will reset on Monday */
-    uint8_t   tsWeekBegin; // day of week 
-    float     rainWeekBegin; // rain gauge @ begin of week
-    uint8_t   wdayPrev; // day of week at previous run - to detect new week
-
-    /* Rainfall of current calendar month (can start anytime, but will reset at begin of month */
-    uint8_t   tsMonthBegin; // month
-    float     rainMonthBegin; // rain gauge @ begin of month
-
-    float     rainPrev;  // rain gauge at previous run - to detect overflow
-    float     rainAcc; // accumulated rain (overflows and startups)
-} nvData_t;
-
-
+#if !defined(RAINGAUGE_USE_PREFS) && !defined(UNIT_TESTING)
 RTC_DATA_ATTR nvData_t nvData = {
    .lastUpdate = 0,
    .hist = {-1},
@@ -125,7 +82,7 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainPrev = 0,
    .rainAcc = 0
 };
-
+#endif
 
 /**
  * \verbatim

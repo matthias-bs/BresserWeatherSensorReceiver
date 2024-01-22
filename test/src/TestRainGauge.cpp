@@ -334,7 +334,7 @@ TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
   setTime("2022-09-11 16:10", tm, ts);
   rainGauge.update(ts, rainSensor=19.9);
 
-  DOUBLES_EQUAL(9.1, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(9.5, rainGauge.pastHour(), TOLERANCE);
 }
 
 

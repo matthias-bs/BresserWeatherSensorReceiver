@@ -70,8 +70,9 @@
 static void setTime(const char *time, tm &tm, time_t &ts)
 {
   strptime(time, "%Y-%m-%d %H:%M", &tm);
+  tm.tm_isdst = -1;
   ts = mktime(&tm);
-  printf("TS: %ld", ts);
+  printf("TS: %ld\n", ts);
 }
 
 TEST_GROUP(TestRainGaugeHour) {

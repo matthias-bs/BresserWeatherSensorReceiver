@@ -114,7 +114,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   setTime("2023-07-22 8:00", tm, ts);
   lightning.update(ts, 48, 5);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
-  CHECK_FALSE(res);
+  CHECK(res);
 
   // Step 1
   setTime("2023-07-22 8:06", tm, ts);

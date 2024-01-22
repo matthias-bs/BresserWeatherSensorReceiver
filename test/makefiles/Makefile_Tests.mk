@@ -2,7 +2,8 @@ COMPONENT_NAME=RainGauge
 
 SRC_FILES = \
   $(PROJECT_SRC_DIR)/RainGauge.cpp \
-  $(PROJECT_SRC_DIR)/Lightning.cpp
+  $(PROJECT_SRC_DIR)/Lightning.cpp \
+  $(PROJECT_SRC_DIR)/WStringMock.cpp
 
 TEST_SRC_FILES = \
   $(UNITTEST_SRC_DIR)/TestRainGauge.cpp \

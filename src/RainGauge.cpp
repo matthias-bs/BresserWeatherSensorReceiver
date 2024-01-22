@@ -348,16 +348,25 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.lastUpdate = timestamp;
     }
 
-    int min = t.tm_min;
-    int idx = min / RAINGAUGE_UPD_RATE;
+    int idx = t.tm_min / RAINGAUGE_UPD_RATE;
 
     if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
-        // Same index as before, add new delta
+        // t_delta shorter than expected update rate
         if (nvData.hist[idx] < 0)
             nvData.hist[idx] = 0;
-        nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
+        struct tm t_prev;
+        localtime_r(&nvData.lastUpdate, &t_prev);
+        if (t_prev.tm_min / RAINGAUGE_UPD_RATE == idx) {
+            // same index as in previous cycle - add value
+            nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
+        } else {
+            // different index - new value
+            nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
+        }
         nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
+        
     }
     else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
         // Next index, write delta

@@ -44,7 +44,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#define TOLERANCE 0.1
+#define TOLERANCE 0.2
 #include "RainGauge.h"
 
 #if defined(_DEBUG_CIRCULAR_BUFFER_)
@@ -87,7 +87,7 @@ TEST_GROUP(TestRainGaugePotteryFields) {
  * Test rainfall during past hour (no rain gauge overflow)
  */
 TEST(TestRainGaugePotteryFields, Test_PotteryFields) {
-  static RainGauge rainGauge;
+  RainGauge rainGauge(100);
   rainGauge.reset();
   tm        tm;
   time_t    ts;

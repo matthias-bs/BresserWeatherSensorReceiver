@@ -187,62 +187,62 @@ TEST(TestRainGaugeHour, Test_RainHour) {
 
   setTime("2022-09-06 8:06", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 8:12", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:18", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:24", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:30", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.5, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 8:36", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(2.1, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 8:42", tm, ts);
   rainGauge.update(ts, rainSensor=12.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(2.8, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 8:48", tm, ts);
   rainGauge.update(ts, rainSensor=13.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(3.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:54", tm, ts);
   rainGauge.update(ts, rainSensor=14.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(4.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:00", tm, ts);
   rainGauge.update(ts, rainSensor=15.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(5.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:06", tm, ts);
   rainGauge.update(ts, rainSensor=16.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(16.6 - 10.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:12", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(17.8 - 10.3, rainGauge.pastHour(), TOLERANCE);
 }
 
@@ -263,77 +263,77 @@ TEST(TestRainGaugeHourShortInterval, Test_RainHourShort) {
   
   setTime("2022-09-11 15:00", tm, ts);
   rainGauge.update(ts, rainSensor=10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:05", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 15:10", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:15", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:20", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:25", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.5, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 15:30", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(2.1, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 15:35", tm, ts);
   rainGauge.update(ts, rainSensor=12.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(2.8, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 15:40", tm, ts);
   rainGauge.update(ts, rainSensor=13.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(3.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:45", tm, ts);
   rainGauge.update(ts, rainSensor=14.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(4.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 15:50", tm, ts);
   rainGauge.update(ts, rainSensor=15.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(5.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 15:55", tm, ts);
   rainGauge.update(ts, rainSensor=16.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(6.6, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 16:00", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(7.7, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:05", tm, ts);
   rainGauge.update(ts, rainSensor=18.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(8.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:10", tm, ts);
   rainGauge.update(ts, rainSensor=19.9);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(9.4, rainGauge.pastHour(), TOLERANCE);
 }
 
@@ -355,62 +355,62 @@ TEST(TestRainGaugeHourLongInterval, Test_RainHourLong) {
   
   setTime("2022-09-11 15:00", tm, ts);
   rainGauge.update(ts, rainSensor=10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:10", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 15:20", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:30", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:40", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 15:50", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(1.5, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 16:00", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(2.1, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 16:10", tm, ts);
   rainGauge.update(ts, rainSensor=12.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(12.8 - 10.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 16:20", tm, ts);
   rainGauge.update(ts, rainSensor=13.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(13.6 - 10.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:30", tm, ts);
   rainGauge.update(ts, rainSensor=14.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(14.5 - 10.6, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 16:40", tm, ts);
   rainGauge.update(ts, rainSensor=15.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(15.5 - 11.0, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 16:50", tm, ts);
   rainGauge.update(ts, rainSensor=16.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(16.6 - 11.5, rainGauge.pastHour(), TOLERANCE);
 }
 
@@ -432,37 +432,37 @@ TEST(TestRainGaugeHourExtremeInterval, Test_RainHourExtreme) {
   
   setTime("2022-09-11 15:00", tm, ts);
   rainGauge.update(ts, rainSensor=10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 16:05", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 17:10", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 18:15", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 19:20", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 20:25", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 21:40", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);  
 }
 
@@ -711,67 +711,67 @@ TEST(TestRainGaugeHourOv, Test_RainHourOv) {
   
   setTime("2022-09-06 8:00", tm, ts);
   rainGauge.update(ts, 10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:06", tm, ts);
   rainGauge.update(ts, 10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 8:12", tm, ts);
   rainGauge.update(ts, 60.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(50.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:18", tm, ts);
   rainGauge.update(ts, 0.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(90.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:24", tm, ts);
   rainGauge.update(ts, 10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(100.0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:30", tm, ts);
   rainGauge.update(ts, 11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(101.5, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 8:36", tm, ts);
   rainGauge.update(ts, 12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(102.1, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 8:42", tm, ts);
   rainGauge.update(ts, 92.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(182.8, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 8:48", tm, ts);
   rainGauge.update(ts, 23.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(213.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 8:54", tm, ts);
   rainGauge.update(ts, 14.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(304.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:00", tm, ts);
   rainGauge.update(ts, 15.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(305.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:06", tm, ts);
   rainGauge.update(ts, 5.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(405.5 - 10.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 9:12", tm, ts);
   rainGauge.update(ts, 17.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(417.8 - 60.3, rainGauge.pastHour(), TOLERANCE);
 }
 
@@ -791,72 +791,72 @@ TEST(TestRainGaugeHourOvMidnight, Test_RainHourOvMidnight) {
   
   setTime("2022-09-06 23:00", tm, ts);
   rainGauge.update(ts, 10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 23:06", tm, ts);
   rainGauge.update(ts, 10.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 23:12", tm, ts);
   rainGauge.update(ts, 60.3);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(50.3, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 23:18", tm, ts);
   rainGauge.update(ts, 0.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(90.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 23:24", tm, ts);
   rainGauge.update(ts, 10.0);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(100.0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 23:30", tm, ts);
   rainGauge.update(ts, 11.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(101.5, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 23:36", tm, ts);
   rainGauge.update(ts, 12.1);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(102.1, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-06 23:42", tm, ts);
   rainGauge.update(ts, 92.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(182.8, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-06 23:48", tm, ts);
   rainGauge.update(ts, 23.6);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(213.6, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-06 23:54", tm, ts);
   rainGauge.update(ts, 14.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(304.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:00", tm, ts);
   rainGauge.update(ts, 15.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(305.5, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:06", tm, ts);
   rainGauge.update(ts, 5.5);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(405.5 - 10.1, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:12", tm, ts);
   rainGauge.update(ts, 17.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(417.8 - 60.3, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-07 00:18", tm, ts);
   rainGauge.update(ts, 17.8);
-  DEBUG_CB();
+
   DOUBLES_EQUAL(417.8 - 100.6, rainGauge.pastHour(), TOLERANCE);
 
 }

@@ -45,9 +45,6 @@
 #include "Lightning.h"
 
 
-
-static Lightning lightning;
-
 /**
  * \example
  * struct tm tm;
@@ -114,7 +111,8 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   time_t    exp_ts;
   int       res_events;
   uint8_t   res_distance;
-
+  Lightning lightning;
+  
   printf("< LightningBasic >\n");
   
   setTime("2023-07-22 8:00", tm, ts);

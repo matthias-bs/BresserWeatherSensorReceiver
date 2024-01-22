@@ -333,7 +333,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     // 2 * RAINGAUGE_UPDATE_RATE <= t_delta < RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE
     //                                                          -> update history, mark missing history entries as invalid
     time_t t_delta = timestamp - nvData.lastUpdate;
-    
+    log_d("t_delta: %d", t_delta);
+
     // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");

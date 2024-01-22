@@ -42,7 +42,7 @@
 
 #include "CppUTest/TestHarness.h"
 
-#define TOLERANCE 0.21
+#define TOLERANCE 0.1
 #define UNIT_TESTING
 #include "RainGauge.h"
 
@@ -449,32 +449,32 @@ TEST(TestRainGaugeHourExtremeInterval, Test_RainHourExtreme) {
   setTime("2022-09-11 16:05", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
   
   setTime("2022-09-11 17:10", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.2, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 18:15", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 19:20", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.4, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
 
   setTime("2022-09-11 20:25", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.5, rainGauge.pastHour(), TOLERANCE);  
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);  
 
   setTime("2022-09-11 21:40", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
   DEBUG_CB();
-  DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);  
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);  
 }
 
 

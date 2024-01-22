@@ -66,7 +66,6 @@ static void setTime(const char *time, tm &tm, time_t &ts)
 
 TEST_GROUP(TG_LightningBasic) {
   void setup() {
-      lightning.reset();
   }
 
   void teardown() {
@@ -75,7 +74,6 @@ TEST_GROUP(TG_LightningBasic) {
 
 TEST_GROUP(TG_LightningHourly) {
   void setup() {
-      lightning.reset();
   }
 
   void teardown() {
@@ -84,7 +82,6 @@ TEST_GROUP(TG_LightningHourly) {
 
 TEST_GROUP(TG_LightningDouble) {
   void setup() {
-      lightning.reset();
   }
 
   void teardown() {
@@ -93,7 +90,6 @@ TEST_GROUP(TG_LightningDouble) {
 
 TEST_GROUP(TG_LightningSkip) {
   void setup() {
-      lightning.reset();
   }
 
   void teardown() {

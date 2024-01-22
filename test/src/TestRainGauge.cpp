@@ -43,18 +43,7 @@
 #include "CppUTest/TestHarness.h"
 
 #define TOLERANCE 0.1
-#define UNIT_TESTING
 #include "RainGauge.h"
-
-//#define _DEBUG_CIRCULAR_BUFFER_
-
-#if defined(_DEBUG_CIRCULAR_BUFFER_)
-    #define DEBUG_CB() { rainGauge.printCircularBuffer(); }
-
-#else
-  #define DEBUG_CB() {}
-#endif
-
 
 /**
  * \example

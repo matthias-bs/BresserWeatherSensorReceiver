@@ -149,7 +149,7 @@ $(document).ready(function(){initNavTree('_rain_gauge_8h_source.html',''); initR
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#if defined(ESP32) || defined(ESP8266)</span></div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="preprocessor">  #include &lt;sys/time.h&gt;</span></div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#if defined(RAINGAUGE_USE_PREFS)</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#if defined(RAINGAUGE_USE_PREFS) &amp;&amp; !defined(INSIDE_UNITTEST)</span></div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">    #include &lt;Preferences.h&gt;</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
@@ -220,7 +220,7 @@ $(document).ready(function(){initNavTree('_rain_gauge_8h_source.html',''); initR
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        .rainAcc = 0</div>
 <div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    };</div>
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="preprocessor">    #endif</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="preprocessor">    #if defined(RAINGAUGE_USE_PREFS)</span></div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="preprocessor">    #if defined(RAINGAUGE_USE_PREFS) &amp;&amp; !defined(INSIDE_UNITTEST)</span></div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;    Preferences preferences;</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="preprocessor">    #endif</span></div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160; </div>
@@ -239,7 +239,7 @@ $(document).ready(function(){initNavTree('_rain_gauge_8h_source.html',''); initR
 <div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    </div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_rain_gauge.html#a505d07a7ea924cfa32e958b7b00152db">hist_init</a>(int16_t rain = -1);</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">    #if defined(RAINGAUGE_USE_PREFS)</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="preprocessor">    #if defined(RAINGAUGE_USE_PREFS) &amp;&amp; !defined(INSIDE_UNITTEST)</span></div>
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;    <span class="keywordtype">void</span> prefs_load(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;    <span class="keywordtype">void</span> prefs_save(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="preprocessor">    #endif</span></div>

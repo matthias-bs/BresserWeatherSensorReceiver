@@ -93,7 +93,7 @@
 // --- Rain Gauge / Lightning sensor data retention during deep sleep ---
 // ------------------------------------------------------------------------------------------------
 
-#if !defined(UNIT_TESTING)
+#if !defined(INSIDE_UNITTEST)
     #if defined(ESP32)
         // Option: Comment out to save data in RTC RAM
         // N.B.:

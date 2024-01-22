@@ -43,6 +43,7 @@
 #include "CppUTest/TestHarness.h"
 
 #define TOLERANCE 0.11
+#define UNIT_TESTING
 #include "RainGauge.h"
 
 //#define _DEBUG_CIRCULAR_BUFFER_

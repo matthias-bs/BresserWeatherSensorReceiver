@@ -51,6 +51,12 @@
 // 20231105 Added data storage via Preferences, modified history implementation
 // 20240116 Corrected LIGHTNINGCOUNT_MAX_VALUE
 // 20240119 Changed preferences to class member
+// 20240123 Changed scope of nvLightning -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
+//          Modified for unit testing
+//          Modified pastHour()
+//          Added qualityThreshold
 //
 // ToDo: 
 // -
@@ -91,6 +97,40 @@
 #define LIGHTNING_HIST_SIZE 10
 
 /**
+ * \def
+ * 
+ * Number of valid rain_hist entries required for valid result
+ */
+#define DEFAULT_QUALITY_THRESHOLD 8
+
+
+/**
+ * \typedef nvData_t
+ *
+ * \brief Data structure for lightning sensor to be stored in non-volatile memory
+ *
+ * On ESP32, this data is stored in the RTC RAM. 
+ */
+typedef struct {
+    /* Timestamp of last update */
+    time_t    lastUpdate;   //!< Timestamp of last update
+
+    /* Startup handling */
+    bool      startupPrev;  //!< Previous startup flag value
+
+    /* Data of last lightning event */
+    int16_t   prevCount;    //!< Previous counter value
+    int16_t   events;       //!< Number of events reported at last event
+    uint8_t   distance;     //!< Distance at last event
+    time_t    timestamp;    //!< Timestamp of last event
+
+    /* Data of past 60 minutes */
+    int16_t   hist[LIGHTNING_HIST_SIZE];
+
+} nvLightning_t;
+
+
+/**
  * \class Lightning
  *
  * \brief Calculation number of lightning events during last sensor update cycle and 
@@ -99,13 +139,33 @@
 class Lightning {
 
 private:
-    #if defined(LIGHTNING_USE_PREFS)
+    int qualityThreshold;
+
+    #if defined(LIGHTNING_USE_PREFS) || defined(INSIDE_UNITTEST)
+    nvLightning_t nvLightning = {
+    .lastUpdate = 0,
+    .startupPrev = false,
+    .prevCount = -1,
+    .events = 0,
+    .distance = 0,
+    .timestamp = 0,
+    .hist = {0}
+    };
+    #endif
+    
+    #if defined(LIGHTNING_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
-    float countCurr;
 
-public:    
-    Lightning() {};
+public:
+    /**
+     * Constructor
+     *
+     * \param quality_threshold number of valid hist entries required for valid pastHour() result
+     */
+    Lightning(const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+        qualityThreshold(quality_threshold)
+    {};
     
     /**
      * Initialize/reset non-volatile data
@@ -120,7 +180,7 @@ public:
      */
     void  hist_init(int16_t count = -1);
     
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
     void prefs_save(void);
     #endif
@@ -138,7 +198,7 @@ public:
      * 
      * \param lightningCountMax overflow value; when reached, the sensor's counter is reset to zero
      */  
-    void  update(time_t timestamp, int16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
+    void update(time_t timestamp, int16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
     
     
     /**
@@ -146,11 +206,12 @@ public:
      * 
      * \brief Get number of lightning events during past 60 minutes
      * 
-     * \param events        return number of events during past 60 minutes
+     * \param valid     number of valid entries in hist >= qualityThreshold
+     * \param quality   number of valid entries in hist
      * 
-     * \return true if valid
+     * \return number of events during past 60 minutes
      */
-    bool pastHour(int &events);
+    int pastHour(bool *valid = nullptr, int *quality = nullptr);
 
     /*
      * \fn lastCycle
@@ -159,7 +220,7 @@ public:
      * 
      * \return number of lightning events
      */
-    int lastCycle(void);
+    //int lastCycle(void);
 
     /*
      * \fn lastEvent
@@ -173,15 +234,4 @@ public:
      * \return true if valid    
      */
     bool lastEvent(time_t &timestamp, int &events, uint8_t &distance);
-
-private:
-    inline int inc(int x)
-    {
-        return ((x + 1) == LIGHTNING_HIST_SIZE) ? 0 : ++x;
-    }
-
-    inline int dec(int x)
-    {
-        return (x == 0) ? (LIGHTNING_HIST_SIZE - 1) : --x;
-    }
 };

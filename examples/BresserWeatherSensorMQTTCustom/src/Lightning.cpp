@@ -52,6 +52,12 @@
 // 20240113 Fixed timestamp format string and hourly history calculation
 // 20240114 Implemented counter overflow and startup handling
 // 20240119 Changed preferences to class member
+// 20240123 Changed scope of nvLightning -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
+//          Modified for unit testing
+//          Modified pastHour()
+//          Added qualityThreshold
 //
 // ToDo: 
 //
@@ -64,39 +70,9 @@
 #include <Arduino.h>
 #include "Lightning.h"
 
-#if !defined(ESP32) && !defined(LIGHTNING_USE_PREFS)
-   #pragma message("Lightning with SLEEP_EN and data in RTC RAM only supported on ESP32!")
-#endif
 
-/**
- * \typedef nvData_t
- *
- * \brief Data structure for lightning sensor to be stored in non-volatile memory
- *
- * On ESP32, this data is stored in the RTC RAM. 
- */
-typedef struct {
-    /* Timestamp of last update */
-    time_t    lastUpdate;   //!< Timestamp of last update
-
-    /* Startup handling */
-    bool      startupPrev;  //!< Previous startup flag value
-
-    /* Data of last lightning event */
-    int16_t   prevCount;    //!< Previous counter value
-    int16_t   events;       //!< Number of events reported at last event
-    uint8_t   distance;     //!< Distance at last event
-    time_t    timestamp;    //!< Timestamp of last event
-
-    /* Data of past 60 minutes */
-    int16_t   hist[LIGHTNING_HIST_SIZE];
-
-} nvLightning_t;
-
-#if !defined(LIGHTNING_USE_PREFS)
-RTC_DATA_ATTR
-#endif
-nvLightning_t nvLightning = {
+#if !defined(LIGHTNING_USE_PREFS) && !defined(INSIDE_UNITTEST)
+RTC_DATA_ATTR nvLightning_t nvLightning = {
     .lastUpdate = 0,
     .startupPrev = false,
     .prevCount = -1,
@@ -105,7 +81,7 @@ nvLightning_t nvLightning = {
     .timestamp = 0,
     .hist = {0}
 };
-
+#endif
 
 void
 Lightning::reset(void)
@@ -126,7 +102,7 @@ Lightning::hist_init(int16_t count)
     }
 }
 
-#if defined(LIGHTNING_USE_PREFS)
+#if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
 void Lightning::prefs_load(void)
 {
     preferences.begin("BWS-LGT", false);
@@ -175,7 +151,7 @@ void Lightning::prefs_save(void)
 void
 Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startup)
 {
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_load();
     #endif
 
@@ -188,7 +164,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.lastUpdate = timestamp;
         nvLightning.startupPrev = startup;
 
-        #if defined(LIGHTNING_USE_PREFS)
+        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
         return;
@@ -222,7 +198,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.prevCount = count;
         nvLightning.lastUpdate = timestamp;
         nvLightning.startupPrev = startup;
-        #if defined(LIGHTNING_USE_PREFS)
+        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
         return; 
@@ -237,12 +213,30 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     struct tm timeinfo;
 
     localtime_r(&timestamp, &timeinfo);
-    int min = timeinfo.tm_min;
-    int idx = min / LIGHTNING_UPD_RATE;
+    int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
 
-    if (t_delta / 60 < 2 * LIGHTNING_UPD_RATE) {
-        // Add entry to history or update entry
+    if (t_delta / 60 < LIGHTNING_UPD_RATE) {
+        // t_delta shorter than expected update rate
+        if (nvLightning.hist[idx] < 0)
+            nvLightning.hist[idx] = 0;
+        struct tm t_prev;
+        localtime_r(&nvLightning.lastUpdate, &t_prev);
+        if (t_prev.tm_min / LIGHTNING_UPD_RATE == idx) {
+            // same index as in previous cycle - add value
+            nvLightning.hist[idx] += delta;
+            log_d("hist[%d]=%d (upd)", idx, nvLightning.hist[idx]);
+        } else {
+            // different index - new value
+            nvLightning.hist[idx] = delta;
+            log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
+        }
+        nvLightning.lastUpdate = timestamp;
+        
+    }
+    else if (t_delta / 60 < 2 * LIGHTNING_UPD_RATE) {
+        // Next index, write delta
         nvLightning.hist[idx] = delta;
+        nvLightning.lastUpdate = timestamp;
         log_d("hist[%d]=%d", idx, delta);
     }
 
@@ -268,7 +262,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     nvLightning.prevCount = count;
     nvLightning.lastUpdate = timestamp;
     nvLightning.startupPrev = startup;
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
 }
@@ -287,19 +281,32 @@ Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
     return true;
 }
 
-bool
-Lightning::pastHour(int &events)
+int
+Lightning::pastHour(bool *valid, int *quality)
 {
-    bool res = false;
+    int _quality = 0;
     int sum = 0;
 
     // Sum of all valid entries
     for (size_t i=0; i<LIGHTNING_HIST_SIZE; i++){
-        if (nvLightning.hist[i] != -1) {
-            res = true;
+        if (nvLightning.hist[i] >= 0) {
             sum += nvLightning.hist[i];
+            _quality++;
         }
     }
-    events = sum;
-    return res;
+
+    // Optional: return quality indication
+    if (quality)
+        *quality = _quality;
+
+    // Optional: return valid flag
+    if (valid) {
+        if (_quality >= qualityThreshold) {
+            *valid = true;
+        } else {
+            *valid = false;
+        }
+    }
+
+    return sum;
 }

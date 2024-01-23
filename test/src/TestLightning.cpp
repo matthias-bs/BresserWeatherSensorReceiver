@@ -160,9 +160,11 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
 TEST(TG_LightningHourly, Test_LightningHourly) {
   tm        tm;
   time_t    ts;
+  bool      res;
   int       counter;
   int       res_events;
   int       exp_events;
+  Lightning lightning;
 
   printf("< LightningHourly >\n");
   

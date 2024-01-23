@@ -236,7 +236,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     if (t_delta / 60 < 2 * LIGHTNING_UPD_RATE) {
         // Next index, write delta
         nvLightning.hist[idx] = delta;
-        nvData.lastUpdate = timestamp;
+        nvLightning.lastUpdate = timestamp;
         log_d("hist[%d]=%d", idx, delta);
     }
 

@@ -221,13 +221,13 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             nvLightning.hist[idx] = 0;
         struct tm t_prev;
         localtime_r(&nvLightning.lastUpdate, &t_prev);
-        if (t_prev.tm_min / RAINGAUGE_UPD_RATE == idx) {
+        if (t_prev.tm_min / LIGHTNING_UPD_RATE == idx) {
             // same index as in previous cycle - add value
-            nvLightning.hist[idx] += static_cast<int16_t>(rainDelta * 100);
+            nvLightning.hist[idx] += delta;
             log_d("hist[%d]=%d (upd)", idx, nvLightning.hist[idx]);
         } else {
             // different index - new value
-            nvLightning.hist[idx] = static_cast<int16_t>(rainDelta * 100);
+            nvLightning.hist[idx] = delta;
             log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
         }
         nvLightning.lastUpdate = timestamp;

@@ -167,6 +167,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
+        log_d("prevCount: %d, startupPrev: %d, startup: %d", nvLightning.prevCount, nvLightning.startupPrev, startup);
         return;
     }
     
@@ -193,15 +194,9 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     time_t t_delta = timestamp - nvLightning.lastUpdate;
     log_d("t_delta: %ld", t_delta);
 
-    // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
+    // t_delta < 0: something is wrong, e.g. RTC was not set correctly
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");
-        nvLightning.prevCount = count;
-        nvLightning.lastUpdate = timestamp;
-        nvLightning.startupPrev = startup;
-        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
-            prefs_save();
-        #endif
         return; 
     }
 
@@ -209,6 +204,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
         log_w("History time frame expired, resetting!");
         hist_init();
+        nvLightning.lastUpdate = timestamp;
     }
 
     struct tm timeinfo;

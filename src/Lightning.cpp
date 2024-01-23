@@ -191,7 +191,8 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     // 2 * LIGHTNING_UPDATE_RATE <= t_delta < LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE
     //                                                          -> update history, mark missing history entries as invalid
     time_t t_delta = timestamp - nvLightning.lastUpdate;
-    
+    log_d("t_delta: %ld", t_delta);
+
     // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");

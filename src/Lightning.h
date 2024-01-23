@@ -55,6 +55,8 @@
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
 //          Modified for unit testing
+//          Modified pastHour()
+//          Added qualityThreshold
 //
 // ToDo: 
 // -
@@ -94,6 +96,13 @@
  */
 #define LIGHTNING_HIST_SIZE 10
 
+/**
+ * \def
+ * 
+ * Number of valid rain_hist entries required for valid result
+ */
+#define DEFAULT_QUALITY_THRESHOLD 8
+
 
 /**
  * \typedef nvData_t
@@ -130,7 +139,7 @@ typedef struct {
 class Lightning {
 
 private:
-    float countCurr;
+    int qualityThreshold;
 
     #if defined(LIGHTNING_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvLightning_t nvLightning = {
@@ -148,8 +157,15 @@ private:
     Preferences preferences;
     #endif
 
-public:    
-    Lightning() {};
+public:
+    /**
+     * Constructor
+     *
+     * \param quality_threshold number of valid hist entries required for valid pastHour() result
+     */
+    Lightning(const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+        qualityThreshold(quality_threshold)
+    {};
     
     /**
      * Initialize/reset non-volatile data
@@ -182,7 +198,7 @@ public:
      * 
      * \param lightningCountMax overflow value; when reached, the sensor's counter is reset to zero
      */  
-    void  update(time_t timestamp, int16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
+    void update(time_t timestamp, int16_t count, uint8_t distance, bool startup = false /*, uint16_t lightningCountMax = LIGHTNINGCOUNT_MAX */);
     
     
     /**
@@ -190,11 +206,12 @@ public:
      * 
      * \brief Get number of lightning events during past 60 minutes
      * 
-     * \param events        return number of events during past 60 minutes
+     * \param valid     number of valid entries in hist >= qualityThreshold
+     * \param quality   number of valid entries in hist
      * 
-     * \return true if valid
+     * \return number of events during past 60 minutes
      */
-    bool pastHour(int &events);
+    int pastHour(bool *valid = nullptr, int *quality = nullptr);
 
     /*
      * \fn lastCycle
@@ -203,7 +220,7 @@ public:
      * 
      * \return number of lightning events
      */
-    int lastCycle(void);
+    //int lastCycle(void);
 
     /*
      * \fn lastEvent
@@ -217,15 +234,4 @@ public:
      * \return true if valid    
      */
     bool lastEvent(time_t &timestamp, int &events, uint8_t &distance);
-
-private:
-    inline int inc(int x)
-    {
-        return ((x + 1) == LIGHTNING_HIST_SIZE) ? 0 : ++x;
-    }
-
-    inline int dec(int x)
-    {
-        return (x == 0) ? (LIGHTNING_HIST_SIZE - 1) : --x;
-    }
 };

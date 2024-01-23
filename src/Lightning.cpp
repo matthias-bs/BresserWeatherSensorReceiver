@@ -56,6 +56,8 @@
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
 //          Modified for unit testing
+//          Modified pastHour()
+//          Added qualityThreshold
 //
 // ToDo: 
 //
@@ -67,10 +69,6 @@
 
 #include <Arduino.h>
 #include "Lightning.h"
-
-#if !defined(ESP32) && !defined(LIGHTNING_USE_PREFS)
-   #pragma message("Lightning with SLEEP_EN and data in RTC RAM only supported on ESP32!")
-#endif
 
 
 #if !defined(LIGHTNING_USE_PREFS) && !defined(INSIDE_UNITTEST)
@@ -265,19 +263,32 @@ Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
     return true;
 }
 
-bool
-Lightning::pastHour(int &events)
+int
+Lightning::pastHour(bool *valid, int *quality)
 {
-    bool res = false;
+    int _quality = 0;
     int sum = 0;
 
     // Sum of all valid entries
     for (size_t i=0; i<LIGHTNING_HIST_SIZE; i++){
-        if (nvLightning.hist[i] != -1) {
-            res = true;
+        if (nvLightning.hist[i] >= 0) {
             sum += nvLightning.hist[i];
+            _quality++;
         }
     }
-    events = sum;
-    return res;
+
+    // Optional: return quality indication
+    if (quality)
+        *quality = _quality;
+
+    // Optional: return valid flag
+    if (valid) {
+        if (_quality >= qualityThreshold) {
+            *valid = true;
+        } else {
+            *valid = false;
+        }
+    }
+
+    return sum;
 }

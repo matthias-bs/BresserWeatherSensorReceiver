@@ -168,7 +168,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             prefs_save();
         #endif
         log_d("prevCount: %d, startupPrev: %d, startup: %d", nvLightning.prevCount, nvLightning.startupPrev, startup);
-        return;
+        //return;
     }
     
     int16_t delta = 0;

@@ -479,7 +479,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   // Step 13
   // Counter +14
   // Events from Step 3 are discarded!
-  setTime("2023-07-22 9:12", tm, ts);
+  setTime("2023-07-22 9:18", tm, ts);
   counter += 14;
   exp_events += 14;
   exp_events -= 4;

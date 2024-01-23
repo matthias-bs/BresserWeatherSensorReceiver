@@ -154,7 +154,6 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_FALSE(res);
 }
 
-#if 0
 /*
  * Test hourly lightning events
  */
@@ -289,7 +288,7 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   CHECK_EQUAL(exp_events, res_events);
 }
 
-
+#if 0
 /*
  * Test hourly lightning events
  * Two updates during the same time slot

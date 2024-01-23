@@ -200,13 +200,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         return; 
     }
 
-    // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
-    if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
-        log_w("History time frame expired, resetting!");
-        hist_init();
-        nvLightning.lastUpdate = timestamp;
-    }
-
     struct tm timeinfo;
 
     localtime_r(&timestamp, &timeinfo);
@@ -230,8 +223,14 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.lastUpdate = timestamp;
         
     }
-    else if (t_delta / 60 < 2 * LIGHTNING_UPD_RATE) {
-        // Next index, write delta
+    else if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
+        // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
+        log_w("History time frame expired, resetting!");
+        hist_init();
+        nvLightning.lastUpdate = timestamp;
+    }
+    else {
+        // Some other index, write delta
         nvLightning.hist[idx] = delta;
         nvLightning.lastUpdate = timestamp;
         log_d("hist[%d]=%d", idx, delta);

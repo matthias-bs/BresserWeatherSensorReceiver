@@ -242,7 +242,7 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   exp_events += 8;
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour(&res);
-  CHECK_FALSE(res);
+  CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 8

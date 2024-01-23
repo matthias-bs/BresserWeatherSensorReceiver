@@ -267,11 +267,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
 
   // Step 10
   // Counter +11
-  // Events from Step 1 are discarded!
   setTime("2023-07-22 9:00", tm, ts);
   counter += 11;
   exp_events += 11;
-  exp_events -= 2;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
   //CHECK(res);
@@ -279,10 +277,22 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
 
   // Step 11
   // Counter +12
-  // Events from Step 2 are discarded!
+  // Events from Step 1 are discarded!
   setTime("2023-07-22 9:06", tm, ts);
   counter += 12;
   exp_events += 12;
+  exp_events -= 2;
+  lightning.update(ts, counter, 7);
+  res = lightning.pastHour(res_events);
+  //CHECK(res);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 12
+  // Counter +13
+  // Events from Step 2 are discarded!
+  setTime("2023-07-22 9:12", tm, ts);
+  counter += 13;
+  exp_events += 13;
   exp_events -= 3;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);

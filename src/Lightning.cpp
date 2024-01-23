@@ -52,6 +52,10 @@
 // 20240113 Fixed timestamp format string and hourly history calculation
 // 20240114 Implemented counter overflow and startup handling
 // 20240119 Changed preferences to class member
+// 20240123 Changed scope of nvLightning -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
+//          Modified for unit testing
 //
 // ToDo: 
 //
@@ -68,35 +72,9 @@
    #pragma message("Lightning with SLEEP_EN and data in RTC RAM only supported on ESP32!")
 #endif
 
-/**
- * \typedef nvData_t
- *
- * \brief Data structure for lightning sensor to be stored in non-volatile memory
- *
- * On ESP32, this data is stored in the RTC RAM. 
- */
-typedef struct {
-    /* Timestamp of last update */
-    time_t    lastUpdate;   //!< Timestamp of last update
 
-    /* Startup handling */
-    bool      startupPrev;  //!< Previous startup flag value
-
-    /* Data of last lightning event */
-    int16_t   prevCount;    //!< Previous counter value
-    int16_t   events;       //!< Number of events reported at last event
-    uint8_t   distance;     //!< Distance at last event
-    time_t    timestamp;    //!< Timestamp of last event
-
-    /* Data of past 60 minutes */
-    int16_t   hist[LIGHTNING_HIST_SIZE];
-
-} nvLightning_t;
-
-#if !defined(LIGHTNING_USE_PREFS)
-RTC_DATA_ATTR
-#endif
-nvLightning_t nvLightning = {
+#if !defined(LIGHTNING_USE_PREFS) && !defined(INSIDE_UNITTEST)
+RTC_DATA_ATTR nvLightning_t nvLightning = {
     .lastUpdate = 0,
     .startupPrev = false,
     .prevCount = -1,
@@ -105,7 +83,7 @@ nvLightning_t nvLightning = {
     .timestamp = 0,
     .hist = {0}
 };
-
+#endif
 
 void
 Lightning::reset(void)
@@ -126,7 +104,7 @@ Lightning::hist_init(int16_t count)
     }
 }
 
-#if defined(LIGHTNING_USE_PREFS)
+#if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
 void Lightning::prefs_load(void)
 {
     preferences.begin("BWS-LGT", false);
@@ -175,7 +153,7 @@ void Lightning::prefs_save(void)
 void
 Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startup)
 {
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_load();
     #endif
 
@@ -188,7 +166,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.lastUpdate = timestamp;
         nvLightning.startupPrev = startup;
 
-        #if defined(LIGHTNING_USE_PREFS)
+        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
         return;
@@ -222,7 +200,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         nvLightning.prevCount = count;
         nvLightning.lastUpdate = timestamp;
         nvLightning.startupPrev = startup;
-        #if defined(LIGHTNING_USE_PREFS)
+        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
         return; 
@@ -268,7 +246,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     nvLightning.prevCount = count;
     nvLightning.lastUpdate = timestamp;
     nvLightning.startupPrev = startup;
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
 }

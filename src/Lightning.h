@@ -51,6 +51,10 @@
 // 20231105 Added data storage via Preferences, modified history implementation
 // 20240116 Corrected LIGHTNINGCOUNT_MAX_VALUE
 // 20240119 Changed preferences to class member
+// 20240123 Changed scope of nvLightning -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
+//          Modified for unit testing
 //
 // ToDo: 
 // -
@@ -90,6 +94,33 @@
  */
 #define LIGHTNING_HIST_SIZE 10
 
+
+/**
+ * \typedef nvData_t
+ *
+ * \brief Data structure for lightning sensor to be stored in non-volatile memory
+ *
+ * On ESP32, this data is stored in the RTC RAM. 
+ */
+typedef struct {
+    /* Timestamp of last update */
+    time_t    lastUpdate;   //!< Timestamp of last update
+
+    /* Startup handling */
+    bool      startupPrev;  //!< Previous startup flag value
+
+    /* Data of last lightning event */
+    int16_t   prevCount;    //!< Previous counter value
+    int16_t   events;       //!< Number of events reported at last event
+    uint8_t   distance;     //!< Distance at last event
+    time_t    timestamp;    //!< Timestamp of last event
+
+    /* Data of past 60 minutes */
+    int16_t   hist[LIGHTNING_HIST_SIZE];
+
+} nvLightning_t;
+
+
 /**
  * \class Lightning
  *
@@ -99,10 +130,23 @@
 class Lightning {
 
 private:
-    #if defined(LIGHTNING_USE_PREFS)
+    float countCurr;
+
+    #if defined(LIGHTNING_USE_PREFS) || defined(INSIDE_UNITTEST)
+    nvLightning_t nvLightning = {
+    .lastUpdate = 0,
+    .startupPrev = false,
+    .prevCount = -1,
+    .events = 0,
+    .distance = 0,
+    .timestamp = 0,
+    .hist = {0}
+    };
+    #endif
+    
+    #if defined(LIGHTNING_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
-    float countCurr;
 
 public:    
     Lightning() {};
@@ -120,7 +164,7 @@ public:
      */
     void  hist_init(int16_t count = -1);
     
-    #if defined(LIGHTNING_USE_PREFS)
+    #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
     void prefs_save(void);
     #endif

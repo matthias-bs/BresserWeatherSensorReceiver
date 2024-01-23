@@ -753,10 +753,8 @@ void publishWeatherdata(bool complete)
                 weatherSensor.sensor[i].lgt.distance_km,
                 weatherSensor.sensor[i].startup
             );
+            mqtt_payload += String(",\"lightning_hr\":") + String(lightning.pastHour());
             int events;
-            if (lightning.pastHour(events)) {
-                mqtt_payload += String(",\"lightning_hr\":") + String(events);
-            }
             time_t timestamp;
             uint8_t distance;
             if (lightning.lastEvent(timestamp, events, distance)) {

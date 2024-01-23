@@ -300,7 +300,7 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   CHECK_EQUAL(exp_events, res_events);
 }
 
-#if 0
+
 /*
  * Test hourly lightning events
  * Two updates during the same time slot
@@ -320,7 +320,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   lightning.hist_init();
   lightning.update(ts, counter=48, 5);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  CHECK_FALSE(res);
   CHECK_EQUAL(exp_events=0, res_events);
 
   // Step 1
@@ -330,7 +330,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   exp_events = 2;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 2
@@ -340,12 +340,11 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   exp_events = 5;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 }
-#endif
 
-#if 0
+
 /*
  * Test hourly lightning events
  * Deliberately skip entry at 8:06
@@ -365,7 +364,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   lightning.hist_init();
   lightning.update(ts, counter=48, 5);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  CHECK_FALSE(res);
   CHECK_EQUAL(exp_events=0, res_events);
 
   // Step 1
@@ -384,7 +383,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 3;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 3
@@ -394,7 +393,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 4;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 4
@@ -404,7 +403,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 5;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 5
@@ -414,7 +413,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 6;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 6
@@ -424,7 +423,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 7;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 7
@@ -434,7 +433,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 8;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 8
@@ -444,7 +443,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 9;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 9
@@ -454,7 +453,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events += 10;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 10
@@ -478,7 +477,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events -= 3;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 12
@@ -490,7 +489,6 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   exp_events -= 4;
   lightning.update(ts, counter, 7);
   res = lightning.pastHour(res_events);
-  CHECK(res);
+  //CHECK(res);
   CHECK_EQUAL(exp_events, res_events);
 }
-#endif

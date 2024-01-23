@@ -307,7 +307,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   printf("< LightningDouble >\n");
   
   setTime("2023-07-22 8:00", tm, ts);
-  lightning.init(48);
+  lightning.hist_init();
   lightning.update(ts, counter=48, 5);
   res = lightning.pastHour(res_events);
   CHECK(res);
@@ -347,11 +347,12 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   int       counter;
   int       res_events;
   int       exp_events;
+  Lightning lightning;
 
   printf("< LightningSkip >\n");
   
   setTime("2023-07-22 8:00", tm, ts);
-  lightning.init(48);
+  lightning.hist_init();
   lightning.update(ts, counter=48, 5);
   res = lightning.pastHour(res_events);
   CHECK(res);

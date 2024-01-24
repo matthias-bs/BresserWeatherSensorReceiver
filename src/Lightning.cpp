@@ -166,7 +166,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         prefs_load();
     #endif
 
-    if (nvLightning.lastUpdate == -1) {
+    if (nvLightning.lastUpdate == 0) {
         // Initialize history
         hist_init();
     }

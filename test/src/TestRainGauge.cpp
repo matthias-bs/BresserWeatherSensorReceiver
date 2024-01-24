@@ -169,6 +169,15 @@ TEST_GROUP(TestRainGaugeStartup) {
   }
 };
 
+TEST_GROUP(TestRainGaugeInvReq) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+
 /*
  * Test rainfall during past hour (no rain gauge overflow)
  */
@@ -1058,4 +1067,24 @@ TEST(TestRainGaugeStartup, TestRainStartup) {
   DOUBLES_EQUAL(5, rainGauge.pastHour(), TOLERANCE);
   DOUBLES_EQUAL(5, rainGauge.currentDay(), TOLERANCE);
   DOUBLES_EQUAL(5, rainGauge.currentWeek(), TOLERANCE);
+}
+
+/*
+ * Test that methods indicate an invalid request if
+ * called before initial invocation of update()
+ */
+TEST(TestRainGaugeInvReq, TestRainInvReq) {
+  RainGauge rainGauge(100);
+  float     val;
+    
+  printf("< RainInvReq >\n");
+
+  val = RainGauge.currentDay();
+  DOUBLES_EQUAL(val, -1);
+
+  val = RainGauge.currentWeek();
+  DOUBLES_EQUAL(val, -1);
+
+  val = RainGauge.currentMonth();
+  DOUBLES_EQUAL(val, -1);
 }

@@ -73,6 +73,14 @@ TEST_GROUP(TestRainGaugeHour) {
   }
 };
 
+TEST_GROUP(TestRainGaugeHourTimeBack) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
 TEST_GROUP(TestRainGaugeHourShortInterval) {
   void setup() {
   }
@@ -242,6 +250,41 @@ TEST(TestRainGaugeHour, Test_RainHour) {
   setTime("2022-09-06 9:12", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
   DOUBLES_EQUAL(17.8 - 10.3, rainGauge.pastHour(), TOLERANCE);
+}
+
+
+/*
+ * Test rainfall during past hour - time jumping back
+ */
+TEST(TestRainGaugeHourTimeBack, Test_RainHourTimeBack) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor;
+
+  printf("< RainHourTimeBack >\n");
+  
+  setTime("2022-09-06 8:00", tm, ts);
+  rainGauge.update(ts, rainSensor=10.0);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
+
+  setTime("2022-09-06 8:06", tm, ts);
+  rainGauge.update(ts, rainSensor=10.1);
+  DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
+
+  setTime("2022-09-06 8:00", tm, ts);
+  rainGauge.update(ts, rainSensor=10.1);
+  DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
+  
+  setTime("2022-09-06 8:12", tm, ts);
+  rainGauge.update(ts, rainSensor=10.3);
+  DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
+
+  setTime("2022-09-06 8:18", tm, ts);
+  rainGauge.update(ts, rainSensor=10.6);
+  DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);
 }
 
 

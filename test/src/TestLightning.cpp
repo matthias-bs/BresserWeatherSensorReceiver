@@ -104,6 +104,14 @@ TEST_GROUP(TG_LightningOv) {
   }
 };
 
+TEST_GROUP(TG_LightningStartup) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
 TEST_GROUP(TG_LightningIrregular) {
   void setup() {
   }
@@ -587,6 +595,56 @@ TEST(TG_LightningOv, Test_LightningOv) {
   counter = 10;
   exp_events = 2 + 98 + 10;
   lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+/*
+ * Test hourly lightning events
+ * Lightning sensor startup
+ */
+TEST(TG_LightningStartup, Test_LightningStartup) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+  Lightning lightning;
+
+  printf("< LightningStartup >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.hist_init();
+  lightning.update(ts, counter=1500, 5);
+  res_events = lightning.pastHour(&res);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter += 2;
+  exp_events = 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Sensor startup
+  setTime("2023-07-22 8:12", tm, ts);
+  counter = 10;
+  exp_events = 2 + 10;
+  lightning.update(ts, counter, 7, true);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 4
+  // Counter + 3
+  setTime("2023-07-22 8:18", tm, ts);
+  counter += 3;
+  exp_events = 2 + 10 + 3;
+  lightning.update(ts, counter, 7, true);
   res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);
 }

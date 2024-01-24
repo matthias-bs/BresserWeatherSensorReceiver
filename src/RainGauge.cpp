@@ -299,7 +299,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
-        //return;
     }
 
     rainCurr = nvData.rainAcc + rain;
@@ -336,7 +335,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     time_t t_delta = timestamp - nvData.lastUpdate;
     log_d("t_delta: %ld", t_delta);
 
-    // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
+    // t_delta < 0: something is wrong, e.g. RTC was not set correctly
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");
         return; 
@@ -347,6 +346,16 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         log_w("History time frame expired, resetting!");
         hist_init();
         nvData.lastUpdate = timestamp;
+    }
+
+    // Mark all history entries in interval [expected_index, current_index) as invalid
+    // N.B.: excluding current index!
+    for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
+        struct tm timeinfo;
+        localtime_r(&ts, &timeinfo);
+        int idx = timeinfo.tm_min / RAINGAUGE_UPD_RATE;
+        nvData.hist[idx] = -1;
+        log_d("hist[%d]=-1", idx);
     }
 
     int idx = t.tm_min / RAINGAUGE_UPD_RATE;
@@ -376,15 +385,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
     }
 
-    // Mark all history entries in interval [expected_index, current_index) as invalid
-    // N.B.: excluding current index!
-    for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
-        struct tm timeinfo;
-        localtime_r(&ts, &timeinfo);
-        int min = timeinfo.tm_min;
-        int idx = min / RAINGAUGE_UPD_RATE;
-        nvData.hist[idx] = -1;
-    }
 
     #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
         String buf;

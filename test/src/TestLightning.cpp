@@ -575,7 +575,7 @@ TEST(TG_LightningOv, Test_LightningOv) {
 
   // Step 3
   // Counter overflow from 1502 to 10
-  setTime("2023-07-22 8:06", tm, ts);
+  setTime("2023-07-22 8:12", tm, ts);
   counter = 10;
   exp_events = 98 + 10;
   lightning.update(ts, counter, 7);

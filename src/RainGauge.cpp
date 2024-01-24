@@ -213,7 +213,7 @@ void
 RainGauge::prefs_load(void)
 {
     preferences.begin("BWS-RAIN", false);
-    nvData.lastUpdate     = preferences.getULong64("lastUpdate", -1);
+    nvData.lastUpdate     = preferences.getULong64("lastUpdate", 0);
     // Optimization: Reduces number of Flash writes
     // preferences.getBytes("hist", nvData.hist, sizeof(nvData.hist));
     for (int i=0; i<RAIN_HIST_SIZE; i++) {
@@ -286,7 +286,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     struct tm t;
     localtime_r(&timestamp, &t);
 
-    if (nvData.lastUpdate == -1) {
+    if (nvData.lastUpdate == 0) {
         // Initialize history
         hist_init();
     }

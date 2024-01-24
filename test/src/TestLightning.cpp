@@ -365,6 +365,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   tm        tm;
   time_t    ts;
   bool      res;
+  int       qual;
   int       counter;
   int       res_events;
   int       exp_events;
@@ -503,11 +504,32 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 14
-  // Time jumped back
+  // Time jumped back - to be ignored
   setTime("2023-07-22 9:16", tm, ts);
   counter += 15;
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);
-  
+
+  // Step 15
+  // Counter +15 (from Step 14)
+  // Events from Step 4 are discarded!
+  setTime("2023-07-22 9:24", tm, ts);
+  exp_events += 15;
+  exp_events -= 5;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 16
+  // Counter +16
+  // No update for one hour - history to be discarded
+  setTime("2023-07-22 10:24", tm, ts);
+  counter += 16;
+  exp_events = 0;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(qual, 1);
+  CHECK_EQUAL(exp_events, res_events);
 }

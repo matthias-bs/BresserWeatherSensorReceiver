@@ -859,7 +859,7 @@ TEST(TestRainGaugeWeeklyOv, Test_RainWeeklyOv) {
   printf("< RainWeeklyOv >\n");
    
   setTime("2022-09-06 8:00:00", tm, ts);
-  DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
 
   rainGauge.update(ts, rainSensor = 10.0);
   DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
@@ -919,7 +919,7 @@ TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
   printf("< RainMonthlyOv >\n");
   
   setTime("2022-09-06 12:00:00", tm, ts);
-  DOUBLES_EQUAL(rainMonthly=0, rainGauge.currentMonth(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentMonth(), TOLERANCE);
 
   rainGauge.update(ts, rainSensor = 5);
   DOUBLES_EQUAL(rainMonthly = 0, rainGauge.currentMonth(), TOLERANCE);
@@ -1047,8 +1047,8 @@ TEST(TestRainGaugeStartup, TestRainStartup) {
    
   setTime("2023-07-16 8:00:00", tm, ts);
   DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
-  DOUBLES_EQUAL(0, rainGauge.currentDay(), TOLERANCE);
-  DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
 
   setTime("2023-07-16 8:05:00", tm, ts);
   rainGauge.update(ts, rainSensor = 10.0);
@@ -1075,16 +1075,10 @@ TEST(TestRainGaugeStartup, TestRainStartup) {
  */
 TEST(TestRainGaugeInvReq, TestRainInvReq) {
   RainGauge rainGauge(100);
-  float     val;
     
   printf("< RainInvReq >\n");
 
-  val = rainGauge.currentDay();
-  DOUBLES_EQUAL(val, -1, TOLERANCE);
-
-  val = rainGauge.currentWeek();
-  DOUBLES_EQUAL(val, -1, TOLERANCE);
-
-  val = rainGauge.currentMonth();
-  DOUBLES_EQUAL(val, -1, TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentMonth(), TOLERANCE);
 }

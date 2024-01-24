@@ -501,4 +501,13 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);
+
+  // Step 14
+  // Time jumped back
+  setTime("2023-07-22 9:16", tm, ts);
+  counter += 15;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+  
 }

@@ -104,6 +104,14 @@ TEST_GROUP(TG_LightningOv) {
   }
 };
 
+TEST_GROUP(TG_LightningStartup) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
 TEST_GROUP(TG_LightningIrregular) {
   void setup() {
   }

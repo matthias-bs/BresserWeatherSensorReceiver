@@ -341,12 +341,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         return; 
     }
 
-    // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
-    if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
-        log_w("History time frame expired, resetting!");
-        hist_init();
-        nvData.lastUpdate = timestamp;
-    }
 
     // Mark all history entries in interval [expected_index, current_index) as invalid
     // N.B.: excluding current index!
@@ -376,10 +370,15 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
             log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
         }
         nvData.lastUpdate = timestamp;
-        
     }
-    else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
-        // Next index, write delta
+    else if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
+        // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
+        log_w("History time frame expired, resetting!");
+        hist_init();
+        nvData.lastUpdate = timestamp;
+    }
+    else {
+        // Some other index, write delta
         nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
         nvData.lastUpdate = timestamp;
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);

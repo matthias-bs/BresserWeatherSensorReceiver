@@ -96,6 +96,14 @@ TEST_GROUP(TG_LightningSkip) {
   }
 };
 
+TEST_GROUP(TG_LightningOv) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
 /*
  * Test basic lightning functions
  */
@@ -531,5 +539,46 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   res_events = lightning.pastHour(&res, &qual);
   CHECK_FALSE(res);
   CHECK_EQUAL(qual, 0);
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+/*
+ * Test hourly lightning events
+ * Lightning counter overflow
+ */
+TEST(TG_LightningOv, Test_LightningOv) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+  Lightning lightning;
+
+  printf("< LightningDouble >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.hist_init();
+  lightning.update(ts, counter=1500, 5);
+  res_events = lightning.pastHour(&res);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter += 2;
+  exp_events = 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Counter overflow from 1502 to 10
+  setTime("2023-07-22 8:06", tm, ts);
+  counter = 10;
+  exp_events = 98 + 10;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);
 }

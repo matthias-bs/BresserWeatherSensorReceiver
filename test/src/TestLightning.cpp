@@ -96,6 +96,22 @@ TEST_GROUP(TG_LightningSkip) {
   }
 };
 
+TEST_GROUP(TG_LightningOv) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+TEST_GROUP(TG_LightningIrregular) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
 /*
  * Test basic lightning functions
  */
@@ -365,6 +381,7 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   tm        tm;
   time_t    ts;
   bool      res;
+  int       qual;
   int       counter;
   int       res_events;
   int       exp_events;
@@ -498,6 +515,139 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   counter += 14;
   exp_events += 14;
   exp_events -= 4;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 14
+  // Time jumped back - to be ignored
+  setTime("2023-07-22 9:16", tm, ts);
+  counter += 15;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 15
+  // Counter +15 (from Step 14)
+  // Events from Step 4 are discarded!
+  setTime("2023-07-22 9:24", tm, ts);
+  exp_events += 15;
+  exp_events -= 5;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 16
+  // Counter +16
+  // No update for one hour - history to be discarded
+  setTime("2023-07-22 10:24", tm, ts);
+  counter += 16;
+  exp_events = 0;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(qual, 0);
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+/*
+ * Test hourly lightning events
+ * Lightning counter overflow
+ */
+TEST(TG_LightningOv, Test_LightningOv) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+  Lightning lightning;
+
+  printf("< LightningOv >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.hist_init();
+  lightning.update(ts, counter=1500, 5);
+  res_events = lightning.pastHour(&res);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter += 2;
+  exp_events = 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Counter overflow from 1502 to 10
+  setTime("2023-07-22 8:12", tm, ts);
+  counter = 10;
+  exp_events = 2 + 98 + 10;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+/*
+ * Test hourly lightning events
+ * Lightning counter with irregular update intervals
+ */
+TEST(TG_LightningIrregular, Test_LightningIrregular) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+  Lightning lightning;
+
+  printf("< LightningIrregular >\n");
+  
+  setTime("2023-07-22 8:00", tm, ts);
+  lightning.hist_init();
+  lightning.update(ts, counter=48, 5);
+  res_events = lightning.pastHour(&res);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2023-07-22 8:06", tm, ts);
+  counter += 2;
+  exp_events += 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Update after 4 minutes (same interval as before)
+  // Update value
+  setTime("2023-07-22 8:10", tm, ts);
+  counter += 3;
+  exp_events += 3;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Update after 4 minutes (next interval)
+  // New value
+  setTime("2023-07-22 8:14", tm, ts);
+  counter += 4;
+  exp_events += 4;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour();
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Update after 10 minutes (skipped one interval)
+  // New value
+  setTime("2023-07-22 8:24", tm, ts);
+  counter += 5;
+  exp_events += 5;
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);

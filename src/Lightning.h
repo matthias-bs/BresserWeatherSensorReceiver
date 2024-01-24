@@ -57,6 +57,7 @@
 //          Modified for unit testing
 //          Modified pastHour()
 //          Added qualityThreshold
+// 20240224 Fixed handling of overflow, startup and missing update cycles
 //
 // ToDo: 
 // -
@@ -117,6 +118,8 @@ typedef struct {
 
     /* Startup handling */
     bool      startupPrev;  //!< Previous startup flag value
+    int16_t   preStCount;   //!< Previous raw sensor counter (before startup)
+    uint32_t  accCount;     //!< Accumulated counts (overflows and startups)
 
     /* Data of last lightning event */
     int16_t   prevCount;    //!< Previous counter value
@@ -140,11 +143,14 @@ class Lightning {
 
 private:
     int qualityThreshold;
+    int currCount;
 
     #if defined(LIGHTNING_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvLightning_t nvLightning = {
     .lastUpdate = 0,
     .startupPrev = false,
+    .preStCount = 0,
+    .accCount = 0,
     .prevCount = -1,
     .events = 0,
     .distance = 0,

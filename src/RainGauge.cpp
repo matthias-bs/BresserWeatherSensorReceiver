@@ -228,7 +228,7 @@ RainGauge::prefs_load(void)
     nvData.tsWeekBegin       = preferences.getUChar("tsWeekBegin", 0xFF);
     nvData.rainWeekBegin     = preferences.getFloat("rainWeekBegin", 0);
     nvData.wdayPrev          = preferences.getUChar("wdayPrev", 0xFF);
-    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0);
+    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0xFF);
     nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
     nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
     nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
@@ -474,7 +474,7 @@ RainGauge::pastHour(bool *valid, int *quality)
 float
 RainGauge::currentDay(void)
 {
-    if (nvData.rainDayBegin == -1)
+    if (nvData.tsMonthBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainDayBegin;
@@ -483,7 +483,7 @@ RainGauge::currentDay(void)
 float
 RainGauge::currentWeek(void)
 {
-    if (nvData.rainWeekBegin == -1)
+    if (nvData.tsWeekBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainWeekBegin;
@@ -492,7 +492,7 @@ RainGauge::currentWeek(void)
 float
 RainGauge::currentMonth(void)
 {
-    if (nvData.rainMonthBegin == -1)
+    if (nvData.tsMonthBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainMonthBegin;

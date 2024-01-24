@@ -196,60 +196,88 @@ TEST(TestRainGaugeHour, Test_RainHour) {
   tm        tm;
   time_t    ts;
   float     rainSensor;
+  bool      val;
+  int       qual;
 
   printf("< RainHour >\n");
   
   setTime("2022-09-06 8:00", tm, ts);
   rainGauge.update(ts, rainSensor=10.0);
-  DOUBLES_EQUAL(0, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(1, qual);
 
   setTime("2022-09-06 8:06", tm, ts);
   rainGauge.update(ts, rainSensor=10.1);
-  DOUBLES_EQUAL(0.1, rainGauge.pastHour(), TOLERANCE);
-  
+  DOUBLES_EQUAL(0.1, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(2, qual);
+
   setTime("2022-09-06 8:12", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
-  DOUBLES_EQUAL(0.3, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0.3, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(3, qual);
 
   setTime("2022-09-06 8:18", tm, ts);
   rainGauge.update(ts, rainSensor=10.6);
-  DOUBLES_EQUAL(0.6, rainGauge.pastHour(), TOLERANCE);
-
+  DOUBLES_EQUAL(0.6, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(4, qual);
+  
   setTime("2022-09-06 8:24", tm, ts);
   rainGauge.update(ts, rainSensor=11.0);
-  DOUBLES_EQUAL(1.0, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(1.0, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(5, qual);
 
   setTime("2022-09-06 8:30", tm, ts);
   rainGauge.update(ts, rainSensor=11.5);
-  DOUBLES_EQUAL(1.5, rainGauge.pastHour(), TOLERANCE);  
+  DOUBLES_EQUAL(1.5, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(6, qual);
 
   setTime("2022-09-06 8:36", tm, ts);
   rainGauge.update(ts, rainSensor=12.1);
-  DOUBLES_EQUAL(2.1, rainGauge.pastHour(), TOLERANCE);  
+  DOUBLES_EQUAL(2.1, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(7, qual);
 
   setTime("2022-09-06 8:42", tm, ts);
   rainGauge.update(ts, rainSensor=12.8);
-  DOUBLES_EQUAL(2.8, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(2.8, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
   
   setTime("2022-09-06 8:48", tm, ts);
   rainGauge.update(ts, rainSensor=13.6);
-  DOUBLES_EQUAL(3.6, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(3.6, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
 
   setTime("2022-09-06 8:54", tm, ts);
   rainGauge.update(ts, rainSensor=14.5);
-  DOUBLES_EQUAL(4.5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(4.5, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
   
   setTime("2022-09-06 9:00", tm, ts);
   rainGauge.update(ts, rainSensor=15.5);
-  DOUBLES_EQUAL(5.5, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(5.5, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
   
   setTime("2022-09-06 9:06", tm, ts);
   rainGauge.update(ts, rainSensor=16.6);
-  DOUBLES_EQUAL(16.6 - 10.1, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(16.6 - 10.1, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
   
   setTime("2022-09-06 9:12", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
-  DOUBLES_EQUAL(17.8 - 10.3, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(17.8 - 10.3, rainGauge.pastHour(&val, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(8, qual);
 }
 
 

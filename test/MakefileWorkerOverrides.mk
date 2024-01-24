@@ -19,6 +19,7 @@ TEST_SRC_FILES += \
 UNITTEST_EXTRA_INC_PATHS += \
   -I$(CPPUTEST_HOME)/include \
   -I$(UNITTEST_ROOT)/ \
+  -I$(UNITTEST_ROOT)/mocks \
   -I$(PROJECT_ROOT_DIR) 
 
 

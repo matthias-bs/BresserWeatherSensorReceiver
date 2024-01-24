@@ -5,7 +5,7 @@ SRC_FILES = \
   $(PROJECT_SRC_DIR)/Lightning.cpp
 
 MOCKS_SRC_DIRS = \
-  $(UNITTEST_SRC_DIR)/mocks
+  $(UNITTEST_ROOT)/mocks
 
 TEST_SRC_FILES = \
   $(UNITTEST_SRC_DIR)/TestRainGauge.cpp \

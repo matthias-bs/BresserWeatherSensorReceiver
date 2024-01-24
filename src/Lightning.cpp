@@ -203,6 +203,16 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
 
     struct tm timeinfo;
 
+    // Mark all history entries in interval [expected_index, current_index) as invalid
+    // N.B.: excluding current index!
+    for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
+        log_d("ts: %ld, timestamp: %ld", ts, timestamp);
+        localtime_r(&ts, &timeinfo);
+        int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
+        nvLightning.hist[idx] = -1;
+        log_d("hist[%d]=-1", idx);
+    }
+    
     localtime_r(&timestamp, &timeinfo);
     int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
 
@@ -236,15 +246,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         log_d("hist[%d]=%d", idx, delta);
     }
 
-    // Mark all history entries in interval [expected_index, current_index) as invalid
-    // N.B.: excluding current index!
-    for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
-        log_d("ts: %ld, timestamp: %ld", ts, timestamp);
-        localtime_r(&ts, &timeinfo);
-        int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
-        nvLightning.hist[idx] = -1;
-        log_d("hist[%d]=-1", idx);
-    }
 
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;

@@ -253,31 +253,31 @@ TEST(TestRainGaugeHour, Test_RainHour) {
   rainGauge.update(ts, rainSensor=13.6);
   DOUBLES_EQUAL(3.6, rainGauge.pastHour(&val, &qual), TOLERANCE);
   CHECK(val);
-  CHECK_EQUAL(8, qual);
+  CHECK_EQUAL(9, qual);
 
   setTime("2022-09-06 8:54", tm, ts);
   rainGauge.update(ts, rainSensor=14.5);
   DOUBLES_EQUAL(4.5, rainGauge.pastHour(&val, &qual), TOLERANCE);
   CHECK(val);
-  CHECK_EQUAL(8, qual);
+  CHECK_EQUAL(10, qual);
   
   setTime("2022-09-06 9:00", tm, ts);
   rainGauge.update(ts, rainSensor=15.5);
   DOUBLES_EQUAL(5.5, rainGauge.pastHour(&val, &qual), TOLERANCE);
   CHECK(val);
-  CHECK_EQUAL(8, qual);
+  CHECK_EQUAL(10, qual);
   
   setTime("2022-09-06 9:06", tm, ts);
   rainGauge.update(ts, rainSensor=16.6);
   DOUBLES_EQUAL(16.6 - 10.1, rainGauge.pastHour(&val, &qual), TOLERANCE);
   CHECK(val);
-  CHECK_EQUAL(8, qual);
+  CHECK_EQUAL(10, qual);
   
   setTime("2022-09-06 9:12", tm, ts);
   rainGauge.update(ts, rainSensor=17.8);
   DOUBLES_EQUAL(17.8 - 10.3, rainGauge.pastHour(&val, &qual), TOLERANCE);
   CHECK(val);
-  CHECK_EQUAL(8, qual);
+  CHECK_EQUAL(10, qual);
 }
 
 

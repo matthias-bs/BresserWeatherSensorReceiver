@@ -166,14 +166,15 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         prefs_load();
     #endif
 
-    // No previous count OR startup change 0->1 detected
-    if ((nvLightning.prevCount == -1) || (!nvLightning.startupPrev && startup)) {
-        // Initialize histogram
+    if (nvLightning.lastUpdate == -1) {
+        // Initialize history
         hist_init();
+    }
 
+    if (nvLightning.prevCount == -1) {
+        // No previous count or counter reset
         nvLightning.prevCount = count;
         nvLightning.lastUpdate = timestamp;
-        nvLightning.startupPrev = startup;
 
         #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();

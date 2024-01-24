@@ -1079,12 +1079,12 @@ TEST(TestRainGaugeInvReq, TestRainInvReq) {
     
   printf("< RainInvReq >\n");
 
-  val = RainGauge.currentDay();
-  DOUBLES_EQUAL(val, -1);
+  val = rainGauge.currentDay();
+  DOUBLES_EQUAL(val, -1, TOLERANCE);
 
-  val = RainGauge.currentWeek();
-  DOUBLES_EQUAL(val, -1);
+  val = rainGauge.currentWeek();
+  DOUBLES_EQUAL(val, -1, TOLERANCE);
 
-  val = RainGauge.currentMonth();
-  DOUBLES_EQUAL(val, -1);
+  val = rainGauge.currentMonth();
+  DOUBLES_EQUAL(val, -1, TOLERANCE);
 }

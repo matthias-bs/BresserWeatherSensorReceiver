@@ -444,7 +444,7 @@ TEST(TestRainGaugeDaily, Test_RainDaily) {
 
   printf("< RainDaily >\n");
   setTime("2022-09-06 8:00", tm, ts);
-  DOUBLES_EQUAL(0, rainGauge.currentDay(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentDay(), TOLERANCE);
 
   rainGauge.update(ts, rainSensor=10.0);
   DOUBLES_EQUAL(0, rainGauge.currentDay(), TOLERANCE);
@@ -490,7 +490,7 @@ TEST(TestRainGaugeWeekly, Test_RainWeekly) {
   printf("< RainWeekly >\n");
   
   setTime("2022-09-06 8:00:00", tm, ts);
-  DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
 
   rainGauge.update(ts, rainSensor=10.0);
   DOUBLES_EQUAL(0, rainGauge.currentWeek(), TOLERANCE);
@@ -549,7 +549,7 @@ TEST(TestRainGaugeMonthly, Test_RainMonthly) {
   printf("< RainMonthly >\n");
   
   setTime("2022-09-06 12:00:00", tm, ts);
-  DOUBLES_EQUAL(rainMonthly=0, rainGauge.currentMonth(), TOLERANCE);
+  DOUBLES_EQUAL(-1, rainGauge.currentMonth(), TOLERANCE);
 
   rainGauge.update(ts, rainSensor+=5);
   DOUBLES_EQUAL(rainMonthly = 0, rainGauge.currentMonth(), TOLERANCE);

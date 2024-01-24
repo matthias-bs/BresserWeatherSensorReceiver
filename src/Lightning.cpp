@@ -168,7 +168,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             prefs_save();
         #endif
         log_d("prevCount: %d, startupPrev: %d, startup: %d", nvLightning.prevCount, nvLightning.startupPrev, startup);
-        //return;
     }
     
     
@@ -223,7 +222,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
         }
         nvLightning.lastUpdate = timestamp;
-        
     }
     else if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
         // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
@@ -241,10 +239,11 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     // Mark all history entries in interval [expected_index, current_index) as invalid
     // N.B.: excluding current index!
     for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
+        log_d("ts: %ld, timestamp: %ld", ts, timestamp);
         localtime_r(&ts, &timeinfo);
-        int min = timeinfo.tm_min;
-        int idx = min / LIGHTNING_UPD_RATE;
+        int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
         nvLightning.hist[idx] = -1;
+        log_d("hist[%d]=-1", idx);
     }
 
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG

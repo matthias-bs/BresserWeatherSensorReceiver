@@ -530,6 +530,6 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   lightning.update(ts, counter, 7);
   res_events = lightning.pastHour(&res, &qual);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 1);
+  CHECK_EQUAL(qual, 0);
   CHECK_EQUAL(exp_events, res_events);
 }

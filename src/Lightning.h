@@ -11,7 +11,7 @@
 //
 // Output:
 //     * Number of events during last update cycle
-//     * Timestamp of last event
+//     * Timestamp, number of strikes and estimated distance of last event
 //     * Number of strikes during past 60 minutes
 //
 // Non-volatile data is stored in the ESP32's RTC RAM or in Preferences (Flash FS)
@@ -57,9 +57,10 @@
 //          Modified for unit testing
 //          Modified pastHour()
 //          Added qualityThreshold
-// 20240224 Fixed handling of overflow, startup and missing update cycles
+// 20240124 Fixed handling of overflow, startup and missing update cycles
+// 20240125 Added lastCycle()
 //
-// ToDo: 
+// ToDo:
 // -
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +145,7 @@ class Lightning {
 private:
     int qualityThreshold;
     int currCount;
+    int deltaEvents = -1;
 
     #if defined(LIGHTNING_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvLightning_t nvLightning = {
@@ -222,11 +224,11 @@ public:
     /*
      * \fn lastCycle
      * 
-     * \brief Get number of events during last update cycle with detected lightning events
+     * \brief Get number of events during last update cycle
      * 
      * \return number of lightning events
      */
-    //int lastCycle(void);
+    int lastCycle(void);
 
     /*
      * \fn lastEvent

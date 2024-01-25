@@ -11,7 +11,7 @@
 //
 // Output:
 //     * Number of events during last update cycle
-//     * Timestamp of last event
+//     * Timestamp, number of strikes and estimated distance of last event
 //     * Number of strikes during past 60 minutes
 //
 // Non-volatile data is stored in the ESP32's RTC RAM or in Preferences (Flash FS)
@@ -58,9 +58,11 @@
 //          Modified for unit testing
 //          Modified pastHour()
 //          Added qualityThreshold
-// 20240224 Fixed handling of overflow, startup and missing update cycles
+// 20240124 Fixed handling of overflow, startup and missing update cycles
+// 20240125 Added lastCycle()
 //
-// ToDo: 
+// ToDo:
+// -
 //
 // Notes:
 // Maximum number of lighning strikes on earth:
@@ -215,13 +217,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
 
 
     int16_t delta = currCount - nvLightning.prevCount;
-    /*
-    if (count < nvLightning.prevCount) {
-        delta = count + LIGHTNINGCOUNT_MAX_VALUE - nvLightning.prevCount;
-    } else {
-        delta = count - nvLightning.prevCount;
-    }
-    */
+    deltaEvents = delta;
 
     if (delta > 0) {
         // Save detected event
@@ -288,13 +284,16 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     #endif
 
     nvLightning.prevCount = currCount;
-    //nvLightning.prevCount = count;
-    //nvLightning.lastUpdate = timestamp;
-    //nvLightning.startupPrev = startup;
 
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
+}
+
+int 
+Lightning::lastCycle(void)
+{
+    return deltaEvents;
 }
 
 bool

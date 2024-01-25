@@ -136,9 +136,11 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   printf("< LightningBasic >\n");
   
   setTime("2023-07-22 8:00", tm, ts);
+  CHECK_EQUAL(-1, lightning.lastCycle());
   lightning.update(ts, 48, 5);
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK(res);
+  CHECK_EQUAL(0, lightning.lastCycle());
 
   // Step 1
   setTime("2023-07-22 8:06", tm, ts);
@@ -148,6 +150,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(exp_ts=ts, res_ts);
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
+  CHECK_EQUAL(2, lightning.lastCycle());
 
   // Step 2
   // Counter not changed
@@ -159,6 +162,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(exp_ts, res_ts);
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
+  CHECK_EQUAL(2, lightning.lastCycle());
 
   // Step 3
   // Counter +5, Distance 30
@@ -169,6 +173,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(ts, res_ts);
   CHECK_EQUAL(5, res_events);
   CHECK_EQUAL(30, res_distance);
+  CHECK_EQUAL(5, lightning.lastCycle());
 
   // Step 4
   // Reset
@@ -176,6 +181,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   lightning.reset();
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK_FALSE(res);
+  CHECK_EQUAL(0, lightning.lastCycle());
 }
 
 /*

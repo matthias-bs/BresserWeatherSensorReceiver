@@ -2,7 +2,7 @@
 export UNITTEST_BUILD_DIR = build
 export PROJECT_ROOT_DIR := $(abspath ..)
 export UNITTEST_ROOT := $(abspath .)
-export PROJECT_SRC_DIR := $(PROJECT_ROOT_DIR)/src
+export PROJECT_SRC_DIR := $(PROJECT_ROOT_DIR)
 
 export UNITTEST_SRC_DIR := $(UNITTEST_ROOT)/src
 export UNITTEST_MAKEFILES_DIR := $(UNITTEST_ROOT)/makefiles
@@ -15,7 +15,7 @@ UNITTEST_MAKEFILE_FILTER ?= *
 UNITTEST_MAKEFILES := $(wildcard $(UNITTEST_MAKEFILES_DIR)/Makefile_$(UNITTEST_MAKEFILE_FILTER))
 
 export UNITTEST_EXTRA_INC_PATHS += \
-  -I$(PROJECT_ROOT_DIR)/src \
+  -I$(PROJECT_ROOT_DIR) \
   -I$(UNITTEST_ROOT)/header_overrides
 
 # Run the test on all Makesfiles found

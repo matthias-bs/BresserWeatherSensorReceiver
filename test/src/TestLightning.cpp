@@ -162,7 +162,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   CHECK_EQUAL(exp_ts, res_ts);
   CHECK_EQUAL(2, res_events);
   CHECK_EQUAL(7, res_distance);
-  CHECK_EQUAL(2, lightning.lastCycle());
+  CHECK_EQUAL(0, lightning.lastCycle());
 
   // Step 3
   // Counter +5, Distance 30

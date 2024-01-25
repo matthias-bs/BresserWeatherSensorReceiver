@@ -342,16 +342,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     }
 
 
-    // Mark all history entries in interval [expected_index, current_index) as invalid
-    // N.B.: excluding current index!
-    for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
-        struct tm timeinfo;
-        localtime_r(&ts, &timeinfo);
-        int idx = timeinfo.tm_min / RAINGAUGE_UPD_RATE;
-        nvData.hist[idx] = -1;
-        log_d("hist[%d]=-1", idx);
-    }
-
     int idx = t.tm_min / RAINGAUGE_UPD_RATE;
 
     if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
@@ -378,7 +368,19 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.lastUpdate = timestamp;
     }
     else {
-        // Some other index, write delta
+        // Some other index
+
+        // Mark all history entries in interval [expected_index, current_index) as invalid
+        // N.B.: excluding current index!
+        for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
+            struct tm timeinfo;
+            localtime_r(&ts, &timeinfo);
+            int idx = timeinfo.tm_min / RAINGAUGE_UPD_RATE;
+            nvData.hist[idx] = -1;
+            log_d("hist[%d]=-1", idx);
+        }
+
+        // Write delta
         nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
         nvData.lastUpdate = timestamp;
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);

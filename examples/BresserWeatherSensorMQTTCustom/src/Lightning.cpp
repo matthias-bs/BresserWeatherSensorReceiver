@@ -11,7 +11,7 @@
 //
 // Output:
 //     * Number of events during last update cycle
-//     * Timestamp of last event
+//     * Timestamp, number of strikes and estimated distance of last event
 //     * Number of strikes during past 60 minutes
 //
 // Non-volatile data is stored in the ESP32's RTC RAM or in Preferences (Flash FS)
@@ -58,8 +58,11 @@
 //          Modified for unit testing
 //          Modified pastHour()
 //          Added qualityThreshold
+// 20240124 Fixed handling of overflow, startup and missing update cycles
+// 20240125 Added lastCycle()
 //
-// ToDo: 
+// ToDo:
+// -
 //
 // Notes:
 // Maximum number of lighning strikes on earth:
@@ -75,6 +78,8 @@
 RTC_DATA_ATTR nvLightning_t nvLightning = {
     .lastUpdate = 0,
     .startupPrev = false,
+    .preStCount = 0,
+    .accCount = 0,
     .prevCount = -1,
     .events = 0,
     .distance = 0,
@@ -88,10 +93,13 @@ Lightning::reset(void)
 {
     nvLightning.lastUpdate = 0;
     nvLightning.startupPrev = false;
+    nvLightning.preStCount = 0;
     nvLightning.prevCount = -1;
+    nvLightning.accCount = 0;
     nvLightning.events = -1;
     nvLightning.distance = 0;
     nvLightning.timestamp = 0;
+    deltaEvents = -1;
 }
 
 void
@@ -108,6 +116,8 @@ void Lightning::prefs_load(void)
     preferences.begin("BWS-LGT", false);
     nvLightning.lastUpdate   = preferences.getULong64("lastUpdate", 0);
     nvLightning.startupPrev  = preferences.getBool("startupPrev", false);
+    nvLightning.preStCount   = preferences.getShort("preStCount", 0);
+    nvLightning.accCount     = preferences.getUInt("accCount", 0);
     nvLightning.prevCount    = preferences.getUShort("prevCount", -1);
     nvLightning.events       = preferences.getUShort("events", -1);
     nvLightning.distance     = preferences.getUChar("distance", 0);
@@ -121,6 +131,8 @@ void Lightning::prefs_load(void)
     }
     log_d("lastUpdate   =%s", String(nvLightning.lastUpdate).c_str());
     log_d("startupPrev  =%d", nvLightning.startupPrev);
+    log_d("preStCount   =%d", nvLightning.preStCount);
+    log_d("accCount     =%u", nvLightning.accCount);
     log_d("prevCount    =%d", nvLightning.prevCount);
     log_d("events       =%d", nvLightning.events);
     log_d("distance     =%d", nvLightning.distance);
@@ -133,6 +145,8 @@ void Lightning::prefs_save(void)
     preferences.begin("BWS-LGT", false);
     preferences.putULong64("lastUpdate", nvLightning.lastUpdate);
     preferences.putBool("startupPrev", nvLightning.startupPrev);
+    preferences.putShort("preStCount", nvLightning.preStCount);
+    preferences.putUInt("accCount", nvLightning.accCount);
     preferences.putUShort("prevCount", nvLightning.prevCount);
     preferences.putUShort("events", nvLightning.events);
     preferences.putUChar("distance", nvLightning.distance);
@@ -155,27 +169,55 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         prefs_load();
     #endif
 
-    // No previous count OR startup change 0->1 detected
-    if ((nvLightning.prevCount == -1) || (!nvLightning.startupPrev && startup)) {
-        // Initialize histogram
+    if (nvLightning.lastUpdate == 0) {
+        // Initialize history
         hist_init();
+    }
 
+    if (nvLightning.prevCount == -1) {
+        // No previous count or counter reset
         nvLightning.prevCount = count;
         nvLightning.lastUpdate = timestamp;
-        nvLightning.startupPrev = startup;
 
         #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
-        return;
     }
     
-    int16_t delta = 0;
-    if (count < nvLightning.prevCount) {
-        delta = count + LIGHTNINGCOUNT_MAX_VALUE - nvLightning.prevCount;
-    } else {
-        delta = count - nvLightning.prevCount;
+    currCount = nvLightning.accCount + count;
+
+    if (currCount < nvLightning.prevCount) {
+       // Startup change 0->1 detected
+       if (!nvLightning.startupPrev && startup) {
+           // Add last rain gauge reading before startup
+           nvLightning.accCount += nvLightning.preStCount;
+       } else {
+           // Add counter overflow
+           nvLightning.accCount += LIGHTNINGCOUNT_MAX_VALUE;
+       }
     }
+
+    currCount = nvLightning.accCount + count;
+    nvLightning.startupPrev = startup;
+    nvLightning.preStCount = count;
+
+    // Delta time between last update and current time
+    
+    // 0 < t_delta < 2 * LIGHTNUNG_UPDATE_RATE                  -> update history
+    // 2 * LIGHTNING_UPDATE_RATE <= t_delta < LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE
+    //                                                          -> update history, mark missing history entries as invalid
+    time_t t_delta = timestamp - nvLightning.lastUpdate;
+    log_d("t_delta: %ld", t_delta);
+
+    // t_delta < 0: something is wrong, e.g. RTC was not set correctly
+    if (t_delta < 0) {
+        log_w("Negative time span since last update!?");
+        return; 
+    }
+
+
+    int16_t delta = currCount - nvLightning.prevCount;
+    deltaEvents = delta;
 
     if (delta > 0) {
         // Save detected event
@@ -185,33 +227,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     }
 
 
-    // Delta time between last update and current time
-    
-    // 0 < t_delta < 2 * LIGHTNUNG_UPDATE_RATE                  -> update history
-    // 2 * LIGHTNING_UPDATE_RATE <= t_delta < LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE
-    //                                                          -> update history, mark missing history entries as invalid
-    time_t t_delta = timestamp - nvLightning.lastUpdate;
-    
-    // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
-    if (t_delta < 0) {
-        log_w("Negative time span since last update!?");
-        nvLightning.prevCount = count;
-        nvLightning.lastUpdate = timestamp;
-        nvLightning.startupPrev = startup;
-        #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
-            prefs_save();
-        #endif
-        return; 
-    }
-
-    // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
-    if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
-        log_w("History time frame expired, resetting!");
-        hist_init();
-    }
-
     struct tm timeinfo;
-
     localtime_r(&timestamp, &timeinfo);
     int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
 
@@ -230,25 +246,30 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             nvLightning.hist[idx] = delta;
             log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
         }
-        nvLightning.lastUpdate = timestamp;
-        
     }
-    else if (t_delta / 60 < 2 * LIGHTNING_UPD_RATE) {
-        // Next index, write delta
+    else if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
+        // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
+        log_w("History time frame expired, resetting!");
+        hist_init();
+    }
+    else {
+        // Some other index
+        
+        // Mark all history entries in interval [expected_index, current_index) as invalid
+        // N.B.: excluding current index!
+        for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
+            log_d("ts: %ld, timestamp: %ld", ts, timestamp);
+            localtime_r(&ts, &timeinfo);
+            int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
+            nvLightning.hist[idx] = -1;
+            log_d("hist[%d]=-1", idx);
+        }
+        
+        // Write delta
         nvLightning.hist[idx] = delta;
-        nvLightning.lastUpdate = timestamp;
         log_d("hist[%d]=%d", idx, delta);
     }
-
-    // Mark all history entries in interval [expected_index, current_index) as invalid
-    // N.B.: excluding current index!
-    for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
-        localtime_r(&ts, &timeinfo);
-        int min = timeinfo.tm_min;
-        int idx = min / LIGHTNING_UPD_RATE;
-        nvLightning.hist[idx] = -1;
-    }
-
+    
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;
         buf = String("hist[]={");
@@ -259,12 +280,18 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         log_d("%s", buf.c_str());
     #endif
 
-    nvLightning.prevCount = count;
     nvLightning.lastUpdate = timestamp;
-    nvLightning.startupPrev = startup;
+    nvLightning.prevCount = currCount;
+
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
+}
+
+int 
+Lightning::lastCycle(void)
+{
+    return deltaEvents;
 }
 
 bool

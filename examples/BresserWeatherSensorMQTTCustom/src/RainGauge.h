@@ -50,6 +50,9 @@
 //          Changed hist[] width
 // 20240120 Added set_max()
 //          Removed old implementation
+// 20240122 Changed scope of nvData -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
 //
 // ToDo: 
 // -
@@ -60,7 +63,7 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     #include <Preferences.h>
 #endif
 
@@ -104,6 +107,39 @@
 
 
 /**
+ * \typedef nvData_t
+ *
+ * \brief Data structure for rain statistics to be stored in non-volatile memory
+ */
+typedef struct {
+    /* Timestamp of last update */
+    time_t    lastUpdate;
+
+    /* Data of past 60 minutes */
+    int16_t   hist[RAIN_HIST_SIZE];
+
+    /* Sensor startup handling */
+    bool      startupPrev; // previous state of startup
+    float     rainPreStartup; // previous rain gauge reading (before startup)
+
+    /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
+    uint8_t   tsDayBegin; // day of week
+    float     rainDayBegin; // rain gauge @ begin of day
+
+    /* Rainfall of current week (can start anytime, but will reset on Monday */
+    uint8_t   tsWeekBegin; // day of week 
+    float     rainWeekBegin; // rain gauge @ begin of week
+    uint8_t   wdayPrev; // day of week at previous run - to detect new week
+
+    /* Rainfall of current calendar month (can start anytime, but will reset at begin of month */
+    uint8_t   tsMonthBegin; // month
+    float     rainMonthBegin; // rain gauge @ begin of month
+
+    float     rainPrev;  // rain gauge at previous run - to detect overflow
+    float     rainAcc; // accumulated rain (overflows and startups)
+} nvData_t;
+
+/**
  * \class RainGauge
  *
  * \brief Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall
@@ -116,7 +152,24 @@ private:
     float raingaugeMax;
     int qualityThreshold;
 
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) || defined(INSIDE_UNITTEST)
+    nvData_t nvData = {
+        .lastUpdate = 0,
+        .hist = {-1},
+        .startupPrev = false,
+        .rainPreStartup = 0,
+        .tsDayBegin = 0xFF,
+        .rainDayBegin = 0,
+        .tsWeekBegin = 0xFF,
+        .rainWeekBegin = 0,
+        .wdayPrev = 0xFF,
+        .tsMonthBegin = 0xFF,
+        .rainMonthBegin = 0,
+        .rainPrev = 0,
+        .rainAcc = 0
+    };
+    #endif
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
 
@@ -154,7 +207,7 @@ public:
      */
     void hist_init(int16_t rain = -1);
 
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
     void prefs_save(void);
     #endif

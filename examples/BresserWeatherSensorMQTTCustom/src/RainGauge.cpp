@@ -48,6 +48,10 @@
 //          Modified update at the same index as before
 //          Modified pastHour() algorithm and added features
 // 20240120 Removed old implementation
+// 20240122 Changed scope of nvData -
+//          Using RTC RAM: global
+//          Using Preferences, Unit Tests: class member
+//          Improvements
 //
 // ToDo: 
 // -
@@ -63,53 +67,7 @@
 #include "RainGauge.h"
 
 
-const int SECONDS_PER_HOUR = 3600;
-const int SECONDS_PER_DAY  = 86400;
-
-#ifndef RTC_DATA_ATTR
-   #define RTC_DATA_ATTR static
-#endif
-#if !defined(ESP32) && !defined(RAINGAUGE_USE_PREFS)
-   #pragma message("RainGauge with SLEEP_EN only supported on ESP32!")
-#endif
-
-
-/**
- * \typedef nvData_t
- *
- * \brief Data structure for rain statistics to be stored in non-volatile memory
- *
- * On ESP32, this data is stored in the RTC RAM. 
- */
-typedef struct {
-    /* Timestamp of last update */
-    time_t    lastUpdate;
-
-    /* Data of past 60 minutes */
-    int16_t   hist[RAIN_HIST_SIZE];
-
-    /* Sensor startup handling */
-    bool      startupPrev; // previous state of startup
-    float     rainPreStartup; // previous rain gauge reading (before startup)
-
-    /* Rainfall of current day (can start anytime, but will reset on begin of new day) */
-    uint8_t   tsDayBegin; // day of week
-    float     rainDayBegin; // rain gauge @ begin of day
-
-    /* Rainfall of current week (can start anytime, but will reset on Monday */
-    uint8_t   tsWeekBegin; // day of week 
-    float     rainWeekBegin; // rain gauge @ begin of week
-    uint8_t   wdayPrev; // day of week at previous run - to detect new week
-
-    /* Rainfall of current calendar month (can start anytime, but will reset at begin of month */
-    uint8_t   tsMonthBegin; // month
-    float     rainMonthBegin; // rain gauge @ begin of month
-
-    float     rainPrev;  // rain gauge at previous run - to detect overflow
-    float     rainAcc; // accumulated rain (overflows and startups)
-} nvData_t;
-
-
+#if !defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
 RTC_DATA_ATTR nvData_t nvData = {
    .lastUpdate = 0,
    .hist = {-1},
@@ -125,7 +83,7 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainPrev = 0,
    .rainAcc = 0
 };
-
+#endif
 
 /**
  * \verbatim
@@ -174,7 +132,7 @@ RTC_DATA_ATTR nvData_t nvData = {
 void
 RainGauge::reset(uint8_t flags)
 {
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     preferences.begin("BWS-RAIN", false);
     if (flags & RESET_RAIN_H) {
         hist_init();
@@ -250,12 +208,12 @@ RainGauge::hist_init(int16_t rain)
     }
 }
 
-#if defined(RAINGAUGE_USE_PREFS)
+#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
 void
 RainGauge::prefs_load(void)
 {
     preferences.begin("BWS-RAIN", false);
-    nvData.lastUpdate     = preferences.getULong64("lastUpdate", -1);
+    nvData.lastUpdate     = preferences.getULong64("lastUpdate", 0);
     // Optimization: Reduces number of Flash writes
     // preferences.getBytes("hist", nvData.hist, sizeof(nvData.hist));
     for (int i=0; i<RAIN_HIST_SIZE; i++) {
@@ -270,7 +228,7 @@ RainGauge::prefs_load(void)
     nvData.tsWeekBegin       = preferences.getUChar("tsWeekBegin", 0xFF);
     nvData.rainWeekBegin     = preferences.getFloat("rainWeekBegin", 0);
     nvData.wdayPrev          = preferences.getUChar("wdayPrev", 0xFF);
-    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0);
+    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0xFF);
     nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
     nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
     nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
@@ -321,14 +279,14 @@ RainGauge::prefs_save(void)
 void
 RainGauge::update(time_t timestamp, float rain, bool startup)
 {
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
         prefs_load();
     #endif
 
     struct tm t;
     localtime_r(&timestamp, &t);
 
-    if (nvData.lastUpdate == -1) {
+    if (nvData.lastUpdate == 0) {
         // Initialize history
         hist_init();
     }
@@ -338,10 +296,9 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.rainPrev = rain;
         nvData.lastUpdate = timestamp;
         
-        #if defined(RAINGAUGE_USE_PREFS)
+        #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
-        return;
     }
 
     rainCurr = nvData.rainAcc + rain;
@@ -362,6 +319,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     nvData.rainPreStartup = rain;
 
     float rainDelta = rainCurr - nvData.rainPrev;
+    log_d("rainDelta: %.1f", rainDelta);
 
     // Check if no saved data is available yet
     if (nvData.wdayPrev == 0xFF) {
@@ -375,47 +333,56 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     // 2 * RAINGAUGE_UPDATE_RATE <= t_delta < RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE
     //                                                          -> update history, mark missing history entries as invalid
     time_t t_delta = timestamp - nvData.lastUpdate;
-    
-    // t_delta < 0: something is wrong, e.g. RTC was not set correctly -> keep or reset history (TBD)
+    log_d("t_delta: %ld", t_delta);
+
+    // t_delta < 0: something is wrong, e.g. RTC was not set correctly
     if (t_delta < 0) {
         log_w("Negative time span since last update!?");
         return; 
     }
 
-    // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
-    if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
-        log_w("History time frame expired, resetting!");
-        hist_init();
-        nvData.lastUpdate = timestamp;
-    }
 
-    int min = t.tm_min;
-    int idx = min / RAINGAUGE_UPD_RATE;
+    int idx = t.tm_min / RAINGAUGE_UPD_RATE;
 
     if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
-        // Same index as before, add new delta
+        // t_delta shorter than expected update rate
         if (nvData.hist[idx] < 0)
             nvData.hist[idx] = 0;
-        nvData.hist[idx] += static_cast<int16_t>(rainDelta * 10);
-        nvData.lastUpdate = timestamp;
-        log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
+        struct tm t_prev;
+        localtime_r(&nvData.lastUpdate, &t_prev);
+        if (t_prev.tm_min / RAINGAUGE_UPD_RATE == idx) {
+            // same index as in previous cycle - add value
+            nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
+        } else {
+            // different index - new value
+            nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
+        }
     }
-    else if (t_delta / 60 < 2 * RAINGAUGE_UPD_RATE) {
-        // Next index, write delta
-        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 10);
-        nvData.lastUpdate = timestamp;
+    else if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
+        // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
+        log_w("History time frame expired, resetting!");
+        hist_init();
+    }
+    else {
+        // Some other index
+
+        // Mark all history entries in interval [expected_index, current_index) as invalid
+        // N.B.: excluding current index!
+        for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
+            struct tm timeinfo;
+            localtime_r(&ts, &timeinfo);
+            int idx = timeinfo.tm_min / RAINGAUGE_UPD_RATE;
+            nvData.hist[idx] = -1;
+            log_d("hist[%d]=-1", idx);
+        }
+
+        // Write delta
+        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
     }
 
-    // Mark all history entries in interval [expected_index, current_index) as invalid
-    // N.B.: excluding current index!
-    for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
-        struct tm timeinfo;
-        localtime_r(&ts, &timeinfo);
-        int min = timeinfo.tm_min;
-        int idx = min / RAINGAUGE_UPD_RATE;
-        nvData.hist[idx] = -1;
-    }
 
     #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
         String buf;
@@ -431,6 +398,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     // or no saved data is available yet
     if ((t.tm_wday != nvData.tsDayBegin) || 
         (nvData.tsDayBegin == 0xFF)) {
+
         // save timestamp
         nvData.tsDayBegin = t.tm_wday;
         
@@ -464,9 +432,10 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.rainMonthBegin = rainCurr;
     }
 
+    nvData.lastUpdate = timestamp;
     nvData.rainPrev = rainCurr;
 
-    #if defined(RAINGAUGE_USE_PREFS)
+    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
         prefs_save();
     #endif
 }
@@ -480,7 +449,7 @@ RainGauge::pastHour(bool *valid, int *quality)
     // Sum of all valid entries
     for (size_t i=0; i<RAIN_HIST_SIZE; i++){
         if (nvData.hist[i] >= 0) {
-            res += nvData.hist[i] * 0.1;
+            res += nvData.hist[i] * 0.01;
             _quality++;
         }
     }
@@ -504,7 +473,7 @@ RainGauge::pastHour(bool *valid, int *quality)
 float
 RainGauge::currentDay(void)
 {
-    if (nvData.rainDayBegin == -1)
+    if (nvData.tsMonthBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainDayBegin;
@@ -513,7 +482,7 @@ RainGauge::currentDay(void)
 float
 RainGauge::currentWeek(void)
 {
-    if (nvData.rainWeekBegin == -1)
+    if (nvData.tsWeekBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainWeekBegin;
@@ -522,7 +491,7 @@ RainGauge::currentWeek(void)
 float
 RainGauge::currentMonth(void)
 {
-    if (nvData.rainMonthBegin == -1)
+    if (nvData.tsMonthBegin == 0xFF)
         return -1;
     
     return rainCurr - nvData.rainMonthBegin;

@@ -45,8 +45,8 @@ jobs:
       #- name: Where are we?
       #  run: pwd
       - name: Coveralls
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@v2
         with:
-          path-to-lcov: test/build/lcov.info
+          file: test/build/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
           

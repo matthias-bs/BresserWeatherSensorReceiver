@@ -359,13 +359,11 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
             nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
             log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
         }
-        nvData.lastUpdate = timestamp;
     }
     else if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
         // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
         log_w("History time frame expired, resetting!");
         hist_init();
-        nvData.lastUpdate = timestamp;
     }
     else {
         // Some other index
@@ -382,7 +380,6 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
         // Write delta
         nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
-        nvData.lastUpdate = timestamp;
         log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
     }
 
@@ -435,6 +432,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.rainMonthBegin = rainCurr;
     }
 
+    nvData.lastUpdate = timestamp;
     nvData.rainPrev = rainCurr;
 
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)

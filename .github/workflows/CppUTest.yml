@@ -40,13 +40,13 @@ jobs:
       # Runs all units tests with coverage report
       - name: Run unit tests with coverage report
         run: |
-          cd test
+          cd tests
           make lcov
       - name: Where are we?
         run: pwd
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
-          path-to-lcov: test/build/lcov.info
+          path-to-lcov: tests/build/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
           

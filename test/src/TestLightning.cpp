@@ -181,7 +181,7 @@ TEST(TG_LightningBasic, Test_LightningBasic) {
   lightning.reset();
   res = lightning.lastEvent(res_ts, res_events, res_distance);
   CHECK_FALSE(res);
-  CHECK_EQUAL(0, lightning.lastCycle());
+  CHECK_EQUAL(-1, lightning.lastCycle());
 }
 
 /*

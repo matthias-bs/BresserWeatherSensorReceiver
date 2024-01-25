@@ -99,6 +99,7 @@ Lightning::reset(void)
     nvLightning.events = -1;
     nvLightning.distance = 0;
     nvLightning.timestamp = 0;
+    deltaEvents = -1;
 }
 
 void

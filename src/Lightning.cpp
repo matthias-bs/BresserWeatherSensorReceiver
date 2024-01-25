@@ -182,7 +182,6 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
         #endif
-        log_d("prevCount: %d, startupPrev: %d, startup: %d", nvLightning.prevCount, nvLightning.startupPrev, startup);
     }
     
     currCount = nvLightning.accCount + count;
@@ -247,13 +246,11 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
             nvLightning.hist[idx] = delta;
             log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
         }
-        nvLightning.lastUpdate = timestamp;
     }
     else if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
         // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
         log_w("History time frame expired, resetting!");
         hist_init();
-        nvLightning.lastUpdate = timestamp;
     }
     else {
         // Some other index
@@ -270,11 +267,9 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         
         // Write delta
         nvLightning.hist[idx] = delta;
-        nvLightning.lastUpdate = timestamp;
         log_d("hist[%d]=%d", idx, delta);
     }
-
-
+    
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;
         buf = String("hist[]={");
@@ -285,6 +280,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         log_d("%s", buf.c_str());
     #endif
 
+    nvLightning.lastUpdate = timestamp;
     nvLightning.prevCount = currCount;
 
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)

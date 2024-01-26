@@ -52,6 +52,8 @@
 // 20231121 Added Heltec WiFi LoRa32 V3
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
+// 20231227 Added RAINGAUGE_USE_PREFS and LIGHTNING_USE_PREFS
+// 20240122 Modified for unit testing
 //
 // ToDo:
 // -

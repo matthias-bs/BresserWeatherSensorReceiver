@@ -460,7 +460,7 @@ void wifimgr_setup(void)
 
                 configFile.readBytes(buf.get(), size);
 
-                DynamicJsonDocument json(1024);
+                JsonDocument json;
                 auto deserializeError = deserializeJson(json, buf.get());
                 serializeJson(json, Serial);
 
@@ -564,7 +564,7 @@ void wifimgr_setup(void)
     {
         log_i("saving config");
 
-        DynamicJsonDocument json(1024);
+        JsonDocument json;
         json["mqtt_server"] = mqtt_host;
         json["mqtt_port"] = mqtt_port;
         json["mqtt_user"] = mqtt_user;

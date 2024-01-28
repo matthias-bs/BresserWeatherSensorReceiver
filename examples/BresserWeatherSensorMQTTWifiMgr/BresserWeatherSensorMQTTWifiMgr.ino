@@ -134,7 +134,7 @@
 
 
 // Library Defines - Need to be defined before library import
-#define ESP_DRD_USE_SPIFFS true
+#define ESP_DRD_USE_LITTLEFS true
 #define DOUBLERESETDETECTOR_DEBUG true
 
 // BEGIN User specific options

@@ -134,6 +134,7 @@
 
 
 // Library Defines - Need to be defined before library import
+#define FORMAT_LITTLEFS_IF_FAILED true
 #define ESP_DRD_USE_LITTLEFS true
 #define DOUBLERESETDETECTOR_DEBUG true
 
@@ -441,7 +442,7 @@ void wifimgr_setup(void)
     // read configuration from FS json
     Serial.println("mounting FS...");
 
-    if (LittleFS.begin())
+    if (LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED))
     {
         log_i("mounted file system");
         if (LittleFS.exists("/config.json"))

@@ -91,6 +91,8 @@
 // 20231110 Fixed false double reset detection on wake-up from deep sleep
 // 20240113 Added lightning data post-processing
 // 20240122 Added lightning post-processing reset
+// 20240129 Replaced SPIFFS by LittleFS
+//          Added formatting of LittleFS partition if mounting failed
 //
 // ToDo:
 //

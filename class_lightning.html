@@ -289,7 +289,34 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
   </table>
   </dd>
 </dl>
-
+<pre class="fragment">* Total number of events during past 60 minutes
+* ----------------------------------------------
+* 
+* In each update():
+* - timestamp (time_t) -&gt;                  t (localtime, struct tm)
+* - calculate index into hist[]:           idx = t.tm_min / LIGHTNING_UPD_RATE
+* - expired time since last update:        t_delta = timestamp - nvLightning.lastUpdate
+* - number of events since last update:    delta = currCount - nvLightning.prevCount
+* - t_delta
+*      &lt; 0:                                something is wrong, e.g. RTC was not set correctly -&gt; ignore, return
+*      t_delta &lt; expected update rate:
+*          idx same as in previous cycle:  hist[idx] += delta
+*          idx changed by 1:               hist[idx] = delta
+*      t_delta &gt;= history size:            mark all history entries as invalid
+*      else (index changed &gt; 1):           mark all history entries in interval [expected_index, current_index) as invalid
+*                                          hist[idx] = delta
+*
+*   ---------------     -----------
+*  |   |   |   |   |...|   |   |   |   hist[LIGHTNING_HIST_SIZE]
+*   ---------------     -----------
+*        ^
+*        |
+*       idx = t.tm_min / LIGHTNING_UPD_RATE
+*
+* - Calculate hourly rate:
+*   pastHour = sum of all valid hist[] entries
+*
+* </pre>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>

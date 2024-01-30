@@ -300,49 +300,11 @@ Public Member Functions</h2></td></tr>
 <p>Reset non-volatile data and current rain counter value</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">flags</td><td>Flags defining what to reset:</td></tr>
+    <tr><td class="paramname">flags</td><td>Flags defining what to reset: </td></tr>
   </table>
   </dd>
 </dl>
-<pre class="fragment">* Total rainfall in the past hour
-* -------------------------------
-* 
-* OLD:
-* ----
-* To determine the rainfall in the past hour, timestamps (ts) and rain gauge values (rain) 
-* are stored in a circular buffer:
-*
-*      ---------------     -----------
-* .-&gt; |   |   |   |   |...|   |   |   |--. 
-* |    ---------------     -----------   |
-* |     ^                   ^            |
-* |    tail                head          |
-* `--------------------------------------'
-*
-* 
-* - Add new value: 
-*   increment(head); 
-*   rainBuf[head] = rainNow; 
-*   tsBuf[head]   = tsNow;
-* 
-* - Remove stale entries: 
-*   if ((tsBuf[head]-tsBuf[tail]) &gt; 1hour) {
-*     increment(tail);
-*   }
-* 
-* - Calculate hourly rate:
-*   rainHour = rainBuf[head] - rainBuf[tail];
-* 
-* Notes:
-* - increment(i) := "i = (i+1) mod RAINGAUGE_BUF_SIZE"
-* - If a new value is added when the buffer is already filled
-*   (which would result in increment(head) == tail), head is
-*   NOT incremented and the previous value is overwritten instead.
-* - Rain values are stored as uint16_t encoded as fixed-point data with one decimal
-*   to reduce memory consumption.
-* - Timestamps are stored as seconds since midnight; the discontinuity between days
-*   is handled when stale entries are removed. 
-* </pre> 
+
 </div>
 </div>
 <a id="a77efc11e951f426af6f9e44ddbfde299"></a>
@@ -419,7 +381,37 @@ Public Member Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-
+<pre class="fragment">* Total rainfall during past 60 minutes
+* --------------------------------------
+*
+* In each update():
+* - timestamp (time_t) -&gt;                  t (localtime, struct tm)
+* - calculate index into hist[]:           idx = t.tm_min / RAINGAUGE_UPD_RATE
+* - expired time since last update:        t_delta = timestamp - nvData.lastUpdate
+* - amount of rain since last update:      rainDelta = rainCurr - nvData.rainPrev
+* - t_delta
+*      &lt; 0:                                something is wrong, e.g. RTC was not set correctly -&gt; ignore, return
+*      t_delta &lt; expected update rate:
+*          idx same as in previous cycle:  hist[idx] += rainDelta
+*          idx changed by 1:               hist[idx] = rainDelta
+*      t_delta &gt;= history size:            mark all history entries as invalid
+*      else (index changed &gt; 1):           mark all history entries in interval [expected_index, current_index) as invalid
+*                                          hist[idx] = rainDelta
+*
+*   ---------------     -----------
+*  |   |   |   |   |...|   |   |   |   hist[RAIN_HIST_SIZE]
+*   ---------------     -----------
+*        ^
+*        |
+*       idx = t.tm_min / RAINGAUGE_UPD_RATE
+*
+* - Calculate hourly rate:
+*   pastHour = sum of all valid hist[] entries
+*
+* Notes:
+* - rainDelta values (floating point with resolution of 0.1) are stored as integers to reduce memory consumption.
+*   To avoid rounding errors, the rainDelta values are multiplied by 100 for conversion to integer.
+* </pre>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>

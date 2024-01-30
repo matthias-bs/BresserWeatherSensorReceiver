@@ -442,7 +442,12 @@ void wifimgr_setup(void)
     // read configuration from FS json
     Serial.println("mounting FS...");
 
+#if defined(ESP8266)
+    // No parameter - FS is always formatted if mounting failed
+    if (LittleFS.begin())
+#else
     if (LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED))
+#endif
     {
         log_i("mounted file system");
         if (LittleFS.exists("/config.json"))

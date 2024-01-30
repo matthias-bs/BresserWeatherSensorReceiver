@@ -134,7 +134,8 @@
 
 
 // Library Defines - Need to be defined before library import
-#define ESP_DRD_USE_SPIFFS true
+#define FORMAT_LITTLEFS_IF_FAILED true
+#define ESP_DRD_USE_LITTLEFS true
 #define DOUBLERESETDETECTOR_DEBUG true
 
 // BEGIN User specific options
@@ -208,9 +209,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include <string>
 #include <MQTT.h>
 #include <FS.h>
-#ifdef ESP32
-#include <SPIFFS.h>
-#endif
+#include <LittleFS.h>
 #include <WiFiManager.h>
 #include <ESP_DoubleResetDetector.h>
 #include <ArduinoJson.h>
@@ -438,19 +437,24 @@ void wifimgr_setup(void)
 {
 
     // clean FS, for testing
-    // SPIFFS.format();
+    //LittleFS.format();
 
     // read configuration from FS json
     Serial.println("mounting FS...");
 
-    if (SPIFFS.begin())
+#if defined(ESP8266)
+    // No parameter - FS is always formatted if mounting failed
+    if (LittleFS.begin())
+#else
+    if (LittleFS.begin(FORMAT_LITTLEFS_IF_FAILED))
+#endif
     {
         log_i("mounted file system");
-        if (SPIFFS.exists("/config.json"))
+        if (LittleFS.exists("/config.json"))
         {
             // file exists, reading and loading
             log_i("reading config file");
-            File configFile = SPIFFS.open("/config.json", "r");
+            File configFile = LittleFS.open("/config.json", "r");
             if (configFile)
             {
                 log_i("opened config file");
@@ -570,7 +574,7 @@ void wifimgr_setup(void)
         json["mqtt_user"] = mqtt_user;
         json["mqtt_pass"] = mqtt_pass;
 
-        File configFile = SPIFFS.open("/config.json", "w");
+        File configFile = LittleFS.open("/config.json", "w");
         if (!configFile)
         {
             log_e("failed to open config file for writing");
@@ -940,8 +944,8 @@ void setup()
         forceConfig = true;
     }
     /*
-        bool spiffsSetup = loadConfigFile();
-        if (!spiffsSetup)
+        bool fsSetup = loadConfigFile();
+        if (!fsSetup)
         {
             Serial.println(F("Forcing config mode as there is no saved config"));
             forceConfig = true;

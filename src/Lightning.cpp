@@ -60,6 +60,7 @@
 //          Added qualityThreshold
 // 20240124 Fixed handling of overflow, startup and missing update cycles
 // 20240125 Added lastCycle()
+// 20240130 Update pastHour() documentation
 //
 // ToDo:
 // -
@@ -201,11 +202,39 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     nvLightning.startupPrev = startup;
     nvLightning.preStCount = count;
 
+    /**
+     * \verbatim
+     * Total number of events during past 60 minutes
+     * ----------------------------------------------
+     * 
+     * In each update():
+     * - timestamp (time_t) ->                  t (localtime, struct tm)
+     * - calculate index into hist[]:           idx = t.tm_min / LIGHTNING_UPD_RATE
+     * - expired time since last update:        t_delta = timestamp - nvLightning.lastUpdate
+     * - number of events since last update:    delta = currCount - nvLightning.prevCount
+     * - t_delta
+     *      < 0:                                something is wrong, e.g. RTC was not set correctly -> ignore, return
+     *      t_delta < expected update rate:
+     *          idx same as in previous cycle:  hist[idx] += delta
+     *          idx changed by 1:               hist[idx] = delta
+     *      t_delta >= history size:            mark all history entries as invalid
+     *      else (index changed > 1):           mark all history entries in interval [expected_index, current_index) as invalid
+     *                                          hist[idx] = delta
+     *
+     *   ---------------     -----------
+     *  |   |   |   |   |...|   |   |   |   hist[LIGHTNING_HIST_SIZE]
+     *   ---------------     -----------
+     *        ^
+     *        |
+     *       idx = t.tm_min / LIGHTNING_UPD_RATE
+     *
+     * - Calculate hourly rate:
+     *   pastHour = sum of all valid hist[] entries
+     *
+     * \endverbatim
+     */
+
     // Delta time between last update and current time
-    
-    // 0 < t_delta < 2 * LIGHTNUNG_UPDATE_RATE                  -> update history
-    // 2 * LIGHTNING_UPDATE_RATE <= t_delta < LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE
-    //                                                          -> update history, mark missing history entries as invalid
     time_t t_delta = timestamp - nvLightning.lastUpdate;
     log_d("t_delta: %ld", t_delta);
 

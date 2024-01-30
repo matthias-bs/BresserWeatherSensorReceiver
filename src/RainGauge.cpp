@@ -52,6 +52,7 @@
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
 //          Improvements
+// 20240130 Update pastHour() documentation
 //
 // ToDo: 
 // -
@@ -84,49 +85,6 @@ RTC_DATA_ATTR nvData_t nvData = {
    .rainAcc = 0
 };
 #endif
-
-/**
- * \verbatim
- * Total rainfall in the past hour
- * -------------------------------
- * 
- * OLD:
- * ----
- * To determine the rainfall in the past hour, timestamps (ts) and rain gauge values (rain) 
- * are stored in a circular buffer:
- *
- *      ---------------     -----------
- * .-> |   |   |   |   |...|   |   |   |--. 
- * |    ---------------     -----------   |
- * |     ^                   ^            |
- * |    tail                head          |
- * `--------------------------------------'
- *
- * 
- * - Add new value: 
- *   increment(head); 
- *   rainBuf[head] = rainNow; 
- *   tsBuf[head]   = tsNow;
- * 
- * - Remove stale entries: 
- *   if ((tsBuf[head]-tsBuf[tail]) > 1hour) {
- *     increment(tail);
- *   }
- * 
- * - Calculate hourly rate:
- *   rainHour = rainBuf[head] - rainBuf[tail];
- * 
- * Notes:
- * - increment(i) := "i = (i+1) mod RAINGAUGE_BUF_SIZE"
- * - If a new value is added when the buffer is already filled
- *   (which would result in increment(head) == tail), head is
- *   NOT incremented and the previous value is overwritten instead.
- * - Rain values are stored as uint16_t encoded as fixed-point data with one decimal
- *   to reduce memory consumption.
- * - Timestamps are stored as seconds since midnight; the discontinuity between days
- *   is handled when stale entries are removed. 
- * \endverbatim
- */
 
 
 void
@@ -327,11 +285,42 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         nvData.wdayPrev = t.tm_wday;
     }
 
+    /**
+     * \verbatim
+     * Total rainfall during past 60 minutes
+     * --------------------------------------
+     *
+     * In each update():
+     * - timestamp (time_t) ->                  t (localtime, struct tm)
+     * - calculate index into hist[]:           idx = t.tm_min / RAINGAUGE_UPD_RATE
+     * - expired time since last update:        t_delta = timestamp - nvData.lastUpdate
+     * - amount of rain since last update:      rainDelta = rainCurr - nvData.rainPrev
+     * - t_delta
+     *      < 0:                                something is wrong, e.g. RTC was not set correctly -> ignore, return
+     *      t_delta < expected update rate:
+     *          idx same as in previous cycle:  hist[idx] += rainDelta
+     *          idx changed by 1:               hist[idx] = rainDelta
+     *      t_delta >= history size:            mark all history entries as invalid
+     *      else (index changed > 1):           mark all history entries in interval [expected_index, current_index) as invalid
+     *                                          hist[idx] = rainDelta
+     *
+     *   ---------------     -----------
+     *  |   |   |   |   |...|   |   |   |   hist[RAIN_HIST_SIZE]
+     *   ---------------     -----------
+     *        ^
+     *        |
+     *       idx = t.tm_min / RAINGAUGE_UPD_RATE
+     *
+     * - Calculate hourly rate:
+     *   pastHour = sum of all valid hist[] entries
+     *
+     * Notes:
+     * - rainDelta values (floating point with resolution of 0.1) are stored as integers to reduce memory consumption.
+     *   To avoid rounding errors, the rainDelta values are multiplied by 100 for conversion to integer.
+     * \endverbatim
+     */
+
     // Delta time between last update and current time
-    
-    // 0 < t_delta < 2 * RAINGAUGE_UPDATE_RATE                  -> update history
-    // 2 * RAINGAUGE_UPDATE_RATE <= t_delta < RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE
-    //                                                          -> update history, mark missing history entries as invalid
     time_t t_delta = timestamp - nvData.lastUpdate;
     log_d("t_delta: %ld", t_delta);
 

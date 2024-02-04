@@ -54,6 +54,7 @@
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231227 Added RAINGAUGE_USE_PREFS and LIGHTNING_USE_PREFS
 // 20240122 Modified for unit testing
+// 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
 //
 // ToDo:
 // -
@@ -189,6 +190,14 @@
     #pragma message("Radio transceiver chip has to be configured manually: V2 -> USE_SX1276 / V3 -> USE_SX1262")
     //#define USE_SX1276 // Heltec Wireless Stick V2
     #define USE_SX1262 // Heltec Wireless Stick V3
+
+#elif defined(ARDUINO_heltec_wireless_stick_v2)
+    #pragma message("ARDUINO_heltec_wireless_stick_v2 defined; using on-board transceiver")
+    #define USE_SX1276
+
+#elif defined(ARDUINO_heltec_wireless_stick_v3)
+    #pragma message("ARDUINO_heltec_wireless_stick_v3 defined; using on-board transceiver")
+    #define USE_SX1262
 
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")

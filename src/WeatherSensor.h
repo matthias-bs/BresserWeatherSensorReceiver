@@ -69,6 +69,9 @@
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231227 Added sleep()
 // 20240116 Fixed width of Lightning.strike_count
+// 20240207 Added sensors for CO2, P/N 7009977 and HCHO/VOC, P/N 7009978
+//          see https://github.com/merbanan/rtl_433/pull/2815 
+//            & https://github.com/merbanan/rtl_433/pull/2817
 //
 // ToDo:
 // -
@@ -83,19 +86,19 @@
 
 
 // Sensor Types
-// 0 - Weather Station          5-in-1; PN 7002510..12/7902510..12
-// 1 - Weather Station          6-in-1; PN 7002585
-//   - Professional Wind Gauge  6-in-1; PN 7002531
-//   - Weather Station          7-in-1; PN 7003300
-// 2 - Thermo-/Hygro-Sensor     6-in-1; PN 7009999
-// 3 - Pool / Spa Thermometer   PN 7000073 
-// 4 - Soil Moisture Sensor     6-in-1; PN 7009972
-// 5 - Water Leakage Sensor     6-in-1; PN 7009975
-// 8 - Air Quality Sensor PM2.5/PM10
+// 0 - Weather Station                  5-in-1; PN 7002510..12/7902510..12
+// 1 - Weather Station                  6-in-1; PN 7002585
+//   - Professional Wind Gauge          6-in-1; PN 7002531
+//   - Weather Station                  7-in-1; PN 7003300
+// 2 - Thermo-/Hygro-Sensor             6-in-1; PN 7009999
+// 3 - Pool / Spa Thermometer           6-in-1; PN 7000073 
+// 4 - Soil Moisture Sensor             6-in-1; PN 7009972
+// 5 - Water Leakage Sensor             6-in-1; PN 7009975
+// 8 - Air Quality Sensor PM2.5/PM10    7-in-1; P/N 7009970
 // 9 - Professional Rain Gauge  (5-in-1 decoder)
-// 9 - Lightning Sensor         PN 7009976
-// ? - CO2 Sensor
-// ? - HCHO/VCO Sensor
+// 9 - Lightning Sensor                 PN 7009976
+// 10 - CO2 Sensor                      7-in-1; PN 7009977
+// 11 - HCHO/VCO Sensor                 7-in-1; PN 7009978
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
@@ -105,6 +108,8 @@
 #define SENSOR_TYPE_AIR_PM          8 // Air Quality Sensor (Particle Matter)
 #define SENSOR_TYPE_RAIN            9 // Professional Rain Gauge (from 5-in-1 decoder)
 #define SENSOR_TYPE_LIGHTNING       9 // Lightning Sensor
+#define SENSOR_TYPE_CO2             10 // CO2 Sensor
+#define SENSOR_TYPE_HCHO_VOC        11 // Air Quality Sensor (HCHO and VOC)
 
 
 // Sensor specific rain gauge overflow threshold (mm)
@@ -238,12 +243,26 @@ class WeatherSensor {
         };
 
         struct Leakage {
-            bool     alarm;                //!< water leakage alarm (only water leakage)
+            bool     alarm;                 //!< water leakage alarm (only water leakage)
         };
 
         struct AirPM {
-            uint16_t pm_2_5;               //!< air quality PM2.5 in µg/m³
-            uint16_t pm_10;                //!< air quality PM10  in µg/m³
+            uint16_t pm_2_5;                //!< air quality PM2.5 in µg/m³
+            uint16_t pm_10;                 //!< air quality PM10  in µg/m³
+            bool     pm_2_5_init;           //!< measurement value invalid due to initialization
+            bool     pm_10_init;            //!< measurement value invalid due to initialization
+        };
+
+        struct AirCO2 {
+            uint16_t co2_ppm;               //!< CO2 concentration in ppm
+            bool     co2_init;              //!< measurement value invalid due to initialization
+        };
+
+        struct AirVOC {
+            uint16_t hcho_ppb;              //!< formaldehyde concentrartion in ppb
+            uint8_t voc_level;              //!< volatile organic oompounds; 1 - bad air quality .. 5 - very good air quality
+            bool hcho_init;                 //!< measurement value invalid due to initialization
+            bool voc_init;                  //!< measurement value invalid due to initialization
         };
 
         /**
@@ -266,6 +285,8 @@ class WeatherSensor {
                 struct Lightning    lgt;
                 struct Leakage      leak;
                 struct AirPM        pm;
+                struct AirCO2       co2;
+                struct AirVOC       voc;
             };
 
             Sensor ()

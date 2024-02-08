@@ -112,8 +112,39 @@ void loop()
         }
         else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
             // Air Quality (Particular Matter) Sensor
-            Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
-            Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
+            if (ws.sensor[i].pm.pm_2_5_init) {
+                Serial.printf("PM2.5: [init] ");
+            } else {
+                Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
+            }
+            if (ws.sensor[i].pm.pm_10_init) {
+                Serial.printf("PM10: [init]\n");
+            } else {
+                Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
+            }
+            
+        }
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_CO2) {
+            // CO2 Sensor
+            if (ws.sensor[i].co2.co2_init) {
+                Serial.printf("CO2: [init] ");
+            } else {
+                Serial.printf("CO2: [%uppm] ", ws.sensor[i].co2.co2_ppm);
+            }
+
+        }
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC) {
+            // HCHO / VOC Sensor
+            if (ws.sensor[i].voc.hcho_init) {
+                Serial.printf("HCHO: [init] ");
+            } else {
+                Serial.printf("HCHO: [%uppb] ", ws.sensor[i].voc.hcho_ppb);
+            }
+            if (ws.sensor[i].voc.voc_init) {
+                Serial.printf("VOC: [init] ");
+            } else {
+                Serial.printf("VOC: [%u] ", ws.sensor[i].voc.voc_level);
+            }
 
         }
         else if (ws.sensor[i].s_type == SENSOR_TYPE_SOIL) {

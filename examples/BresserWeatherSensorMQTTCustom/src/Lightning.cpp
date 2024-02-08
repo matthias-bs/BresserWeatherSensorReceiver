@@ -327,6 +327,7 @@ bool
 Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
 {
     if (nvLightning.events == -1) {
+        events = -1;
         return false;
     }
 

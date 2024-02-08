@@ -3,6 +3,7 @@ var struct_weather_sensor_1_1_sensor =
     [ "Sensor", "struct_weather_sensor_1_1_sensor.html#afd11d6f1f39345f3466a7e2eebaeb2e9", null ],
     [ "battery_ok", "struct_weather_sensor_1_1_sensor.html#a179014c02826f68faabbddbc9a57ff90", null ],
     [ "chan", "struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9", null ],
+    [ "co2", "struct_weather_sensor_1_1_sensor.html#a7b8e971a27b50faf3b4fa169902c8772", null ],
     [ "complete", "struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57", null ],
     [ "leak", "struct_weather_sensor_1_1_sensor.html#a2be0329dff70f431f408e70a57117ecf", null ],
     [ "lgt", "struct_weather_sensor_1_1_sensor.html#a70a0e2b3062eb6b3f1f7b9fc57a479bf", null ],
@@ -13,5 +14,6 @@ var struct_weather_sensor_1_1_sensor =
     [ "soil", "struct_weather_sensor_1_1_sensor.html#abb7429449881d93d8a23b20ad9a9b939", null ],
     [ "startup", "struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4", null ],
     [ "valid", "struct_weather_sensor_1_1_sensor.html#ae28084d05f7e81b1c3a1b2cff859315a", null ],
+    [ "voc", "struct_weather_sensor_1_1_sensor.html#a322353d11a88318615480b956ba8430b", null ],
     [ "w", "struct_weather_sensor_1_1_sensor.html#ae6c6e91d8e3d6d22e38c26ef212a6d69", null ]
 ];

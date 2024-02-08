@@ -1,6 +1,8 @@
 var class_weather_sensor =
 [
+    [ "AirCO2", "struct_weather_sensor_1_1_air_c_o2.html", "struct_weather_sensor_1_1_air_c_o2" ],
     [ "AirPM", "struct_weather_sensor_1_1_air_p_m.html", "struct_weather_sensor_1_1_air_p_m" ],
+    [ "AirVOC", "struct_weather_sensor_1_1_air_v_o_c.html", "struct_weather_sensor_1_1_air_v_o_c" ],
     [ "Leakage", "struct_weather_sensor_1_1_leakage.html", "struct_weather_sensor_1_1_leakage" ],
     [ "Lightning", "struct_weather_sensor_1_1_lightning.html", "struct_weather_sensor_1_1_lightning" ],
     [ "Sensor", "struct_weather_sensor_1_1_sensor.html", "struct_weather_sensor_1_1_sensor" ],

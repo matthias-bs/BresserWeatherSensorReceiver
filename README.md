@@ -29,8 +29,10 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7009973       | Pool / Spa Thermometer           | decodeBresser**6In1**Payload() |
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |
-| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() **2)** |
-| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **3)** |
+| 7009976       | Lightning Sensor | decodeBresser**Lightning**Payload() |
+| 7009977       | CO<sub>2</sub> Sensor | decodeBresser**7In1**Payload() **2)** |
+| 7009978       | Air Quality Sensor HCHO / VOC | decodeBresser**7In1**Payload() **3)** |
+| 7003600 and WSX3001 | Weather Station | decodeBresser**7In1**Payload() **4)** |
 | 7003210       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
@@ -47,9 +49,11 @@ Some guesswork:
 
 **1)** The flag `DATA_COMPLETE` must not be set in `getData()`, otherwise the return value would always indicate a timeout. (I.e. use `#define RX_STRATEGY 0` in some of the example sketches.)
 
-**2)** Work in progress
+**2)** Request for testing, see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/138
 
-**3)** The part number is specific to the actual variant, i.e. some more characters are appended
+**3)** Request for testing, see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/139
+
+**4)** The part number is specific to the actual variant, i.e. some more characters are appended
 
 
 ## Configuration

@@ -773,6 +773,39 @@ void publishWeatherdata(bool complete)
                 mqtt_payload += String(",\"lightning_event_distance_km\":") + String(distance);
             }
         }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
+            // Water Leakage Sensor
+            mqtt_payload += String(",\"leakage\":") + String(weatherSensor.sensor[i].leak.alarm);
+      
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
+            // Air Quality (Particular Matter) Sensor
+            if (!weatherSensor.sensor[i].pm.pm_2_5_init) {
+                mqtt_payload += String(",\"pm2_5_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_2_5);
+
+            }
+            if (!weatherSensor.sensor[i].pm.pm_10_init) {
+                mqtt_payload += String(",\"pm10_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_10);
+            }
+            
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2) {
+            // CO2 Sensor
+            if (!weatherSensor.sensor[i].co2.co2_init) {
+                mqtt_payload += String(",\"co2_ppm\":") + String(weatherSensor.sensor[i].co2.co2_ppm);
+            }
+
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC) {
+            // HCHO / VOC Sensor
+            if (!weatherSensor.sensor[i].voc.hcho_init) {
+                mqtt_payload += String(",\"hcho_ppb\":") + String(weatherSensor.sensor[i].voc.hcho_ppb);
+            }
+            if (!weatherSensor.sensor[i].voc.voc_init) {
+                mqtt_payload += String(",\"voc\":") + String(weatherSensor.sensor[i].voc.voc_level);
+            }
+
+        }
         else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 

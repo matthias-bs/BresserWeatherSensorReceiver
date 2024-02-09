@@ -42,6 +42,7 @@
 // 20230723 Created from BresserWeatherSensorBasic.ino
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231027 Refactored sensor structure
+// 20240209 Added Air Quality (HCHO/VOC) and CO2 Sensor decoder
 //
 // ToDo: 
 // - 
@@ -79,7 +80,15 @@ const uint8_t testData[][MSG_BUF_SIZE-1] = {
 
     // #6: Water Leakage Sensor
     {0xB3, 0xDA, 0x55, 0x57, 0x17, 0x40, 0x53, 0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xFF, 0xFF, 
-     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFB}
+     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFB},
+
+    // #7: CO2 Sensor
+    {0x04, 0xa9, 0xd7, 0x82, 0xac, 0xd8, 0xa1, 0xad, 0x9a, 0xad, 0x9a, 0xad, 0x9a, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+     0xaa, 0xaa, 0xe9, 0x9a, 0xaa, 0xaa, 0x00},
+
+    // #8: Air Quality HCHO/VOC
+    {0x0c, 0x1c, 0xc4, 0xa5, 0xaa, 0xaf, 0xb1, 0xaa, 0xa8, 0xaa, 0xa8, 0xaa, 0xa8, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
+     0xaa, 0xaa, 0xe9, 0xff, 0xaa, 0xaa, 0x00}
 };
 
 WeatherSensor ws;
@@ -107,7 +116,7 @@ void loop()
     // Timeout occurs after a small multiple of expected time-on-air.
     DecodeStatus decode_status = ws.decodeMessage(&testData[idx][0], MSG_BUF_SIZE-1);
 
-    idx = (idx == 6) ? 0 : idx+1;
+    idx = (idx == 8) ? 0 : idx+1;
     Serial.printf("testData[%d]\n", idx);
 
     if (decode_status == DECODE_OK) {
@@ -138,8 +147,39 @@ void loop()
         }
         else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
             // Air Quality (Particular Matter) Sensor
-            Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
-            Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
+            if (ws.sensor[i].pm.pm_2_5_init) {
+                Serial.printf("PM2.5: [init] ");
+            } else {
+                Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
+            }
+            if (ws.sensor[i].pm.pm_10_init) {
+                Serial.printf("PM10: [init]\n");
+            } else {
+                Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
+            }
+            
+        }
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_CO2) {
+            // CO2 Sensor
+            if (ws.sensor[i].co2.co2_init) {
+                Serial.printf("CO2: [init]\n");
+            } else {
+                Serial.printf("CO2: [%uppm]\n", ws.sensor[i].co2.co2_ppm);
+            }
+
+        }
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC) {
+            // HCHO / VOC Sensor
+            if (ws.sensor[i].voc.hcho_init) {
+                Serial.printf("HCHO: [init] ");
+            } else {
+                Serial.printf("HCHO: [%uppb] ", ws.sensor[i].voc.hcho_ppb);
+            }
+            if (ws.sensor[i].voc.voc_init) {
+                Serial.printf("VOC: [init]\n");
+            } else {
+                Serial.printf("VOC: [%u]\n", ws.sensor[i].voc.voc_level);
+            }
 
         }
         else if (ws.sensor[i].s_type == SENSOR_TYPE_SOIL) {

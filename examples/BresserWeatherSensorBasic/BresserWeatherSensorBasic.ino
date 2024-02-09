@@ -127,9 +127,9 @@ void loop()
         else if (ws.sensor[i].s_type == SENSOR_TYPE_CO2) {
             // CO2 Sensor
             if (ws.sensor[i].co2.co2_init) {
-                Serial.printf("CO2: [init] ");
+                Serial.printf("CO2: [init]\n");
             } else {
-                Serial.printf("CO2: [%uppm] ", ws.sensor[i].co2.co2_ppm);
+                Serial.printf("CO2: [%uppm]\n", ws.sensor[i].co2.co2_ppm);
             }
 
         }
@@ -141,9 +141,9 @@ void loop()
                 Serial.printf("HCHO: [%uppb] ", ws.sensor[i].voc.hcho_ppb);
             }
             if (ws.sensor[i].voc.voc_init) {
-                Serial.printf("VOC: [init] ");
+                Serial.printf("VOC: [init]\n");
             } else {
-                Serial.printf("VOC: [%u] ", ws.sensor[i].voc.voc_level);
+                Serial.printf("VOC: [%u]\n", ws.sensor[i].voc.voc_level);
             }
 
         }

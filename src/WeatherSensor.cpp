@@ -81,6 +81,9 @@
 // 20231227 Added sleep()
 // 20240116 Fixed counter width and assignment to unknown1 in decodeBresserLightningPayload()
 // 20240117 Fixed counter decoding (changed from binary to BCD) in decodeBresserLightningPayload()
+// 20240208 Added sensors for CO2, P/N 7009977 and HCHO/VOC, P/N 7009978 to 7-in-1 decoder
+//          see https://github.com/merbanan/rtl_433/pull/2815 
+//            & https://github.com/merbanan/rtl_433/pull/2817
 //
 // ToDo:
 // -
@@ -1017,7 +1020,7 @@ See https://github.com/merbanan/rtl_433/issues/1492
 Preamble:
     aa aa aa aa aa 2d d4
 Observed length depends on reset_limit.
-The data has a whitening of 0xaa.
+The data (not including STYPE, STARTUP, CH and maybe ID) has a whitening of 0xaa.
 
 Weather Center
 Data layout:
@@ -1035,7 +1038,73 @@ Air Quality Sensor PM2.5 / PM10 Sensor (PN 7009970)
 Data layout:
 DIGEST:8h8h ID?8h8h ?8h8h STYPE:4h STARTUP:1b CH:3b ?8h 4h ?4h8h4h PM_2_5:4h8h4h PM10:4h8h4h ?4h ?8h4h BATT:1b ?3b ?8h8h8h8h8h8h TRAILER:8h8h8h
 
-STYPE, STARTUP and CH are not covered by whitening. Probably also ID.
+Air Quality Sensor CO2 (PN 7009977) : issue #2813
+
+From user manual , co2 ppm is from 400 to 5000 ppm, so it's 16 bits coded.
+
+Samples :
+Raw :
+                  SType Startup & Channel
+
+                      | |
+    {207}dab6d782acd9 a 1 ad9aad9aad9aaaaaaaaaaaaaaaaae99aaaaa00 Type = 0xa = 10, Startup = 0, ch = 1
+    {207}04a9d782acd8 a 1 ad9aad9aad9aaaaaaaaaaaaaaaaae99aaaaa00 Type = 0xa = 10, Startup = 0, ch = 1
+    {207}04a9d782acd8 a 1 ad9aad9aad9aaaaaaaaaaaaaaaaae99aaaaa00 Type = 0xa = 10, Startup = 0, ch = 1
+    {207}0dd1d782b8ee a 1 ad9aad9aad9aaaaaaaaaaaaaaaaae99aaaaa00 Type = 0xa = 10, Startup = 0, ch = 1
+
+Data layout raw :
+    DIGEST:16h ID:16h 8x8x STYPE:4h STARTUP:1b CH:3d 8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x TRAILER:8x
+
+XOR / de-whitened :
+
+          0 1  2 3  4 5  6 7 8 9101112131415161718192021222324
+       DIGEST   ID  ppm                  bat
+            |    |    |                    |
+    {200}701c 7d28 0673 0b073007300730000000000000000043300000 [ XOR from g001_868.34M_1000k.cu8 co2 ppm  673]
+    {200}ae03 7d28 0672 0b073007300730000000000000000043300000 [ XOR from g001_868.34M_250k.cu8  co2 ppm  672]
+    {200}ae03 7d28 0672 0b073007300730000000000000000043300000 [ XOR from g002_868.34M_1000k.cu8 co2 ppm  672]
+    {200}a77b 7d28 1244 0b073007300730000000000000000043300000 [ XOR from g002_868.34M_250k.cu8  co2 ppm 1244]
+
+Data layout de-whitened :
+    DIGEST:16h ID:16h PPM:16h 8x8x8x8x8x8x8x8x8x8x4x BATT:1b 3x8x8x8x8x8x8x TRAILER:16x
+
+Air Quality Sensor HCHO/VOC (PN 7009978) : issue #2814
+
+From user manual , hcho ppb is from 0 to 1000 ppm, so it's 16 bits coded.
+              and voc level is from 1 (bad air quality) to 5 (good air quality), so it's 4 bits coded.
+
+Samples:
+Raw :
+                  SType Startup & Channel
+                      | |
+    {207}3f2dc4a5aaaf b 1 aaa8aaa8aaa8aaaaaaaaaaaaaaaae9feaaaa00 Type = 0xb = 11, Startup = 0, ch = 1
+    {207}0c1cc4a5aaaf b 1 aaa8aaa8aaa8aaaaaaaaaaaaaaaae9ffaaaa00 Type = 0xb = 11, Startup = 0, ch = 1
+    {207}3f2dc4a5aaaf b 1 aaa8aaa8aaa8aaaaaaaaaaaaaaaae9feaaaa00 Type = 0xb = 11, Startup = 0, ch = 1
+    {207}0c1cc4a5aaaf b 1 aaa8aaa8aaa8aaaaaaaaaaaaaaaae9ffaaaa00 Type = 0xb = 11, Startup = 0, ch = 1
+    {207}61afc4a5aaa2 b 9 aaa8aaa8aaa9aaaaaaaaaaaaaaaae9f8aaaa00 Type = 0xb = 11, Startup = 1, ch = 1
+    {207}ecddc4a5aaae b 9 aaa8aaa8aaa9aaaaaaaaaaaaaaaae9fbaaaa00 Type = 0xb = 11, Startup = 1, ch = 1
+
+Data layout raw :
+    DIGEST:16h ID:16h 8x8x STYPE:4h STARTUP:1b CH:3d 8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x8x TRAILER:8x
+
+XOR / de-whitened :
+
+          0 1  2 3  4 5  6 7 8 9101112131415161718192021 22 2324
+       DIGEST   ID  ppb                  bat            voc
+            |    |    |                    |              |
+    {200}9587 6e0f 0005 1b0002000200020000000000000000435 4 0000 [XOR from g001_868.34M_1000k.cu8 hcho_ppb 5 voc_level 4]
+    {200}a6b6 6e0f 0005 1b0002000200020000000000000000435 5 0000 [XOR from g001_868.34M_250k.cu8  hcho_ppb 5 voc_level 5]
+    {200}9587 6e0f 0005 1b0002000200020000000000000000435 4 0000 [XOR from g002_868.34M_1000k.cu8 hcho_ppb 5 voc_level 4]
+    {200}a6b6 6e0f 0005 1b0002000200020000000000000000435 5 0000 [XOR from g001_868.34M_250k.cu8  hcho_ppb 5 voc_level 5]
+    {200}cb05 6e0f 0008 130002000200030000000000000000435 2 0000 [XOR from g003_868.34M_1000k.cu8 hcho_ppb 8 voc_level 2]
+    {200}4677 6e0f 0004 130002000200030000000000000000435 1 0000 [XOR from g004_868.34M_1000k.cu8 hcho_ppb 4 voc_level 1]
+
+Data layout de-whitened :
+    DIGEST:16h ID:16h PPB:16h 8x8x8x8x8x8x8x8x8x8x4x BATT:1b 3x8x8x8x8x8x4x VOC:4h TRAILER:16x
+
+#2816 Bresser Air Quality sensors, ignore first packet:
+    The first signal is not sending the good BCD values , all at 0xF and need to be excluded from result (BCD value can't be > 9) .
+
 First two bytes are an LFSR-16 digest, generator 0x8810 key 0xba95 with a final xor 0x6df1, which likely means we got that wrong.
 */
 #ifdef BRESSER_7_IN_1
@@ -1078,26 +1147,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     if (status != DECODE_OK)
         return status;
 
-    int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
-    int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
-    int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
-    int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
-    float rain_mm = rain_raw * 0.1f;
-    int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
-    float temp_c = temp_raw * 0.1f;
     int flags = (msgw[15] & 0x0f);
     int battery_low = (flags & 0x06) == 0x06;
-    if (temp_raw > 600)
-        temp_c = (temp_raw - 1000) * 0.1f;
-    int humidity = (msgw[16] >> 4) * 10 + (msgw[16] & 0x0f);
-    int lght_raw = (msgw[17] >> 4) * 100000 + (msgw[17] & 0x0f) * 10000 + (msgw[18] >> 4) * 1000 + (msgw[18] & 0x0f) * 100 + (msgw[19] >> 4) * 10 + (msgw[19] & 0x0f);
-    int uv_raw = (msgw[20] >> 4) * 100 + (msgw[20] & 0x0f) * 10 + (msgw[21] >> 4);
-
-    float light_klx = lght_raw * 0.001f; // TODO: remove this
-    float light_lux = lght_raw;
-    float uv_index = uv_raw * 0.1f;
-    uint16_t pm_2_5 = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
-    uint16_t pm_10 = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
 
     sensor[slot].sensor_id = id_tmp;
     sensor[slot].s_type = s_type;
@@ -1110,6 +1161,23 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
 
     if (s_type == SENSOR_TYPE_WEATHER1)
     {
+        int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
+        int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
+        int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
+        int rain_raw = (msgw[10] >> 4) * 100000 + (msgw[10] & 0x0f) * 10000 + (msgw[11] >> 4) * 1000 + (msgw[11] & 0x0f) * 100 + (msgw[12] >> 4) * 10 + (msgw[12] & 0x0f) * 1; // 6 digits
+        float rain_mm = rain_raw * 0.1f;
+        int temp_raw = (msgw[14] >> 4) * 100 + (msgw[14] & 0x0f) * 10 + (msgw[15] >> 4);
+        float temp_c = temp_raw * 0.1f;
+        if (temp_raw > 600)
+            temp_c = (temp_raw - 1000) * 0.1f;
+        int humidity = (msgw[16] >> 4) * 10 + (msgw[16] & 0x0f);
+        int lght_raw = (msgw[17] >> 4) * 100000 + (msgw[17] & 0x0f) * 10000 + (msgw[18] >> 4) * 1000 + (msgw[18] & 0x0f) * 100 + (msgw[19] >> 4) * 10 + (msgw[19] & 0x0f);
+        int uv_raw = (msgw[20] >> 4) * 100 + (msgw[20] & 0x0f) * 10 + (msgw[21] >> 4);
+
+        float light_klx = lght_raw * 0.001f; // TODO: remove this
+        float light_lux = lght_raw;
+        float uv_index = uv_raw * 0.1f;
+
         // The RTL_433 decoder does not include any field to verify that these data
         // are ok, so we are assuming that they are ok if the decode status is ok.
         sensor[slot].w.temp_ok = true;
@@ -1137,8 +1205,22 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {
-        sensor[slot].pm.pm_2_5 = pm_2_5;
-        sensor[slot].pm.pm_10 = pm_10;
+        sensor[slot].pm.pm_2_5      = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
+        sensor[slot].pm.pm_10       = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
+        sensor[slot].pm.pm_2_5_init = ((msg[12] >> 4) & 0x0f) == 0x0f;
+        sensor[slot].pm.pm_10_init  = ((msg[14] >> 4) & 0x0f) == 0x0f;
+    }
+    else if (s_type == SENSOR_TYPE_CO2)
+    {
+        sensor[slot].co2.co2_ppm  = ((msg[4]& 0xf0) >> 4) * 1000 + (msg[4]& 0x0f) * 100 + ((msg[5]& 0xf0) >> 4) * 10 + (msg[5] & 0x0f);
+        sensor[slot].co2.co2_init = (msg[5] & 0x0f) == 0x0f;
+    }
+    else if (s_type == SENSOR_TYPE_HCHO_VOC)
+    {
+        sensor[slot].voc.hcho_ppb  = ((msg[4]& 0xf0) >> 4) * 1000 + (msg[4]& 0x0f) * 100 + ((msg[5]& 0xf0) >> 4) * 10 + (msg[5] & 0x0f);
+        sensor[slot].voc.voc_level = (msg[22]& 0x0f);
+        sensor[slot].voc.hcho_init = (msg[5] & 0x0f) == 0x0f;
+        sensor[slot].voc.voc_init  = msg[22] == 0x0f;
     }
 
     return DECODE_OK;

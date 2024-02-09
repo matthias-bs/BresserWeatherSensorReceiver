@@ -32,7 +32,7 @@
         PM1, PM2.5, PM4 and PM10 are in ug/m^3, numerical concentrations are in #/cm^3
 
     20240209 Matthias Prinke    Created from log_1_sec.py for passive monitoring of the
-                                SPS30 TX output in a
+                                SPS30 UART TX output in a
                                 Bresser Air Quality PM2.5/PM10 Sensor (PN 7009970).
                                 The aim is to find the actual sensor data in the payload
                                 of the 868 MHz FSK radio message.

@@ -1207,20 +1207,20 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     {
         sensor[slot].pm.pm_2_5      = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
         sensor[slot].pm.pm_10       = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
-        sensor[slot].pm.pm_2_5_init = ((msg[12] >> 4) & 0x0f) == 0x0f;
-        sensor[slot].pm.pm_10_init  = ((msg[14] >> 4) & 0x0f) == 0x0f;
+        sensor[slot].pm.pm_2_5_init = ((msgw[12] >> 4) & 0x0f) == 0x0f;
+        sensor[slot].pm.pm_10_init  = ((msgw[14] >> 4) & 0x0f) == 0x0f;
     }
     else if (s_type == SENSOR_TYPE_CO2)
     {
-        sensor[slot].co2.co2_ppm  = ((msg[4]& 0xf0) >> 4) * 1000 + (msg[4]& 0x0f) * 100 + ((msg[5]& 0xf0) >> 4) * 10 + (msg[5] & 0x0f);
-        sensor[slot].co2.co2_init = (msg[5] & 0x0f) == 0x0f;
+        sensor[slot].co2.co2_ppm  = ((msgw[4]& 0xf0) >> 4) * 1000 + (msgw[4]& 0x0f) * 100 + ((msgw[5]& 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
+        sensor[slot].co2.co2_init = (msgw[5] & 0x0f) == 0x0f;
     }
     else if (s_type == SENSOR_TYPE_HCHO_VOC)
     {
-        sensor[slot].voc.hcho_ppb  = ((msg[4]& 0xf0) >> 4) * 1000 + (msg[4]& 0x0f) * 100 + ((msg[5]& 0xf0) >> 4) * 10 + (msg[5] & 0x0f);
-        sensor[slot].voc.voc_level = (msg[22]& 0x0f);
-        sensor[slot].voc.hcho_init = (msg[5] & 0x0f) == 0x0f;
-        sensor[slot].voc.voc_init  = msg[22] == 0x0f;
+        sensor[slot].voc.hcho_ppb  = ((msgw[4]& 0xf0) >> 4) * 1000 + (msgw[4]& 0x0f) * 100 + ((msgw[5]& 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
+        sensor[slot].voc.voc_level = (msgw[22]& 0x0f);
+        sensor[slot].voc.hcho_init = (msgw[5] & 0x0f) == 0x0f;
+        sensor[slot].voc.voc_init  = msgw[22] == 0x0f;
     }
 
     return DECODE_OK;

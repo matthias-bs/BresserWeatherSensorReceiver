@@ -84,6 +84,7 @@
 // 20240208 Added sensors for CO2, P/N 7009977 and HCHO/VOC, P/N 7009978 to 7-in-1 decoder
 //          see https://github.com/merbanan/rtl_433/pull/2815 
 //            & https://github.com/merbanan/rtl_433/pull/2817
+// 20240213 Added PM1.0 to air quality (PM) sensor decoder
 //
 // ToDo:
 // -
@@ -1205,8 +1206,16 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {
+        #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+        uint16_t pn1 = (msgw[14] & 0x0f) * 1000 + (msgw[15] >> 4) * 100 + (msgw[15] & 0x0f) * 10 + (msgw[16] >> 4);
+        uint16_t pn2 = (msgw[17] >> 4) * 100 + (msgw[17] & 0x0f) * 10 + (msgw[18] >> 4);
+        uint16_t pn3 = (msgw[19] >> 4) * 100 + (msgw[19] & 0x0f) * 10 + (msgw[20] >> 4);
+        #endif
+        log_d("PN1: %04d PN2: %04d PN3: %04d", pn1, pn2, pn3);
+        sensor[slot].pm.pm_1_0      = (msgw[8] & 0x0f) * 1000 + (msgw[9] >> 4) * 100 + (msgw[9] & 0x0f) * 10 + (msgw[10] >> 4);
         sensor[slot].pm.pm_2_5      = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
         sensor[slot].pm.pm_10       = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
+        sensor[slot].pm.pm_1_0_init = ((msgw[10] >> 4) & 0x0f) == 0x0f;
         sensor[slot].pm.pm_2_5_init = ((msgw[12] >> 4) & 0x0f) == 0x0f;
         sensor[slot].pm.pm_10_init  = ((msgw[14] >> 4) & 0x0f) == 0x0f;
     }

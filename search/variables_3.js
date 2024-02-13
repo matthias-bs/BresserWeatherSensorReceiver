@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['distance_118',['distance',['../structnv_lightning__t.html#afab02b732c4f9586b9b8353a85c2a72d',1,'nvLightning_t']]],
-  ['distance_5fkm_119',['distance_km',['../struct_weather_sensor_1_1_lightning.html#a2b353ea8a3a66402349b26fde4a25008',1,'WeatherSensor::Lightning']]]
+  ['distance_120',['distance',['../structnv_lightning__t.html#afab02b732c4f9586b9b8353a85c2a72d',1,'nvLightning_t']]],
+  ['distance_5fkm_121',['distance_km',['../struct_weather_sensor_1_1_lightning.html#a2b353ea8a3a66402349b26fde4a25008',1,'WeatherSensor::Lightning']]]
 ];

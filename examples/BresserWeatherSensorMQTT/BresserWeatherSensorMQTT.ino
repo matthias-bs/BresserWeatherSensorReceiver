@@ -108,6 +108,8 @@
 // 20231228 Fixed entering sleep mode before sensor data was published
 // 20240113 Added post-processed lightning data to payload
 // 20240122 Added lightning post-processing reset
+// 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
+// 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 //
 // ToDo:
 //
@@ -589,9 +591,11 @@ void publishWeatherdata(bool complete)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
             // Air Quality (Particular Matter) Sensor
+            if (!weatherSensor.sensor[i].pm.pm_1_0_init) {
+                mqtt_payload += String(",\"pm1_0_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_1_0);
+            }
             if (!weatherSensor.sensor[i].pm.pm_2_5_init) {
                 mqtt_payload += String(",\"pm2_5_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_2_5);
-
             }
             if (!weatherSensor.sensor[i].pm.pm_10_init) {
                 mqtt_payload += String(",\"pm10_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_10);

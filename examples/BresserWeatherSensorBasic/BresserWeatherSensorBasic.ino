@@ -48,6 +48,8 @@
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231023 Modified detection of Lightning Sensor
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor decoder
+// 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
+// 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 //
 // ToDo: 
 // - 
@@ -112,6 +114,11 @@ void loop()
         }
         else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
             // Air Quality (Particular Matter) Sensor
+            if (ws.sensor[i].pm.pm_1_0_init) {
+                Serial.printf("PM1.0: [init] ");
+            } else {
+                Serial.printf("PM1.0: [%uµg/m³] ", ws.sensor[i].pm.pm_1_0);
+            }
             if (ws.sensor[i].pm.pm_2_5_init) {
                 Serial.printf("PM2.5: [init] ");
             } else {

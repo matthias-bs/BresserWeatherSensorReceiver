@@ -72,6 +72,7 @@
 // 20240207 Added sensors for CO2, P/N 7009977 and HCHO/VOC, P/N 7009978
 //          see https://github.com/merbanan/rtl_433/pull/2815 
 //            & https://github.com/merbanan/rtl_433/pull/2817
+// 20240213 Added PM1.0 to air quality (PM) sensor decoder
 //
 // ToDo:
 // -
@@ -247,8 +248,10 @@ class WeatherSensor {
         };
 
         struct AirPM {
+            uint16_t pm_1_0;                //!< air quality PM1.0 in µg/m³
             uint16_t pm_2_5;                //!< air quality PM2.5 in µg/m³
             uint16_t pm_10;                 //!< air quality PM10  in µg/m³
+            uint16_t pm_1_0_init;           //!< measurement value invalid due to initialization
             bool     pm_2_5_init;           //!< measurement value invalid due to initialization
             bool     pm_10_init;            //!< measurement value invalid due to initialization
         };

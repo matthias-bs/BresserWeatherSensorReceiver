@@ -589,9 +589,11 @@ void publishWeatherdata(bool complete)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
             // Air Quality (Particular Matter) Sensor
+            if (!weatherSensor.sensor[i].pm.pm_1_0_init) {
+                mqtt_payload += String(",\"pm1_0_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_1_0);
+            }
             if (!weatherSensor.sensor[i].pm.pm_2_5_init) {
                 mqtt_payload += String(",\"pm2_5_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_2_5);
-
             }
             if (!weatherSensor.sensor[i].pm.pm_10_init) {
                 mqtt_payload += String(",\"pm10_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_10);

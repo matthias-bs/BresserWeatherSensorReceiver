@@ -162,7 +162,7 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">//#define SENSOR_IDS_EXC { 0x792882A2 }</span></div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">// List of sensor IDs to be included - if empty, handle all available sensors</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor">#define SENSOR_IDS_INC {}</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor">#define SENSOR_IDS_INC { }</span></div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">//#define SENSOR_IDS_INC { 0x83750871 }</span></div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">// Disable data type which will not be used to save RAM</span></div>
@@ -311,8 +311,8 @@ $(document).ready(function(){initNavTree('_weather_sensor_cfg_8h_source.html',''
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;<span class="preprocessor">    #define USE_SX1276</span></div>
 <div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;<span class="preprocessor">    #pragma message(&quot;Required wiring: A to RST, B to DIO1, D to DIO0, E to CS&quot;</span>)</div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_ESP32_DEV)</span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;    <span class="comment">//#define LORAWAN_NODE</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)</span></div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;<span class="preprocessor">    #define LORAWAN_NODE</span></div>
 <div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;    <span class="comment">//#define FIREBEETLE_ESP32_COVER_LORA</span></div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
 <div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;<span class="preprocessor">    #if defined(FIREBEETLE_ESP32_COVER_LORA)</span></div>

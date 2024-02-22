@@ -76,7 +76,7 @@
 //#define SENSOR_IDS_EXC { 0x792882A2 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
+#define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // Disable data type which will not be used to save RAM
@@ -225,8 +225,8 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_ESP32_DEV)
-    //#define LORAWAN_NODE
+#elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
+    #define LORAWAN_NODE
     //#define FIREBEETLE_ESP32_COVER_LORA
 
     #if defined(FIREBEETLE_ESP32_COVER_LORA)

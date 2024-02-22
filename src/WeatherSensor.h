@@ -73,6 +73,7 @@
 //          see https://github.com/merbanan/rtl_433/pull/2815 
 //            & https://github.com/merbanan/rtl_433/pull/2817
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
+// 20240222 Added clearing of flags in clearSlots() to prevent mixing of old and new data
 //
 // ToDo:
 // -
@@ -325,6 +326,14 @@ class WeatherSensor {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
                     sensor[i].valid    = false;
                     sensor[i].complete = false;
+                }
+                if (sensor[i].s_type == SENSOR_TYPE_WEATHER1) {
+                    sensor[i].w.temp_ok = false;    
+                    sensor[i].w.humidity_ok = false;
+                    sensor[i].w.light_ok = false;   
+                    sensor[i].w.uv_ok = false;      
+                    sensor[i].w.wind_ok = false;    
+                    sensor[i].w.rain_ok = false;    
                 }
             }
         };

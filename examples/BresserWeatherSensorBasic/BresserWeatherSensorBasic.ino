@@ -65,6 +65,9 @@ WeatherSensor ws;
 
 
 void setup() {
+    #if defined(ARDUINO_M5STACK_CORE2)
+    M5.begin();
+    #endif
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 

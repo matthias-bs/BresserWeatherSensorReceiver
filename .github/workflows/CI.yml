@@ -25,6 +25,7 @@ jobs:
           - esp32:esp32:adafruit_feather_esp32s2
           - esp32:esp32:featheresp32
           - esp32:esp32:m5stack-core2
+          - esp32:esp32:m5stack-core-esp32
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
           - rp2040:rp2040:adafruit_feather:dbgport=Serial
@@ -76,7 +77,7 @@ jobs:
             # ESP32
             python -m pip install pyserial
             echo "index-url=--additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json" >> $GITHUB_OUTPUT
-            if  [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack-core2') }}" == "true" ]]; then
+            if  [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
                 echo "skip-pattern=(M5Core2).*ino" >> $GITHUB_OUTPUT
             fi
           elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then

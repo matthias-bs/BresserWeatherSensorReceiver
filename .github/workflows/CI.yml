@@ -118,7 +118,6 @@ jobs:
         if: ${{ env.run-build == 'true' }}
         run:
           |
-          arduino-cli board listall
           for example in $(find $PWD/examples -name '*.ino' | sort); do
             # check whether to skip this sketch
             if [ ! -z '${{ steps.prep.outputs.skip-pattern }}' ] && [[ ${example} =~ ${{ steps.prep.outputs.skip-pattern }} ]]; then

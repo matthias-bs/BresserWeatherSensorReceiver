@@ -25,7 +25,6 @@ jobs:
           - esp32:esp32:adafruit_feather_esp32s2
           - esp32:esp32:featheresp32
           - esp32:esp32:m5stack_core2
-          - m5stack:esp32:core2
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
           - rp2040:rp2040:adafruit_feather:dbgport=Serial

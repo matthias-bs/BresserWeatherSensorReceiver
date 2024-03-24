@@ -127,6 +127,17 @@ void
 
 int16_t WeatherSensor::begin(void)
 {
+    #if defined(ARDUINO_M5STACK_CORE2)
+    auto cfg = M5.config();
+    cfg.clear_display = true;  // default=true. clear the screen when begin.
+    cfg.output_power  = true;  // default=true. use external port 5V output.
+    cfg.internal_imu  = false;  // default=true. use internal IMU.
+    cfg.internal_rtc  = true;  // default=true. use internal RTC.
+    cfg.internal_spk  = false;  // default=true. use internal speaker.
+    cfg.internal_mic  = false;  // default=true. use internal microphone.
+    M5.begin(cfg);
+    #endif
+
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     log_d("%s Initializing ... ", RECEIVER_CHIP);

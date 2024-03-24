@@ -74,6 +74,7 @@
 //            & https://github.com/merbanan/rtl_433/pull/2817
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240222 Added clearing of flags in clearSlots() to prevent mixing of old and new data
+// 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 //
 // ToDo:
 // -
@@ -84,6 +85,9 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
+#if defined(ARDUINO_M5STACK_CORE2)
+#include <M5Unified.h>
+#endif
 #include <RadioLib.h>
 
 

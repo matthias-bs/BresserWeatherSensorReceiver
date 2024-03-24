@@ -24,6 +24,7 @@ jobs:
           - esp32:esp32:heltec_wifi_lora_32_V3
           - esp32:esp32:adafruit_feather_esp32s2
           - esp32:esp32:featheresp32
+          - esp32:esp32:m5stack_core2
           - m5stack:esp32:core2
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial

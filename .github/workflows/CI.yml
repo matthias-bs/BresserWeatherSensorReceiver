@@ -107,6 +107,7 @@ jobs:
           arduino-cli lib install Preferences@2.1.0
           arduino-cli lib install M5Unified@0.1.13
           arduino-cli lib install M5Core2@0.1.9
+          arduino-cli lib install M5GFX@0.1.14
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

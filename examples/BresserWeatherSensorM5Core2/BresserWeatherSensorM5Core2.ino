@@ -333,7 +333,7 @@ void loop()
                 static bool battery_ok;
                 y += 24;
                 M5.Lcd.setCursor(10, y);
-                if (!ws.sensor[i].w.temp_ok)
+                if (ws.sensor[i].w.temp_ok)
                 {
                     // 6-in-1 protocol - only valid in messages containing temp
                     battery_ok = ws.sensor[i].battery_ok;

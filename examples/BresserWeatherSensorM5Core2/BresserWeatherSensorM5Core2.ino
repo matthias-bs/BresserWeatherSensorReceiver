@@ -280,11 +280,11 @@ void loop()
                 M5.Lcd.setCursor(10, y);
                 if (ws.sensor[i].w.humidity_ok)
                 {
-                    M5.Lcd.printf("Hum: %3d%% ", humidity = ws.sensor[i].w.humidity);
+                    M5.Lcd.printf("Hum:     %3d%% ", humidity = ws.sensor[i].w.humidity);
                 }
                 else
                 {
-                    M5.Lcd.printf("Hum: %3d%% ", humidity);
+                    M5.Lcd.printf("Hum:     %3d%% ", humidity);
                 }
 
                 y += 24;
@@ -297,7 +297,7 @@ void loop()
 
                     y += 24;
                     M5.Lcd.setCursor(10, y);
-                    M5.Lcd.printf("Wdir: %5.1fdeg",
+                    M5.Lcd.printf("Wdir:  %5.1fdeg",
                                   ws.sensor[i].w.wind_direction_deg);
                 }
                 else
@@ -305,7 +305,7 @@ void loop()
                     M5.Lcd.printf("Wmx: --.-m/s Wav: --.-m/s");
                     y += 22;
                     M5.Lcd.setCursor(10, y);
-                    M5.Lcd.printf("Wdir: ---.-deg");
+                    M5.Lcd.printf("Wdir:  ---.-deg");
                 }
 
                 y += 24;
@@ -313,12 +313,12 @@ void loop()
                 static float rain_mm;
                 if (ws.sensor[i].w.rain_ok)
                 {
-                    M5.Lcd.printf("Rain: %7.1fmm ",
+                    M5.Lcd.printf("Rain:%7.1fmm ",
                                   rain_mm = ws.sensor[i].w.rain_mm);
                 }
                 else
                 {
-                    M5.Lcd.printf("Rain: %7.1fmm ",
+                    M5.Lcd.printf("Rain:%7.1fmm ",
                                   rain_mm);
                 }
 

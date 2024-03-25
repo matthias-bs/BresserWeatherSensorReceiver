@@ -433,7 +433,7 @@ void publishWeatherdata(void)
     {
         rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
         
-        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 1);
+        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 0);
         domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
         domo2_payload += String("\"}");
         Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());

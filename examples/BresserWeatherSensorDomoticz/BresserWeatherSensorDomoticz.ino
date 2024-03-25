@@ -73,7 +73,7 @@
 // 20230124 Improved WiFi connection robustness
 // 20231028 Refactored struct Sensor
 //          Changed MQTT payload and topic from char[] to String
-// 20240424 domoticz virtual rain sensor: added hourly rain rate
+// 20240325 domoticz virtual rain sensor: added hourly rain rate
 //
 // ToDo:
 //

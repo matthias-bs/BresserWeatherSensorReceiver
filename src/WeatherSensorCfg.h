@@ -224,7 +224,7 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_M5STACK_CORE2)
-    #pragma message("ARDUINO_FM5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
+    #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
     #define USE_SX1276
     #pragma message("Required wiring: DIO1 to GPIO35")
 

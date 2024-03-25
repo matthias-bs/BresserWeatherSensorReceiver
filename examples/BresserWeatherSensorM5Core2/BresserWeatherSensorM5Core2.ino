@@ -322,6 +322,7 @@ void loop()
                                   rain_mm);
                 }
 
+                M5.Lcd.setTextColor(DARKGREY);
                 y = 195;
                 M5.Lcd.setCursor(10, y);
                 M5.Lcd.printf("Id: %8X Typ: %X Ch: %d",

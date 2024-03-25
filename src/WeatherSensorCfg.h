@@ -502,7 +502,7 @@
     #define PIN_RECEIVER_RST  27
 
 #elif defined(ARDUINO_M5STACK_CORE2)
-    // Use pinning for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
+    // Use pinning for M5Stack Core2 with M5Stack Module LoRa868
     #define PIN_RECEIVER_CS   33
 
     // CC1101: GDO0 / RFM95W/SX127x: G0

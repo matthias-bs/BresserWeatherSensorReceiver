@@ -36,6 +36,7 @@
 // History:
 //
 // 20240324 Created from BresserWeatherSensorBasic.ino
+// 20240325 Fake missing degree sign with small 'o', print only weather sensor data on LCD
 //
 // Notes:
 // - The character set does not provide a degrees sign
@@ -87,11 +88,14 @@ void loop()
 
     if (decode_status == DECODE_OK)
     {
-        M5.Lcd.fillScreen(WHITE); // Set the screen background.
-        M5.Lcd.setCursor(10, y);
-        M5.Lcd.setTextColor(BLUE); // Set the font color
-        M5.Lcd.printf("Weather Sensor Receiver");
-        M5.Lcd.setTextColor(BLACK); // Set the font color
+        if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
+        {
+            M5.Lcd.fillScreen(WHITE); // Set the screen background.
+            M5.Lcd.setCursor(10, y);
+            M5.Lcd.setTextColor(BLUE); // Set the font color
+            M5.Lcd.printf("Weather Sensor Receiver");
+            M5.Lcd.setTextColor(BLACK); // Set the font color
+        }
 
         Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
                       static_cast<int>(ws.sensor[i].sensor_id),
@@ -250,83 +254,95 @@ void loop()
 #endif
             Serial.printf("\n");
 
-            y += 30;
-            M5.Lcd.setTextSize(3); // Set the font size
-            M5.Lcd.setCursor(10, y);
-            static float temp_c;
-            static uint8_t humidity;
-            if (ws.sensor[i].w.temp_ok)
+            if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
             {
-                M5.Lcd.printf("Temp: %5.1f'C", temp_c = ws.sensor[i].w.temp_c);
-            }
-            else
-            {
-                M5.Lcd.printf("Temp: %5.1f'C", temp_c);
-            }
-            y += 34;
-            M5.Lcd.setTextSize(2);
-            M5.Lcd.setCursor(10, y);
-            if (ws.sensor[i].w.humidity_ok)
-            {
-                M5.Lcd.printf("Hum: %3d%% ", humidity = ws.sensor[i].w.humidity);
-            }
-            else
-            {
-                M5.Lcd.printf("Hum: %3d%% ", humidity);
-            }
+                y += 30;
+                M5.Lcd.setTextSize(3); // Set the font size
+                M5.Lcd.setCursor(10, y);
+                static float temp_c;
+                static uint8_t humidity;
+                if (ws.sensor[i].w.temp_ok)
+                {
+                    M5.Lcd.printf("Temp: %5.1f", temp_c = ws.sensor[i].w.temp_c);
+                }
+                else
+                {
+                    M5.Lcd.printf("Temp: %5.1f", temp_c);
+                }
+                // Fake degrees sign which is not available in character set :-(
+                M5.Lcd.setTextSize(1);
+                M5.Lcd.printf("o");
+                M5.Lcd.setTextSize(3);
+                M5.Lcd.printf("C");
 
-            y += 24;
-            M5.Lcd.setCursor(10, y);
-            if (ws.sensor[i].w.wind_ok)
-            {
-                M5.Lcd.printf("Wmx: %4.1fm/s Wav: %4.1fm/s",
-                              ws.sensor[i].w.wind_gust_meter_sec,
-                              ws.sensor[i].w.wind_avg_meter_sec);
+                y += 34;
+                M5.Lcd.setTextSize(2);
+                M5.Lcd.setCursor(10, y);
+                if (ws.sensor[i].w.humidity_ok)
+                {
+                    M5.Lcd.printf("Hum: %3d%% ", humidity = ws.sensor[i].w.humidity);
+                }
+                else
+                {
+                    M5.Lcd.printf("Hum: %3d%% ", humidity);
+                }
 
                 y += 24;
                 M5.Lcd.setCursor(10, y);
-                M5.Lcd.printf("Wdir: %5.1fdeg",
-                              ws.sensor[i].w.wind_direction_deg);
-            }
-            else
-            {
-                M5.Lcd.printf("Wmx: --.-m/s Wav: --.-m/s");
-                y += 22;
+                if (ws.sensor[i].w.wind_ok)
+                {
+                    M5.Lcd.printf("Wmx: %4.1fm/s Wav: %4.1fm/s",
+                                  ws.sensor[i].w.wind_gust_meter_sec,
+                                  ws.sensor[i].w.wind_avg_meter_sec);
+
+                    y += 24;
+                    M5.Lcd.setCursor(10, y);
+                    M5.Lcd.printf("Wdir: %5.1fdeg",
+                                  ws.sensor[i].w.wind_direction_deg);
+                }
+                else
+                {
+                    M5.Lcd.printf("Wmx: --.-m/s Wav: --.-m/s");
+                    y += 22;
+                    M5.Lcd.setCursor(10, y);
+                    M5.Lcd.printf("Wdir: ---.-deg");
+                }
+
+                y += 24;
                 M5.Lcd.setCursor(10, y);
-                M5.Lcd.printf("Wdir: ---.-deg");
-            }
+                static float rain_mm;
+                if (ws.sensor[i].w.rain_ok)
+                {
+                    M5.Lcd.printf("Rain: %7.1fmm ",
+                                  rain_mm = ws.sensor[i].w.rain_mm);
+                }
+                else
+                {
+                    M5.Lcd.printf("Rain: %7.1fmm ",
+                                  rain_mm);
+                }
 
-            y += 24;
-            M5.Lcd.setCursor(10, y);
-            static float rain_mm;
-            if (ws.sensor[i].w.rain_ok)
-            {
-                M5.Lcd.printf("Rain: %7.1fmm ",
-                              rain_mm = ws.sensor[i].w.rain_mm);
-            } else {
-                M5.Lcd.printf("Rain: %7.1fmm ",
-                              rain_mm);
-            }
-        }
-        y += 35;
-        M5.Lcd.setCursor(10, y);
-        M5.Lcd.printf("Id: %8X Typ: %X Ch: %d",
-                      static_cast<int>(ws.sensor[i].sensor_id),
-                      ws.sensor[i].s_type,
-                      ws.sensor[i].chan);
+                y = 195;
+                M5.Lcd.setCursor(10, y);
+                M5.Lcd.printf("Id: %8X Typ: %X Ch: %d",
+                              static_cast<int>(ws.sensor[i].sensor_id),
+                              ws.sensor[i].s_type,
+                              ws.sensor[i].chan);
 
-        y += 24;
-        static bool battery_ok;
-        M5.Lcd.setCursor(10, y);
-        if (!ws.sensor[i].w.temp_ok)
-        {
-            // 6-in-1 protocol - only valid in messages containing temp
-            battery_ok = ws.sensor[i].battery_ok;
-        }
-        M5.Lcd.printf("S: %u B: %u RSSI: %6.1fdBm",
-                      ws.sensor[i].startup,
-                      battery_ok,
-                      ws.sensor[i].rssi);
+                static bool battery_ok;
+                y += 24;
+                M5.Lcd.setCursor(10, y);
+                if (!ws.sensor[i].w.temp_ok)
+                {
+                    // 6-in-1 protocol - only valid in messages containing temp
+                    battery_ok = ws.sensor[i].battery_ok;
+                }
+                M5.Lcd.printf("S: %u B: %u RSSI: %6.1fdBm",
+                              ws.sensor[i].startup,
+                              battery_ok,
+                              ws.sensor[i].rssi);
+            } // if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
+        } // weather-like sensor
 
     } // if (decode_status == DECODE_OK)
     delay(100);

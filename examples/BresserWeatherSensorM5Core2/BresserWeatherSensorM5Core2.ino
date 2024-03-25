@@ -49,7 +49,6 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
-extern m5::M5Unified M5;
 WeatherSensor ws;
 
 void setup()

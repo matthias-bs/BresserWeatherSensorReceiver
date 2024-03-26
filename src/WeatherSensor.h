@@ -85,7 +85,8 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
-#if defined(ARDUINO_M5STACK_CORE2)
+#if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+// Note: Depending on the environment, both variants are used!
 #include <M5Unified.h>
 #endif
 #include <RadioLib.h>

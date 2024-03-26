@@ -127,7 +127,8 @@ void
 
 int16_t WeatherSensor::begin(void)
 {
-    #if defined(ARDUINO_M5STACK_CORE2)
+    #if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+    // Note: Depending on the environment, both variants are used!
     auto cfg = M5.config();
     cfg.clear_display = true;  // default=true. clear the screen when begin.
     cfg.output_power  = true;  // default=true. use external port 5V output.

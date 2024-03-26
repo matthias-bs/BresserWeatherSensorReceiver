@@ -223,7 +223,8 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_M5STACK_CORE2)
+#elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+    // Note: Depending on the environment, both variants are used!
     #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
     #define USE_SX1276
     #pragma message("Required wiring: DIO1 to GPIO35")
@@ -501,7 +502,8 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  27
 
-#elif defined(ARDUINO_M5STACK_CORE2)
+#elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+    // Note: Depending on the environment, both variants are used!
     // Use pinning for M5Stack Core2 with M5Stack Module LoRa868
     #define PIN_RECEIVER_CS   33
 

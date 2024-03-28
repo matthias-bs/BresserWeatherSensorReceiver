@@ -118,6 +118,8 @@ jobs:
           pwd
           cd /home/runner
           find . -name boards.txt
+          grep ttgo-lora32.menu.Revision.TTGO_LoRa32_V2 ./.arduino15/packages/esp32/hardware/esp32/2.0.14/boards.txt
+          grep m5stack_core2 boards.txt ./.arduino15/packages/esp32/hardware/esp32/2.0.14/boards.txt
           
       - name: Checkout repository
         if: ${{ env.run-build == 'true' }}

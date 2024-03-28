@@ -116,6 +116,7 @@ jobs:
           arduino-cli core update-index ${{ format('{0}', steps.prep.outputs.index-url) }}
           arduino-cli core install ${{ format('{0}:{1} {2}', steps.split.outputs._0, steps.split.outputs._1, steps.prep.outputs.index-url) }}
           pwd
+          cd /home/runner
           find . -name boards.txt
           
       - name: Checkout repository

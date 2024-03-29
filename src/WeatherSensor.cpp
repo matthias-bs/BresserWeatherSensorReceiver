@@ -85,6 +85,7 @@
 //          see https://github.com/merbanan/rtl_433/pull/2815 
 //            & https://github.com/merbanan/rtl_433/pull/2817
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
+// 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 //
 // ToDo:
 // -

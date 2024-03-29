@@ -503,7 +503,8 @@
     #define PIN_RECEIVER_RST  27
 
 #elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-    // Note: Depending on the environment, both variants are used!
+    // Note: Depending on board package file date, either variant is used - 
+    //       see https://github.com/espressif/arduino-esp32/issues/9423!
     // Use pinning for M5Stack Core2 with M5Stack Module LoRa868
     #define PIN_RECEIVER_CS   33
 

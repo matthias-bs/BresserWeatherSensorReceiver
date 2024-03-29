@@ -52,6 +52,10 @@
 // 20231121 Added Heltec WiFi LoRa32 V3
 // 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
 //          for negative temperatures by fix (6-in-1 decoder)
+// 20231227 Added RAINGAUGE_USE_PREFS and LIGHTNING_USE_PREFS
+// 20240122 Modified for unit testing
+// 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
+// 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 //
 // ToDo:
 // -
@@ -73,7 +77,7 @@
 //#define SENSOR_IDS_EXC { 0x792882A2 }
 
 // List of sensor IDs to be included - if empty, handle all available sensors
-#define SENSOR_IDS_INC {}
+#define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // Disable data type which will not be used to save RAM
@@ -93,21 +97,20 @@
 // --- Rain Gauge / Lightning sensor data retention during deep sleep ---
 // ------------------------------------------------------------------------------------------------
 
-//#define RAINGAUGE_OLD // Use old implementation
-
-#if defined(ESP32)
-    // Option: Comment out to save data in RTC RAM
-    // N.B.:
-    // ESP8266 has RTC RAM, too, but access is different from ESP32
-    // and currently not implemented here
-    #define RAINGAUGE_USE_PREFS
-    #define LIGHTNING_USE_PREFS
-#else
-    // Using Preferences is mandatory on other architectures (e.g. RP2040)
-    #define RAINGAUGE_USE_PREFS
-    #define LIGHTNING_USE_PREFS
+#if !defined(INSIDE_UNITTEST)
+    #if defined(ESP32)
+        // Option: Comment out to save data in RTC RAM
+        // N.B.:
+        // ESP8266 has RTC RAM, too, but access is different from ESP32
+        // and currently not implemented here
+        #define RAINGAUGE_USE_PREFS
+        #define LIGHTNING_USE_PREFS
+    #else
+        // Using Preferences is mandatory on other architectures (e.g. RP2040)
+        #define RAINGAUGE_USE_PREFS
+        #define LIGHTNING_USE_PREFS
+    #endif
 #endif
-
 
 // ------------------------------------------------------------------------------------------------
 // --- Board ---
@@ -170,6 +173,12 @@
 // This define (not very specific...) is set by selecting "FireBeetle-ESP32" in the Arduino IDE:
 //#define ARDUINO_ESP32_DEV
 
+// M5Stack Core2
+// https://github.com/espressif/arduino-esp32/blob/master/variants/m5stack_core2/pins_arduino.h
+//
+// This define is set by selecting "M5Core2" in the Arduino IDE
+//#define ARDUINO_M5STACK_CORE2
+
 #if defined(ARDUINO_TTGO_LoRa32_V1)
     #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
     #define USE_SX1276
@@ -189,6 +198,14 @@
     //#define USE_SX1276 // Heltec Wireless Stick V2
     #define USE_SX1262 // Heltec Wireless Stick V3
 
+#elif defined(ARDUINO_heltec_wireless_stick_v2)
+    #pragma message("ARDUINO_heltec_wireless_stick_v2 defined; using on-board transceiver")
+    #define USE_SX1276
+
+#elif defined(ARDUINO_heltec_wireless_stick_v3)
+    #pragma message("ARDUINO_heltec_wireless_stick_v3 defined; using on-board transceiver")
+    #define USE_SX1262
+
 #elif defined(ARDUINO_heltec_wifi_lora_32_V2)
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
@@ -206,6 +223,12 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
+#elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+    // Note: Depending on the environment, both variants are used!
+    #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
+    #define USE_SX1276
+    #pragma message("Required wiring: DIO1 to GPIO35")
+
 #elif defined(ARDUINO_AVR_FEATHER32U4)
     #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
     #define USE_SX1276
@@ -215,7 +238,7 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_ESP32_DEV)
+#elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
     //#define LORAWAN_NODE
     #define FIREBEETLE_ESP32_COVER_LORA
 
@@ -229,8 +252,8 @@
         #define USE_SX1276
 
     #else
-        #pragma message("ARDUINO_ESP32_DEV defined; select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
-        
+        #pragma message("ARDUINO_ESP32_DEV defined; if you use one of those boards, select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+
     #endif
 #endif
 
@@ -478,6 +501,21 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  27
+
+#elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+    // Note: Depending on board package file date, either variant is used - 
+    //       see https://github.com/espressif/arduino-esp32/issues/9423!
+    // Use pinning for M5Stack Core2 with M5Stack Module LoRa868
+    #define PIN_RECEIVER_CS   33
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  36
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 35
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  26
 
 #elif defined(ESP32)
     // Generic pinning for ESP32 development boards

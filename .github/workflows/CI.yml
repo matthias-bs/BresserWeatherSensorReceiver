@@ -25,9 +25,9 @@ jobs:
           - esp32:esp32:adafruit_feather_esp32s2
           - esp32:esp32:featheresp32
           - esp32:esp32:m5stack-core2
-          #- esp8266:esp8266:generic:dbg=Disabled
-          #- esp8266:esp8266:generic:dbg=Serial
-          #- rp2040:rp2040:adafruit_feather:dbgport=Serial
+          - esp8266:esp8266:generic:dbg=Disabled
+          - esp8266:esp8266:generic:dbg=Serial
+          - rp2040:rp2040:adafruit_feather:dbgport=Serial
           
 
 
@@ -105,6 +105,7 @@ jobs:
           arduino-cli lib install WiFiManager@2.0.17
           arduino-cli lib install ESP_DoubleResetDetector@1.3.2
           arduino-cli lib install Preferences@2.1.0
+          # The following libs are only needed for M5Stack Core2
           arduino-cli lib install M5Unified@0.1.13
           arduino-cli lib install M5Core2@0.1.9
           arduino-cli lib install M5GFX@0.1.14
@@ -115,12 +116,6 @@ jobs:
           |
           arduino-cli core update-index ${{ format('{0}', steps.prep.outputs.index-url) }}
           arduino-cli core install ${{ format('{0}:{1} {2}', steps.split.outputs._0, steps.split.outputs._1, steps.prep.outputs.index-url) }}
-          pwd
-          cd /home/runner
-          find . -name boards.txt
-          grep ttgo-lora32.menu.Revision.TTGO_LoRa32_V2 ./.arduino15/packages/esp32/hardware/esp32/2.0.14/boards.txt
-          grep m5stack_core2 ./.arduino15/packages/esp32/hardware/esp32/2.0.14/boards.txt
-          grep m5stack-core2 ./.arduino15/packages/esp32/hardware/esp32/2.0.14/boards.txt
           
       - name: Checkout repository
         if: ${{ env.run-build == 'true' }}

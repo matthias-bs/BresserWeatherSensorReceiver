@@ -224,7 +224,8 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-    // Note: Depending on the environment, both variants are used!
+    // Note: Depending on board package file date, either variant is used - 
+    //       see https://github.com/espressif/arduino-esp32/issues/9423!
     #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
     #define USE_SX1276
     #pragma message("Required wiring: DIO1 to GPIO35")

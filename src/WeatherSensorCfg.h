@@ -218,6 +218,11 @@
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
 
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32_V2)
+    #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32_V2 defined; assuming RFM95W FeatherWing will be used")
+    #define USE_SX1276
+    #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
+
 #elif defined(ARDUINO_FEATHER_ESP32)
     #pragma message("ARDUINO_FEATHER_ESP32 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
@@ -489,6 +494,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  9
+
+#elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32_V2)
+    // Use pinning for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232
+    #define PIN_RECEIVER_CS   14
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  32
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 33
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  27
 
 #elif defined(ARDUINO_FEATHER_ESP32)
     // Use pinning for Adafruit Feather ESP32 with RFM95W "FeatherWing" ADA3232

@@ -245,8 +245,8 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    #define LORAWAN_NODE
-    //#define FIREBEETLE_ESP32_COVER_LORA
+    //#define LORAWAN_NODE
+    #define FIREBEETLE_ESP32_COVER_LORA
 
     #if defined(FIREBEETLE_ESP32_COVER_LORA)
         #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")

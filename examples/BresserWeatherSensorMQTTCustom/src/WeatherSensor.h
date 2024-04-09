@@ -75,6 +75,7 @@
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240222 Added clearing of flags in clearSlots() to prevent mixing of old and new data
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
+// 20240409 Added radioReset()
 //
 // ToDo:
 // -
@@ -167,6 +168,11 @@ class WeatherSensor {
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
         int16_t begin(void);
+
+        /*!
+        \brief Reset radio transceiver
+        */
+        void radioReset(void);
 
         /*!
         \brief Set transceiver into sleep mode

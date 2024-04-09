@@ -86,6 +86,7 @@
 //            & https://github.com/merbanan/rtl_433/pull/2817
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
+// 20240409 Added radioReset()
 //
 // ToDo:
 // -
@@ -218,6 +219,11 @@ int16_t WeatherSensor::begin(void)
     }
 
     return state;
+}
+
+void WeatherSensor::radioReset(void)
+{
+    radio.reset();
 }
 
 void WeatherSensor::sleep(void)

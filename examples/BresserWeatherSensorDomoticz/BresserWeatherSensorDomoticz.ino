@@ -73,6 +73,7 @@
 // 20230124 Improved WiFi connection robustness
 // 20231028 Refactored struct Sensor
 //          Changed MQTT payload and topic from char[] to String
+// 20240325 domoticz virtual rain sensor: added hourly rain rate
 //
 // ToDo:
 //
@@ -142,6 +143,7 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
+#include "RainGauge.h"
 
 const char sketch_id[] = "BresserWeatherSensorDomoticz 20231028";
 
@@ -229,6 +231,7 @@ static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:9
 #endif
 
 WeatherSensor weatherSensor;
+RainGauge rainGauge;
 
 // MQTT topics
 const char MQTT_PUB_STATUS[] = "/status";
@@ -428,7 +431,9 @@ void publishWeatherdata(void)
     // domoticz virtual rain sensor
     if (weatherSensor.sensor[i].w.rain_ok)
     {
-        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(weatherSensor.sensor[i].w.rain_mm * 100, 1);
+        rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
+        
+        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 0);
         domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
         domo2_payload += String("\"}");
         Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());

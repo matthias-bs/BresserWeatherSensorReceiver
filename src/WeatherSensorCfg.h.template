@@ -185,7 +185,7 @@
 
 #elif defined(ARDUINO_TTGO_LoRa32_V2)
     #pragma message("ARDUINO_TTGO_LoRa32_V2 defined; using on-board transceiver")
-    #pragma message("LoRa DIO1 must be wired to GPIO33 manually!")
+    #pragma message("Wiring required for LMIC: DIO1 to GPIO33")
     #define USE_SX1276
 
 #elif defined(ARDUINO_TTGO_LoRa32_v21new)
@@ -226,7 +226,7 @@
 #elif defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
     #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
     #define USE_SX1276
-    #pragma message("Required wiring: DIO1 to GPIO35")
+    #pragma message("Wiring required for LMIC: DIO1 to GPIO35")
 
 #elif defined(ARDUINO_AVR_FEATHER32U4)
     #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")

@@ -240,7 +240,7 @@
     #define USE_SX1276
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
-    #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming assuming RFM95W FeatherWing will be used")
+    #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 

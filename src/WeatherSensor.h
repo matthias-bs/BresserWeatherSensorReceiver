@@ -90,6 +90,10 @@
 // Note: Depending on the environment, both variants are used!
 #include <M5Unified.h>
 #endif
+#if defined(ARDUINO_ESP32S3_POWERFEATHER)
+#include <PowerFeather.h>
+using namespace PowerFeather;
+#endif
 #include <RadioLib.h>
 
 

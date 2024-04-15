@@ -140,6 +140,9 @@ int16_t WeatherSensor::begin(void)
     cfg.internal_mic  = false;  // default=true. use internal microphone.
     M5.begin(cfg);
     #endif
+    #if defined(ARDUINO_ESP32S3_POWERFEATHER)
+    Board.init();
+    #endif
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud

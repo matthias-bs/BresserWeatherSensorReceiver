@@ -25,6 +25,7 @@ jobs:
           - esp32:esp32:adafruit_feather_esp32s2
           - esp32:esp32:featheresp32
           - esp32:esp32:m5stack-core2
+          - esp32:esp32:esp32s3_powerfeather
           - esp8266:esp8266:generic:dbg=Disabled
           - esp8266:esp8266:generic:dbg=Serial
           - rp2040:rp2040:adafruit_feather:dbgport=Serial
@@ -109,6 +110,8 @@ jobs:
           arduino-cli lib install M5Unified@0.1.13
           arduino-cli lib install M5Core2@0.1.9
           arduino-cli lib install M5GFX@0.1.14
+          # Only ESP32-S3 PowerFeather
+          arduino-cli lib install powerfeather-sdk@1.0.5
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

@@ -56,6 +56,7 @@
 // 20240122 Modified for unit testing
 // 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
+// 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
 //
 // ToDo:
 // -
@@ -70,7 +71,7 @@
 // ------------------------------------------------------------------------------------------------
 // --- Weather Sensors ---
 // ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     4       // Number of sensors to be received
+#define NUM_SENSORS     1       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC { 0x792882A2 }

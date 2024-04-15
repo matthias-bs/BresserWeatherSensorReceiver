@@ -70,7 +70,7 @@
 // ------------------------------------------------------------------------------------------------
 // --- Weather Sensors ---
 // ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
+#define NUM_SENSORS     4       // Number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC { 0x792882A2 }
@@ -234,6 +234,11 @@
     #pragma message("ARDUINO_M5STACK_CORE2 defined; assuming M5Stack Module LoRa868 will be used")
     #define USE_SX1276
     #pragma message("Wiring required for LMIC: DIO1 to GPIO35")
+
+#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
+    #pragma message("ARDUINO_ESP32S3_POWERFEATHER defined; assuming RFM95W FeatherWing will be used")
+    #define USE_SX1276
+    #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_AVR_FEATHER32U4)
     #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
@@ -535,6 +540,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  26
+
+#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
+    // Use pinning for ESP32-S3 PowerFeather with RFM95W "FeatherWing" ADA3232
+    #define PIN_RECEIVER_CS   15
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  16
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 18
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  45
 
 #elif defined(ESP32)
     // Generic pinning for ESP32 development boards

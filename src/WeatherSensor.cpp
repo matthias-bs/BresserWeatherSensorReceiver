@@ -87,6 +87,7 @@
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
+// 20240416 Added enabling of 3.3V power supply for FeatherWing on ESP32-S3 PowerFeather
 //
 // ToDo:
 // -
@@ -142,6 +143,9 @@ int16_t WeatherSensor::begin(void)
     #endif
     #if defined(ARDUINO_ESP32S3_POWERFEATHER)
     Board.init();
+
+    // Enable power supply for Adafruit LoRa Radio FeatherWing
+    Board.enable3V3(true); 
     #endif
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445

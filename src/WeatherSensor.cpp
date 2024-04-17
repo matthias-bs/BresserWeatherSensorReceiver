@@ -87,6 +87,7 @@
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
+// 20240416 Added enabling of 3.3V power supply for FeatherWing on ESP32-S3 PowerFeather
 // 20240417 Added sensor configuration at run time
 //
 // ToDo:
@@ -137,6 +138,7 @@ int16_t WeatherSensor::begin(void)
 #endif
 #if defined(ARDUINO_ESP32S3_POWERFEATHER)
     Board.init();
+    // Enable power supply for Adafruit LoRa Radio FeatherWing
     Board.enable3V3(true);
 #endif
 
@@ -144,7 +146,7 @@ int16_t WeatherSensor::begin(void)
     uint32_t const sensor_ids_exc_def[] = SENSOR_IDS_EXC;
     initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
 
-    // List of sensor IDs to be included - if empty, handle all available sensors
+    // List of sensor IDs to be included - if zero, handle all available sensors
     uint32_t const sensor_ids_inc_def[] = SENSOR_IDS_INC;
     initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
 

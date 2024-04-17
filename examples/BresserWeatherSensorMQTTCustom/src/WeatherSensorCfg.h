@@ -57,7 +57,7 @@
 // 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
-// 20240417 BREAKING CHANGE: Empty SENSOR_IDS_INC must contain zero!
+// 20240417 Modified SENSOR_IDS_INC
 //
 // ToDo:
 // -

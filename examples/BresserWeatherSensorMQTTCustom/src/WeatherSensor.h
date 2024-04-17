@@ -422,13 +422,13 @@ class WeatherSensor {
         /*!
          * Initialize list from Preferences or array
          *
-         * The array will be used if there is no entry from Preferences
+         * The default list will be used if there is no entry from Preferences
          * 
          * \param list list of sensor IDs
-         * \param array array of sensor IDs
+         * \param list_def default list of sensor IDs
          * \param key keyword in Preferences
          */
-        void initList(std::vector<uint32_t> &list, const uint32_t *array, const char *key);
+        void initList(std::vector<uint32_t> &list, const std::vector<uint32_t> list_def, const char *key);
 
         /*!
          * \brief Find slot in sensor data array

@@ -57,7 +57,7 @@
 // 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
-// 20240417 BREAKING CHANGE: Empty SENSOR_IDS_INC must contain zero!
+// 20240417 Modified SENSOR_IDS_INC
 //
 // ToDo:
 // -
@@ -78,8 +78,8 @@
 #define SENSOR_IDS_EXC { 0x792882A2 }
 //#define SENSOR_IDS_EXC { 0x792882A2 }
 
-// List of sensor IDs to be included - if zero, handle all available sensors
-#define SENSOR_IDS_INC { 0 }
+// List of sensor IDs to be included - if empty, handle all available sensors
+#define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
 // Disable data type which will not be used to save RAM

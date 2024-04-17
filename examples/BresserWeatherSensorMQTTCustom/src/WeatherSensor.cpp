@@ -87,6 +87,7 @@
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
+// 20240416 Added enabling of 3.3V power supply for FeatherWing on ESP32-S3 PowerFeather
 // 20240417 Added sensor configuration at run time
 //
 // ToDo:
@@ -137,15 +138,16 @@ int16_t WeatherSensor::begin(void)
 #endif
 #if defined(ARDUINO_ESP32S3_POWERFEATHER)
     Board.init();
+    // Enable power supply for Adafruit LoRa Radio FeatherWing
     Board.enable3V3(true);
 #endif
 
     // List of sensor IDs to be excluded - can be empty
-    uint32_t const sensor_ids_exc_def[] = SENSOR_IDS_EXC;
+    std::vector<uint32_t> sensor_ids_exc_def = SENSOR_IDS_EXC;
     initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
 
-    // List of sensor IDs to be included - if empty, handle all available sensors
-    uint32_t const sensor_ids_inc_def[] = SENSOR_IDS_INC;
+    // List of sensor IDs to be included - if zero, handle all available sensors
+    std::vector<uint32_t> sensor_ids_inc_def = SENSOR_IDS_INC;
     initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
@@ -570,7 +572,7 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
 }
 
 // Initialize list of sensor IDs
-void WeatherSensor::initList(std::vector<uint32_t> &list, const uint32_t *array, const char *key)
+void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint32_t> list_def, const char *key)
 {   
     list.clear();
     cfgPrefs.begin("BWS-CFG", false);
@@ -592,13 +594,7 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const uint32_t *array,
     else
     {
         log_d("Using sensor_ids_%s list from WeatherSensorCfg.h:", key);
-        if (sizeof(array) > 0 && (array[0] != 0))
-        {
-            for (size_t i = 0; i < sizeof(array) / sizeof(array[0]); i++)
-            {
-                list.push_back(array[i]);
-            }
-        }
+        list = list_def;
     }
     cfgPrefs.end();
 

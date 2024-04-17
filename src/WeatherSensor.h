@@ -76,6 +76,7 @@
 // 20240222 Added clearing of flags in clearSlots() to prevent mixing of old and new data
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
+// 20240417 Added sensor configuration at run time
 //
 // ToDo:
 // -
@@ -86,6 +87,8 @@
 #define WeatherSensor_h
 
 #include <Arduino.h>
+#include <vector>
+#include <Preferences.h>
 #if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
 // Note: Depending on the environment, both variants are used!
 #include <M5Unified.h>
@@ -165,6 +168,11 @@ typedef struct SensorMap {
   Uses CC1101 or SX1276 radio module for receiving FSK modulated signal at 868 MHz.
 */
 class WeatherSensor {
+    private:
+        Preferences cfgPrefs; //!< Preferences (stored in flash memory)
+        std::vector<uint32_t> sensor_ids_inc;
+        std::vector<uint32_t> sensor_ids_exc;
+
     public:
         /*!
         \brief Presence check and initialization of radio module.
@@ -324,7 +332,7 @@ class WeatherSensor {
 
         \returns Always true (for compatibility with getMessage())
         */
-        bool    genMessage(int i, uint32_t id = 0xff, uint8_t s_type = 1, uint8_t channel = 0, uint8_t startup = 0);
+        bool genMessage(int i, uint32_t id = 0xff, uint8_t s_type = 1, uint8_t channel = 0, uint8_t startup = 0);
 
 
          /*!
@@ -373,8 +381,54 @@ class WeatherSensor {
          */
         int findType(uint8_t type, uint8_t channel = 0xFF);
         
+        /*!
+         * Set sensors include list in Preferences
+         *
+         * \param bytes sensor IDs
+         * \param size buffer size in bytes
+         */
+        void setSensorsInc(uint8_t *bytes, uint8_t size);
+
+        /*!
+         * Set sensors include list in Preferences
+         *
+         * \param bytes sensor IDs
+         * \param size buffer size in bytes
+         */
+        void setSensorsExc(uint8_t *bytes, uint8_t size);
+
+
+        /*!
+         * Get sensors include list from Preferences
+         *
+         * \param payload buffer for storing sensor IDs
+         *
+         * \returns size size in bytes
+         */
+        uint8_t getSensorsInc(uint8_t *payload);
+
+        /*!
+         * Get sensors exclude list from Preferences
+         *
+         * \param payload buffer for storing sensor IDs
+         *
+         * \returns size size in bytes
+         */
+        uint8_t getSensorsExc(uint8_t *payload);
+
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array
+
+        /*!
+         * Initialize list from Preferences or array
+         *
+         * The default list will be used if there is no entry from Preferences
+         * 
+         * \param list list of sensor IDs
+         * \param list_def default list of sensor IDs
+         * \param key keyword in Preferences
+         */
+        void initList(std::vector<uint32_t> &list, const std::vector<uint32_t> list_def, const char *key);
 
         /*!
          * \brief Find slot in sensor data array

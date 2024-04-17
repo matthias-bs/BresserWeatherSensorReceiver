@@ -78,7 +78,7 @@
 #define SENSOR_IDS_EXC { 0x792882A2 }
 //#define SENSOR_IDS_EXC { 0x792882A2 }
 
-// List of sensor IDs to be included - if zero, handle all available sensors
+// List of sensor IDs to be included - if empty, handle all available sensors
 #define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 

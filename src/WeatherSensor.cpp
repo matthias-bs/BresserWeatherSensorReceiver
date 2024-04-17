@@ -571,7 +571,8 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
 
 // Initialize list of sensor IDs
 void WeatherSensor::initList(std::vector<uint32_t> &list, const uint32_t *array, const char *key)
-{
+{   
+    list.clear();
     cfgPrefs.begin("BWS-CFG", false);
     if (cfgPrefs.isKey(key))
     {

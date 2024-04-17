@@ -157,6 +157,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:a0adf85658be20d05e43e34c6b728b989"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0d3ac40d2ac605badcbb8e1631d64fa"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa">findType</a> (uint8_t type, uint8_t channel=0xFF)</td></tr>
 <tr class="separator:ac0d3ac40d2ac605badcbb8e1631d64fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecf60e2ae2e51eff69fdd20b00f3f487"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#aecf60e2ae2e51eff69fdd20b00f3f487">setSensorsInc</a> (uint8_t *bytes, uint8_t size)</td></tr>
+<tr class="separator:aecf60e2ae2e51eff69fdd20b00f3f487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affeca257b06518b29519756a9e85a006"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#affeca257b06518b29519756a9e85a006">setSensorsExc</a> (uint8_t *bytes, uint8_t size)</td></tr>
+<tr class="separator:affeca257b06518b29519756a9e85a006"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6f489c26a476d658c2ce5161ea48441"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ac6f489c26a476d658c2ce5161ea48441">getSensorsInc</a> (uint8_t *payload)</td></tr>
+<tr class="separator:ac6f489c26a476d658c2ce5161ea48441"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6ffcbf06bb5aea95203fbb3a53aaf3d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#af6ffcbf06bb5aea95203fbb3a53aaf3d">getSensorsExc</a> (uint8_t *payload)</td></tr>
+<tr class="separator:af6ffcbf06bb5aea95203fbb3a53aaf3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -441,6 +449,130 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
 
 <p>Tries to receive radio message (non-blocking) and to decode it. Timeout occurs after a multitude of expected time-on-air. </p>
 <dl class="section return"><dt>Returns</dt><dd>DecodeStatus </dd></dl>
+
+</div>
+</div>
+<a id="af6ffcbf06bb5aea95203fbb3a53aaf3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6ffcbf06bb5aea95203fbb3a53aaf3d">&#9670;&nbsp;</a></span>getSensorsExc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t WeatherSensor::getSensorsExc </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>payload</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get sensors exclude list from Preferences</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">payload</td><td>buffer for storing sensor IDs</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>size size in bytes </dd></dl>
+
+</div>
+</div>
+<a id="ac6f489c26a476d658c2ce5161ea48441"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6f489c26a476d658c2ce5161ea48441">&#9670;&nbsp;</a></span>getSensorsInc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t WeatherSensor::getSensorsInc </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>payload</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Get sensors include list from Preferences</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">payload</td><td>buffer for storing sensor IDs</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>size size in bytes </dd></dl>
+
+</div>
+</div>
+<a id="affeca257b06518b29519756a9e85a006"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#affeca257b06518b29519756a9e85a006">&#9670;&nbsp;</a></span>setSensorsExc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WeatherSensor::setSensorsExc </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>bytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set sensors include list in Preferences</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>sensor IDs </td></tr>
+    <tr><td class="paramname">size</td><td>buffer size in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aecf60e2ae2e51eff69fdd20b00f3f487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecf60e2ae2e51eff69fdd20b00f3f487">&#9670;&nbsp;</a></span>setSensorsInc()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WeatherSensor::setSensorsInc </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>bytes</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set sensors include list in Preferences</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">bytes</td><td>sensor IDs </td></tr>
+    <tr><td class="paramname">size</td><td>buffer size in bytes </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

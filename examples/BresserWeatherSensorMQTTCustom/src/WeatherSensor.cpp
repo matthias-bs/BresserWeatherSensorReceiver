@@ -74,7 +74,7 @@
 // 20231030 Refactored sensor data using a union to save memory
 // 20231101 Added radio transceiver SX1262
 // 20231112 Added setting of rain_ok in genMessage()
-// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround 
+// 20231130 Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531: Replaced workaround
 //          for negative temperatures by fix (6-in-1 decoder)
 // 20231202 Changed reception to interrupt mode to fix issues with CC1101 and SX1262
 // 20231218 Fixed inadvertent end of reception due to transceiver sleep mode
@@ -82,11 +82,12 @@
 // 20240116 Fixed counter width and assignment to unknown1 in decodeBresserLightningPayload()
 // 20240117 Fixed counter decoding (changed from binary to BCD) in decodeBresserLightningPayload()
 // 20240208 Added sensors for CO2, P/N 7009977 and HCHO/VOC, P/N 7009978 to 7-in-1 decoder
-//          see https://github.com/merbanan/rtl_433/pull/2815 
+//          see https://github.com/merbanan/rtl_433/pull/2815
 //            & https://github.com/merbanan/rtl_433/pull/2817
 // 20240213 Added PM1.0 to air quality (PM) sensor decoder
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
+// 20240417 Added sensor configuration at run time
 //
 // ToDo:
 // -
@@ -106,12 +107,6 @@ static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER
 static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
 
-// List of sensor IDs to be excluded - can be empty
-uint32_t const sensor_ids_exc[] = SENSOR_IDS_EXC;
-
-// List of sensor IDs to be included - if empty, handle all available sensors
-uint32_t const sensor_ids_inc[] = SENSOR_IDS_INC;
-
 // Flag to indicate that a packet was received
 volatile bool receivedFlag = false;
 
@@ -129,17 +124,29 @@ void
 
 int16_t WeatherSensor::begin(void)
 {
-    #if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
+#if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
     // Note: Depending on the environment, both variants are used!
     auto cfg = M5.config();
-    cfg.clear_display = true;  // default=true. clear the screen when begin.
-    cfg.output_power  = true;  // default=true. use external port 5V output.
-    cfg.internal_imu  = false;  // default=true. use internal IMU.
-    cfg.internal_rtc  = true;  // default=true. use internal RTC.
-    cfg.internal_spk  = false;  // default=true. use internal speaker.
-    cfg.internal_mic  = false;  // default=true. use internal microphone.
+    cfg.clear_display = true; // default=true. clear the screen when begin.
+    cfg.output_power = true;  // default=true. use external port 5V output.
+    cfg.internal_imu = false; // default=true. use internal IMU.
+    cfg.internal_rtc = true;  // default=true. use internal RTC.
+    cfg.internal_spk = false; // default=true. use internal speaker.
+    cfg.internal_mic = false; // default=true. use internal microphone.
     M5.begin(cfg);
-    #endif
+#endif
+#if defined(ARDUINO_ESP32S3_POWERFEATHER)
+    Board.init();
+    Board.enable3V3(true);
+#endif
+
+    // List of sensor IDs to be excluded - can be empty
+    uint32_t const sensor_ids_exc_def[] = SENSOR_IDS_EXC;
+    initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
+
+    // List of sensor IDs to be included - if empty, handle all available sensors
+    uint32_t const sensor_ids_inc_def[] = SENSOR_IDS_INC;
+    initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
@@ -234,9 +241,9 @@ void WeatherSensor::sleep(void)
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())
 {
     const uint32_t timestamp = millis();
-    
+
     radio.startReceive();
-    
+
     while ((millis() - timestamp) < timeout)
     {
         int decode_status = getMessage();
@@ -459,32 +466,26 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
 //
 int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
 {
-
     log_v("find_slot(): ID=%08X", id);
 
     // Skip sensors from exclude-list (if any)
-    uint8_t n_exc = sizeof(sensor_ids_exc) / 4;
-    if (n_exc != 0)
+    for (const uint32_t &exc : sensor_ids_exc)
     {
-        for (int i = 0; i < n_exc; i++)
+        if (id == exc)
         {
-            if (id == sensor_ids_exc[i])
-            {
-                log_v("In Exclude-List, skipping!");
-                *status = DECODE_SKIP;
-                return -1;
-            }
+            log_v("In Exclude-List, skipping!");
+            *status = DECODE_SKIP;
+            return -1;
         }
     }
 
     // Handle sensors from include-list (if not empty)
-    uint8_t n_inc = sizeof(sensor_ids_inc) / 4;
-    if (n_inc != 0)
+    if (sensor_ids_inc.size() > 0)
     {
         bool found = false;
-        for (int i = 0; i < n_inc; i++)
+        for (const uint32_t &inc : sensor_ids_inc)
         {
-            if (id == sensor_ids_inc[i])
+            if (id == inc)
             {
                 found = true;
                 break;
@@ -566,6 +567,106 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
             return i;
     }
     return -1;
+}
+
+// Initialize list of sensor IDs
+void WeatherSensor::initList(std::vector<uint32_t> &list, const uint32_t *array, const char *key)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    if (cfgPrefs.isKey(key))
+    {
+        log_d("Using sensor_ids_%s list from Preferences:", key);
+        size_t size = cfgPrefs.getBytesLength(key);
+        uint8_t buf[48];
+        cfgPrefs.getBytes(key, buf, size);
+        for (size_t i = 0; i < size; i += 4)
+        {
+            list.push_back(
+                (buf[i] << 24) |
+                (buf[i + 1] << 16) |
+                (buf[i + 2] << 8) |
+                buf[i + 3]);
+        }
+    }
+    else
+    {
+        log_d("Using sensor_ids_%s list from WeatherSensorCfg.h:", key);
+        if (sizeof(array) > 0 && (array[0] != 0))
+        {
+            for (size_t i = 0; i < sizeof(array) / sizeof(array[0]); i++)
+            {
+                list.push_back(array[i]);
+            }
+        }
+    }
+    cfgPrefs.end();
+
+    if (list.size() == 0)
+    {
+        log_d("(empty)");
+    }
+    for (size_t i = 0; i < list.size(); i++)
+    {
+        log_d("%08X", list[i]);
+    }
+}
+
+// Set sensors include list in Preferences
+void WeatherSensor::setSensorsInc(uint8_t *buf, uint8_t size)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    cfgPrefs.putBytes("inc", buf, size);
+    cfgPrefs.end();
+
+    sensor_ids_inc.clear();
+    for (size_t i = 0; i < size; i += 4)
+    {
+        sensor_ids_inc.push_back(
+            (buf[i] << 24) |
+            (buf[i + 1] << 16) |
+            (buf[i + 2] << 8) |
+            buf[i + 3]);
+    }
+}
+
+// Get sensors include list from Preferences
+uint8_t WeatherSensor::getSensorsInc(uint8_t *payload)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    uint8_t size = cfgPrefs.getBytesLength("inc");
+    cfgPrefs.getBytes("inc", payload, size);
+    cfgPrefs.end();
+
+    return size;
+}
+
+// Set sensors exclude list in Preferences
+void WeatherSensor::setSensorsExc(uint8_t *buf, uint8_t size)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    cfgPrefs.putBytes("exc", buf, size);
+    cfgPrefs.end();
+
+    sensor_ids_exc.clear();
+    for (size_t i = 0; i < size; i += 4)
+    {
+        sensor_ids_exc.push_back(
+            (buf[i] << 24) |
+            (buf[i + 1] << 16) |
+            (buf[i + 2] << 8) |
+            buf[i + 3]);
+    }
+}
+
+// Get sensors exclude list from Preferences
+uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    uint8_t size = cfgPrefs.getBytesLength("exc");
+    cfgPrefs.getBytes("exc", payload, size);
+    cfgPrefs.end();
+
+    return size;
 }
 
 //
@@ -918,20 +1019,22 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     // temperature, humidity(, uv) - shared with rain counter
     temp_ok = humidity_ok = (flags == 0);
     float temp = 0;
-    if (temp_ok) {
-        bool  sign     = (msg[13] >> 3) & 1;
-        int   temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
-        
+    if (temp_ok)
+    {
+        bool sign = (msg[13] >> 3) & 1;
+        int temp_raw = (msg[12] >> 4) * 100 + (msg[12] & 0x0f) * 10 + (msg[13] >> 4);
+
         temp = ((sign) ? (temp_raw - 1000) : temp_raw) * 0.1f;
 
         // Correction for Bresser 3-in-1 Professional Wind Gauge / Anemometer, PN 7002531
         // The temperature range (as far as provided in other Bresser manuals) is -40...+60°C
-        if (temp < -50.0) {
+        if (temp < -50.0)
+        {
             temp = -temp_raw * 0.1f;
         }
 
-        sensor[slot].w.temp_c      = temp;
-        sensor[slot].w.humidity    = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
+        sensor[slot].w.temp_c = temp;
+        sensor[slot].w.humidity = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
         // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
         uv_ok = ((~msg[15] & 0xff) <= 0x99) && ((~msg[16] & 0xf0) <= 0x90) && !f_3in1;
@@ -1225,30 +1328,30 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {
-        #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+#if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
         uint16_t pn1 = (msgw[14] & 0x0f) * 1000 + (msgw[15] >> 4) * 100 + (msgw[15] & 0x0f) * 10 + (msgw[16] >> 4);
         uint16_t pn2 = (msgw[17] >> 4) * 100 + (msgw[17] & 0x0f) * 10 + (msgw[18] >> 4);
         uint16_t pn3 = (msgw[19] >> 4) * 100 + (msgw[19] & 0x0f) * 10 + (msgw[20] >> 4);
-        #endif
+#endif
         log_d("PN1: %04d PN2: %04d PN3: %04d", pn1, pn2, pn3);
-        sensor[slot].pm.pm_1_0      = (msgw[8] & 0x0f) * 1000 + (msgw[9] >> 4) * 100 + (msgw[9] & 0x0f) * 10 + (msgw[10] >> 4);
-        sensor[slot].pm.pm_2_5      = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
-        sensor[slot].pm.pm_10       = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
+        sensor[slot].pm.pm_1_0 = (msgw[8] & 0x0f) * 1000 + (msgw[9] >> 4) * 100 + (msgw[9] & 0x0f) * 10 + (msgw[10] >> 4);
+        sensor[slot].pm.pm_2_5 = (msgw[10] & 0x0f) * 1000 + (msgw[11] >> 4) * 100 + (msgw[11] & 0x0f) * 10 + (msgw[12] >> 4);
+        sensor[slot].pm.pm_10 = (msgw[12] & 0x0f) * 1000 + (msgw[13] >> 4) * 100 + (msgw[13] & 0x0f) * 10 + (msgw[14] >> 4);
         sensor[slot].pm.pm_1_0_init = ((msgw[10] >> 4) & 0x0f) == 0x0f;
         sensor[slot].pm.pm_2_5_init = ((msgw[12] >> 4) & 0x0f) == 0x0f;
-        sensor[slot].pm.pm_10_init  = ((msgw[14] >> 4) & 0x0f) == 0x0f;
+        sensor[slot].pm.pm_10_init = ((msgw[14] >> 4) & 0x0f) == 0x0f;
     }
     else if (s_type == SENSOR_TYPE_CO2)
     {
-        sensor[slot].co2.co2_ppm  = ((msgw[4]& 0xf0) >> 4) * 1000 + (msgw[4]& 0x0f) * 100 + ((msgw[5]& 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
+        sensor[slot].co2.co2_ppm = ((msgw[4] & 0xf0) >> 4) * 1000 + (msgw[4] & 0x0f) * 100 + ((msgw[5] & 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
         sensor[slot].co2.co2_init = (msgw[5] & 0x0f) == 0x0f;
     }
     else if (s_type == SENSOR_TYPE_HCHO_VOC)
     {
-        sensor[slot].voc.hcho_ppb  = ((msgw[4]& 0xf0) >> 4) * 1000 + (msgw[4]& 0x0f) * 100 + ((msgw[5]& 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
-        sensor[slot].voc.voc_level = (msgw[22]& 0x0f);
+        sensor[slot].voc.hcho_ppb = ((msgw[4] & 0xf0) >> 4) * 1000 + (msgw[4] & 0x0f) * 100 + ((msgw[5] & 0xf0) >> 4) * 10 + (msgw[5] & 0x0f);
+        sensor[slot].voc.voc_level = (msgw[22] & 0x0f);
         sensor[slot].voc.hcho_init = (msgw[5] & 0x0f) == 0x0f;
-        sensor[slot].voc.voc_init  = msgw[22] == 0x0f;
+        sensor[slot].voc.voc_init = msgw[22] == 0x0f;
     }
 
     return DECODE_OK;

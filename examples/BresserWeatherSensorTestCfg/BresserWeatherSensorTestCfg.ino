@@ -52,7 +52,7 @@ WeatherSensor ws;
 
 void printBuf(uint8_t *buf, uint8_t size) {
         for (size_t i=0; i < size; i+=4) {
-        Serial.printf("0x%08X", 
+        Serial.printf("0x%08X\n", 
             (buf[i] << 24) |
             (buf[i+1] << 16) |
             (buf[i+2] << 8) |

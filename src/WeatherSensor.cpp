@@ -612,11 +612,21 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const uint32_t *array,
 }
 
 // Set sensors include list in Preferences
-void WeatherSensor::setSensorsInc(uint8_t *bytes, uint8_t size)
+void WeatherSensor::setSensorsInc(uint8_t *buf, uint8_t size)
 {
     cfgPrefs.begin("BWS-CFG", false);
-    cfgPrefs.putBytes("inc", bytes, size);
+    cfgPrefs.putBytes("inc", buf, size);
     cfgPrefs.end();
+
+    sensor_ids_inc.clear();
+    for (size_t i = 0; i < size; i += 4)
+    {
+        sensor_ids_inc.push_back(
+            (buf[i] << 24) |
+            (buf[i + 1] << 16) |
+            (buf[i + 2] << 8) |
+            buf[i + 3]);
+    }
 }
 
 // Get sensors include list from Preferences
@@ -631,11 +641,21 @@ uint8_t WeatherSensor::getSensorsInc(uint8_t *payload)
 }
 
 // Set sensors exclude list in Preferences
-void WeatherSensor::setSensorsExc(uint8_t *bytes, uint8_t size)
+void WeatherSensor::setSensorsExc(uint8_t *buf, uint8_t size)
 {
     cfgPrefs.begin("BWS-CFG", false);
-    cfgPrefs.putBytes("exc", bytes, size);
+    cfgPrefs.putBytes("exc", buf, size);
     cfgPrefs.end();
+
+    sensor_ids_exc.clear();
+    for (size_t i = 0; i < size; i += 4)
+    {
+        sensor_ids_exc.push_back(
+            (buf[i] << 24) |
+            (buf[i + 1] << 16) |
+            (buf[i + 2] << 8) |
+            buf[i + 3]);
+    }
 }
 
 // Get sensors exclude list from Preferences

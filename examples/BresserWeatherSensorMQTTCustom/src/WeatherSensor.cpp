@@ -89,6 +89,8 @@
 // 20240409 Added radioReset()
 // 20240416 Added enabling of 3.3V power supply for FeatherWing on ESP32-S3 PowerFeather
 // 20240417 Added sensor configuration at run time
+// 20240423 Implemented setting of sensor_ids_inc/sensor_ids_inc to empty if first value in
+//          Preferences is 0x00000000
 //
 // ToDo:
 // -
@@ -576,12 +578,16 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint
 {   
     list.clear();
     cfgPrefs.begin("BWS-CFG", false);
+    log_d("Key %s in preferences? %d", key, cfgPrefs.isKey(key));
     if (cfgPrefs.isKey(key))
     {
-        log_d("Using sensor_ids_%s list from Preferences:", key);
         size_t size = cfgPrefs.getBytesLength(key);
+        log_d("Using sensor_ids_%s list from Preferences (%d bytes)", key, size);
         uint8_t buf[48];
         cfgPrefs.getBytes(key, buf, size);
+        if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+            size = 0;
+        }
         for (size_t i = 0; i < size; i += 4)
         {
             list.push_back(
@@ -593,7 +599,7 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint
     }
     else
     {
-        log_d("Using sensor_ids_%s list from WeatherSensorCfg.h:", key);
+        log_d("Using sensor_ids_%s list from WeatherSensorCfg.h", key);
         list = list_def;
     }
     cfgPrefs.end();
@@ -611,11 +617,15 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint
 // Set sensors include list in Preferences
 void WeatherSensor::setSensorsInc(uint8_t *buf, uint8_t size)
 {
+    log_d("size: %d", size);
     cfgPrefs.begin("BWS-CFG", false);
     cfgPrefs.putBytes("inc", buf, size);
     cfgPrefs.end();
 
     sensor_ids_inc.clear();
+    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+        size = 0;
+    }
     for (size_t i = 0; i < size; i += 4)
     {
         sensor_ids_inc.push_back(
@@ -633,6 +643,7 @@ uint8_t WeatherSensor::getSensorsInc(uint8_t *payload)
     uint8_t size = cfgPrefs.getBytesLength("inc");
     cfgPrefs.getBytes("inc", payload, size);
     cfgPrefs.end();
+    log_d("size: %d", size);
 
     return size;
 }
@@ -640,11 +651,15 @@ uint8_t WeatherSensor::getSensorsInc(uint8_t *payload)
 // Set sensors exclude list in Preferences
 void WeatherSensor::setSensorsExc(uint8_t *buf, uint8_t size)
 {
+    log_d("size: %d", size);
     cfgPrefs.begin("BWS-CFG", false);
     cfgPrefs.putBytes("exc", buf, size);
     cfgPrefs.end();
 
     sensor_ids_exc.clear();
+    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+        size = 0;
+    }
     for (size_t i = 0; i < size; i += 4)
     {
         sensor_ids_exc.push_back(
@@ -662,6 +677,7 @@ uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
     uint8_t size = cfgPrefs.getBytesLength("exc");
     cfgPrefs.getBytes("exc", payload, size);
     cfgPrefs.end();
+    log_d("size: %d", size);
 
     return size;
 }

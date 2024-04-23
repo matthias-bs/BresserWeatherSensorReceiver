@@ -89,7 +89,7 @@
 // 20240409 Added radioReset()
 // 20240416 Added enabling of 3.3V power supply for FeatherWing on ESP32-S3 PowerFeather
 // 20240417 Added sensor configuration at run time
-// 20240423 Implemented setting of sensor_ids_inc/sensor_ids_inc to empty if first value in
+// 20240423 Implemented setting of sensor_ids_inc/sensor_ids_exc to empty if first value in
 //          Preferences is 0x00000000
 //
 // ToDo:

@@ -57,6 +57,8 @@
 // 20240204 Added separate ARDUINO_heltec_wireless_stick_v2/v3
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
+// 20240417 Modified SENSOR_IDS_INC
+// 20240425 Added define variant ARDUINO_heltec_wifi_lora_32_V3
 //
 // ToDo:
 // -
@@ -116,8 +118,6 @@
 // ------------------------------------------------------------------------------------------------
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
-// Use pinning for LoRaWAN Node
-
 
 // LILIGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
 // See pin definitions in
@@ -211,8 +211,8 @@
     #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
-    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 defined; using on-board transceiver")
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
+    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 (or similar) defined; using on-board transceiver")
     #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -475,7 +475,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa
 
-#elif defined(ARDUINO_heltec_wifi_32_lora_V3)
+#elif defined(ARDUINO_heltec_wifi_32_lora_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
     // Use pinning for Heltec WiFi LoRa32 V3
     #define PIN_RECEIVER_CS   SS
 

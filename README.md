@@ -99,7 +99,7 @@ Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
 
 See `WeatherSensorCfg.h` for configuration options.
 
-* Set the desired radio module by (un-)commenting `USE_CC1101` or `USE_SX1276`.
+* Set the desired radio module by (un-)commenting `USE_CC1101`, `USE_SX1262` or `USE_SX1276`.
 
   SX1276 is compatible with RFM95W and HPD13A.
 

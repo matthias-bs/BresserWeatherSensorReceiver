@@ -23,6 +23,8 @@ jobs:
         run: |
           pwd
           ls
+          ls docs
+          #xsltproc doxygen2keywords.xsl docs/ >keywords.txt
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v4

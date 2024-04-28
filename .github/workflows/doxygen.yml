@@ -21,9 +21,6 @@ jobs:
 
       - name: Generate keywords.txt
         run: |
-          pwd
-          ls
-          ls docs/xml
           xsltproc doxygen2keywords.xsl docs/xml/index.xml >keywords.txt
           echo "-----------------------------------------------------------"
           cat keywords.txt

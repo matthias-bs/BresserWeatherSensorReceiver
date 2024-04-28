@@ -24,7 +24,10 @@ jobs:
           pwd
           ls
           ls docs/xml
-          #xsltproc doxygen2keywords.xsl docs/ >keywords.txt
+          xsltproc doxygen2keywords.xsl docs/xml/index.xml >keywords.txt
+          echo "-----------------------------------------------------------"
+          cat keywords.txt
+          echo "-----------------------------------------------------------"
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v4

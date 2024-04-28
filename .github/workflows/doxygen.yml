@@ -9,14 +9,20 @@ jobs:
   doxygen:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Doxygen
+      - name: Install Doxygen and Xsltproc
         run: |
           sudo apt-get update
           sudo apt-get install -y doxygen
+          sudo apt-get install xsltproc
       - uses: actions/checkout@v4
 
       - name: Generate docs
         run: doxygen Doxyfile
+
+      - name: Generate keywords.txt
+        run: |
+          pwd
+          ls
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v4

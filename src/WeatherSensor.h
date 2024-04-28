@@ -318,7 +318,10 @@ class WeatherSensor {
 
             Sensor ()
             {
+                #pragma GCC diagnostic push
+                #pragma GCC diagnostic ignore "-Wclass-memaccess"
                 memset(this, 0, sizeof(*this));
+                #pragma GCC diagnostic pop
             };
         };
 

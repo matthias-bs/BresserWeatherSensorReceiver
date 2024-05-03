@@ -225,6 +225,14 @@ After a successful setup, you can perform two consecutive resets (within 10 seco
 
 Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT). Provides sensor data as MQTT messages via WiFi to Domoticz (https://domoticz.com/) (MQTT plugin for Domoticz required). The MQTT topics are designed for using with Domoticz virtual sensors (see https://www.domoticz.com/wiki/Managing_Devices#Temperature and https://www.domoticz.com/wiki/Managing_Devices#Weather).
 
+# MQTT Integrations
+
+## Home Assistant
+
+@shadowpost provided a Home Assistant configuration:
+
+
+
 # Debug Output Configuration
 
 See [Debug Output Configuration in Arduino IDE](DEBUG_OUTPUT.md)

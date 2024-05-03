@@ -269,13 +269,13 @@ See [Debug Output Configuration in Arduino IDE](DEBUG_OUTPUT.md)
 **Note:**
 The SX1276/RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
 
-## ESP8266 D1 Mini with CC1101
+### ESP8266 D1 Mini with CC1101
 
 <img src="https://user-images.githubusercontent.com/83612361/158458191-b5cabad3-3515-45d0-98e3-94b0fa13b8ef.jpg" alt="Bresser5in1_CC1101_D1-Mini" width="400">
 
 [Pinout ESP8266 WeMos D1-Mini with cc1101](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/ESP8266_WeMos_D1-Mini_pinout_cc1101_v2.pdf)
 
-### CC1101
+#### CC1101
 
 [Texas Instruments CC1101 Product Page](https://www.ti.com/product/CC1101)
 
@@ -289,7 +289,7 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 
 **Note 2: Make sure to use the 868MHz version!**
 
-## Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
+### Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
 
 **Note: Make sure to use the 868MHz version!**
 * [ADA3231](https://www.adafruit.com/product/3231) - Adafruit LoRa Radio FeatherWing - RFM95W 900 MHz - RadioFruit
@@ -303,7 +303,7 @@ Solder-Bridges on the Module/Wing:
 * C to RST
 * A to DI01
 
-## Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
+### Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
 ![ePulse_Feather+FeatherWing](https://user-images.githubusercontent.com/83612361/228173195-f13fe4c4-7f86-4e73-b485-d5d553034554.jpg)
 
 **Note: Make sure to use the 868MHz version!**
@@ -318,7 +318,7 @@ Solder-Bridges on the Module/Wing:
 * D to IRQ
 * E to CS
 
-## Adafruit RFM95W LoRa Radio Transceiver Breakout
+### Adafruit RFM95W LoRa Radio Transceiver Breakout
 
 **Note: Make sure to use the 868MHz version!**
 * [ADA3072](https://www.adafruit.com/product/3072) - 868/915 MHz version
@@ -329,7 +329,7 @@ Solder-Bridges on the Module/Wing:
 See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://learn.adafruit.com/adafruit-rfm69hcw-and-rfm96-rfm95-rfm98-lora-packet-padio-breakouts/pinouts).
 
 
-## DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
+### DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
 ![firebeetle_esp32+cover_lora](https://user-images.githubusercontent.com/83612361/233463592-e99a9d1c-5100-4ac2-9b33-bcfc974406f0.jpg)
 Note: Stacking headers were included with TEL0125.
 
@@ -344,7 +344,7 @@ Solder-Bridges on the Cover:
 * D4 to CS
 * D5 to DIO1
 
-## Adafruit Feather 32u4 RFM95 LoRa Radio
+### Adafruit Feather 32u4 RFM95 LoRa Radio
 
 **Note: Make sure to use the 868MHz version!**
 

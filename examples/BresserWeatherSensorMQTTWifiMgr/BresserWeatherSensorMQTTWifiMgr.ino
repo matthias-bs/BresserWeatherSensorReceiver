@@ -95,6 +95,7 @@
 //          Added formatting of LittleFS partition if mounting failed
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
+// 20240503 Fixed setting of RTC via SNTP in case on non-secure WiFi config
 //
 // ToDo:
 //
@@ -599,8 +600,7 @@ void wifimgr_setup(void)
  */
 void mqtt_setup(void)
 {
-#ifdef USE_SECUREWIFI
-    // Note: TLS security needs correct time
+    // Note: TLS security, raingauge and lightning need correct time
     log_i("Setting time using SNTP");
     configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
     time_t now = time(nullptr);
@@ -623,6 +623,7 @@ void mqtt_setup(void)
     gmtime_r(&now, &timeinfo);
     log_i("Current time (GMT): %s", asctime(&timeinfo));
 
+#ifdef USE_SECUREWIFI
 #if defined(ESP8266)
 #ifdef CHECK_CA_ROOT
     BearSSL::X509List cert(digicert);

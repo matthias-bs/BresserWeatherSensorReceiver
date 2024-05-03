@@ -362,7 +362,7 @@ Some restrictions apply:
 
 ## Antennas and RF Connectors
 
-The required antenna depends on the signal path between weather sensor and CC1101 or RFM95W receiver. 
+The required antenna depends on the signal path between weather sensor and receiver. 
 
 Some options are:
 * wire antenna

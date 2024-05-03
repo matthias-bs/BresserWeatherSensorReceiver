@@ -60,7 +60,7 @@ Some guesswork:
 
 ## Contents
 
-* [Configuration](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#configuration)
+* [Configuration](#configuration)
   * Configuration by selecting a supported Board in the Arduino IDE
   * Manual Configuration
 * [SW Examples](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#sw-examples)

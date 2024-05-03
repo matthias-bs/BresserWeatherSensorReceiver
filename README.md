@@ -229,9 +229,8 @@ Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeathe
 
 ## Home Assistant
 
-@shadowpost provided a Home Assistant configuration:
-
-
+@Shadowpost provided a Home Assistant configuration which can be modified as required:<br>
+[Bresser_HA_MQTT_custom_config.yaml](Bresser_HA_MQTT_custom_config.yaml)
 
 # Debug Output Configuration
 

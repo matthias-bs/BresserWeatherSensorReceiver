@@ -82,7 +82,7 @@ Some guesswork:
   * [Adafruit RFM95W LoRa Radio Transceiver Breakout](#adafruit-rfm95w-lora-radio-transceiver-breakout)
   * [DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz](#dfrobot-firebeetle-esp32-with-firebeetle-cover-lora-radio-868mhz)
   * [Adafruit Feather 32u4 RFM95 LoRa Radio](#adafruit-feather-32u4-rfm95-lora-radio)
-  * [Antennas and RF Connectors](#antennas-and-rf-connectors)
+* [Antennas and RF Connectors](#antennas-and-rf-connectors)
 * [Software Build Tutorial](#software-build-tutorial)
 * [Source Documentation](#source-documentation)
 * [Legal](#legal)

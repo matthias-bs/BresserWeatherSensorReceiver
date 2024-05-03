@@ -62,7 +62,7 @@ Some guesswork:
 
 * [Configuration](#configuration)
   * [Predefined Board Configurations](#predefined-board-configurations)
-  * [Manual Configuration](#manual-configuration)
+  * [User-Defined Configuration](#user-defined-configuration)
 * [SW Examples](#sw-examples)
   * [BresserWeatherSensorBasic](#bresserweathersensorbasic)
   * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)
@@ -123,7 +123,7 @@ Receiver chip: [SX1276]
 Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
 ```
 
-### Manual Configuration
+### User-Defined Configuration
 
 See `WeatherSensorCfg.h` for configuration options.
 

@@ -58,6 +58,34 @@ Some guesswork:
 
 **4)** The part number is specific to the actual variant, i.e. some more characters are appended
 
+## Contents
+
+* [Configuration](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#configuration)
+  * Configuration by selecting a supported Board in the Arduino IDE
+  * Manual Configuration
+* [SW Examples](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#sw-examples)
+  * BresserWeatherSensorBasic
+  * BresserWeatherSensorWaiting
+  * BresserWeatherSensorCallback
+  * BresserWeatherSensorOptions
+  * BresserWeatherSensorMQTT
+  * BresserWeatherSensorMQTTCustom
+  * BresserWeatherSensorMQTTWiFiMgr
+  * BresserWeatherSensorDomoticz
+* [MQTT Integrations](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#mqtt-integrations)
+  * Home Assistant
+* [Debug Output Configuration](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#debug-output-configuration)
+* [HW Examples](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#hw-examples)
+  * ESP8266 D1 Mini with CC1101
+  * Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
+  * Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
+  * Adafruit RFM95W LoRa Radio Transceiver Breakout
+  * DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
+  * Adafruit Feather 32u4 RFM95 LoRa Radio
+  * Antennas and RF Connectors
+* [Software Build Tutorial](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#software-build-tutorial)
+* [Source Documentation](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#source-documentation)
+* [Legal](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#legal)
 
 ## Configuration
 
@@ -225,18 +253,18 @@ After a successful setup, you can perform two consecutive resets (within 10 seco
 
 Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT). Provides sensor data as MQTT messages via WiFi to Domoticz (https://domoticz.com/) (MQTT plugin for Domoticz required). The MQTT topics are designed for using with Domoticz virtual sensors (see https://www.domoticz.com/wiki/Managing_Devices#Temperature and https://www.domoticz.com/wiki/Managing_Devices#Weather).
 
-# MQTT Integrations
+## MQTT Integrations
 
-## Home Assistant
+### Home Assistant
 
 [Shadowpost](https://github.com/Shadowpost) provided a Home Assistant configuration which can be modified as required:<br>
 [Bresser_HA_MQTT_custom_config.yaml](Bresser_HA_MQTT_custom_config.yaml)
 
-# Debug Output Configuration
+## Debug Output Configuration
 
 See [Debug Output Configuration in Arduino IDE](DEBUG_OUTPUT.md)
 
-# HW Examples
+## HW Examples
 
 **Note:**
 The SX1276/RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
@@ -366,6 +394,6 @@ See [BUILD](BUILD.md)
 
 https://matthias-bs.github.io/BresserWeatherSensorReceiver/
 
-# Legal
+## Legal
 
 > This project is in no way affiliated with, authorized, maintained, sponsored or endorsed by Bresser GmbH or any of its affiliates or subsidiaries.

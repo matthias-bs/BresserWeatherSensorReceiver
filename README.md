@@ -61,21 +61,21 @@ Some guesswork:
 ## Contents
 
 * [Configuration](#configuration)
-  * Configuration by selecting a supported Board in the Arduino IDE
-  * Manual Configuration
-* [SW Examples](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#sw-examples)
-  * BresserWeatherSensorBasic
-  * BresserWeatherSensorWaiting
-  * BresserWeatherSensorCallback
-  * BresserWeatherSensorOptions
-  * BresserWeatherSensorMQTT
-  * BresserWeatherSensorMQTTCustom
-  * BresserWeatherSensorMQTTWiFiMgr
-  * BresserWeatherSensorDomoticz
-* [MQTT Integrations](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#mqtt-integrations)
-  * Home Assistant
-* [Debug Output Configuration](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#debug-output-configuration)
-* [HW Examples](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#hw-examples)
+  * [Predefined Board Configurations](#predefined-board-configurations)
+  * [Manual Configuration](#manual-configuration)
+* [SW Examples](#sw-examples)
+  * [BresserWeatherSensorBasic](#bresserweathersensorbasic)
+  * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)
+  * [BresserWeatherSensorCallback](#bresserweathersensorcallback)
+  * [BresserWeatherSensorOptions](#bresserweathersensoroptions)
+  * [BresserWeatherSensorMQTT](#bresserweathersensormqtt)
+  * [BresserWeatherSensorMQTTCustom](#bresserweathersensormqttcustom)
+  * [BresserWeatherSensorMQTTWiFiMgr](#bresserweathersensormqttwifimgr)
+  * [BresserWeatherSensorDomoticz](#bresserweathersensordomoticz)
+* [MQTT Integrations](#mqtt-integrations)
+  * [Home Assistant](#home-assistant)
+* [Debug Output Configuration](#debug-output-configuration)
+* [HW Examples](#hw-examples)
   * ESP8266 D1 Mini with CC1101
   * Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
   * Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
@@ -83,13 +83,13 @@ Some guesswork:
   * DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
   * Adafruit Feather 32u4 RFM95 LoRa Radio
   * Antennas and RF Connectors
-* [Software Build Tutorial](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#software-build-tutorial)
-* [Source Documentation](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#source-documentation)
-* [Legal](https://github.com/matthias-bs/BresserWeatherSensorReceiver?tab=readme-ov-file#legal)
+* [Software Build Tutorial](#software-build-tutorial)
+* [Source Documentation](#source-documentation)
+* [Legal](#legal)
 
 ## Configuration
 
-### Configuration by selecting a supported Board in the Arduino IDE
+### Predefined Board Configurations
 
 By selecting a Board and a Board Revision in the Arduino IDE, a define is passed to the preprocessor/compiler. For the boards in the table below, the default configuration is assumed based on this define. I.e. you could could use an Adafruit Feather ESP32-S2 with a CC1101 connected to the pins of your choice of course, but the code assumes you are using it with a LoRa Radio Featherwing with the wiring given below. In some cases (**bold** entries in the table below) an additional define has to be enabled manually in `WeatherSensorCfg.h`.
 

@@ -72,6 +72,7 @@ Some guesswork:
   * [BresserWeatherSensorMQTTCustom](#bresserweathersensormqttcustom)
   * [BresserWeatherSensorMQTTWiFiMgr](#bresserweathersensormqttwifimgr)
   * [BresserWeatherSensorDomoticz](#bresserweathersensordomoticz)
+  * [BresserWeatherSensorM5Core2](#bresserweathersensorm5core2)
 * [MQTT Integrations](#mqtt-integrations)
   * [Home Assistant](#home-assistant)
 * [Debug Output Configuration](#debug-output-configuration)

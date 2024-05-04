@@ -43,6 +43,7 @@
 // 20230804 Added Bresser Water Leakage Sensor decoder
 // 20231027 Refactored sensor structure
 // 20240209 Added Air Quality (HCHO/VOC), Air Quality (PM2.5/PM10), CO2 Sensor and Pool Thermometer
+// 20240504 Added board initialization
 //
 // ToDo: 
 // - 
@@ -52,6 +53,7 @@
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 const uint8_t testData[][MSG_BUF_SIZE-1] = {
     // #0: Lightning Sensor
@@ -105,6 +107,7 @@ WeatherSensor ws;
 void setup() {    
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
 
     Serial.printf("Starting execution...\n");
 

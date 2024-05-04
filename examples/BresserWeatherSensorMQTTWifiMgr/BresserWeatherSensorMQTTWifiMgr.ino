@@ -96,6 +96,7 @@
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 // 20240503 Fixed setting of RTC via SNTP in case on non-secure WiFi config
+// 20240504 Added board initialization
 //
 // ToDo:
 //
@@ -224,6 +225,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "WeatherUtils.h"
 #include "RainGauge.h"
 #include "Lightning.h"
+#include "InitBoard.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
 #define JSON_FLOAT(x) String("\"") + x + String("\"")
@@ -933,6 +935,7 @@ void setup()
 {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
     log_i("\n\n%s\n", sketch_id);
 
     // Detect reset reason:

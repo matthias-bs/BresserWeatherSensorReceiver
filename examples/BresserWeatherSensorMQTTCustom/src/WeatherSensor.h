@@ -89,14 +89,6 @@
 #include <Arduino.h>
 #include <vector>
 #include <Preferences.h>
-#if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-// Note: Depending on the environment, both variants are used!
-#include <M5Unified.h>
-#endif
-#if defined(ARDUINO_ESP32S3_POWERFEATHER)
-#include <PowerFeather.h>
-using namespace PowerFeather;
-#endif
 #include <RadioLib.h>
 
 

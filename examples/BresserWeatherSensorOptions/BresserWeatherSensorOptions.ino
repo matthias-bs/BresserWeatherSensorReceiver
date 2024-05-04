@@ -36,6 +36,7 @@
 // 20220815 Created
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20231027 Refactored sensor structure
+// 20240504 Added board initialization
 //
 // ToDo:
 // -
@@ -45,6 +46,7 @@
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 // Set TIMEOUT to a relative small value to see the behaviour of different options -
 // depending on the timing of sensor transmission, start of getData() call and selected option,
@@ -171,6 +173,7 @@ void setup()
 {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
+  initBoard();
 
   ws.begin();
 }

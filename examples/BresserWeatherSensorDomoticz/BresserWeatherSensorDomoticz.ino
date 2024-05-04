@@ -74,6 +74,7 @@
 // 20231028 Refactored struct Sensor
 //          Changed MQTT payload and topic from char[] to String
 // 20240325 domoticz virtual rain sensor: added hourly rain rate
+// 20240504 Added board initialization
 //
 // ToDo:
 //
@@ -144,6 +145,7 @@
 #include "WeatherSensor.h"
 #include "WeatherUtils.h"
 #include "RainGauge.h"
+#include "InitBoard.h"
 
 const char sketch_id[] = "BresserWeatherSensorDomoticz 20231028";
 

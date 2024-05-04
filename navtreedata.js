@@ -44,7 +44,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_lightning_8h_source.html"
+"_init_board_8h_source.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

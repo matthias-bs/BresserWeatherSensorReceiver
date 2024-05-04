@@ -1,10 +1,11 @@
 var NAVTREEINDEX0 =
 {
-"_lightning_8h_source.html":[2,0,0,0],
-"_rain_gauge_8h_source.html":[2,0,0,1],
-"_weather_sensor_8h_source.html":[2,0,0,2],
-"_weather_sensor_cfg_8h_source.html":[2,0,0,3],
-"_weather_utils_8h_source.html":[2,0,0,4],
+"_init_board_8h_source.html":[2,0,0,0],
+"_lightning_8h_source.html":[2,0,0,1],
+"_rain_gauge_8h_source.html":[2,0,0,2],
+"_weather_sensor_8h_source.html":[2,0,0,3],
+"_weather_sensor_cfg_8h_source.html":[2,0,0,4],
+"_weather_utils_8h_source.html":[2,0,0,5],
 "annotated.html":[1,0],
 "class_lightning.html":[1,0,0],
 "class_lightning.html#a2a214ac4ed02d390fd64709e46478968":[1,0,0,0],

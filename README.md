@@ -260,6 +260,8 @@ Example for BresserWeatherSensorReceiver on [M5Stack Core2](https://docs.m5stack
 Using getMessage() for non-blocking reception of a single data message.
 Weather sensor data is presented on the display.
 
+![BresserWeatherSensorM5Core2](https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/12edec14-83fc-4f94-b2cb-0190a14357db)
+
 ## MQTT Integrations
 
 ### Home Assistant

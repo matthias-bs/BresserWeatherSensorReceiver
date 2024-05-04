@@ -127,23 +127,6 @@ void
 
 int16_t WeatherSensor::begin(void)
 {
-#if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-    // Note: Depending on the environment, both variants are used!
-    auto cfg = M5.config();
-    cfg.clear_display = true; // default=true. clear the screen when begin.
-    cfg.output_power = true;  // default=true. use external port 5V output.
-    cfg.internal_imu = false; // default=true. use internal IMU.
-    cfg.internal_rtc = true;  // default=true. use internal RTC.
-    cfg.internal_spk = false; // default=true. use internal speaker.
-    cfg.internal_mic = false; // default=true. use internal microphone.
-    M5.begin(cfg);
-#endif
-#if defined(ARDUINO_ESP32S3_POWERFEATHER)
-    Board.init();
-    // Enable power supply for Adafruit LoRa Radio FeatherWing
-    Board.enable3V3(true);
-#endif
-
     // List of sensor IDs to be excluded - can be empty
     std::vector<uint32_t> sensor_ids_exc_def = SENSOR_IDS_EXC;
     initList(sensor_ids_exc, sensor_ids_exc_def, "exc");

@@ -253,6 +253,12 @@ After a successful setup, you can perform two consecutive resets (within 10 seco
 
 Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT). Provides sensor data as MQTT messages via WiFi to Domoticz (https://domoticz.com/) (MQTT plugin for Domoticz required). The MQTT topics are designed for using with Domoticz virtual sensors (see https://www.domoticz.com/wiki/Managing_Devices#Temperature and https://www.domoticz.com/wiki/Managing_Devices#Weather).
 
+### [BresserWeatherSensorM5Core2](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorM5Core2)
+
+Example for BresserWeatherSensorReceiver on [M5Stack Core2](https://docs.m5stack.com/en/core/core2) with [M5Stack Module LoRa868](https://docs.m5stack.com/en/module/lora868) (and optionally [M5Go Bottom2](http://docs.m5stack.com/en/base/m5go_bottom2)).
+Using getMessage() for non-blocking reception of a single data message.
+Weather sensor data is presented on the display.
+
 ## MQTT Integrations
 
 ### Home Assistant

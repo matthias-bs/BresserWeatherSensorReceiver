@@ -52,6 +52,7 @@
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 
 WeatherSensor ws;
@@ -67,6 +68,7 @@ void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
+    initBoard();
     ws.begin();
 }
 

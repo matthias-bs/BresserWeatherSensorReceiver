@@ -108,6 +108,7 @@
 // 20231228 Fixed entering sleep mode before sensor data was published
 // 20240113 Added post-processed lightning data to payload
 // 20240122 Added lightning post-processing reset
+// 20240504 Added board initialization
 //
 // ToDo:
 //
@@ -197,6 +198,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/WeatherUtils.h"
 #include "src/RainGauge.h"
 #include "src/Lightning.h"
+#include "src/InitBoard.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
 #define JSON_FLOAT(x) String("\"") + x + String("\"")
@@ -740,6 +742,7 @@ void setup()
 {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
     log_i("\n\n%s\n", sketch_id);
 
     // Set time zone

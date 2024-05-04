@@ -37,6 +37,7 @@
 // History:
 //
 // 20240417 Created
+// 20240504 Added board initialization
 //
 // ToDo: 
 // - 
@@ -46,6 +47,7 @@
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 
 WeatherSensor ws;
@@ -65,6 +67,7 @@ void printBuf(uint8_t *buf, uint8_t size) {
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
 
     Serial.printf("Starting execution...\n");
 

@@ -42,6 +42,7 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20231027 Refactored sensor structure
+// 20240504 Added board initialization
 //
 // ToDo:
 // -
@@ -51,6 +52,7 @@
 #include <Arduino.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 WeatherSensor ws;
 
@@ -58,6 +60,7 @@ WeatherSensor ws;
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
 
     ws.begin();
 }

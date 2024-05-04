@@ -37,6 +37,7 @@
 //
 // 20240324 Created from BresserWeatherSensorBasic.ino
 // 20240325 Fake missing degree sign with small 'o', print only weather sensor data on LCD
+// 20240504 Added board initialization
 //
 // Notes:
 // - The character set does not provide a degrees sign
@@ -50,6 +51,7 @@
 #include <M5Unified.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
+#include "InitBoard.h"
 
 WeatherSensor ws;
 
@@ -57,6 +59,7 @@ void setup()
 {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
+    initBoard();
 
     Serial.printf("Starting execution...\n");
 

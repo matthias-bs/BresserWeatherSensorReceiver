@@ -43,6 +43,7 @@
 // 20220810 Changed to modified WeatherSensor class; fixed Soil Moisture Sensor Handling
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
+// 20240507 Added configuration of maximum number of sensors at run time
 //
 // ToDo:
 // -
@@ -85,7 +86,7 @@ void loop()
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");
     }
-    for (int i=0; i<NUM_SENSORS; i++) {
+    for (int i=0; i<ws.sensor.size(); i++) {
         Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
             (unsigned int)ws.sensor[i].sensor_id,
             ws.sensor[i].s_type,

@@ -111,6 +111,7 @@
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 // 20240504 Added board initialization
+// 20240507 Added configuration of maximum number of sensors at run time
 //
 // ToDo:
 //
@@ -152,11 +153,14 @@
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
-// Stop reception when data of at least one sensor is complete
-#define RX_STRATEGY DATA_COMPLETE
+// Maximum number of sensors (override )
+#define MAX_SENSORS 1
 
-// Stop reception when data of all (NUM_SENSORS) is complete
-// #define RX_STRATEGY (DATA_COMPLETE | DATA_ALL_SLOTS)
+// Stop reception when data of at least one sensor is complete
+#define RX_FLAGS DATA_COMPLETE
+
+// Stop reception when data of all (max_sensors) is complete
+//#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // See
 // https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
@@ -523,7 +527,7 @@ void publishWeatherdata(bool complete)
     // neither does MQTT Dashboard...
     // Therefore the JSON string is created manually.
 
-    for (int i = 0; i < NUM_SENSORS; i++)
+    for (int i = 0; i < weatherSensor.sensor.size(); i++)
     {
         // Reset string buffers
         mqtt_payload = "";
@@ -718,7 +722,7 @@ void publishWeatherdata(bool complete)
             log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload2.c_str());
             client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
         }
-    } // for (int i=0; i<NUM_SENSORS; i++)
+    } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 }
 
 //
@@ -775,6 +779,7 @@ void setup()
 
     mqtt_setup();
     weatherSensor.begin();
+    weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
 }
 
 /*!
@@ -837,7 +842,7 @@ void loop()
 #endif
 
     // Attempt to receive data set with timeout of <xx> s
-    decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_STRATEGY, 0, &clientLoopWrapper);
+    decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_FLAGS, 0, &clientLoopWrapper);
 #endif
 
 #ifdef LED_EN

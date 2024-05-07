@@ -37,6 +37,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20231027 Refactored sensor structure
 // 20240504 Added board initialization
+// 20240507 Added configuration of maximum number of sensors at run time
 //
 // ToDo:
 // -
@@ -58,7 +59,7 @@ WeatherSensor ws;
 
 void print_data(void)
 {
-  for (int i = 0; i < NUM_SENSORS; i++)
+  for (int i = 0; i < ws.sensor.size(); i++)
   {
     if (!ws.sensor[i].valid)
       continue;
@@ -165,7 +166,7 @@ void print_data(void)
       }
 #endif
       Serial.printf("\n");
-    } // for (int i=0; i<NUM_SENSORS; i++)
+    } // for (int i=0; i<ws.sensor.size(); i++)
   }   // void print_data(void)
 }
 

@@ -82,7 +82,6 @@ Some guesswork:
   * [Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing](#adafruit-feather-esp32-or-thingpulse-epulse-feather-with-adafruit-lora-radio-featherwing)
   * [Adafruit RFM95W LoRa Radio Transceiver Breakout](#adafruit-rfm95w-lora-radio-transceiver-breakout)
   * [DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz](#dfrobot-firebeetle-esp32-with-firebeetle-cover-lora-radio-868mhz)
-  * [Adafruit Feather 32u4 RFM95 LoRa Radio](#adafruit-feather-32u4-rfm95-lora-radio)
 * [Antennas and RF Connectors](#antennas-and-rf-connectors)
 * [Software Build Tutorial](#software-build-tutorial)
 * [Source Documentation](#source-documentation)
@@ -113,7 +112,6 @@ If this is not what you need, you have to switch to **Manual Configuration**
  | [M5Stack Core2](https://docs.m5stack.com/en/core/core2) with [M5Stack Module LoRa868](https://docs.m5stack.com/en/module/lora868)   | "M5Core2" | n.a.               | ARDUINO_M5STACK_CORE2   | SX1276<br>(RA-01H) | Only needed for LMIC - wiring on the LoRa868 Module: <br>DIO1 to GPIO35<br><br>"M5Unified" must be installed <br>`M5.begin()`is called to control power management |
  | [ESP32-S3 PowerFeather](https://www.powerfeather.dev/) with [Adafruit LoRa Radio FeatherWing](https://www.adafruit.com/product/3231) | "ESP32-S3 PowerFeather" | n.a.            | ARDUINO_ESP32S3_POWERFEATHER   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS<br><br>"PowerFeather-SDK" must be installed<br>`Board.init();` is called to control power management |
  | [Adafruit Feather RP2040 with Adafruit LoRa Radio FeatherWing](https://www.adafruit.com/product/4884)                                | "Adafruit Feather RP2040" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_RP2040   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>A to RST<br>B to DIO1<br>D to IRQ<br>E to CS<br><br>External voltage divider required for battery voltage measurement. |
- | [Adafruit Feather 32u4 RFM95 LoRa Radio](https://www.adafruit.com/product/3078)      | "Adafruit Feather 32u4" | n.a.                       | ARDUINO_AVR_FEATHER32U4     | SX1276 (RFM95W) | see [notes](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/README.md#adafruit-feather-32u4-rfm95-lora-radio)       |
 
 
 The preprocessor will provide some output regarding the selected configuration if enabled in the Arduino IDE's Preferences ("Verbose Output"), e.g. 
@@ -123,6 +121,9 @@ ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be us
 Receiver chip: [SX1276]
 Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
 ```
+
+> [!NOTE]
+> The AVR architecture &mdash; including Adafruit Feather 32u4 RFM95 LoRa Radio &mdash is no longer supported due to code size.
 
 ### User-Defined Configuration
 
@@ -352,22 +353,6 @@ Solder-Bridges on the Cover:
 * D3 to DIO0
 * D4 to CS
 * D5 to DIO1
-
-### Adafruit Feather 32u4 RFM95 LoRa Radio
-
-**Note: Make sure to use the 868MHz version!**
-
-**Note: Not recommended for new projects!**
-
-* [ADA3078](https://www.adafruit.com/product/3078) - 868/915 MHz version
-* Antenna
-
-Some restrictions apply:
-* Based on AVR ATmega32u4 clocked at 8 MHz
-* No WiFi
-* Basic SW example ([examples/BresserWeatherSensorFeather32u4](https://github.com/matthias-bs/BresserWeatherSensorReceiver/tree/main/examples/BresserWeatherSensorFeather32u4)) already uses 92% of available program memory (see [BUILD_AVR.md](BUILD_AVR.md) for additional hints)
-* Only a single pad for antenna
-* `WeatherUtils.h/.cpp`: `winddir_flt_to_str()` not implemented
 
 ## Antennas and RF Connectors
 

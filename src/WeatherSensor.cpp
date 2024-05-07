@@ -681,7 +681,7 @@ void WeatherSensor::setSensorsCfg(uint8_t maxSensors, uint8_t rxFlags)
 {
     cfgPrefs.begin("BWS-CFG", false);
     cfgPrefs.putUChar("maxsensors", maxSensors);
-    cfgPrefs.getUChar("rxflags", rxFlags);
+    cfgPrefs.putUChar("rxflags", rxFlags);
     cfgPrefs.end();
     log_d("max_sensors: %u", maxSensors);
     log_d("rx_flags: %u", rxFlags);

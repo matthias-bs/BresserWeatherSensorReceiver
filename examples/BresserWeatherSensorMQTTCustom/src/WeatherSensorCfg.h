@@ -59,6 +59,7 @@
 // 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
 // 20240417 Modified SENSOR_IDS_INC
 // 20240425 Added define variant ARDUINO_heltec_wifi_lora_32_V3
+// 20240507 Renamed NUM_SENSORS to MAX_SENSORS_DEFAULT
 //
 // ToDo:
 // -
@@ -73,7 +74,7 @@
 // ------------------------------------------------------------------------------------------------
 // --- Weather Sensors ---
 // ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
+#define MAX_SENSORS_DEFAULT 1       // Maximum number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC { 0x792882A2 }

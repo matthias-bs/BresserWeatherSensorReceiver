@@ -59,6 +59,8 @@
 // 20240415 Added pin definitions for ESP32-S3 PowerFeather with with RFM95W "FeatherWing" ADA3232
 // 20240417 Modified SENSOR_IDS_INC
 // 20240425 Added define variant ARDUINO_heltec_wifi_lora_32_V3
+// 20240507 Renamed NUM_SENSORS to MAX_SENSORS_DEFAULT
+//          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
 //
 // ToDo:
 // -
@@ -73,7 +75,7 @@
 // ------------------------------------------------------------------------------------------------
 // --- Weather Sensors ---
 // ------------------------------------------------------------------------------------------------
-#define NUM_SENSORS     1       // Number of sensors to be received
+#define MAX_SENSORS_DEFAULT 1       // Maximum number of sensors to be received
 
 // List of sensor IDs to be excluded - can be empty
 #define SENSOR_IDS_EXC { 0x792882A2 }
@@ -241,10 +243,6 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_AVR_FEATHER32U4)
-    #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
-    #define USE_SX1276
-
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
@@ -343,48 +341,6 @@
         #define log_v(...) {}
      #endif
 
-#endif
-
-
-//   Replacement for
-//   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
-//   on Arduino AVR:
-#if defined(ARDUINO_ARCH_AVR)
-    #define ARDUHAL_LOG_LEVEL_NONE      0
-    #define ARDUHAL_LOG_LEVEL_ERROR     1
-    #define ARDUHAL_LOG_LEVEL_WARN      2
-    #define ARDUHAL_LOG_LEVEL_INFO      3
-    #define ARDUHAL_LOG_LEVEL_DEBUG     4
-    #define ARDUHAL_LOG_LEVEL_VERBOSE   5
-
-    // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
-
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
-        #define log_e(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_e(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
-        #define log_w(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_w(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
-        #define log_i(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_i(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
-        #define log_d(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_d(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
-        #define log_v(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_v(...) {}
-     #endif
 #endif
 
 #if ( (defined(USE_CC1101) && defined(USE_SX1276)) || \
@@ -580,19 +536,6 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  2
-    
-#elif defined(ARDUINO_AVR_FEATHER32U4)
-    // Pinning for Adafruit Feather 32u4 
-    #define PIN_RECEIVER_CS   8
-
-    // CC1101: GDO0 / RFM95W/SX127x: G0
-    #define PIN_RECEIVER_IRQ  7
-
-    // CC1101: GDO2 / RFM95W/SX127x: G1 (not used)
-    #define PIN_RECEIVER_GPIO 99
-
-    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
-    #define PIN_RECEIVER_RST  4
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     // Use pinning for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232

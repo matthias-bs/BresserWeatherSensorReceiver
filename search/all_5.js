@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['findid_19',['findId',['../class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989',1,'WeatherSensor']]],
-  ['findtype_20',['findType',['../class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa',1,'WeatherSensor']]]
+  ['findid_20',['findId',['../class_weather_sensor.html#a0adf85658be20d05e43e34c6b728b989',1,'WeatherSensor']]],
+  ['findtype_21',['findType',['../class_weather_sensor.html#ac0d3ac40d2ac605badcbb8e1631d64fa',1,'WeatherSensor']]]
 ];

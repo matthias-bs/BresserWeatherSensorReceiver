@@ -161,14 +161,14 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="separator:aecf60e2ae2e51eff69fdd20b00f3f487"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:affeca257b06518b29519756a9e85a006"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#affeca257b06518b29519756a9e85a006">setSensorsExc</a> (uint8_t *bytes, uint8_t size)</td></tr>
 <tr class="separator:affeca257b06518b29519756a9e85a006"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34bf4076d17b00cedce3ca85ce78f665"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a34bf4076d17b00cedce3ca85ce78f665">setSensorsCfg</a> (uint8_t maxSensors, uint8_t <a class="el" href="class_weather_sensor.html#a3d8e81b016a72815676e93441642a8a8">rxFlags</a>)</td></tr>
-<tr class="separator:a34bf4076d17b00cedce3ca85ce78f665"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62203c24af7924cc8e86bdff40fb9281"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a62203c24af7924cc8e86bdff40fb9281">setSensorsCfg</a> (uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders=0xFF)</td></tr>
+<tr class="separator:a62203c24af7924cc8e86bdff40fb9281"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6f489c26a476d658c2ce5161ea48441"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ac6f489c26a476d658c2ce5161ea48441">getSensorsInc</a> (uint8_t *payload)</td></tr>
 <tr class="separator:ac6f489c26a476d658c2ce5161ea48441"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6ffcbf06bb5aea95203fbb3a53aaf3d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#af6ffcbf06bb5aea95203fbb3a53aaf3d">getSensorsExc</a> (uint8_t *payload)</td></tr>
 <tr class="separator:af6ffcbf06bb5aea95203fbb3a53aaf3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afcbc3f1154f0a26dd387bf8f4bce7d8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#afcbc3f1154f0a26dd387bf8f4bce7d8c">getSensorsCfg</a> (uint8_t &amp;maxSensors, uint8_t &amp;<a class="el" href="class_weather_sensor.html#a3d8e81b016a72815676e93441642a8a8">rxFlags</a>)</td></tr>
-<tr class="separator:afcbc3f1154f0a26dd387bf8f4bce7d8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9216b2bf75468c6141974c6f9519a30f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a9216b2bf75468c6141974c6f9519a30f">getSensorsCfg</a> (uint8_t &amp;max_sensors, uint8_t &amp;rx_flags, uint8_t &amp;en_decoders=_dummy_en_decoders)</td></tr>
+<tr class="separator:a9216b2bf75468c6141974c6f9519a30f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -184,6 +184,11 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cla
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a3d8e81b016a72815676e93441642a8a8">rxFlags</a></td></tr>
 <tr class="memdesc:a3d8e81b016a72815676e93441642a8a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) <br /></td></tr>
 <tr class="separator:a3d8e81b016a72815676e93441642a8a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a652b68eb82bf73157e591094bb8f4f42"><td class="memItemLeft" align="right" valign="top"><a id="a652b68eb82bf73157e591094bb8f4f42"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a652b68eb82bf73157e591094bb8f4f42">enDecoders</a> = 0xFF</td></tr>
+<tr class="memdesc:a652b68eb82bf73157e591094bb8f4f42"><td class="mdescLeft">&#160;</td><td class="mdescRight">enabled Decoders <br  />
+ <br /></td></tr>
+<tr class="separator:a652b68eb82bf73157e591094bb8f4f42"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Receive, decode and store Bresser <a class="el" href="struct_weather_sensor_1_1_weather.html">Weather</a> <a class="el" href="struct_weather_sensor_1_1_sensor.html" title="sensor data and status flags">Sensor</a> Data Uses CC1101 or SX1276 radio module for receiving FSK modulated signal at 868 MHz. </p>
@@ -460,8 +465,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a id="afcbc3f1154f0a26dd387bf8f4bce7d8c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afcbc3f1154f0a26dd387bf8f4bce7d8c">&#9670;&nbsp;</a></span>getSensorsCfg()</h2>
+<a id="a9216b2bf75468c6141974c6f9519a30f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9216b2bf75468c6141974c6f9519a30f">&#9670;&nbsp;</a></span>getSensorsCfg()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -470,13 +475,19 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
           <td class="memname">void WeatherSensor::getSensorsCfg </td>
           <td>(</td>
           <td class="paramtype">uint8_t &amp;&#160;</td>
-          <td class="paramname"><em>maxSensors</em>, </td>
+          <td class="paramname"><em>max_sensors</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t &amp;&#160;</td>
-          <td class="paramname"><em>rxFlags</em>&#160;</td>
+          <td class="paramname"><em>rx_flags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t &amp;&#160;</td>
+          <td class="paramname"><em>en_decoders</em> = <code>_dummy_en_decoders</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -488,8 +499,9 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <p>Get maximum number of sensors from Preferences</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">maxSensors</td><td>maximum number of sensors </td></tr>
-    <tr><td class="paramname">rxFlags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">max_sensors</td><td>maximum number of sensors </td></tr>
+    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">en_decoders</td><td>enabled decoders </td></tr>
   </table>
   </dd>
 </dl>
@@ -548,8 +560,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 
 </div>
 </div>
-<a id="a34bf4076d17b00cedce3ca85ce78f665"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a34bf4076d17b00cedce3ca85ce78f665">&#9670;&nbsp;</a></span>setSensorsCfg()</h2>
+<a id="a62203c24af7924cc8e86bdff40fb9281"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a62203c24af7924cc8e86bdff40fb9281">&#9670;&nbsp;</a></span>setSensorsCfg()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -558,13 +570,19 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
           <td class="memname">void WeatherSensor::setSensorsCfg </td>
           <td>(</td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>maxSensors</em>, </td>
+          <td class="paramname"><em>max_sensors</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>rxFlags</em>&#160;</td>
+          <td class="paramname"><em>rx_flags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>en_decoders</em> = <code>0xFF</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -576,8 +594,9 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <p>Set maximum number of sensors and store it in Preferences</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">maxSensors</td><td>maximum number of sensors </td></tr>
-    <tr><td class="paramname">rxFlags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">max_sensors</td><td>maximum number of sensors </td></tr>
+    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">en_decoders</td><td>enabled decoders </td></tr>
   </table>
   </dd>
 </dl>

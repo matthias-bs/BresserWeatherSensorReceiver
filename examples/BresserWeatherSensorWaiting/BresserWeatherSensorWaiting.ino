@@ -43,6 +43,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20231027 Refactored sensor structure
 // 20240504 Added board initialization
+// 20240507 Added configuration of maximum number of sensors at run time
 //
 // ToDo:
 // -
@@ -79,7 +80,7 @@ void loop()
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");
     }
-    for (int i=0; i<NUM_SENSORS; i++) {
+    for (int i=0; i<ws.sensor.size(); i++) {
         if (ws.sensor[i].valid) {
             Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
                 (unsigned int)ws.sensor[i].sensor_id,

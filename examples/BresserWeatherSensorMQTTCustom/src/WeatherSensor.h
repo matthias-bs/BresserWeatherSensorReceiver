@@ -77,6 +77,7 @@
 // 20240322 Added pin definitions for M5Stack Core2 with M5Stack Module LoRa868
 // 20240409 Added radioReset()
 // 20240417 Added sensor configuration at run time
+// 20240506 Changed sensor from array to std::vector, added getSensorCfg() / setSensorCfg()
 //
 // ToDo:
 // -
@@ -88,6 +89,7 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <string>
 #include <Preferences.h>
 #include <RadioLib.h>
 
@@ -138,9 +140,6 @@ typedef enum DecodeStatus {
 } DecodeStatus;
 
 
-#if !defined(ARDUINO_ARCH_AVR)
-#include <string>
-
 /*!
  * \struct SensorMap
  *
@@ -150,7 +149,7 @@ typedef struct SensorMap {
     uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
     std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
-#endif
+
 
 
 /*!
@@ -310,14 +309,17 @@ class WeatherSensor {
 
             Sensor ()
             {
+                #pragma GCC diagnostic push
+                #pragma GCC diagnostic ignored "-Wclass-memaccess"
                 memset(this, 0, sizeof(*this));
+                #pragma GCC diagnostic pop
             };
         };
 
-        typedef struct Sensor sensor_t;    //!< Shortcut for struct Sensor
-        sensor_t sensor[NUM_SENSORS];      //!< sensor data array
-        float    rssi = 0.0;               //!< received signal strength indicator in dBm
-
+        typedef struct Sensor sensor_t;            //!< Shortcut for struct Sensor
+        std::vector<sensor_t> sensor;              //!< sensor data array
+        float   rssi = 0.0;                        //!< received signal strength indicator in dBm
+        uint8_t rxFlags;                           //!< receive flags (see getData())
 
         /*!
         \brief Generates data otherwise received and decoded from a radio message.
@@ -337,7 +339,7 @@ class WeatherSensor {
         */
         void clearSlots(uint8_t type = 0xFF)
         {
-            for (int i=0; i< NUM_SENSORS; i++) {
+            for (int i=0; i<sensor.size(); i++) {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
                     sensor[i].valid    = false;
                     sensor[i].complete = false;
@@ -389,6 +391,13 @@ class WeatherSensor {
          */
         void setSensorsExc(uint8_t *bytes, uint8_t size);
 
+        /*!
+         * Set maximum number of sensors and store it in Preferences
+         * 
+         * \param maxSensors maximum number of sensors
+         * \param rxFlags receive flags (see getData())
+         */
+        void setSensorsCfg(uint8_t maxSensors, uint8_t rxFlags);
 
         /*!
          * Get sensors include list from Preferences
@@ -407,6 +416,14 @@ class WeatherSensor {
          * \returns size size in bytes
          */
         uint8_t getSensorsExc(uint8_t *payload);
+
+        /*!
+         * Get maximum number of  sensors from Preferences
+         *
+         * \param maxSensors maximum number of sensors
+         * \param rxFlags receive flags (see getData())
+         */
+        void getSensorsCfg(uint8_t &maxSensors, uint8_t &rxFlags);
 
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array

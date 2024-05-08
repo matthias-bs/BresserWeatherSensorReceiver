@@ -91,6 +91,7 @@
 // 20240417 Added sensor configuration at run time
 // 20240423 Implemented setting of sensor_ids_inc/sensor_ids_exc to empty if first value in
 //          Preferences is 0x00000000
+// 20240506 Changed sensor from array to std::vector, added getSensorsCfg() / setSensorsCfg()
 //
 // ToDo:
 // -
@@ -127,6 +128,12 @@ void
 
 int16_t WeatherSensor::begin(void)
 {
+    uint8_t maxSensors;
+    getSensorsCfg(maxSensors, rxFlags);
+    log_d("max_sensors: %u", maxSensors);
+    log_d("rx_flags: %u", rxFlags);
+    sensor.resize(maxSensors);
+
     // List of sensor IDs to be excluded - can be empty
     std::vector<uint32_t> sensor_ids_exc_def = SENSOR_IDS_EXC;
     initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
@@ -245,7 +252,8 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
         {
             bool all_slots_valid = true;
             bool all_slots_complete = true;
-            for (int i = 0; i < NUM_SENSORS; i++)
+
+            for (int i = 0; i < sensor.size(); i++)
             {
                 if (!sensor[i].valid)
                 {
@@ -281,7 +289,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                     radio.standby();
                     return true;
                 }
-            } // for (int i=0; i<NUM_SENSORS; i++)
+            } // for (int i=0; i<sensor.size(); i++)
 
             // All slots required (valid AND complete)
             if ((flags & DATA_ALL_SLOTS) && all_slots_valid && all_slots_complete)
@@ -489,7 +497,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
     // Search all slots
     int free_slot = -1;
     int update_slot = -1;
-    for (int i = 0; i < NUM_SENSORS; i++)
+    for (int i = 0; i < sensor.size(); i++)
     {
         log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
 
@@ -534,7 +542,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
 //
 int WeatherSensor::findId(uint32_t id)
 {
-    for (int i = 0; i < NUM_SENSORS; i++)
+    for (int i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].sensor_id == id))
             return i;
@@ -547,7 +555,7 @@ int WeatherSensor::findId(uint32_t id)
 //
 int WeatherSensor::findType(uint8_t type, uint8_t ch)
 {
-    for (int i = 0; i < NUM_SENSORS; i++)
+    for (int i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].s_type == type) &&
             ((ch == 0xFF) || (sensor[i].chan = ch)))
@@ -558,7 +566,7 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
 
 // Initialize list of sensor IDs
 void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint32_t> list_def, const char *key)
-{   
+{
     list.clear();
     cfgPrefs.begin("BWS-CFG", false);
     log_d("Key %s in preferences? %d", key, cfgPrefs.isKey(key));
@@ -568,7 +576,8 @@ void WeatherSensor::initList(std::vector<uint32_t> &list, const std::vector<uint
         log_d("Using sensor_ids_%s list from Preferences (%d bytes)", key, size);
         uint8_t buf[48];
         cfgPrefs.getBytes(key, buf, size);
-        if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+        if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0)
+        {
             size = 0;
         }
         for (size_t i = 0; i < size; i += 4)
@@ -606,7 +615,8 @@ void WeatherSensor::setSensorsInc(uint8_t *buf, uint8_t size)
     cfgPrefs.end();
 
     sensor_ids_inc.clear();
-    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0)
+    {
         size = 0;
     }
     for (size_t i = 0; i < size; i += 4)
@@ -640,7 +650,8 @@ void WeatherSensor::setSensorsExc(uint8_t *buf, uint8_t size)
     cfgPrefs.end();
 
     sensor_ids_exc.clear();
-    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0) {
+    if ((buf[0] | buf[1] | buf[2] | buf[3]) == 0)
+    {
         size = 0;
     }
     for (size_t i = 0; i < size; i += 4)
@@ -663,6 +674,27 @@ uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
     log_d("size: %d", size);
 
     return size;
+}
+
+// Set sensor configuration and store in in Preferences
+void WeatherSensor::setSensorsCfg(uint8_t maxSensors, uint8_t rxFlags)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    cfgPrefs.putUChar("maxsensors", maxSensors);
+    cfgPrefs.getUChar("rxflags", rxFlags);
+    cfgPrefs.end();
+    log_d("max_sensors: %u", maxSensors);
+    log_d("rx_flags: %u", rxFlags);
+    sensor.resize(maxSensors);
+}
+
+// Get sensor configuration from Preferences
+void WeatherSensor::getSensorsCfg(uint8_t &maxSensors, uint8_t &rxFlags)
+{
+    cfgPrefs.begin("BWS-CFG", false);
+    maxSensors = cfgPrefs.getUChar("maxsensors", MAX_SENSORS_DEFAULT);
+    rxFlags = cfgPrefs.getUChar("rxflags", DATA_COMPLETE);
+    cfgPrefs.end();
 }
 
 //

@@ -80,7 +80,7 @@ void loop()
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");
     }
-    for (int i=0; i<ws.sensor.size(); i++) {
+    for (size_t i=0; i<ws.sensor.size(); i++) {
         if (ws.sensor[i].valid) {
             Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
                 (unsigned int)ws.sensor[i].sensor_id,

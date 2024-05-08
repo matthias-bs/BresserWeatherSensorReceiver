@@ -59,7 +59,7 @@ WeatherSensor ws;
 
 void print_data(void)
 {
-  for (int i = 0; i < ws.sensor.size(); i++)
+  for (size_t i = 0; i < ws.sensor.size(); i++)
   {
     if (!ws.sensor[i].valid)
       continue;
@@ -166,7 +166,7 @@ void print_data(void)
       }
 #endif
       Serial.printf("\n");
-    } // for (int i=0; i<ws.sensor.size(); i++)
+    } // for (size_t i=0; i<ws.sensor.size(); i++)
   }   // void print_data(void)
 }
 

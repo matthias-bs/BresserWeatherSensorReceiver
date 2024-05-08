@@ -55,7 +55,6 @@
 #include "WeatherSensor.h"
 #include "InitBoard.h"
 
-
 WeatherSensor ws;
 
 // Example for callback function which is executed while waiting for radio messages
@@ -65,14 +64,14 @@ void loopCallback(void)
     Serial.print(".");
 }
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 
     initBoard();
     ws.begin();
 }
-
 
 void loop()
 {
@@ -83,94 +82,116 @@ void loop()
     bool decode_ok = ws.getData(60000, DATA_COMPLETE, 0, &loopCallback);
     Serial.println();
 
-    if (!decode_ok) {
+    if (!decode_ok)
+    {
         Serial.printf("Sensor timeout\n");
     }
-    for (int i=0; i<ws.sensor.size(); i++) {
+    for (size_t i = 0; i < ws.sensor.size(); i++)
+    {
         Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
-            (unsigned int)ws.sensor[i].sensor_id,
-            ws.sensor[i].s_type,
-            ws.sensor[i].chan,
-            ws.sensor[i].startup,
-            ws.sensor[i].battery_ok ? "OK " : "Low",
-            ws.sensor[i].rssi);
-           
-        if (ws.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {
+                      (unsigned int)ws.sensor[i].sensor_id,
+                      ws.sensor[i].s_type,
+                      ws.sensor[i].chan,
+                      ws.sensor[i].startup,
+                      ws.sensor[i].battery_ok ? "OK " : "Low",
+                      ws.sensor[i].rssi);
+
+        if (ws.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
+        {
             // Lightning Sensor
             Serial.printf("Lightning Counter: [%3d] ", ws.sensor[i].lgt.strike_count);
-            if (ws.sensor[i].lgt.distance_km != 0) {
+            if (ws.sensor[i].lgt.distance_km != 0)
+            {
                 Serial.printf("Distance: [%2dkm] ", ws.sensor[i].lgt.distance_km);
-            } else {
+            }
+            else
+            {
                 Serial.printf("Distance: [----] ");
             }
             Serial.printf("unknown1: [0x%03X] ", ws.sensor[i].lgt.unknown1);
             Serial.printf("unknown2: [0x%04X]\n", ws.sensor[i].lgt.unknown2);
-
         }
-        else if (ws.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
+        {
             // Water Leakage Sensor
             Serial.printf("Leakage: [%-5s]\n", (ws.sensor[i].leak.alarm) ? "ALARM" : "OK");
-      
         }
-        else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
+        {
             // Air Quality (Particular Matter) Sensor
             Serial.printf("PM2.5: [%uµg/m³] ", ws.sensor[i].pm.pm_2_5);
             Serial.printf("PM10: [%uµg/m³]\n", ws.sensor[i].pm.pm_10);
-
         }
-        else if (ws.sensor[i].s_type == SENSOR_TYPE_SOIL) {
+        else if (ws.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        {
             Serial.printf("Temp: [%5.1fC] ", ws.sensor[i].soil.temp_c);
             Serial.printf("Moisture: [%2d%%]\n", ws.sensor[i].soil.moisture);
-
-        } else {
+        }
+        else
+        {
             // Any other (weather-like) sensor is very similar
-            if (ws.sensor[i].w.temp_ok) {
+            if (ws.sensor[i].w.temp_ok)
+            {
                 Serial.printf("Temp: [%5.1fC] ", ws.sensor[i].w.temp_c);
-            } else {
+            }
+            else
+            {
                 Serial.printf("Temp: [---.-C] ");
             }
-            if (ws.sensor[i].w.humidity_ok) {
+            if (ws.sensor[i].w.humidity_ok)
+            {
                 Serial.printf("Hum: [%3d%%] ", ws.sensor[i].w.humidity);
             }
-            else {
+            else
+            {
                 Serial.printf("Hum: [---%%] ");
             }
-            if (ws.sensor[i].w.wind_ok) {
+            if (ws.sensor[i].w.wind_ok)
+            {
                 Serial.printf("Wmax: [%4.1fm/s] Wavg: [%4.1fm/s] Wdir: [%5.1fdeg] ",
-                        ws.sensor[i].w.wind_gust_meter_sec,
-                        ws.sensor[i].w.wind_avg_meter_sec,
-                        ws.sensor[i].w.wind_direction_deg);
-            } else {
+                              ws.sensor[i].w.wind_gust_meter_sec,
+                              ws.sensor[i].w.wind_avg_meter_sec,
+                              ws.sensor[i].w.wind_direction_deg);
+            }
+            else
+            {
                 Serial.printf("Wmax: [--.-m/s] Wavg: [--.-m/s] Wdir: [---.-deg] ");
             }
-            if (ws.sensor[i].w.rain_ok) {
-                Serial.printf("Rain: [%7.1fmm] ",  
-                    ws.sensor[i].w.rain_mm);
-            } else {
-                Serial.printf("Rain: [-----.-mm] "); 
+            if (ws.sensor[i].w.rain_ok)
+            {
+                Serial.printf("Rain: [%7.1fmm] ",
+                              ws.sensor[i].w.rain_mm);
             }
-        
-            #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
-            if (ws.sensor[i].w.uv_ok) {
+            else
+            {
+                Serial.printf("Rain: [-----.-mm] ");
+            }
+
+#if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+            if (ws.sensor[i].w.uv_ok)
+            {
                 Serial.printf("UVidx: [%1.1f] ",
-                    ws.sensor[i].w.uv);
+                              ws.sensor[i].w.uv);
             }
-            else {
+            else
+            {
                 Serial.printf("UVidx: [-.-%%] ");
             }
-            #endif
-            #ifdef BRESSER_7_IN_1
-            if (ws.sensor[i].w.light_ok) {
+#endif
+#ifdef BRESSER_7_IN_1
+            if (ws.sensor[i].w.light_ok)
+            {
                 Serial.printf("Light: [%2.1fKlux] ",
-                    ws.sensor[i].w.light_klx);
+                              ws.sensor[i].w.light_klx);
             }
-            else {
+            else
+            {
                 Serial.printf("Light: [--.-Klux] ");
             }
-            #endif
+#endif
             Serial.printf("\n");
-    
-    } // if (decode_status == DECODE_OK)
+
+        } // if (decode_status == DECODE_OK)
     }
     delay(100);
 } // loop()

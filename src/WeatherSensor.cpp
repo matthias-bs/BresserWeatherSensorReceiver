@@ -92,6 +92,7 @@
 // 20240423 Implemented setting of sensor_ids_inc/sensor_ids_exc to empty if first value in
 //          Preferences is 0x00000000
 // 20240506 Changed sensor from array to std::vector, added getSensorsCfg() / setSensorsCfg()
+// 20240507 Added configuration of enabled decoders at run time
 //
 // ToDo:
 // -
@@ -129,9 +130,10 @@ void
 int16_t WeatherSensor::begin(void)
 {
     uint8_t maxSensors;
-    getSensorsCfg(maxSensors, rxFlags);
+    getSensorsCfg(maxSensors, rxFlags, enDecoders);
     log_d("max_sensors: %u", maxSensors);
     log_d("rx_flags: %u", rxFlags);
+    log_d("en_decoders: %u", enDecoders);
     sensor.resize(maxSensors);
 
     // List of sensor IDs to be excluded - can be empty
@@ -358,43 +360,53 @@ DecodeStatus WeatherSensor::decodeMessage(const uint8_t *msg, uint8_t msgSize)
     DecodeStatus decode_res = DECODE_INVALID;
 
 #ifdef BRESSER_7_IN_1
-    decode_res = decodeBresser7In1Payload(msg, msgSize);
-    if (decode_res == DECODE_OK ||
-        decode_res == DECODE_FULL ||
-        decode_res == DECODE_SKIP)
-    {
-        return decode_res;
+    if (enDecoders & DECODER_7IN1) {
+        decode_res = decodeBresser7In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP)
+        {
+            return decode_res;
+        }
     }
 #endif
 #ifdef BRESSER_6_IN_1
-    decode_res = decodeBresser6In1Payload(msg, msgSize);
-    if (decode_res == DECODE_OK ||
-        decode_res == DECODE_FULL ||
-        decode_res == DECODE_SKIP)
-    {
-        return decode_res;
+    if (enDecoders & DECODER_6IN1) {
+        decode_res = decodeBresser6In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP)
+        {
+            return decode_res;
+        }
     }
 #endif
 #ifdef BRESSER_5_IN_1
-    decode_res = decodeBresser5In1Payload(msg, msgSize);
-    if (decode_res == DECODE_OK ||
-        decode_res == DECODE_FULL ||
-        decode_res == DECODE_SKIP)
-    {
-        return decode_res;
+    if (enDecoders & DECODER_5IN1) {
+        decode_res = decodeBresser5In1Payload(msg, msgSize);
+        if (decode_res == DECODE_OK ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP)
+        {
+            return decode_res;
+        }
     }
 #endif
 #ifdef BRESSER_LIGHTNING
-    decode_res = decodeBresserLightningPayload(msg, msgSize);
-    if (decode_res == DECODE_OK ||
-        decode_res == DECODE_FULL ||
-        decode_res == DECODE_SKIP)
-    {
-        return decode_res;
+    if (enDecoders & DECODER_LIGHTNING) {
+        decode_res = decodeBresserLightningPayload(msg, msgSize);
+        if (decode_res == DECODE_OK ||
+            decode_res == DECODE_FULL ||
+            decode_res == DECODE_SKIP)
+        {
+            return decode_res;
+        }
     }
 #endif
 #ifdef BRESSER_LEAKAGE
-    decode_res = decodeBresserLeakagePayload(msg, msgSize);
+    if (enDecoders & DECODER_LEAKAGE) {
+        decode_res = decodeBresserLeakagePayload(msg, msgSize);
+    }
 #endif
     return decode_res;
 }
@@ -677,23 +689,28 @@ uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
 }
 
 // Set sensor configuration and store in in Preferences
-void WeatherSensor::setSensorsCfg(uint8_t maxSensors, uint8_t rxFlags)
+void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders)
 {
+    rxFlags = rx_flags;
+    enDecoders = enDecoders;
     cfgPrefs.begin("BWS-CFG", false);
-    cfgPrefs.putUChar("maxsensors", maxSensors);
-    cfgPrefs.putUChar("rxflags", rxFlags);
+    cfgPrefs.putUChar("maxsensors", max_sensors);
+    cfgPrefs.putUChar("rxflags", rx_flags);
+    cfgPrefs.putUChar("endec", en_decoders);
     cfgPrefs.end();
-    log_d("max_sensors: %u", maxSensors);
+    log_d("max_sensors: %u", max_sensors);
     log_d("rx_flags: %u", rxFlags);
-    sensor.resize(maxSensors);
+    log_d("enabled_decoders: %u", enDecoders);
+    sensor.resize(max_sensors);
 }
 
 // Get sensor configuration from Preferences
-void WeatherSensor::getSensorsCfg(uint8_t &maxSensors, uint8_t &rxFlags)
+void WeatherSensor::getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders)
 {
     cfgPrefs.begin("BWS-CFG", false);
-    maxSensors = cfgPrefs.getUChar("maxsensors", MAX_SENSORS_DEFAULT);
-    rxFlags = cfgPrefs.getUChar("rxflags", DATA_COMPLETE);
+    max_sensors = cfgPrefs.getUChar("maxsensors", MAX_SENSORS_DEFAULT);
+    rx_flags = cfgPrefs.getUChar("rxflags", DATA_COMPLETE);
+    en_decoders = cfgPrefs.getUChar("endec", 0xFF);
     cfgPrefs.end();
 }
 

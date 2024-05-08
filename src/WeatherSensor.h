@@ -78,6 +78,7 @@
 // 20240409 Added radioReset()
 // 20240417 Added sensor configuration at run time
 // 20240506 Changed sensor from array to std::vector, added getSensorCfg() / setSensorCfg()
+// 20240507 Added configuration of enabled decoders at run time
 //
 // ToDo:
 // -
@@ -131,6 +132,13 @@
 #define DATA_TYPE               0x2     // at least one slot with specific sensor type
 #define DATA_ALL_SLOTS          0x8     // all slots completed
 
+// Flags for checking enabled decoders
+#define DECODER_5IN1            0x01
+#define DECODER_6IN1            0x02
+#define DECODER_7IN1            0x04
+#define DECODER_LIGHTNING       0x08
+#define DECODER_LEAKAGE         0x10
+
 // Message buffer size
 #define MSG_BUF_SIZE            27
 
@@ -163,6 +171,7 @@ class WeatherSensor {
         Preferences cfgPrefs; //!< Preferences (stored in flash memory)
         std::vector<uint32_t> sensor_ids_inc;
         std::vector<uint32_t> sensor_ids_exc;
+        static uint8_t _dummy_en_decoders;
 
     public:
         /*!
@@ -320,6 +329,7 @@ class WeatherSensor {
         std::vector<sensor_t> sensor;              //!< sensor data array
         float   rssi = 0.0;                        //!< received signal strength indicator in dBm
         uint8_t rxFlags;                           //!< receive flags (see getData())
+        uint8_t enDecoders = 0xFF;                 //!< enabled Decoders                     
 
         /*!
         \brief Generates data otherwise received and decoded from a radio message.
@@ -394,10 +404,11 @@ class WeatherSensor {
         /*!
          * Set maximum number of sensors and store it in Preferences
          * 
-         * \param maxSensors maximum number of sensors
-         * \param rxFlags receive flags (see getData())
+         * \param max_sensors maximum number of sensors
+         * \param rx_flags receive flags (see getData())
+         * \param en_decoders enabled decoders
          */
-        void setSensorsCfg(uint8_t maxSensors, uint8_t rxFlags);
+        void setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders = 0xFF);
 
         /*!
          * Get sensors include list from Preferences
@@ -420,10 +431,11 @@ class WeatherSensor {
         /*!
          * Get maximum number of  sensors from Preferences
          *
-         * \param maxSensors maximum number of sensors
-         * \param rxFlags receive flags (see getData())
+         * \param max_sensors maximum number of sensors
+         * \param rx_flags receive flags (see getData())
+         * \param en_decoders enabled decoders
          */
-        void getSensorsCfg(uint8_t &maxSensors, uint8_t &rxFlags);
+        void getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders = _dummy_en_decoders);
 
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array

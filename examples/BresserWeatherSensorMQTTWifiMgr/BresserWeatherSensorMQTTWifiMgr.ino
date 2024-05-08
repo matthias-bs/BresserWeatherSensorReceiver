@@ -716,7 +716,7 @@ void publishWeatherdata(bool complete)
     // neither does MQTT Dashboard...
     // Therefore the JSON string is created manually.
 
-    for (int i = 0; i < weatherSensor.sensor.size(); i++)
+    for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
         // Reset string buffers
         mqtt_payload = "";

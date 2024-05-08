@@ -17,12 +17,15 @@ var class_weather_sensor =
     [ "genMessage", "class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0", null ],
     [ "getData", "class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a", null ],
     [ "getMessage", "class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf", null ],
+    [ "getSensorsCfg", "class_weather_sensor.html#afcbc3f1154f0a26dd387bf8f4bce7d8c", null ],
     [ "getSensorsExc", "class_weather_sensor.html#af6ffcbf06bb5aea95203fbb3a53aaf3d", null ],
     [ "getSensorsInc", "class_weather_sensor.html#ac6f489c26a476d658c2ce5161ea48441", null ],
     [ "radioReset", "class_weather_sensor.html#a2cb2e1d7ffb2aa6b641563772c72be20", null ],
+    [ "setSensorsCfg", "class_weather_sensor.html#a34bf4076d17b00cedce3ca85ce78f665", null ],
     [ "setSensorsExc", "class_weather_sensor.html#affeca257b06518b29519756a9e85a006", null ],
     [ "setSensorsInc", "class_weather_sensor.html#aecf60e2ae2e51eff69fdd20b00f3f487", null ],
     [ "sleep", "class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794", null ],
     [ "rssi", "class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e", null ],
-    [ "sensor", "class_weather_sensor.html#ac3edc5eaae93e8289f0267d56fa0a44a", null ]
+    [ "rxFlags", "class_weather_sensor.html#a3d8e81b016a72815676e93441642a8a8", null ],
+    [ "sensor", "class_weather_sensor.html#ae732ec52236b0a6232e95df8f73934ee", null ]
 ];

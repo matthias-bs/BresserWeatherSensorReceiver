@@ -349,7 +349,7 @@ class WeatherSensor {
         */
         void clearSlots(uint8_t type = 0xFF)
         {
-            for (int i=0; i<sensor.size(); i++) {
+            for (size_t i=0; i<sensor.size(); i++) {
                 if ((type == 0xFF) || (sensor[i].s_type == type)) {
                     sensor[i].valid    = false;
                     sensor[i].complete = false;

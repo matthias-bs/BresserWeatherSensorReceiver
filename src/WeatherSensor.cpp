@@ -255,7 +255,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
             bool all_slots_valid = true;
             bool all_slots_complete = true;
 
-            for (int i = 0; i < sensor.size(); i++)
+            for (size_t i = 0; i < sensor.size(); i++)
             {
                 if (!sensor[i].valid)
                 {
@@ -291,7 +291,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
                     radio.standby();
                     return true;
                 }
-            } // for (int i=0; i<sensor.size(); i++)
+            } // for (size_t i=0; i<sensor.size(); i++)
 
             // All slots required (valid AND complete)
             if ((flags & DATA_ALL_SLOTS) && all_slots_valid && all_slots_complete)
@@ -509,7 +509,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
     // Search all slots
     int free_slot = -1;
     int update_slot = -1;
-    for (int i = 0; i < sensor.size(); i++)
+    for (size_t i = 0; i < sensor.size(); i++)
     {
         log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
 
@@ -554,7 +554,7 @@ int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
 //
 int WeatherSensor::findId(uint32_t id)
 {
-    for (int i = 0; i < sensor.size(); i++)
+    for (size_t i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].sensor_id == id))
             return i;
@@ -567,7 +567,7 @@ int WeatherSensor::findId(uint32_t id)
 //
 int WeatherSensor::findType(uint8_t type, uint8_t ch)
 {
-    for (int i = 0; i < sensor.size(); i++)
+    for (size_t i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].s_type == type) &&
             ((ch == 0xFF) || (sensor[i].chan = ch)))

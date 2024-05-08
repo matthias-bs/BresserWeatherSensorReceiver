@@ -93,6 +93,7 @@
 //          Preferences is 0x00000000
 // 20240506 Changed sensor from array to std::vector, added getSensorsCfg() / setSensorsCfg()
 // 20240507 Added configuration of enabled decoders at run time
+// 20240508 Fixed configuration of enabled decoders at run time
 //
 // ToDo:
 // -
@@ -692,7 +693,7 @@ uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
 void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders)
 {
     rxFlags = rx_flags;
-    enDecoders = enDecoders;
+    enDecoders = en_decoders;
     cfgPrefs.begin("BWS-CFG", false);
     cfgPrefs.putUChar("maxsensors", max_sensors);
     cfgPrefs.putUChar("rxflags", rx_flags);

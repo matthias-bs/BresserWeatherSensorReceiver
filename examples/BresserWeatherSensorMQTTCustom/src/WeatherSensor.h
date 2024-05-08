@@ -171,7 +171,6 @@ class WeatherSensor {
         Preferences cfgPrefs; //!< Preferences (stored in flash memory)
         std::vector<uint32_t> sensor_ids_inc;
         std::vector<uint32_t> sensor_ids_exc;
-        static uint8_t _dummy_en_decoders;
 
     public:
         /*!
@@ -435,7 +434,7 @@ class WeatherSensor {
          * \param rx_flags receive flags (see getData())
          * \param en_decoders enabled decoders
          */
-        void getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders = _dummy_en_decoders);
+        void getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders);
 
     private:
         struct Sensor *pData; //!< pointer to slot in sensor data array

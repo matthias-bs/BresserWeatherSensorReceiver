@@ -123,7 +123,7 @@ Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
 ```
 
 > [!NOTE]
-> The AVR architecture &mdash; including Adafruit Feather 32u4 RFM95 LoRa Radio &mdash is no longer supported due to code size.
+> The AVR architecture &mdash; including Adafruit Feather 32u4 RFM95 LoRa Radio &mdash; is no longer supported due to code size.
 
 ### User-Defined Configuration
 

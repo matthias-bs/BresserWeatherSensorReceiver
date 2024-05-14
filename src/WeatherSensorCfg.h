@@ -61,6 +61,7 @@
 // 20240425 Added define variant ARDUINO_heltec_wifi_lora_32_V3
 // 20240507 Renamed NUM_SENSORS to MAX_SENSORS_DEFAULT
 //          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
+// 20240514 Added pin definitions for DFRobot FireBeetle 2 ESP32-E
 //
 // ToDo:
 // -
@@ -182,6 +183,12 @@
 // This define is set by selecting "M5Core2" in the Arduino IDE
 //#define ARDUINO_M5STACK_CORE2
 
+// FireBeetle 2 ESP32-E
+// https://github.com/espressif/arduino-esp32/blob/master/variants/dfrobot_firebeetle2_esp32e/pins_arduino.h
+//
+// This define is set by selecting "FireBeetle 2 ESP32-E" in the Arduino IDE
+//#define ARDUINO_DFROBOT_FIREBEETLE_2_ESP32E
+
 #if defined(ARDUINO_TTGO_LoRa32_V1)
     #pragma message("ARDUINO_TTGO_LoRa32_V1 defined; using on-board transceiver")
     #define USE_SX1276
@@ -247,6 +254,11 @@
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
+
+#elif defined(ARDUINO_DFROBOT_FIREBEETLE_2_ESP32E)
+    #pragma message("DFROBOT_FIREBEETLE_2_ESP32E defined; assuming this is a FireBeetle 2 ESP32-E with FireBeetle Cover LoRa")
+    #define USE_SX1276
+    #pragma message("Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1")
 
 #elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
     //#define LORAWAN_NODE
@@ -389,6 +401,18 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  25 // D2
+
+#elif defined(ARDUINO_DFROBOT_FIREBEETLE_2_ESP32E)
+    #define PIN_RECEIVER_CS   34
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  39
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 35
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  36
 
 #elif defined(ARDUINO_TTGO_LoRa32_V1) || defined(ARDUINO_TTGO_LoRa32_V2)
     // Use pinning for LILIGO TTGO LoRa32-OLED

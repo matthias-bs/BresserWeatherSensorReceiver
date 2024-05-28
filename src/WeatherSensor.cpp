@@ -98,6 +98,7 @@
 //          - Reception/utility part (this file)
 //          - Sensor data decoding functions (WeatherSensorDecoders.cpp)
 //          - Run-time configuration functions (WeatherSensorConfig.cpp)
+// 20240528 Fixed channel comparison in findType()
 //
 // ToDo:
 // -
@@ -441,7 +442,7 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
     for (size_t i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].s_type == type) &&
-            ((ch == 0xFF) || (sensor[i].chan = ch)))
+            ((ch == 0xFF) || (sensor[i].chan == ch)))
             return i;
     }
     return -1;

@@ -235,7 +235,7 @@ class WeatherSensor {
             float    temp_c = 0.0;            //!< temperature in degC
             float    light_klx = 0.0;         //!< Light KLux (only 7-in-1)
             float    light_lux = 0.0;         //!< Light lux (only 7-in-1)
-            float    uv = 0.0;                //!< uv radiation (only 6-in-1)
+            float    uv = 0.0;                //!< uv radiation (only 6-in-1 & 7-in-1)
             float    rain_mm = 0.0;           //!< rain gauge level in mm
             #ifdef WIND_DATA_FLOATINGPOINT   
             float    wind_direction_deg = 0.0;  //!< wind direction in deg
@@ -274,7 +274,7 @@ class WeatherSensor {
             uint16_t pm_1_0;                //!< air quality PM1.0 in µg/m³
             uint16_t pm_2_5;                //!< air quality PM2.5 in µg/m³
             uint16_t pm_10;                 //!< air quality PM10  in µg/m³
-            uint16_t pm_1_0_init;           //!< measurement value invalid due to initialization
+            bool     pm_1_0_init;           //!< measurement value invalid due to initialization
             bool     pm_2_5_init;           //!< measurement value invalid due to initialization
             bool     pm_10_init;            //!< measurement value invalid due to initialization
         };
@@ -285,7 +285,7 @@ class WeatherSensor {
         };
 
         struct AirVOC {
-            uint16_t hcho_ppb;              //!< formaldehyde concentrartion in ppb
+            uint16_t hcho_ppb;              //!< formaldehyde concentration in ppb
             uint8_t voc_level;              //!< volatile organic oompounds; 1 - bad air quality .. 5 - very good air quality
             bool hcho_init;                 //!< measurement value invalid due to initialization
             bool voc_init;                  //!< measurement value invalid due to initialization

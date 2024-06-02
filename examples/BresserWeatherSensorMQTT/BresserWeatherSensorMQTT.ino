@@ -148,7 +148,7 @@
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 #define USE_SECUREWIFI        // use secure WIFI
-// #define USE_WIFI              // use non-secure WIFI
+//#define USE_WIFI              // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
@@ -186,10 +186,10 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #endif
 
 #if defined(ESP32)
-#if defined(USE_WIFI)
 #include <WiFi.h>
+#if defined(USE_WIFI)
 #elif defined(USE_SECUREWIFI)
-#include <WiFiClientSecure.h>
+#include <NetworkClientSecure.h>
 #endif
 #elif defined(ESP8266)
 #include <ESP8266WiFi.h>
@@ -326,7 +326,7 @@ char Hostname[HOSTNAME_SIZE];
 #if defined(USE_WIFI)
 WiFiClient net;
 #elif defined(USE_SECUREWIFI)
-WiFiClientSecure net;
+NetworkClientSecure net;
 #endif
 #elif defined(ESP8266)
 #if defined(USE_WIFI)

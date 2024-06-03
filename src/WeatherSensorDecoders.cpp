@@ -314,7 +314,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     // significant bits is unknown.
     // The Bresser Lightning Sensor has type 0x9, too -
     // we change the type to SENSOR_TYPE_WEATHER0 here to simplify processing by the application.
-    if ((sensor_type >= 0x39) && (sensor_type <= 0x3b))
+    if ((type_tmp >= 0x39) && (type_tmp <= 0x3b))
     {
         // rescale the rain sensor readings
         sensor[slot].w.rain_mm *= 2.5;

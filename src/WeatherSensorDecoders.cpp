@@ -45,6 +45,10 @@
 // History:
 //
 // 20240513 Created from WeatherSensor.cpp
+// 20240603 Updated decodeBresser5In1Payload() according to
+//          https://github.com/merbanan/rtl_433/commit/271bed886c5b1ff7c1a47e6cf1366e397aeb8364
+//          and
+//          https://github.com/merbanan/rtl_433/commit/9928efe5c8d55e9ca01f1ebab9e8b20b0e7ba01e
 //
 // ToDo:
 // -
@@ -198,17 +202,19 @@ DecodeStatus WeatherSensor::decodeMessage(const uint8_t *msg, uint8_t msgSize)
 // Example input data:
 //   EA EC 7F EB 5F EE EF FA FE 76 BB FA FF 15 13 80 14 A0 11 10 05 01 89 44 05 00
 //   CC CC CC CC CC CC CC CC CC CC CC CC CC uu II sS GG DG WW  W TT  T HH RR RR Bt
-// - C = Check, inverted data of 13 byte further
+// - C = check, inverted data of 13 byte further
 // - uu = checksum (number/count of set bits within bytes 14-25)
 // - I = station ID (maybe)
+// - s = startup, MSb is 0b0 after power-on/reset and 0b1 after 1 hour
+// - S = sensor type, 0x9/0xA/0xB for Bresser Professional Rain Gauge
 // - G = wind gust in 1/10 m/s, normal binary coded, GGxG = 0x76D1 => 0x0176 = 256 + 118 = 374 => 37.4 m/s.  MSB is out of sequence.
 // - D = wind direction 0..F = N..NNE..E..S..W..NNW
 // - W = wind speed in 1/10 m/s, BCD coded, WWxW = 0x7512 => 0x0275 = 275 => 27.5 m/s. MSB is out of sequence.
-// - T = temperature in 1/10 °C, BCD coded, TTxT = 1203 => 31.2 °C
+// - T = temperature in 1/10 °C, BCD coded, TTxT = 1203 => 31.2 °C, 0xf on error
 // - t = temperature sign, minus if unequal 0
-// - H = humidity in percent, BCD coded, HH = 23 => 23 %
+// - H = humidity in percent, BCD coded, HH = 23 => 23 %, 0xf on error
 // - R = rain in mm, BCD coded, RRRR = 1203 => 031.2 mm
-// - B = Battery. 0=Ok, 8=Low.
+// - B = battery. 0=Ok, 8=Low
 // - s = startup, 0 after power-on/reset / 8 after 1 hour
 // - S = sensor type, only low nibble used, 0x9 for Bresser Professional Rain Gauge
 //
@@ -258,7 +264,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     }
 
     uint8_t id_tmp = msg[14];
-    uint8_t type_tmp = msg[15] & 0xF;
+    uint8_t type_tmp = msg[15] & 0x7F;
     DecodeStatus status;
 
     // Find appropriate slot in sensor data array and update <status>
@@ -303,9 +309,12 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].w.rain_mm = rain_raw * 0.1f;
 
     // Check if the message is from a Bresser Professional Rain Gauge
-    // This sensor has the same type as the Bresser Lightning Sensor -
-    // we change this to SENSOR_TYPE_WEATHER0 to simplify processing by the application.
-    if (type_tmp == 0x9)
+    // The sensor type for the Rain Gauge can be either 0x9, 0xA, or 0xB. The
+    // value changes between resets, and the meaning of the two least
+    // significant bits is unknown.
+    // The Bresser Lightning Sensor has type 0x9, too -
+    // we change the type to SENSOR_TYPE_WEATHER0 here to simplify processing by the application.
+    if ((type_tmp >= 0x39) && (type_tmp <= 0x3b))
     {
         // rescale the rain sensor readings
         sensor[slot].w.rain_mm *= 2.5;
@@ -318,11 +327,11 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     else
     {
         sensor[slot].w.humidity_ok = true;
-        sensor[slot].w.wind_ok = true;
+        sensor[slot].w.wind_ok = (msg[22] & 0x0f) <= 9; // BCD, 0x0f on error
     }
 
     sensor[slot].s_type = type_tmp;
-    sensor[slot].w.temp_ok = true;
+    sensor[slot].w.temp_ok = (msg[20] & 0x0f) <= 9; // BCD, 0x0f on error
     sensor[slot].w.light_ok = false;
     sensor[slot].w.uv_ok = false;
     sensor[slot].w.rain_ok = true;

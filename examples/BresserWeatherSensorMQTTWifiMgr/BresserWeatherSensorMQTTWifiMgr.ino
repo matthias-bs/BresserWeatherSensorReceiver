@@ -98,6 +98,7 @@
 // 20240503 Fixed setting of RTC via SNTP in case on non-secure WiFi config
 // 20240504 Added board initialization
 // 20240507 Added configuration of maximum number of sensors at run time
+// 20240603 Modified for arduino-esp32 v3.0.0
 //
 // ToDo:
 //
@@ -1102,7 +1103,7 @@ void loop()
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();
         client.disconnect();
-        client.loop();
+        net.stop();
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);
 #endif

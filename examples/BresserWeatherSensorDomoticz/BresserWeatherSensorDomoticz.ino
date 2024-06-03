@@ -75,6 +75,7 @@
 //          Changed MQTT payload and topic from char[] to String
 // 20240325 domoticz virtual rain sensor: added hourly rain rate
 // 20240504 Added board initialization
+// 20240603 Modified for arduino-esp32 v3.0.0
 //
 // ToDo:
 //
@@ -603,7 +604,7 @@ void loop()
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.disconnect();
-        client.loop();
+        net.stop();
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);
 #endif

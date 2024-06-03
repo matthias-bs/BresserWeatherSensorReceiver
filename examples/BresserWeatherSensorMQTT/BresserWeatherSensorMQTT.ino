@@ -112,6 +112,7 @@
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 // 20240504 Added board initialization
 // 20240507 Added configuration of maximum number of sensors at run time
+// 20240603 Modified for arduino-esp32 v3.0.0
 //
 // ToDo:
 //
@@ -147,8 +148,8 @@
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
-#define USE_SECUREWIFI        // use secure WIFI
-//#define USE_WIFI              // use non-secure WIFI
+//#define USE_SECUREWIFI        // use secure WIFI
+#define USE_WIFI              // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
@@ -885,7 +886,7 @@ void loop()
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
         client.loop();
         client.disconnect();
-        client.loop();
+        net.stop();
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);
 #endif

@@ -60,6 +60,8 @@
 // 20240417 Modified SENSOR_IDS_INC
 // 20240425 Added define variant ARDUINO_heltec_wifi_lora_32_V3
 // 20240507 Renamed NUM_SENSORS to MAX_SENSORS_DEFAULT
+//          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
+// 20240508 Updated board definitions after changes in arduino-esp32 v3.0.0
 //
 // ToDo:
 // -
@@ -119,8 +121,6 @@
 // ------------------------------------------------------------------------------------------------
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
-// Use pinning for LoRaWAN Node
-
 
 // LILIGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
 // See pin definitions in
@@ -140,18 +140,14 @@
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V21new
 
-// Heltec Wireless Stick
-// V2 -> SX1276
-// V3 -> SX1262
-// THERE IS NO WAY TO DISTINGUISH THE VERSION AUTOMATICALLY!
-//
-// This define is set by selecting "Board: Heltec Wireless Stick"
-// in the Arduino IDE:
-//#define ARDUINO_heltec_wireless_stick
+// This define is set by selecting "Board: Heltec Wireless Stick" (SX1276) in the Arduino IDE:
+//#define ARDUINO_HELTEC_WIRELESS_STICK
 
-// This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)"
-// in the Adruino IDE:
-//#define ARDUINO_heltec_wifi_lora_32_V2
+// This define is set by selecting "Board: Heltec Wireless Stick(V3)" (SX1262) in the Arduino IDE:
+//#define ARDUINO_HELTEC_WIRELESS_STICK_V3
+
+// This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)" in the Arduino IDE:
+//#define ARDUINO_HELTEC_WIFI_LORA_32_V2
 
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
@@ -174,8 +170,8 @@
 // DFRobot Firebeetle32
 // https://github.com/espressif/arduino-esp32/tree/master/variants/firebeetle32/pins_arduino.h
 //
-// This define (not very specific...) is set by selecting "FireBeetle-ESP32" in the Arduino IDE:
-//#define ARDUINO_ESP32_DEV
+// This define is set by selecting "FireBeetle-ESP32" in the Arduino IDE:
+//#define ARDUINO_DFROBOT_FIREBEETLE_ESP32
 
 // M5Stack Core2
 // https://github.com/espressif/arduino-esp32/blob/master/variants/m5stack_core2/pins_arduino.h
@@ -196,26 +192,20 @@
     #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(ARDUINO_heltec_wireless_stick)
-    #pragma message("ARDUINO_heltec_wireless_stick defined; using on-board transceiver")
-    #pragma message("Radio transceiver chip has to be configured manually: V2 -> USE_SX1276 / V3 -> USE_SX1262")
-    //#define USE_SX1276 // Heltec Wireless Stick V2
-    #define USE_SX1262 // Heltec Wireless Stick V3
+#elif defined(ARDUINO_HELTEC_WIRELESS_STICK)
+    #pragma message("ARDUINO_HELTEC_WIRELESS_STICK defined; using on-board transceiver")
+    #define USE_SX1276 // Heltec Wireless Stick V2
 
-#elif defined(ARDUINO_heltec_wireless_stick_v2)
-    #pragma message("ARDUINO_heltec_wireless_stick_v2 defined; using on-board transceiver")
-    #define USE_SX1276
-
-#elif defined(ARDUINO_heltec_wireless_stick_v3)
-    #pragma message("ARDUINO_heltec_wireless_stick_v3 defined; using on-board transceiver")
+#elif defined(ARDUINO_HELTEC_WIRELESS_STICK_V3)
+    #pragma message("ARDUINO_HELTEC_WIRELESS_STICK_V3 defined; using on-board transceiver")
     #define USE_SX1262
 
-#elif defined(ARDUINO_heltec_wifi_lora_32_V2)
-    #pragma message("ARDUINO_heltec_wifi_lora_32_V2 defined; using on-board transceiver")
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V2)
+    #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(ARDUINO_heltec_wifi_32_lora_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
-    #pragma message("ARDUINO_heltec_wifi_32_lora_V3 (or similar) defined; using on-board transceiver")
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
+    #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V3 (or similar) defined; using on-board transceiver")
     #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -227,8 +217,8 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_FEATHER_ESP32)
-    #pragma message("ARDUINO_FEATHER_ESP32 defined; assuming RFM95W FeatherWing will be used")
+#elif defined(ARDUINO_FEATHER_ESP32) || defined(ARDUINO_THINGPULSE_EPULSE_FEATHER)
+    #pragma message("ARDUINO_FEATHER_ESP32/ARDUINO_THINGPULSE_EPULSE_FEATHER defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
@@ -244,30 +234,26 @@
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_AVR_FEATHER32U4)
-    #pragma message("ARDUINO_AVR_FEATHER32U4 defined; assuming this is the Adafruit Feather 32u4 RFM95 LoRa Radio")
-    #define USE_SX1276
-
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
-#elif defined(ARDUINO_ESP32_DEV) || defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
+#elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
     //#define LORAWAN_NODE
-    #define FIREBEETLE_ESP32_COVER_LORA
+    #define DFROBOT_COVER_LORA
 
-    #if defined(FIREBEETLE_ESP32_COVER_LORA)
-        #pragma message("FIREBEETLE_ESP32_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
+    #if defined(DFROBOT_COVER_LORA)
+        #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
         #define USE_SX1276
         #pragma message("Required wiring: D2 to RESET, D3 to DIO0, D4 to CS, D5 to DIO1")
 
     #elif defined(LORAWAN_NODE) 
-        #pragma message("LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
+        #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & LORAWAN_NODE defined; assuming this is the LoRaWAN_Node board (DFRobot Firebeetle32 + Adafruit RFM95W LoRa Radio)")
         #define USE_SX1276
 
     #else
-        #pragma message("ARDUINO_ESP32_DEV defined; if you use one of those boards, select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
+        #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 defined; if you use one of those boards, select either LORAWAN_NODE or FIREBEETLE_ESP32_COVER_LORA manually!")
 
     #endif
 #endif
@@ -348,48 +334,6 @@
 
 #endif
 
-
-//   Replacement for
-//   https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/esp32-hal-log.h
-//   on Arduino AVR:
-#if defined(ARDUINO_ARCH_AVR)
-    #define ARDUHAL_LOG_LEVEL_NONE      0
-    #define ARDUHAL_LOG_LEVEL_ERROR     1
-    #define ARDUHAL_LOG_LEVEL_WARN      2
-    #define ARDUHAL_LOG_LEVEL_INFO      3
-    #define ARDUHAL_LOG_LEVEL_DEBUG     4
-    #define ARDUHAL_LOG_LEVEL_VERBOSE   5
-
-    // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
-
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
-        #define log_e(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_e(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_ERROR
-        #define log_w(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_w(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_WARN
-        #define log_i(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_i(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_INFO
-        #define log_d(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_d(...) {}
-     #endif
-    #if defined(DEBUG_ESP_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_DEBUG
-        #define log_v(...) { printf(__VA_ARGS__); println(); }
-     #else
-        #define log_v(...) {}
-     #endif
-#endif
-
 #if ( (defined(USE_CC1101) && defined(USE_SX1276)) || \
       (defined(USE_SX1276) && defined(USE_SX1262)) || \
       (defined(USE_SX1262) && defined(USE_CC1101)) )
@@ -412,7 +356,7 @@
 // Board   SCK   MOSI  MISO
 // ESP8266 D5    D7    D6
 // ESP32   D18   D23   D19
-#if defined(LORAWAN_NODE)
+#if defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32) && defined(LORAWAN_NODE)
     // Use pinning for LoRaWAN_Node (https://github.com/matthias-bs/LoRaWAN_Node)
     #define PIN_RECEIVER_CS   14
 
@@ -425,7 +369,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  12
 
-#elif defined(FIREBEETLE_ESP32_COVER_LORA)
+#elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32) && defined(DFROBOT_COVER_LORA)
     #define PIN_RECEIVER_CS   27 // D4
 
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -465,7 +409,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ARDUINO_heltec_wireless_stick) || defined(ARDUINO_heltec_wifi_lora_32_V2)
+#elif defined(ARDUINO_HELTEC_WIRELESS_STICK) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V2)
     // Use pinning for Heltec Wireless Stick or WiFi LoRa32 V2, respectively
     #define PIN_RECEIVER_CS   SS
 
@@ -478,7 +422,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa
 
-#elif defined(ARDUINO_heltec_wifi_32_lora_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
     // Use pinning for Heltec WiFi LoRa32 V3
     #define PIN_RECEIVER_CS   SS
 
@@ -583,19 +527,6 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  2
-    
-#elif defined(ARDUINO_AVR_FEATHER32U4)
-    // Pinning for Adafruit Feather 32u4 
-    #define PIN_RECEIVER_CS   8
-
-    // CC1101: GDO0 / RFM95W/SX127x: G0
-    #define PIN_RECEIVER_IRQ  7
-
-    // CC1101: GDO2 / RFM95W/SX127x: G1 (not used)
-    #define PIN_RECEIVER_GPIO 99
-
-    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
-    #define PIN_RECEIVER_RST  4
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     // Use pinning for Adafruit Feather RP2040 with RFM95W "FeatherWing" ADA3232

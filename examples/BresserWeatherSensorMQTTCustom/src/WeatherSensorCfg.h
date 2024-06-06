@@ -62,6 +62,7 @@
 // 20240507 Renamed NUM_SENSORS to MAX_SENSORS_DEFAULT
 //          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
 // 20240508 Updated board definitions after changes in arduino-esp32 v3.0.0
+// 20240509 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3
 //
 // ToDo:
 // -
@@ -409,7 +410,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ARDUINO_HELTEC_WIRELESS_STICK) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V2)
+#elif defined(ARDUINO_HELTEC_WIRELESS_STICK) || defined(ARDUINO_HELTEC_WIRELESS_STICK_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V2)
     // Use pinning for Heltec Wireless Stick or WiFi LoRa32 V2, respectively
     #define PIN_RECEIVER_CS   SS
 

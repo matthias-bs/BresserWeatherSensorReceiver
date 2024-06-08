@@ -79,6 +79,7 @@
 // 20240417 Added sensor configuration at run time
 // 20240506 Changed sensor from array to std::vector, added getSensorCfg() / setSensorCfg()
 // 20240507 Added configuration of enabled decoders at run time
+// 20240608 Modified implementation of maximum number of sensors
 //
 // ToDo:
 // -
@@ -171,6 +172,7 @@ class WeatherSensor {
         Preferences cfgPrefs; //!< Preferences (stored in flash memory)
         std::vector<uint32_t> sensor_ids_inc;
         std::vector<uint32_t> sensor_ids_exc;
+        uint8_t maxSensorsDefault;
 
     public:
         /*!
@@ -178,7 +180,7 @@ class WeatherSensor {
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
-        int16_t begin(void);
+        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT);
 
         /*!
         \brief Reset radio transceiver

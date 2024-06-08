@@ -127,9 +127,9 @@ typedef struct <a class="el" href="struct_weather_sensor_1_1_sensor.html">Sensor
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9b84d8518edf33a2f796288bb482eb8b"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">begin</a> (void)</td></tr>
-<tr class="memdesc:a9b84d8518edf33a2f796288bb482eb8b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Presence check and initialization of radio module.  <a href="class_weather_sensor.html#a9b84d8518edf33a2f796288bb482eb8b">More...</a><br /></td></tr>
-<tr class="separator:a9b84d8518edf33a2f796288bb482eb8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69fb340800d9fef5cb81921760a15a45"><td class="memItemLeft" align="right" valign="top">int16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a69fb340800d9fef5cb81921760a15a45">begin</a> (uint8_t max_sensors_default=MAX_SENSORS_DEFAULT)</td></tr>
+<tr class="memdesc:a69fb340800d9fef5cb81921760a15a45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Presence check and initialization of radio module.  <a href="class_weather_sensor.html#a69fb340800d9fef5cb81921760a15a45">More...</a><br /></td></tr>
+<tr class="separator:a69fb340800d9fef5cb81921760a15a45"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cb2e1d7ffb2aa6b641563772c72be20"><td class="memItemLeft" align="right" valign="top"><a id="a2cb2e1d7ffb2aa6b641563772c72be20"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a2cb2e1d7ffb2aa6b641563772c72be20">radioReset</a> (void)</td></tr>
 <tr class="memdesc:a2cb2e1d7ffb2aa6b641563772c72be20"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset radio transceiver. <br /></td></tr>
@@ -193,8 +193,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Receive, decode and store Bresser <a class="el" href="struct_weather_sensor_1_1_weather.html">Weather</a> <a class="el" href="struct_weather_sensor_1_1_sensor.html" title="sensor data and status flags">Sensor</a> Data Uses CC1101 or SX1276 radio module for receiving FSK modulated signal at 868 MHz. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a9b84d8518edf33a2f796288bb482eb8b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9b84d8518edf33a2f796288bb482eb8b">&#9670;&nbsp;</a></span>begin()</h2>
+<a id="a69fb340800d9fef5cb81921760a15a45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69fb340800d9fef5cb81921760a15a45">&#9670;&nbsp;</a></span>begin()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -202,8 +202,8 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="c
         <tr>
           <td class="memname">int16_t WeatherSensor::begin </td>
           <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>max_sensors_default</em> = <code>MAX_SENSORS_DEFAULT</code></td><td>)</td>
           <td></td>
         </tr>
       </table>

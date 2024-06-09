@@ -100,6 +100,7 @@
 //          - Run-time configuration functions (WeatherSensorConfig.cpp)
 // 20240528 Fixed channel comparison in findType()
 // 20240608 Modified implementation of maximum number of sensors
+// 20240609 Fixed implementation of maximum number of sensors
 //
 // ToDo:
 // -
@@ -136,8 +137,7 @@ void
 
 int16_t WeatherSensor::begin(uint8_t max_sensors_default)
 {
-    uint8_t maxSensorsDefault = max_sensors_default;
-    uint8_t maxSensors;
+    uint8_t maxSensors = max_sensors_default;
     getSensorsCfg(maxSensors, rxFlags, enDecoders);
     log_d("max_sensors: %u", maxSensors);
     log_d("rx_flags: %u", rxFlags);
@@ -309,7 +309,7 @@ bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void 
             }
 
         } // if (decode_status == DECODE_OK)
-    }     //  while ((millis() - timestamp) < timeout)
+    } //  while ((millis() - timestamp) < timeout)
 
     // Timeout
     radio.standby();
@@ -348,7 +348,7 @@ DecodeStatus WeatherSensor::getMessage(void)
 
                 decode_res = decodeMessage(&recvData[1], sizeof(recvData) - 1);
             } // if (recvData[0] == 0xD4)
-        }     // if (state == RADIOLIB_ERR_NONE)
+        } // if (state == RADIOLIB_ERR_NONE)
         else if (state == RADIOLIB_ERR_RX_TIMEOUT)
         {
             log_v("T");
@@ -362,8 +362,6 @@ DecodeStatus WeatherSensor::getMessage(void)
 
     return decode_res;
 }
-
-
 
 //
 // Generate sample data for testing
@@ -422,7 +420,6 @@ bool WeatherSensor::genMessage(int i, uint32_t id, uint8_t s_type, uint8_t chann
     return true;
 }
 
-
 //
 // Find required sensor data by ID
 //
@@ -449,7 +446,6 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
     }
     return -1;
 }
-
 
 //
 // From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/util.c

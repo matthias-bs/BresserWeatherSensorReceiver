@@ -80,6 +80,7 @@
 // 20240506 Changed sensor from array to std::vector, added getSensorCfg() / setSensorCfg()
 // 20240507 Added configuration of enabled decoders at run time
 // 20240608 Modified implementation of maximum number of sensors
+// 20240609 Fixed implementation of maximum number of sensors
 //
 // ToDo:
 // -
@@ -172,7 +173,6 @@ class WeatherSensor {
         Preferences cfgPrefs; //!< Preferences (stored in flash memory)
         std::vector<uint32_t> sensor_ids_inc;
         std::vector<uint32_t> sensor_ids_exc;
-        uint8_t maxSensorsDefault;
 
     public:
         /*!

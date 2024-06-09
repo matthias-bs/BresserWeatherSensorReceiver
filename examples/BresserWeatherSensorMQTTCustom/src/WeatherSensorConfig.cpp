@@ -38,6 +38,7 @@
 //
 // 20240513 Created from WeatherSensor.cpp
 // 20240608 Modified implementation of maximum number of sensors
+// 20240609 Fixed implementation of maximum number of sensors
 //
 //
 // ToDo:
@@ -180,7 +181,7 @@ void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t
 void WeatherSensor::getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders)
 {
     cfgPrefs.begin("BWS-CFG", false);
-    max_sensors = cfgPrefs.getUChar("maxsensors", maxSensorsDefault);
+    max_sensors = cfgPrefs.getUChar("maxsensors", max_sensors);
     rx_flags = cfgPrefs.getUChar("rxflags", DATA_COMPLETE);
     en_decoders = cfgPrefs.getUChar("endec", 0xFF);
     cfgPrefs.end();

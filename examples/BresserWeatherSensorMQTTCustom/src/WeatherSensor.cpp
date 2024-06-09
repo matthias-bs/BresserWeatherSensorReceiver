@@ -98,6 +98,8 @@
 //          - Reception/utility part (this file)
 //          - Sensor data decoding functions (WeatherSensorDecoders.cpp)
 //          - Run-time configuration functions (WeatherSensorConfig.cpp)
+// 20240528 Fixed channel comparison in findType()
+// 20240608 Modified implementation of maximum number of sensors
 //
 // ToDo:
 // -
@@ -132,8 +134,9 @@ void
     receivedFlag = true;
 }
 
-int16_t WeatherSensor::begin(void)
+int16_t WeatherSensor::begin(uint8_t max_sensors_default)
 {
+    uint8_t maxSensorsDefault = max_sensors_default;
     uint8_t maxSensors;
     getSensorsCfg(maxSensors, rxFlags, enDecoders);
     log_d("max_sensors: %u", maxSensors);
@@ -441,7 +444,7 @@ int WeatherSensor::findType(uint8_t type, uint8_t ch)
     for (size_t i = 0; i < sensor.size(); i++)
     {
         if (sensor[i].valid && (sensor[i].s_type == type) &&
-            ((ch == 0xFF) || (sensor[i].chan = ch)))
+            ((ch == 0xFF) || (sensor[i].chan == ch)))
             return i;
     }
     return -1;

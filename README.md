@@ -161,7 +161,8 @@ See `WeatherSensorCfg.h` for configuration options.
 
 ## Rain Statistics
 
-The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see [RainGauge.h] (https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h)) 
+The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see 
+[RainGauge.h](src/RainGauge.h)) 
 is used to calculate
 * hourly (past 60 minutes) rainfall,
 * daily rainfall, 
@@ -170,7 +171,8 @@ is used to calculate
 
 These values are named `rain_h`, `rain_d`, `rain_w` and `rain_m` in the MQTT software examples.
 
-See [Implementing Rain Gauge Statistics] (https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/04.-Implementing-Rain-Gauge-Statistics) for more details. 
+See 
+[Implementing Rain Gauge Statistics](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/04.-Implementing-Rain-Gauge-Statistics) for more details. 
 
 ## SW Examples
 

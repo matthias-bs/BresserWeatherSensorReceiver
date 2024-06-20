@@ -1,4 +1,4 @@
-# BresserWeatherSensorReceiver
+Jo# BresserWeatherSensorReceiver
 [![CI](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CI.yml)<!--[![Build Status](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver.svg?branch=main)](https://app.travis-ci.com/matthias-bs/BresserWeatherSensorReceiver)-->
 [![CppUTest](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml/badge.svg)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/actions/workflows/CppUTest.yml)
 [![GitHub release](https://img.shields.io/github/release/matthias-bs/BresserWeatherSensorReceiver?maxAge=3600)](https://github.com/matthias-bs/BresserWeatherSensorReceiver/releases)
@@ -160,7 +160,16 @@ See `WeatherSensorCfg.h` for configuration options.
 
 ## Rain Statistics
 
-[RainGauge.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h) 
+The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see [RainGauge.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h)) 
+is used to calculate
+* hourly (past 60 minutes) rainfall,
+* daily rainfall, 
+* weekly rainfall, 
+* and monthly rainfall.
+
+These values are named `rain_h`, `rain_d`, `rain_w` and `rain_m` in the MQTT software examples.
+
+See [Implementing Rain Gauge Statistics] (https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/04.-Implementing-Rain-Gauge-Statistics) for more details. 
 
 ## SW Examples
 

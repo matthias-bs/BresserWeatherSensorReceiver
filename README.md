@@ -179,6 +179,14 @@ These values are named `rain_h`, `rain_d`, `rain_w` and `rain_m` in the MQTT sof
 See 
 [Implementing Rain Gauge Statistics](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/04.-Implementing-Rain-Gauge-Statistics) for more details. 
 
+## Lightning Sensor Post-Processing
+
+The lightning sensor transmits the accumulated number of strikes and the estimated distance from the storm front (at the time of the last strike) at an interval. The post-processing algorithm implemented in the class `Lightning` (see
+[Lightning.h](src/Lightning.h)) calculates the number of events during the past 60 minutes (same algorithm as in the rain statistics) and stores information of the last event:
+* Timestamp, 
+* Estimated distance and
+* Number of strikes since the previous event. 
+
 ## SW Examples
 
 ### [BresserWeatherSensorBasic](https://github.com/matthias-bs/BresserWeatherSensorReceiver/tree/main/examples/BresserWeatherSensorBasic)

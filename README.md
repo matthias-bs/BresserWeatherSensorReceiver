@@ -64,7 +64,7 @@ Some guesswork:
   * [Predefined Board Configurations](#predefined-board-configurations)
   * [User-Defined Configuration](#user-defined-configuration)
 * [Rain Statistics](#rain-statistics)
-* [Lightning Sensor Post-Processing] (#lightning-Sensor-post-processing)
+* [Lightning Sensor Post-Processing](#lightning-Sensor-post-processing)
 * [SW Examples](#sw-examples)
   * [BresserWeatherSensorBasic](#bresserweathersensorbasic)
   * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)

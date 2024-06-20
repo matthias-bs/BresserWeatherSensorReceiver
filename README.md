@@ -158,6 +158,10 @@ See `WeatherSensorCfg.h` for configuration options.
 
      e.g. `//#define BRESSER_LEAKAGE`
 
+## Rain Statistics
+
+[RainGauge.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h) 
+
 ## SW Examples
 
 ### [BresserWeatherSensorBasic](https://github.com/matthias-bs/BresserWeatherSensorReceiver/tree/main/examples/BresserWeatherSensorBasic)

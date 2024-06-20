@@ -160,7 +160,7 @@ See `WeatherSensorCfg.h` for configuration options.
 
      e.g. `//#define BRESSER_LEAKAGE`
 
-See [How Sensor Reception works](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/02.-How-Sensor-Reception-Reception-works) for a detailed description.
+See [How Sensor Reception works](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/02.-How-Sensor-Reception-works) for a detailed description.
 
 ## Rain Statistics
 

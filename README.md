@@ -63,6 +63,7 @@ Some guesswork:
 * [Configuration](#configuration)
   * [Predefined Board Configurations](#predefined-board-configurations)
   * [User-Defined Configuration](#user-defined-configuration)
+* [Rain Statistics](#rain-statistics) 
 * [SW Examples](#sw-examples)
   * [BresserWeatherSensorBasic](#bresserweathersensorbasic)
   * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)
@@ -160,7 +161,7 @@ See `WeatherSensorCfg.h` for configuration options.
 
 ## Rain Statistics
 
-The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see [RainGauge.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h)) 
+The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see [RainGauge.h] (https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/RainGauge.h)) 
 is used to calculate
 * hourly (past 60 minutes) rainfall,
 * daily rainfall, 

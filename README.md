@@ -160,6 +160,8 @@ See `WeatherSensorCfg.h` for configuration options.
 
      e.g. `//#define BRESSER_LEAKAGE`
 
+See [How Sensor Reception works](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/02.-How-Sensor-Reception-Reception-works) for a detailed description.
+
 ## Rain Statistics
 
 The weather sensors transmit the accumulated rainfall since the last battery change or reset. This raw value is provided as `rain_mm`. To provide the same functionality as the original weather stations, the class `RainGauge` (see 

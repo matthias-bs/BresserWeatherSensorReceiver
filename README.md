@@ -143,9 +143,9 @@ See `WeatherSensorCfg.h` for configuration options.
    | ESP32                      | user-defined    | generic, used for ESP32 boards if none of the above is defined   |
    | ESP8266                    | user-defined    | generic, used for ESP8266 boards if none of the above is defined |
 
-* Data from multiple sensors can be received by setting `NUM_SENSORS` to an appropriate value in `WeatherSensorCfg.h`.
+* Data from multiple sensors can be received by setting `MAX_SENSORS_DEFAULT` to an appropriate value in `WeatherSensorCfg.h`.
 
-   e.g. `#define NUM_SENSORS 1`
+   e.g. `#define MAX_SENSORS_DEFAULT 1`
 
 * The sensors to be handled can be configured by two ways:
    * Add any unwanted sensor IDs to the exclude list `SENSOR_IDS_EXC`

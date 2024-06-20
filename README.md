@@ -184,9 +184,13 @@ See
 
 The lightning sensor transmits the accumulated number of strikes and the estimated distance from the storm front (at the time of the last strike) at an interval. The post-processing algorithm implemented in the class `Lightning` (see
 [Lightning.h](src/Lightning.h)) calculates the number of events during the past 60 minutes &mdash; using the same algorithm as the rain statistics &mdash; and stores information of the last event:
-* Timestamp, 
+* Timestamp (UTC), 
 * Estimated distance and
-* Number of strikes since the previous event. 
+* Number of strikes since the previous event.
+
+> [!NOTE]
+> Time and date must be set correctly in order to store the timestamp. 
+> This is achieved by setting the real time clock (RTC) from an available time source, e.g. via SNTP from a network time server if the device has internet connection via WiFi.
 
 ## SW Examples
 

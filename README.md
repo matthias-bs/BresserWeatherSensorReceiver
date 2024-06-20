@@ -63,7 +63,8 @@ Some guesswork:
 * [Configuration](#configuration)
   * [Predefined Board Configurations](#predefined-board-configurations)
   * [User-Defined Configuration](#user-defined-configuration)
-* [Rain Statistics](#rain-statistics) 
+* [Rain Statistics](#rain-statistics)
+* [Lightning Sensor Post-Processing] (#lightning-Sensor-post-processing)
 * [SW Examples](#sw-examples)
   * [BresserWeatherSensorBasic](#bresserweathersensorbasic)
   * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)
@@ -182,7 +183,7 @@ See
 ## Lightning Sensor Post-Processing
 
 The lightning sensor transmits the accumulated number of strikes and the estimated distance from the storm front (at the time of the last strike) at an interval. The post-processing algorithm implemented in the class `Lightning` (see
-[Lightning.h](src/Lightning.h)) calculates the number of events during the past 60 minutes (same algorithm as in the rain statistics) and stores information of the last event:
+[Lightning.h](src/Lightning.h)) calculates the number of events during the past 60 minutes &mdash; using the same algorithm as the rain statistics &mdash; and stores information of the last event:
 * Timestamp, 
 * Estimated distance and
 * Number of strikes since the previous event. 

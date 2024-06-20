@@ -171,6 +171,11 @@ is used to calculate
 
 These values are named `rain_h`, `rain_d`, `rain_w` and `rain_m` in the MQTT software examples.
 
+> [!NOTE]
+> Time and date must be set correctly in order to reset the daily, weekly and monthly rain values correctly.
+> This is achieved by setting the real time clock (RTC) from an available time source, e.g. via SNTP from a network time server if the device has internet connection via WiFi.
+> The user must set the appropriate time zone (`TZ_INFO`) in the sketch.
+
 See 
 [Implementing Rain Gauge Statistics](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki/04.-Implementing-Rain-Gauge-Statistics) for more details. 
 

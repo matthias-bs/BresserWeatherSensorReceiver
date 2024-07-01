@@ -1,0 +1,13 @@
+% mermaidchart.com
+---
+title: Sensor Data Storage
+---
+flowchart TB
+    A[RX Data] --> B{ID already stored?} 
+    B -- Y --> C[Update existing entry]
+    B -- N --> D{Free entry available\nin RX buffer array?}
+    D -- Y --> E[Store as new entry]
+    D -- N --> F[Discard data]
+    C --> G
+    E --> G
+    F --> G[Done]

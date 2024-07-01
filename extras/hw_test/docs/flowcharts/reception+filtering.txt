@@ -1,0 +1,20 @@
+% mermaidchart.com
+---
+title: Sensor Reception and Filtering
+---
+flowchart TB
+    A[Start Reception] --> B>Receive]  
+    B --> H{RX Timeout?}
+    H -- N --> C{Preamble, Checksum, Digest\nvalid?}
+    H -- Y --> I[Process Data]
+    C -- Y --> D{Include List empty?}
+    C -- N --> B
+    D -- N --> E{ID in Include List?}
+    D -- Y --> G{ID in Exclude List?}
+    G -- Y --> B
+    G -- N --> F
+    E -- Y --> F[Store in RX Buffer] 
+    E -- N --> B
+    F --> J{RX Data Complete?}
+    J -- Y --> I
+    J -- N --> B

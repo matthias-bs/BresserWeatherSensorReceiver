@@ -22,7 +22,7 @@
     "RadioLib": "jgromes/RadioLib#semver:^6.6.0",
     "lora-serialization": "thesolarnomad/lora-serialization#semver:^3.1.0",
     "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.2",
-    "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.0.4",
+    "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.1.0",
     "WiFiManager": "tzapu/WiFiManager#semver:2.0.17",
     "ESP_DoubleResetDetector": "khoih-prog/ESP_DoubleResetDetector#semver:1.3.2",
     "Preferences": "vshymanskyy/Preferences#semver:^2.1.0"

@@ -412,7 +412,7 @@ class WeatherSensor {
         void setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders = 0xFF);
 
         /*!
-         * Get sensors include list from Preferences
+         * Get sensors include list (Preferences/defaults)
          *
          * \param payload buffer for storing sensor IDs
          *
@@ -421,7 +421,7 @@ class WeatherSensor {
         uint8_t getSensorsInc(uint8_t *payload);
 
         /*!
-         * Get sensors exclude list from Preferences
+         * Get sensors exclude list (Preferences/defaults)
          *
          * \param payload buffer for storing sensor IDs
          *

@@ -88,10 +88,11 @@ void loop()
     int decode_status = ws.getMessage();
 
     if (decode_status == DECODE_OK) {
-        const char[] batt_ok = "OK ";
-        const char[] batt_low = "Low";
-        const char[] batt_inv = "---";
+        char batt_ok[] = "OK ";
+        char batt_low[] = "Low";
+        char batt_inv[] = "---";
         char * batt;
+
         if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) && !ws.sensor[i].w.temp_ok) {
             // Special handling for 6-in-1 decoder
             batt = batt_inv;

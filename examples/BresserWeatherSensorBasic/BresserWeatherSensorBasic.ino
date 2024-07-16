@@ -50,6 +50,7 @@
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor decoder
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
+// 20240716 Fixed output of invalid battery state with 6-in-1 decoder
 //
 // ToDo: 
 // - 
@@ -87,12 +88,25 @@ void loop()
     int decode_status = ws.getMessage();
 
     if (decode_status == DECODE_OK) {
+        char batt_ok[] = "OK ";
+        char batt_low[] = "Low";
+        char batt_inv[] = "---";
+        char * batt;
+
+        if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) && !ws.sensor[i].w.temp_ok) {
+            // Special handling for 6-in-1 decoder
+            batt = batt_inv;
+        } else if (ws.sensor[i].battery_ok) {
+            batt = batt_ok;
+        } else {
+            batt = batt_low;
+        }
         Serial.printf("Id: [%8X] Typ: [%X] Ch: [%d] St: [%d] Bat: [%-3s] RSSI: [%6.1fdBm] ",
             static_cast<int> (ws.sensor[i].sensor_id),
             ws.sensor[i].s_type,
             ws.sensor[i].chan,
             ws.sensor[i].startup,
-            ws.sensor[i].battery_ok ? "OK " : "Low",
+            batt,
             ws.sensor[i].rssi);
            
         if (ws.sensor[i].s_type == SENSOR_TYPE_LIGHTNING) {

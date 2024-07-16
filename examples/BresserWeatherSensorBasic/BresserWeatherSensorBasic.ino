@@ -50,6 +50,7 @@
 // 20231025 Added Bresser Air Quality (Particulate Matter) Sensor decoder
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
+// 20240716 Fixed output of invalid battery state with 6-in-1 decoder
 //
 // ToDo: 
 // - 

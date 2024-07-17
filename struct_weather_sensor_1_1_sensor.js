@@ -5,6 +5,7 @@ var struct_weather_sensor_1_1_sensor =
     [ "chan", "struct_weather_sensor_1_1_sensor.html#acdcee37faebf4d2f77387d6e649b00c9", null ],
     [ "co2", "struct_weather_sensor_1_1_sensor.html#a7b8e971a27b50faf3b4fa169902c8772", null ],
     [ "complete", "struct_weather_sensor_1_1_sensor.html#a8d7ac24ffcbb4cbc5ef8005c72046a57", null ],
+    [ "decoder", "struct_weather_sensor_1_1_sensor.html#a74e535f32a290980cb5030cb51e6da06", null ],
     [ "leak", "struct_weather_sensor_1_1_sensor.html#a2be0329dff70f431f408e70a57117ecf", null ],
     [ "lgt", "struct_weather_sensor_1_1_sensor.html#a70a0e2b3062eb6b3f1f7b9fc57a479bf", null ],
     [ "pm", "struct_weather_sensor_1_1_sensor.html#a1890b5f983c111175f2702e10cd06627", null ],

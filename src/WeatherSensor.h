@@ -81,6 +81,8 @@
 // 20240507 Added configuration of enabled decoders at run time
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
+// 20240714 Added decoder to struct Sensor
+// 20240716 Added option to skip initialization of filters in begin()
 //
 // ToDo:
 // -
@@ -180,7 +182,7 @@ class WeatherSensor {
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
-        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT);
+        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true);
 
         /*!
         \brief Reset radio transceiver
@@ -303,6 +305,7 @@ class WeatherSensor {
             float    rssi;             //!< received signal strength indicator in dBm
             uint8_t  s_type;           //!< sensor type
             uint8_t  chan;             //!< channel
+            uint8_t  decoder;          //!< decoder used
             bool     startup = false;  //!< startup after reset / battery change
             bool     battery_ok;       //!< battery o.k.
             bool     valid;            //!< data valid (but not necessarily complete)

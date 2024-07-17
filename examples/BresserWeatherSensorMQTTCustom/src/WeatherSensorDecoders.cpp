@@ -49,6 +49,7 @@
 //          https://github.com/merbanan/rtl_433/commit/271bed886c5b1ff7c1a47e6cf1366e397aeb8364
 //          and
 //          https://github.com/merbanan/rtl_433/commit/9928efe5c8d55e9ca01f1ebab9e8b20b0e7ba01e
+// 20240716 Added assignment of sensor[slot].decoder
 //
 // ToDo:
 // -
@@ -331,6 +332,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     }
 
     sensor[slot].s_type = type_tmp;
+    sensor[slot].decoder = DECODER_5IN1;
     sensor[slot].w.temp_ok = (msg[20] & 0x0f) <= 9; // BCD, 0x0f on error
     sensor[slot].w.light_ok = false;
     sensor[slot].w.uv_ok = false;
@@ -479,6 +481,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].sensor_id = id_tmp;
     sensor[slot].s_type = type_tmp;
     sensor[slot].chan = chan_tmp;
+    sensor[slot].decoder = DECODER_6IN1;
     sensor[slot].startup = ((msg[6] & 0x8) == 0) ? true : false; // s.a. #1214
     sensor[slot].battery_ok = (msg[13] >> 1) & 1;                // b[13] & 0x02 is battery_good, s.a. #1993
 
@@ -743,6 +746,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].s_type = s_type;
     sensor[slot].startup = (msg[6] & 0x08) == 0x00; // raw data, no de-whitening
     sensor[slot].chan = msg[6] & 0x07;              // raw data, no de-whitening
+    sensor[slot].decoder = DECODER_7IN1;
     sensor[slot].battery_ok = !battery_low;
     sensor[slot].valid = true;
     sensor[slot].complete = true;
@@ -907,6 +911,7 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
     sensor[slot].s_type = s_type;
     sensor[slot].startup = startup;
     sensor[slot].chan = 0;
+    sensor[slot].decoder = DECODER_LIGHTNING;
     sensor[slot].battery_ok = !battery_low;
     sensor[slot].rssi = rssi;
     sensor[slot].valid = true;
@@ -1008,6 +1013,7 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
     sensor[slot].sensor_id = id_tmp;
     sensor[slot].s_type = type_tmp;
     sensor[slot].chan = chan_tmp;
+    sensor[slot].decoder = DECODER_LEAKAGE;
     sensor[slot].startup = (msg[6] & 0x8) == 0x00;
     sensor[slot].battery_ok = (msg[7] & 0x30) != 0x00;
     sensor[slot].rssi = rssi;

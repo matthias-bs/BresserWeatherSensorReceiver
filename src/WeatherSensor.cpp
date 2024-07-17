@@ -101,6 +101,7 @@
 // 20240528 Fixed channel comparison in findType()
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
+// 20240714 Added option to skip initialization of include/exclude lists
 //
 // ToDo:
 // -
@@ -135,7 +136,7 @@ void
     receivedFlag = true;
 }
 
-int16_t WeatherSensor::begin(uint8_t max_sensors_default)
+int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
 {
     uint8_t maxSensors = max_sensors_default;
     getSensorsCfg(maxSensors, rxFlags, enDecoders);
@@ -144,13 +145,16 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default)
     log_d("en_decoders: %u", enDecoders);
     sensor.resize(maxSensors);
 
-    // List of sensor IDs to be excluded - can be empty
-    std::vector<uint32_t> sensor_ids_exc_def = SENSOR_IDS_EXC;
-    initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
+    if (init_filters)
+    {
+        // List of sensor IDs to be excluded - can be empty
+        std::vector<uint32_t> sensor_ids_exc_def = SENSOR_IDS_EXC;
+        initList(sensor_ids_exc, sensor_ids_exc_def, "exc");
 
-    // List of sensor IDs to be included - if zero, handle all available sensors
-    std::vector<uint32_t> sensor_ids_inc_def = SENSOR_IDS_INC;
-    initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
+        // List of sensor IDs to be included - if zero, handle all available sensors
+        std::vector<uint32_t> sensor_ids_inc_def = SENSOR_IDS_INC;
+        initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
+    }
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud

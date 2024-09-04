@@ -63,6 +63,7 @@
 //          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
 // 20240508 Updated board definitions after changes in arduino-esp32 v3.0.0
 // 20240509 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3
+// 20240904 Added ARDUINO_ESP32S3_DEV
 //
 // ToDo:
 // -
@@ -86,6 +87,9 @@
 // List of sensor IDs to be included - if empty, handle all available sensors
 #define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
+
+// Max. size of sensor ID lists
+#define MAX_SENSOR_IDS 10
 
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT
@@ -234,6 +238,15 @@
     #pragma message("ARDUINO_ESP32S3_POWERFEATHER defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
+
+#elif defined(ARDUINO_ESP32S3_DEV)
+    #pragma message("ARDUINO_ESP32S3_DEV defined; this is a generic (i.e. non-specific) target")
+    #define USE_SX1276
+    //#define USE_SX1262
+    //#define USE_CC1101
+    #pragma message("Cross check if the selected GPIO pins are really available on your board.")
+    #pragma message("Connect a radio module with a supported chip.")
+    #pragma message("Select the chip by setting the appropriate define.")
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
@@ -502,6 +515,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  45
+
+#elif defined(ARDUINO_ESP32S3_DEV)
+    // Use pinning for generic ESP32 S3 board with unspecified radio module
+    #define PIN_RECEIVER_CS   10
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0
+    #define PIN_RECEIVER_IRQ  21
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1
+    #define PIN_RECEIVER_GPIO 8
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  9
 
 #elif defined(ESP32)
     // Generic pinning for ESP32 development boards

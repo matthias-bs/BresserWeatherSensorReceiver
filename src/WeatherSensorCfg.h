@@ -517,7 +517,7 @@
     #define PIN_RECEIVER_RST  45
 
 #elif defined(ARDUINO_ESP32S3_DEV)
-    // Use pinning for ESP32-S3 PowerFeather with RFM95W "FeatherWing" ADA3232
+    // Use pinning for generic ESP32 S3 board with unspecified radio module
     #define PIN_RECEIVER_CS   10
 
     // CC1101: GDO0 / RFM95W/SX127x: G0

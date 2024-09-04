@@ -63,7 +63,7 @@
 //          NOTE: ARDUINO_ARCH_AVR no longer supported due to code size!!!
 // 20240508 Updated board definitions after changes in arduino-esp32 v3.0.0
 // 20240509 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3
-// 20240510 Added ARDUINO_ESP32S3_DEV
+// 20240904 Added ARDUINO_ESP32S3_DEV
 //
 // ToDo:
 // -
@@ -240,9 +240,13 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_ESP32S3_DEV)
-    #pragma message("ARDUINO_ESP32S3_DEV defined; which SX1276 radio module?")
+    #pragma message("ARDUINO_ESP32S3_DEV defined; this is a generic (i.e. non-specific) target")
     #define USE_SX1276
-    //#pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
+    //#define USE_SX1262
+    //#define USE_CC1101
+    #pragma message("Cross check if the selected GPIO pins are really available on your board.")
+    #pragma message("Connect a radio module with a supported chip.")
+    #pragma message("Select the chip by setting the appropriate define.")
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")

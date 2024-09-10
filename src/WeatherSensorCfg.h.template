@@ -64,6 +64,7 @@
 // 20240508 Updated board definitions after changes in arduino-esp32 v3.0.0
 // 20240509 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3
 // 20240904 Added ARDUINO_ESP32S3_DEV
+// 20240910 Heltec: Fixed pin definitions
 //
 // ToDo:
 // -
@@ -411,7 +412,6 @@
 
 #elif defined(ARDUINO_TTGO_LoRa32_v21new)
     // Use pinning for LILIGO TTGO LoRa32-OLED V2.1 (1.6.1)
-    // Same pinout for Heltec Wireless Stick
     #define PIN_RECEIVER_CS   LORA_CS
 
     // CC1101: GDO0 / RFM95W/SX127x: G0
@@ -431,7 +431,7 @@
     #define PIN_RECEIVER_IRQ  DIO0
 
     // CC1101: GDO2 / RFM95W/SX127x: G1
-    #define PIN_RECEIVER_GPIO DIO1
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa

@@ -99,7 +99,8 @@ jobs:
         run:
           |
           ps -p "$$"
-          arduino-cli lib install RadioLib@7.0.0
+          arduino-cli lib install RadioLib@6.6.0
+          #arduino-cli lib install RadioLib@7.0.0
           arduino-cli lib install "LoRa Serialization"@3.1.0
           arduino-cli lib install MQTT@2.5.2
           arduino-cli lib install ArduinoJson@7.1.0

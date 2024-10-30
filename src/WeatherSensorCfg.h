@@ -65,6 +65,7 @@
 // 20240509 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3
 // 20240904 Added ARDUINO_ESP32S3_DEV
 // 20240910 Heltec: Fixed pin definitions
+// 20241030 Added pin definitions for Maker Go ESP32C3 Supermini with Heltec HT-RA62
 //
 // ToDo:
 // -
@@ -248,6 +249,11 @@
     #pragma message("Cross check if the selected GPIO pins are really available on your board.")
     #pragma message("Connect a radio module with a supported chip.")
     #pragma message("Select the chip by setting the appropriate define.")
+
+#elif defined(ARDUINO_MAKERGO_C3_SUPERMINI)
+    // Maker Go ESP32C3 Supermini
+    #pragma message("ARDUINO_MAKERGO_C3_SUPERMINI defined; assuming Heltec HT-RA62 (SX1262) will be used")
+    #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_RP2040 defined; assuming RFM95W FeatherWing will be used")
@@ -541,6 +547,19 @@
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  9
+
+#elif defined(ARDUINO_MAKERGO_C3_SUPERMINI)
+    // Use pinning for Maker Go ESP32C3 Supermini with Heltec HT-RA62
+    #define PIN_RECEIVER_CS   7
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0 / SX1262: DI01
+    #define PIN_RECEIVER_IRQ  1
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 / SX1262: BUSY
+    #define PIN_RECEIVER_GPIO 2
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC / SX1262: RESET
+    #define PIN_RECEIVER_RST  3
 
 #elif defined(ESP32)
     // Generic pinning for ESP32 development boards

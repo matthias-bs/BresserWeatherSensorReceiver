@@ -207,12 +207,12 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include "WeatherSensorCfg.h"
-#include "WeatherSensor.h"
-#include "WeatherUtils.h"
-#include "RainGauge.h"
-#include "Lightning.h"
-#include "InitBoard.h"
+#include "src/WeatherSensorCfg.h"
+#include "src/WeatherSensor.h"
+#include "src/WeatherUtils.h"
+#include "src/RainGauge.h"
+#include "src/Lightning.h"
+#include "src/InitBoard.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
 #define JSON_FLOAT(x) String("\"") + x + String("\"")

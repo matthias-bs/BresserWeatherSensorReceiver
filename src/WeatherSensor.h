@@ -83,6 +83,7 @@
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240714 Added decoder to struct Sensor
 // 20240716 Added option to skip initialization of filters in begin()
+// 20241113 Added getting/setting of sensor include/exclude list from JSON strings
 //
 // ToDo:
 // -
@@ -431,6 +432,54 @@ class WeatherSensor {
          * \returns size size in bytes
          */
         uint8_t getSensorsExc(uint8_t *payload);
+
+        /*!
+         * Convert sensor IDs from JSON string to byte array
+         * 
+         * \param ids list of sensor IDs
+         * \param json JSON string
+         * \param buf buffer for storing sensor IDs
+         * 
+         * \returns size in bytes
+         */
+        uint8_t convSensorsJson(std::vector<uint32_t> &ids, String json, uint8_t *buf);
+
+        /*!
+         * Set sensors include list from JSON string
+         *
+         * \param json JSON string
+         */
+        void setSensorsIncJson(String json);
+
+        /*!
+         * Set sensors exclude list from JSON string
+         *
+         * \param json JSON string
+         */
+        void setSensorsExcJson(String json);
+        
+        /*!
+         * Get sensors include/exclude list as JSON string
+         *
+         * \param ids list of sensor IDs
+         * 
+         * \returns JSON string
+         */
+        String getSensorsJson(std::vector<uint32_t> &ids);
+
+        /*!
+         * Get sensors include list as JSON string
+         *
+         * \returns JSON string
+         */
+        String getSensorsIncJson(void);
+
+        /*!
+         * Get sensors exclude list as JSON string
+         *
+         * \returns JSON string
+         */
+        String getSensorsExcJson(void);
 
         /*!
          * Get maximum number of  sensors from Preferences

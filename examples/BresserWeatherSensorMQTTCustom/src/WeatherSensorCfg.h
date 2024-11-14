@@ -90,8 +90,8 @@
 #define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
-// Max. size of sensor ID lists
-#define MAX_SENSOR_IDS 10
+// Maximum number of sensor IDs in include/exclude list
+#define MAX_SENSOR_IDS 12
 
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT

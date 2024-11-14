@@ -87,6 +87,9 @@
 #define SENSOR_IDS_INC { }
 //#define SENSOR_IDS_INC { 0x83750871 }
 
+// Maximum number of sensor IDs in include/exclude list
+#define MAX_SENSOR_IDS 12
+
 // Disable data type which will not be used to save RAM
 #define WIND_DATA_FLOATINGPOINT
 #define WIND_DATA_FIXEDPOINT
@@ -265,8 +268,8 @@
 // ------------------------------------------------------------------------------------------------
 // Select type of receiver module (if not yet defined based on the assumptions above)
 #if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
-    //#define USE_CC1101
-    #define USE_SX1276
+    #define USE_CC1101
+    //#define USE_SX1276
     //#define USE_SX1262
 #endif
 

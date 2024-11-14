@@ -27,20 +27,26 @@
 // Based on:
 // arduino-mqtt by Joël Gähwiler (256dpi) (https://github.com/256dpi/arduino-mqtt)
 // ArduinoJson by Benoit Blanchon (https://arduinojson.org)
-
-// MQTT subscriptions:
-//     - none -
+//
 //
 // MQTT publications:
-//     <base_topic>/<ID|Name>/data  sensor data as JSON string - see publishWeatherdata()
-//     <base_topic>/<ID|Name>/rssi  sensor specific RSSI
-//     <base_topic>/extra           calculated data
-//     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
-//     <base_topic>/status          "online"|"offline"|"dead"$
+//     <base_topic>/<ID|Name>/data                          sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/rssi                          sensor specific RSSI
+//     <base_topic>/extra                                   calculated data
+//     <base_topic>/radio                                   radio transceiver info as JSON string - see publishRadio()
+//     <base_topic>/status                                  "online"|"offline"|"dead"$
+//     <base_topic>/sensors_inc                             sensors include list as JSON string;
+//                                                          triggered by 'get_sensors_inc' MQTT topic
+//     <base_topic>/sensors_exc                             sensors exclude list as JSON string;
+//                                                          triggered by 'get_sensors_exc' MQTT topic
 //
 // MQTT subscriptions:
-//     <base_topic>/reset <flags>   reset rain counters (see RainGauge.h for <flags>)
-//                                  reset lightning post-processing (flags & 0x10)
+//     <base_topic>/reset <flags>                           reset rain counters (see RainGauge.h for <flags>)
+//                                                          reset lightning post-processing (flags & 0x10)
+//     <base_topic>/get_sensors_inc                         get sensors include list
+//     <base_topic>/get_sensors_exc                         get sensors exclude list
+//     <base_topic>/set_sensors_inc {"ids": [<id0>, ... ]}  set sensors include list, e.g. {"ids": ["0x89ABCDEF"]}
+//     <base_topic>/set_sensors_exc {"ids": [<id0>, ... ]}  set sensors exclude list, e.g. {"ids": ["0x89ABCDEF"]}
 //
 // $ via LWT
 //
@@ -108,9 +114,12 @@
 // 20231228 Fixed entering sleep mode before sensor data was published
 // 20240113 Added post-processed lightning data to payload
 // 20240122 Added lightning post-processing reset
+// 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
+// 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 // 20240504 Added board initialization
 // 20240507 Added configuration of maximum number of sensors at run time
 // 20240603 Modified for arduino-esp32 v3.0.0
+// 20241113 Added getting/setting of sensor include/exclude lists via MQTT
 //
 // ToDo:
 //
@@ -146,17 +155,20 @@
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
-#define USE_SECUREWIFI        // use secure WIFI
-// #define USE_WIFI              // use non-secure WIFI
+//#define USE_SECUREWIFI        // use secure WIFI
+#define USE_WIFI              // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
+
+// Maximum number of sensors (override )
+#define MAX_SENSORS 1
 
 // Stop reception when data of at least one sensor is complete
 #define RX_FLAGS DATA_COMPLETE
 
 // Stop reception when data of all (max_sensors) is complete
-// #define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
+//#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // See
 // https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
@@ -195,12 +207,12 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include <MQTT.h>
 #include <ArduinoJson.h>
 #include <time.h>
-#include "src/WeatherSensorCfg.h"
-#include "src/WeatherSensor.h"
-#include "src/WeatherUtils.h"
-#include "src/RainGauge.h"
-#include "src/Lightning.h"
-#include "src/InitBoard.h"
+#include "WeatherSensorCfg.h"
+#include "WeatherSensor.h"
+#include "WeatherUtils.h"
+#include "RainGauge.h"
+#include "Lightning.h"
+#include "InitBoard.h"
 
 #if defined(JSON_FLOAT_AS_STRING)
 #define JSON_FLOAT(x) String("\"") + x + String("\"")
@@ -304,11 +316,23 @@ const char MQTT_PUB_RADIO[] = "radio";
 const char MQTT_PUB_DATA[] = "data";
 const char MQTT_PUB_RSSI[] = "rssi";
 const char MQTT_PUB_EXTRA[] = "extra";
+const char MQTT_PUB_INC[] = "sensors_inc";
+const char MQTT_PUB_EXC[] = "sensors_exc";
 const char MQTT_SUB_RESET[] = "reset";
+const char MQTT_SUB_GET_INC[] = "get_sensors_inc";
+const char MQTT_SUB_GET_EXC[] = "get_sensors_exc";
+const char MQTT_SUB_SET_INC[] = "set_sensors_inc";
+const char MQTT_SUB_SET_EXC[] = "set_sensors_exc";
 
 String mqttPubStatus;
 String mqttPubRadio;
+String mqttPubInc;
+String mqttPubExc;
 String mqttSubReset;
+String mqttSubGetInc;
+String mqttSubGetExc;
+String mqttSubSetInc;
+String mqttSubSetExc;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -487,6 +511,10 @@ void mqtt_connect(void)
 
     log_i("\nconnected!");
     client.subscribe(mqttSubReset);
+    client.subscribe(mqttSubGetInc);
+    client.subscribe(mqttSubGetExc);
+    client.subscribe(mqttSubSetInc);
+    client.subscribe(mqttSubSetExc);
     log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
@@ -504,6 +532,30 @@ void messageReceived(String &topic, String &payload)
         if (flags & 0x10) {
             lightning.reset();
         }
+    }
+    else if (topic == mqttSubGetInc)
+    {
+        log_d("MQTT msg received: get_sensors_inc");
+        client.publish(mqttPubInc, weatherSensor.getSensorsIncJson());
+    }
+    else if (topic == mqttSubGetExc)
+    {
+        log_d("MQTT msg received: get_sensors_exc");
+        client.publish(mqttPubExc, weatherSensor.getSensorsExcJson());
+    }
+    else if (topic == mqttSubSetInc)
+    {
+        log_d("MQTT msg received: set_sensors_inc");
+        weatherSensor.setSensorsIncJson(payload);
+    }
+    else if (topic == mqttSubSetExc)
+    {
+        log_d("MQTT msg received: set_sensors_exc");
+        weatherSensor.setSensorsExcJson(payload);
+    }
+    else
+    {
+        log_d("MQTT msg received: %s", topic.c_str());
     }
 }
 
@@ -771,10 +823,17 @@ void setup()
 
     mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
     mqttPubRadio = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    mqttPubInc = String(Hostname) + String('/') + String(MQTT_PUB_INC);
+    mqttPubExc = String(Hostname) + String('/') + String(MQTT_PUB_EXC);
     mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
+    mqttSubGetInc = String(Hostname) + String('/') + String(MQTT_SUB_GET_INC);
+    mqttSubGetExc = String(Hostname) + String('/') + String(MQTT_SUB_GET_EXC);
+    mqttSubSetInc = String(Hostname) + String('/') + String(MQTT_SUB_SET_INC);
+    mqttSubSetExc = String(Hostname) + String('/') + String(MQTT_SUB_SET_EXC);
 
     mqtt_setup();
     weatherSensor.begin();
+    weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
 }
 
 /*!

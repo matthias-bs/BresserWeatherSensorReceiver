@@ -40,6 +40,7 @@
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240702 Fixed handling of empty list of IDs / 0x00000000 in Preferences
+// 20241113 Added getting/setting of sensor include/exclude list from JSON strings
 //
 //
 // ToDo:
@@ -47,6 +48,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#include <ArduinoJson.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
@@ -164,6 +166,81 @@ uint8_t WeatherSensor::getSensorsExc(uint8_t *payload)
     }
 
     return sensor_ids_exc.size() * 4;
+}
+
+// Get sensors include/exclude list as JSON string
+String WeatherSensor::getSensorsJson(std::vector<uint32_t> &ids)
+{
+    JsonDocument doc;
+
+    JsonArray data = doc["ids"].to<JsonArray>();
+    for (size_t i = 0; i < ids.size(); i++)
+    {
+        String str = String(ids[i], HEX);
+        // Ensure the hex number has 8 digits
+        while (str.length() < 8)
+        {
+            str = "0" + str;
+        }
+
+        // Add "0x" prefix and enclose in double quotes
+        str = "0x" + str;
+
+        // Add to JSON array
+        data.add(str);
+    }
+
+    String json;
+    serializeJson(doc, json);
+    return json;
+}
+
+// Get sensors include list as JSON string
+String WeatherSensor::getSensorsIncJson(void)
+{
+    return getSensorsJson(sensor_ids_inc);
+}
+
+// Get sensors exclude list as JSON string
+String WeatherSensor::getSensorsExcJson(void)
+{
+    return getSensorsJson(sensor_ids_exc);
+}
+
+// Convert JSON string to sensor IDs as byte array
+uint8_t WeatherSensor::convSensorsJson(std::vector<uint32_t> &ids, String json, uint8_t *buf)
+{
+    JsonDocument doc;
+    deserializeJson(doc, json);
+
+    JsonArray data = doc["ids"].as<JsonArray>();
+    ids.clear();
+    for (size_t i = 0; (i < data.size()) && (i < MAX_SENSOR_IDS); i++)
+    {
+        String str = data[i].as<String>();
+        log_d("ID: %s", str.c_str());
+        for (size_t j=2; j < 10; j += 2) {
+            String hexStr = str.substring(j, j + 2);
+            *buf++ = (uint8_t)strtol(hexStr.c_str(), NULL, 16);
+        }
+    }
+    return data.size() * 4;
+}
+
+// Set sensors include list from JSON string
+void WeatherSensor::setSensorsIncJson(String json)
+{
+    uint8_t buf[MAX_SENSOR_IDS * 4];
+    uint8_t size = convSensorsJson(sensor_ids_inc, json, buf);
+    setSensorsInc(buf, size);
+}
+
+// Set sensors exclude list from JSON string
+void WeatherSensor::setSensorsExcJson(String json)
+{
+    uint8_t buf[MAX_SENSOR_IDS * 4];
+    uint8_t size = convSensorsJson(sensor_ids_exc, json, buf);
+    setSensorsExc(buf, size);
 }
 
 // Set sensor configuration and store in in Preferences

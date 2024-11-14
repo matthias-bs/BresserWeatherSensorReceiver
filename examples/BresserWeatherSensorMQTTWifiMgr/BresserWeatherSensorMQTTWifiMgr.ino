@@ -30,19 +30,24 @@
 // WiFiManager by tzapu (https://github.com/tzapu/WiFiManager)
 // ESP_DoubleResetDetector by Khoi Hoang (https://github.com/khoih-prog/ESP_DoubleResetDetector)
 //
-// MQTT subscriptions:
-//     - none -
-//
 // MQTT publications:
-//     <base_topic>/<ID|Name>/data  sensor data as JSON string - see publishWeatherdata()
-//     <base_topic>/<ID|Name>/rssi  sensor specific RSSI
-//     <base_topic>/extra           calculated data
-//     <base_topic>/radio           radio transceiver info as JSON string - see publishRadio()
-//     <base_topic>/status          "online"|"offline"|"dead"$
+//     <base_topic>/<ID|Name>/data                          sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/<ID|Name>/rssi                          sensor specific RSSI
+//     <base_topic>/extra                                   calculated data
+//     <base_topic>/radio                                   radio transceiver info as JSON string - see publishRadio()
+//     <base_topic>/status                                  "online"|"offline"|"dead"$
+//     <base_topic>/sensors_inc                             sensors include list as JSON string;
+//                                                          triggered by 'get_sensors_inc' MQTT topic
+//     <base_topic>/sensors_exc                             sensors exclude list as JSON string;
+//                                                          triggered by 'get_sensors_exc' MQTT topic
 //
 // MQTT subscriptions:
-//     <base_topic>/reset <flags>   reset rain counters (see RainGauge.h for <flags>)
-//                                  reset lightning post-processing (flags & 0x10)
+//     <base_topic>/reset <flags>                           reset rain counters (see RainGauge.h for <flags>)
+//                                                          reset lightning post-processing (flags & 0x10)
+//     <base_topic>/get_sensors_inc                         get sensors include list
+//     <base_topic>/get_sensors_exc                         get sensors exclude list
+//     <base_topic>/set_sensors_inc {"ids": [<id0>, ... ]}  set sensors include list, e.g. {"ids": ["0x89ABCDEF"]}
+//     <base_topic>/set_sensors_exc {"ids": [<id0>, ... ]}  set sensors exclude list, e.g. {"ids": ["0x89ABCDEF"]}
 //
 // $ via LWT
 //
@@ -99,6 +104,7 @@
 // 20240504 Added board initialization
 // 20240507 Added configuration of maximum number of sensors at run time
 // 20240603 Modified for arduino-esp32 v3.0.0
+// 20241113 Added getting/setting of sensor include/exclude lists via MQTT
 //
 // ToDo:
 //
@@ -338,11 +344,23 @@ const char MQTT_PUB_RADIO[] = "radio";
 const char MQTT_PUB_DATA[] = "data";
 const char MQTT_PUB_RSSI[] = "rssi";
 const char MQTT_PUB_EXTRA[] = "extra";
+const char MQTT_PUB_INC[] = "sensors_inc";
+const char MQTT_PUB_EXC[] = "sensors_exc";
 const char MQTT_SUB_RESET[] = "reset";
+const char MQTT_SUB_GET_INC[] = "get_sensors_inc";
+const char MQTT_SUB_GET_EXC[] = "get_sensors_exc";
+const char MQTT_SUB_SET_INC[] = "set_sensors_inc";
+const char MQTT_SUB_SET_EXC[] = "set_sensors_exc";
 
 String mqttPubStatus;
 String mqttPubRadio;
+String mqttPubInc;
+String mqttPubExc;
 String mqttSubReset;
+String mqttSubGetInc;
+String mqttSubGetExc;
+String mqttSubSetInc;
+String mqttSubSetExc;
 char Hostname[HOSTNAME_SIZE];
 
 //////////////////////////////////////////////////////
@@ -699,6 +717,30 @@ void messageReceived(String &topic, String &payload)
             lightning.reset();
         }
     }
+    else if (topic == mqttSubGetInc)
+    {
+        log_d("MQTT msg received: get_sensors_inc");
+        client.publish(mqttPubInc, weatherSensor.getSensorsIncJson());
+    }
+    else if (topic == mqttSubGetExc)
+    {
+        log_d("MQTT msg received: get_sensors_exc");
+        client.publish(mqttPubExc, weatherSensor.getSensorsExcJson());
+    }
+    else if (topic == mqttSubSetInc)
+    {
+        log_d("MQTT msg received: set_sensors_inc");
+        weatherSensor.setSensorsIncJson(payload);
+    }
+    else if (topic == mqttSubSetExc)
+    {
+        log_d("MQTT msg received: set_sensors_exc");
+        weatherSensor.setSensorsExcJson(payload);
+    }
+    else
+    {
+        log_d("MQTT msg received: %s", topic.c_str());
+    }
 }
 
 /*!
@@ -970,7 +1012,13 @@ void setup()
 
     mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
     mqttPubRadio = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
+    mqttPubInc = String(Hostname) + String('/') + String(MQTT_PUB_INC);
+    mqttPubExc = String(Hostname) + String('/') + String(MQTT_PUB_EXC);
     mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
+    mqttSubGetInc = String(Hostname) + String('/') + String(MQTT_SUB_GET_INC);
+    mqttSubGetExc = String(Hostname) + String('/') + String(MQTT_SUB_GET_EXC);
+    mqttSubSetInc = String(Hostname) + String('/') + String(MQTT_SUB_SET_INC);
+    mqttSubSetExc = String(Hostname) + String('/') + String(MQTT_SUB_SET_EXC);
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 

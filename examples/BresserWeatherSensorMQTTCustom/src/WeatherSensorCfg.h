@@ -66,6 +66,7 @@
 // 20240904 Added ARDUINO_ESP32S3_DEV
 // 20240910 Heltec: Fixed pin definitions
 // 20241030 Added pin definitions for Maker Go ESP32C3 Supermini with Heltec HT-RA62
+// 20241130 Added pin definitions for Heltec Vision Master T190
 //
 // ToDo:
 // -
@@ -153,6 +154,9 @@
 // This define is set by selecting "Board: Heltec Wireless Stick(V3)" (SX1262) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK_V3
 
+// This define is set by selecting "Board: Heltec Vision Master T190" in the Arduino IDE:
+//#define ARDUINO_HELTEC_VISION_MASTER_T190
+
 // This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)" in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIFI_LORA_32_V2
 
@@ -211,8 +215,8 @@
     #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V2 defined; using on-board transceiver")
     #define USE_SX1276
 
-#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
-    #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V3 (or similar) defined; using on-board transceiver")
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_HELTEC_VISION_MASTER_T190)
+    #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V3 / ARDUINO_HELTEC_VISION_MASTER_T190 defined; using on-board transceiver")
     #define USE_SX1262
 
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
@@ -261,8 +265,8 @@
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
 
 #elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    //#define LORAWAN_NODE
-    #define DFROBOT_COVER_LORA
+    #define LORAWAN_NODE
+    //#define DFROBOT_COVER_LORA
 
     #if defined(DFROBOT_COVER_LORA)
         #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")
@@ -455,8 +459,8 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  RST_LoRa
 
-#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_heltec_wifi_lora_32_V3)
-    // Use pinning for Heltec WiFi LoRa32 V3
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || defined(ARDUINO_HELTEC_VISION_MASTER_T190)
+    // Use pinning for Heltec WiFi LoRa32 V3 / Vision Master T190
     #define PIN_RECEIVER_CS   SS
 
     // CC1101: GDO0 / RFM95W/SX127x: G0 / SX1262: DIO0

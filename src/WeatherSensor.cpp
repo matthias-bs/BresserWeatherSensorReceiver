@@ -102,6 +102,7 @@
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240714 Added option to skip initialization of include/exclude lists
+// 20241205 Added radio LR1121
 //
 // ToDo:
 // -
@@ -119,6 +120,9 @@ static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER
 #endif
 #if defined(USE_SX1262)
 static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
+#if defined(USE_LR1121)
+static LR1121 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
 
 // Flag to indicate that a packet was received

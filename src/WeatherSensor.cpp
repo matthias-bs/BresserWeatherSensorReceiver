@@ -2,7 +2,7 @@
 // WeatherSensor.cpp
 //
 // Bresser 5-in-1/6-in-1/7-in1 868 MHz Weather Sensor Radio Receiver
-// based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
+// based on CC1101 or SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //

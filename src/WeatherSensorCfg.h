@@ -311,6 +311,7 @@
     //#define USE_CC1101
     #define USE_SX1276
     //#define USE_SX1262
+    //#define USE_LR1121
 #endif
 
 

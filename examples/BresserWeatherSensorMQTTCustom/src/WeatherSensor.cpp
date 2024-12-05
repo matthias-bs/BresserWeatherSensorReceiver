@@ -2,7 +2,7 @@
 // WeatherSensor.cpp
 //
 // Bresser 5-in-1/6-in-1/7-in1 868 MHz Weather Sensor Radio Receiver
-// based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
+// based on CC1101, SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -102,6 +102,7 @@
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240714 Added option to skip initialization of include/exclude lists
+// 20241205 Added radio LR1121
 //
 // ToDo:
 // -
@@ -119,6 +120,9 @@ static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER
 #endif
 #if defined(USE_SX1262)
 static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
+#if defined(USE_LR1121)
+static LR1121 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
 
 // Flag to indicate that a packet was received

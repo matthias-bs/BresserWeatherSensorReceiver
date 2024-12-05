@@ -2,7 +2,7 @@
 // WeatherSensor.cpp
 //
 // Bresser 5-in-1/6-in-1/7-in1 868 MHz Weather Sensor Radio Receiver
-// based on CC1101, SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
+// based on CC1101 or SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -169,12 +169,14 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
 // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
 // output power:                        10 dBm
 // preamble length:                     40 bits
-#ifdef USE_CC1101
+#if defined(USE_CC1101)
     int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
 #elif defined(USE_SX1276)
     int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
-#else
+#elif defined(USE_SX1262)
     int state = radio.beginFSK(868.3, 8.21, 57.136417, 234.3, 10, 32);
+#else
+    int state = radio.beginGFSK(868.3, 8.21, 57.136417, 234.3, 10, 32);
 #endif
     if (state == RADIOLIB_ERR_NONE)
     {
@@ -186,7 +188,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
             while (true)
                 ;
         }
-#ifdef USE_SX1262
+#if defined(USE_SX1262) || defined(USE_LR1121)
         state = radio.setCRC(0);
 #else
         state = radio.setCrcFiltering(false);

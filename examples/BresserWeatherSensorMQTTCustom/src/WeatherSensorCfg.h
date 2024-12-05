@@ -392,7 +392,7 @@
 #elif defined(USE_SX1262)
     #define RECEIVER_CHIP "[SX1262]"
 #elif defined(USE_LR1121)
-    #define RECEIVER_CHIP "[LR1121] 
+    #define RECEIVER_CHIP "[LR1121]"
 #else
     #error "Either USE_CC1101, USE_SX1276, USE_SX1262 or USE_LR1121 must be defined!"
 #endif

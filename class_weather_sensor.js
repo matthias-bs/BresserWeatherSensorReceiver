@@ -9,7 +9,7 @@ var class_weather_sensor =
     [ "Soil", "struct_weather_sensor_1_1_soil.html", "struct_weather_sensor_1_1_soil" ],
     [ "Weather", "struct_weather_sensor_1_1_weather.html", "struct_weather_sensor_1_1_weather" ],
     [ "sensor_t", "class_weather_sensor.html#ae38bcb7791c9c49d5f23c150d4517dc4", null ],
-    [ "begin", "class_weather_sensor.html#abcb8bebf94ff9f03522abe0108b31dfb", null ],
+    [ "begin", "class_weather_sensor.html#ae98957a1cf7cd27aa6f885394553426c", null ],
     [ "clearSlots", "class_weather_sensor.html#af7d1085b72f2f41e8b349e63d2628b0c", null ],
     [ "convSensorsJson", "class_weather_sensor.html#a2431c6c18e867dd2670b3d60731c3caa", null ],
     [ "decodeMessage", "class_weather_sensor.html#af964b214e398132f25d4e783dffe708a", null ],

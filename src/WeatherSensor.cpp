@@ -136,7 +136,7 @@ void
     receivedFlag = true;
 }
 
-int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
+int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, double frequency_offset)
 {
     uint8_t maxSensors = max_sensors_default;
     getSensorsCfg(maxSensors, rxFlags, enDecoders);
@@ -165,12 +165,15 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
 // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
 // output power:                        10 dBm
 // preamble length:                     40 bits
+    double frequency = 868.3 + frequency_offset;
+    log_d("Setting frequency to %f MHz", 868.3 + frequency_offset);
+
 #ifdef USE_CC1101
-    int state = radio.begin(868.3, 8.21, 57.136417, 270, 10, 32);
+    int state = radio.begin(frequency, 8.21, 57.136417, 270, 10, 32);
 #elif defined(USE_SX1276)
-    int state = radio.beginFSK(868.3, 8.21, 57.136417, 250, 10, 32);
+    int state = radio.beginFSK(frequency, 8.21, 57.136417, 250, 10, 32);
 #else
-    int state = radio.beginFSK(868.3, 8.21, 57.136417, 234.3, 10, 32);
+    int state = radio.beginFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
 #endif
     if (state == RADIOLIB_ERR_NONE)
     {

@@ -26,7 +26,7 @@ compile: $(UNITTEST_MAKEFILES)
 
 LCOV_INFO_FILE = $(UNITTEST_BUILD_DIR)/lcov.info
 lcov: $(UNITTEST_MAKEFILES)
-	lcov --base-directory . --directory . -c -o $(LCOV_INFO_FILE) --exclude "*tests/*" --exclude "*test/*"
+	lcov --base-directory . --directory . -c -o $(LCOV_INFO_FILE) --exclude "*test/*"
 	genhtml -o test_coverage -t "coverage" --num-spaces 4 $(LCOV_INFO_FILE) -o $(UNITTEST_BUILD_DIR)/test_coverage/
 
 $(UNITTEST_MAKEFILES):

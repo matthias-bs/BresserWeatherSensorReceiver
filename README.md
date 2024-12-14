@@ -8,7 +8,7 @@ Badge is not updated any more!
 [![arduino-library-badge](https://www.ardu-badge.com/badge/BresserWeatherSensorReceiver.svg?)](https://www.ardu-badge.com/BresserWeatherSensorReceiver)
 -->
 
-Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W or SX1262
+Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W, SX1262 or LR1121
 
 **See the [Wiki](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki) for additional information.**
 
@@ -116,6 +116,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®TTGO-LORA32 V1](https://github.com/Xinyuan-LilyGo/TTGO-LoRa-Series) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V1 (No TFCard)" | ARDUINO_TTGO_LORA32_V1 | SX1276 (HPD13A) | -   |
    | [LILYGO®TTGO-LORA32 V2](https://github.com/LilyGO/TTGO-LORA32) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2"             | ARDUINO_TTGO_LoRa32_V2 | SX1276 (HPD13A) | Only needed for LMIC: Wire DIO1 to GPIO33 |
    | [LILYGO®TTGO-LORA32 V2.1](https://www.lilygo.cc/products/lora3?variant=42272562282677) | "TTGO LoRa32-OLED" | "TTGO LoRa32 V2.1 (1.6.1)" | ARDUINO_TTGO_LoRa32_v21new |  SX1276 (HPD13A) | - |
+   | [LILYGO®T3 S3 LR1121](https://lilygo.cc/products/t3-s3-lr1121) | "LilyGo T3-S3" | "Radio-LR1121                    | ARDUINO_LILYGO_T3S3_LR1121 | LR1121 | - |
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK | SX1276 | - |
    | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK_V3 | SX1262 | - |
    | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V2 | SX1276 | - |

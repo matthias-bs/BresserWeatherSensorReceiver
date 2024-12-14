@@ -243,7 +243,7 @@ void WeatherSensor::setSensorsExcJson(String json)
     setSensorsExc(buf, size);
 }
 
-// Set sensor configuration and store in in Preferences
+// Set sensor configuration and store in Preferences
 void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders)
 {
     rxFlags = rx_flags;

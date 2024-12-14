@@ -23,7 +23,7 @@ float calcdewpoint(float celsius, float humidity);
  * \param celsius air temperature in °C
  * \param windspeed wind speed in km/h
  * 
- * \returns windchill tempoerature in °C
+ * \returns windchill temperature in °C
  */
 float calcwindchill(float celsius, float windspeed);
 

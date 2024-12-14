@@ -146,7 +146,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sleep</b> (void)</td>
 <tr class="memdesc:a7f48011241803c5d42d45f2c3e5d3794"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set transceiver into sleep mode. <br /></td></tr>
 <tr class="separator:a7f48011241803c5d42d45f2c3e5d3794"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a558191760f9d9b9bf12f79f6f3e5370a" id="r_a558191760f9d9b9bf12f79f6f3e5370a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">getData</a> (uint32_t timeout, uint8_t flags=0, uint8_t type=0, void(*func)()=NULL)</td></tr>
-<tr class="memdesc:a558191760f9d9b9bf12f79f6f3e5370a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set.  <br /></td></tr>
+<tr class="memdesc:a558191760f9d9b9bf12f79f6f3e5370a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set.  <br /></td></tr>
 <tr class="separator:a558191760f9d9b9bf12f79f6f3e5370a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05fbfc16fb2e13543591cb0b3cd8baaf" id="r_a05fbfc16fb2e13543591cb0b3cd8baaf"><td class="memItemLeft" align="right" valign="top">DecodeStatus&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf">getMessage</a> (void)</td></tr>
 <tr class="memdesc:a05fbfc16fb2e13543591cb0b3cd8baaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to receive radio message (non-blocking) and to decode it. Timeout occurs after a multitude of expected time-on-air.  <br /></td></tr>
@@ -201,7 +201,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>rssi</b> = 0.0</td><
 <tr class="separator:a50b72bc1883935f2ede454f57c12625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d8e81b016a72815676e93441642a8a8" id="r_a3d8e81b016a72815676e93441642a8a8"><td class="memItemLeft" align="right" valign="top"><a id="a3d8e81b016a72815676e93441642a8a8" name="a3d8e81b016a72815676e93441642a8a8"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>rxFlags</b></td></tr>
-<tr class="memdesc:a3d8e81b016a72815676e93441642a8a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) <br /></td></tr>
+<tr class="memdesc:a3d8e81b016a72815676e93441642a8a8"><td class="mdescLeft">&#160;</td><td class="mdescRight">receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) <br /></td></tr>
 <tr class="separator:a3d8e81b016a72815676e93441642a8a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a652b68eb82bf73157e591094bb8f4f42" id="r_a652b68eb82bf73157e591094bb8f4f42"><td class="memItemLeft" align="right" valign="top"><a id="a652b68eb82bf73157e591094bb8f4f42" name="a652b68eb82bf73157e591094bb8f4f42"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0xFF</td></tr>
@@ -509,7 +509,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
       </table>
 </div><div class="memdoc">
 
-<p>Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set. </p>
+<p>Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire data is tried if 'complete' is set. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">timeout</td><td>timeout in ms.</td></tr>
@@ -519,7 +519,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>false: Timeout occurred. true: Reception (according to parammeter 'complete') successful. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>false: Timeout occurred. true: Reception (according to parameter 'complete') successful. </dd></dl>
 
 </div>
 </div>
@@ -579,7 +579,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">max_sensors</td><td>maximum number of sensors </td></tr>
-    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
     <tr><td class="paramname">en_decoders</td><td>enabled decoders </td></tr>
   </table>
   </dd>
@@ -740,7 +740,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">max_sensors</td><td>maximum number of sensors </td></tr>
-    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrance of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
     <tr><td class="paramname">en_decoders</td><td>enabled decoders </td></tr>
   </table>
   </dd>

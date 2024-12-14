@@ -144,7 +144,7 @@ float calcheatindex(float celsius, float humidity) {
 /*
  * Source:  https://myscope.net/hitzeindex-gefuehle-temperatur/
  *
- *          Valid for Valid for temperatures >= 27°C and humidity >=40%
+ *          Valid for temperatures >= 27°C and humidity >=40%
  */
 float calchumidex(float temperature, float humidity) {
   float e = (6.112 * pow(10,(7.5 * temperature/(237.7 + temperature))) * humidity/100); //vapor pressure

@@ -105,7 +105,7 @@ You can of course copy the **secrets** to `secrets.h` and make your changes ther
 ```
 #define SECRETS
 ```
-**Note:** The define `SECRET`has been renamed to `SECRETS`for consistency.
+**Note:** The define `SECRET` has been renamed to `SECRETS` for consistency.
 
 8. Now you want to save your changes. You will be asked to select a new directory, because the example resides in the Arduino/libraries folder which is treated as read-only:
 

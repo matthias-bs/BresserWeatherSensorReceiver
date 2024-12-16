@@ -216,7 +216,7 @@
 
 #elif defined(ARDUINO_LILYGO_T3S3_SX1276)
     #pragma message("ARDUINO_LILYGO_T3S3_SX1276 defined; using on-board transceiver")
-    #define USE_SX1262
+    #define USE_SX1276
 
 #elif defined(ARDUINO_LILYGO_T3S3_LR1121)
     #pragma message("ARDUINO_LILYGO_T3S3_LR1121 defined; using on-board transceiver")
@@ -455,7 +455,7 @@
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST
 
-#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
     // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_sx1262/pins_arduino.h
     // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_lr1121/pins_arduino.h
     // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_sx127x/pins_arduino.h

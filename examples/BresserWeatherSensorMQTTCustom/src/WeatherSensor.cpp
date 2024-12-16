@@ -2,7 +2,7 @@
 // WeatherSensor.cpp
 //
 // Bresser 5-in-1/6-in-1/7-in1 868 MHz Weather Sensor Radio Receiver
-// based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
+// based on CC1101 or SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -102,6 +102,7 @@
 // 20240608 Modified implementation of maximum number of sensors
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240714 Added option to skip initialization of include/exclude lists
+// 20241205 Added radio LR1121
 //
 // ToDo:
 // -
@@ -119,6 +120,12 @@ static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER
 #endif
 #if defined(USE_SX1262)
 static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
+#if defined(USE_LR1121)
+static LR1121 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+#endif
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+SPIClass spi(SPI);
 #endif
 
 // Flag to indicate that a packet was received
@@ -156,24 +163,34 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
     }
 
+    #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+    SPISettings spiSettings(2000000, MSBFIRST, SPI_MODE0);
+    spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+    radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
+    #endif
+
+    double frequency = 868.3 + frequency_offset;
+    log_d("Setting frequency to %f MHz", 868.3 + frequency_offset);
+  
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     log_d("%s Initializing ... ", RECEIVER_CHIP);
-// carrier frequency:                   868.3 MHz
-// bit rate:                            8.22 kbps
-// frequency deviation:                 57.136417 kHz
-// Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
-// output power:                        10 dBm
-// preamble length:                     40 bits
-    double frequency = 868.3 + frequency_offset;
-    log_d("Setting frequency to %f MHz", 868.3 + frequency_offset);
-
-#ifdef USE_CC1101
+  
+    // carrier frequency:                   868.3 MHz
+    // bit rate:                            8.22 kbps
+    // frequency deviation:                 57.136417 kHz
+    // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
+    // output power:                        10 dBm
+    // preamble length:                     40 bits
+#if defined(USE_CC1101)
     int state = radio.begin(frequency, 8.21, 57.136417, 270, 10, 32);
 #elif defined(USE_SX1276)
     int state = radio.beginFSK(frequency, 8.21, 57.136417, 250, 10, 32);
-#else
+#elif defined(USE_SX1262)
     int state = radio.beginFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
+#else
+    // USE_LR1121
+    int state = radio.beginGFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
 #endif
     if (state == RADIOLIB_ERR_NONE)
     {
@@ -185,7 +202,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
             while (true)
                 ;
         }
-#ifdef USE_SX1262
+#if defined(USE_SX1262) || defined(USE_LR1121)
         state = radio.setCRC(0);
 #else
         state = radio.setCrcFiltering(false);

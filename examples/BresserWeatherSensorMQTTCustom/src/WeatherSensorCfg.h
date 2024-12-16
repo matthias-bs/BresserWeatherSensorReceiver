@@ -1,8 +1,8 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// WeatherSensorCfg.h
+// WeatherSensorCfg.h.template
 //
 // Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver
-// based on CC1101 or SX1276/RFM95W and ESP32/ESP8266
+// based on CC1101, SX1276/RFM95W, SX1262 or LR1121 and ESP32/ESP8266
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -67,6 +67,7 @@
 // 20240910 Heltec: Fixed pin definitions
 // 20241030 Added pin definitions for Maker Go ESP32C3 Supermini with Heltec HT-RA62
 // 20241130 Added pin definitions for Heltec Vision Master T190
+// 20241205 Added pin definitions for Lilygo T3-S3 (SX1262/SX1276/LR1121)
 //
 // ToDo:
 // -
@@ -148,6 +149,12 @@
 // in the Arduino IDE:
 //#define ARDUINO_TTGO_LoRa32_V21new
 
+// These defines are set by selecting
+// "Board: LilyGo T3-S3" / "Board Revision: Radio-SX1262|Radio-SX1276|Radio-LR1121" in the Arduino IDE:
+//#define ARDUINO_LILYGO_T3S3_SX1262
+//#define ARDUINO_LILYGO_T3S3_SX1276
+//#define ARDUINO_LILYGO_T3S3_LR1121
+
 // This define is set by selecting "Board: Heltec Wireless Stick" (SX1276) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK
 
@@ -202,6 +209,18 @@
 #elif defined(ARDUINO_TTGO_LoRa32_v21new)
     #pragma message("ARDUINO_TTGO_LoRa32_V21new defined; using on-board transceiver")
     #define USE_SX1276
+
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262)
+    #pragma message("ARDUINO_LILYGO_T3S3_SX1262 defined; using on-board transceiver")
+    #define USE_SX1262
+
+#elif defined(ARDUINO_LILYGO_T3S3_SX1276)
+    #pragma message("ARDUINO_LILYGO_T3S3_SX1276 defined; using on-board transceiver")
+    #define USE_SX1262
+
+#elif defined(ARDUINO_LILYGO_T3S3_LR1121)
+    #pragma message("ARDUINO_LILYGO_T3S3_LR1121 defined; using on-board transceiver")
+    #define USE_LR1121
 
 #elif defined(ARDUINO_HELTEC_WIRELESS_STICK)
     #pragma message("ARDUINO_HELTEC_WIRELESS_STICK defined; using on-board transceiver")
@@ -288,10 +307,11 @@
 // --- Radio Transceiver ---
 // ------------------------------------------------------------------------------------------------
 // Select type of receiver module (if not yet defined based on the assumptions above)
-#if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) )
+#if ( !defined(USE_CC1101) && !defined(USE_SX1276) && !defined(USE_SX1262) && !defined(USE_LR1121) )
     #define USE_CC1101
     //#define USE_SX1276
     //#define USE_SX1262
+    //#define USE_LR1121
 #endif
 
 
@@ -373,8 +393,10 @@
     #define RECEIVER_CHIP "[SX1276]"
 #elif defined(USE_SX1262)
     #define RECEIVER_CHIP "[SX1262]"
+#elif defined(USE_LR1121)
+    #define RECEIVER_CHIP "[LR1121]"
 #else
-    #error "Either USE_CC1101, USE_SX1276 or USE_SX1262 must be defined!"
+    #error "Either USE_CC1101, USE_SX1276, USE_SX1262 or USE_LR1121 must be defined!"
 #endif
 
 
@@ -431,6 +453,21 @@
 
     // CC1101: GDO2 / RFM95W/SX127x: G1
     #define PIN_RECEIVER_GPIO LORA_D1
+
+    // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
+    #define PIN_RECEIVER_RST  LORA_RST
+
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+    // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_sx1262/pins_arduino.h
+    // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_lr1121/pins_arduino.h
+    // https://github.com/espressif/arduino-esp32/blob/master/variants/lilygo_t3_s3_sx127x/pins_arduino.h
+    #define PIN_RECEIVER_CS   LORA_CS
+
+    // CC1101: GDO0 / RFM95W/SX127x: G0 // SX1262: IRQ / LR1121: IRQ
+    #define PIN_RECEIVER_IRQ  LORA_IRQ
+
+    // CC1101: GDO2 / RFM95W/SX127x: G1 / SX1262: BUSY / LR1121: BUSY
+    #define PIN_RECEIVER_GPIO LORA_BUSY
 
     // RFM95W/SX127x - GPIOxx / CC1101 - RADIOLIB_NC
     #define PIN_RECEIVER_RST  LORA_RST

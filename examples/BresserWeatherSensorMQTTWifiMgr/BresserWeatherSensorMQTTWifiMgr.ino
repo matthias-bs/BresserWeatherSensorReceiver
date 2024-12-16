@@ -982,11 +982,13 @@ void setup()
     initBoard();
     log_i("\n\n%s\n", sketch_id);
 
+#if defined(ESP32)
     // Detect reset reason:
     // see
     // https://github.com/espressif/arduino-esp32/blob/master/libraries/ESP32/examples/ResetReason/ResetReason.ino
     log_d("CPU0 reset reason: %d", rtc_get_reset_reason(0));
     log_d("CPU1 reset reason: %d", rtc_get_reset_reason(1));
+#endif
 
     // Set time zone
     setenv("TZ", TZ_INFO, 1);
@@ -1027,6 +1029,7 @@ void setup()
     #elif defined(ESP8266)
         rst_info *resetInfo;
         resetInfo = ESP.getResetInfoPtr();
+        log_d("Reset Reason: %d", resetInfo->reason);
         bool hw_reset = (resetInfo->reason == REASON_EXT_SYS_RST);
     #endif
 

@@ -348,8 +348,10 @@
         #define DEBUG_PORT DEBUG_ESP_PORT
     #endif
     
-    // Set desired level here!
-    #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
+    // Set desired level here if not defined elsewhere!
+    #if !defined(CORE_DEBUG_LEVEL)
+        #define CORE_DEBUG_LEVEL ARDUHAL_LOG_LEVEL_INFO
+    #endif
 
     #if defined(DEBUG_PORT) && CORE_DEBUG_LEVEL > ARDUHAL_LOG_LEVEL_NONE
         #define log_e(...) { DEBUG_PORT.printf("%s(), l.%d: ",__func__, __LINE__); DEBUG_PORT.printf(__VA_ARGS__); DEBUG_PORT.println(); }

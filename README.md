@@ -65,7 +65,7 @@ Some guesswork:
 > 
 > All other sensors/protocols are transmitting a single type of message which contains a complete set of data.
 >
-> The behavior decribed above can be observed with [BresserWeatherSensorBasic](examples/BresserWeatherSensorBasic), which just shows each message as it is received by using the function [`getMessage()`](https://matthias-bs.github.io/BresserWeatherSensorReceiver/class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf).
+> The behavior described above can be observed with [BresserWeatherSensorBasic](examples/BresserWeatherSensorBasic), which just shows each message as it is received by using the function [`getMessage()`](https://matthias-bs.github.io/BresserWeatherSensorReceiver/class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf).
 > 
 > The other examples are using the function [`getData()`](https://matthias-bs.github.io/BresserWeatherSensorReceiver/class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a), 
 which buffers and combines messages from the 6-in-1 protocol until a complete set of data &mdash; with some configuration options regarding *completeness*, see [BresserWeatherSensorOptions](examples/BresserWeatherSensorOptions) &mdash; is available.

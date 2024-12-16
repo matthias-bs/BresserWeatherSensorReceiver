@@ -198,7 +198,7 @@ DecodeStatus WeatherSensor::decodeMessage(const uint8_t *msg, uint8_t msgSize)
 }
 
 //
-// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c (20220212)
+// From rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c (20220212)
 //
 // Example input data:
 //   EA EC 7F EB 5F EE EF FA FE 76 BB FA FF 15 13 80 14 A0 11 10 05 01 89 44 05 00
@@ -244,7 +244,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
         }
     }
 
-    // Verify checksum (number number bits set in bytes 14-25)
+    // Verify checksum (number bits set in bytes 14-25)
     uint8_t bitsSet = 0;
     uint8_t expectedBitsSet = msg[13];
 
@@ -604,7 +604,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
 #endif
 
 //
-// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c (20230215)
+// From rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c (20230215)
 //
 /**
 Decoder for Bresser Weather Center 7-in-1, outdoor sensor.

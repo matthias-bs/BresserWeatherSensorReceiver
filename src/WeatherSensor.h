@@ -159,7 +159,7 @@ typedef enum DecodeStatus {
  * \brief Mapping of sensor IDs to names
  */
 typedef struct SensorMap {
-    uint32_t        id;    //!< ID if sensor (as transmitted in radio message)
+    uint32_t        id;    //!< ID of sensor (as transmitted in radio message)
     std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
 
@@ -183,7 +183,7 @@ class WeatherSensor {
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
-        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true);
+        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true, double frequency_offset = 0.0);
 
         /*!
         \brief Reset radio transceiver
@@ -196,7 +196,7 @@ class WeatherSensor {
         void sleep(void);
 
         /*!
-        \brief Wait for reception of data or occurrance of timeout.
+        \brief Wait for reception of data or occurrence of timeout.
         With BRESSER_6_IN_1, data is distributed across two different messages. Reception of entire
         data is tried if 'complete' is set.
 
@@ -209,7 +209,7 @@ class WeatherSensor {
         \param func     Callback function for each loop iteration. (default: NULL)
 
         \returns false: Timeout occurred.
-                 true:  Reception (according to parammeter 'complete') successful.
+                 true:  Reception (according to parameter 'complete') successful.
         */
         bool    getData(uint32_t timeout, uint8_t flags = 0, uint8_t type = 0, void (*func)() = NULL);
 
@@ -291,7 +291,7 @@ class WeatherSensor {
 
         struct AirVOC {
             uint16_t hcho_ppb;              //!< formaldehyde concentration in ppb
-            uint8_t voc_level;              //!< volatile organic oompounds; 1 - bad air quality .. 5 - very good air quality
+            uint8_t voc_level;              //!< volatile organic compounds; 1 - bad air quality .. 5 - very good air quality
             bool hcho_init;                 //!< measurement value invalid due to initialization
             bool voc_init;                  //!< measurement value invalid due to initialization
         };

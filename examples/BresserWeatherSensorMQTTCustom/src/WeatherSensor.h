@@ -183,7 +183,7 @@ class WeatherSensor {
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
-        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true);
+        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true, double frequency_offset = 0.0);
 
         /*!
         \brief Reset radio transceiver

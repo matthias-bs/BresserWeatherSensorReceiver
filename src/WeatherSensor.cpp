@@ -133,11 +133,10 @@ volatile bool receivedFlag = false;
 
 // This function is called when a complete packet is received by the module
 // IMPORTANT: This function MUST be 'void' type and MUST NOT have any arguments!
-void
 #if defined(ESP8266) || defined(ESP32)
     IRAM_ATTR
 #endif
-    setFlag(void)
+void setFlag(void)
 {
     // We got a packet, set the flag
     receivedFlag = true;
@@ -196,7 +195,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
         {
             log_e("%s Error setting fixed packet length: [%d]", RECEIVER_CHIP, state);
             while (true)
-                ;
+                delay(10);
         }
 #if defined(USE_SX1262) || defined(USE_LR1121)
         state = radio.setCRC(0);
@@ -207,7 +206,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
         {
             log_e("%s Error disabling crc filtering: [%d]", RECEIVER_CHIP, state);
             while (true)
-                ;
+                delay(10);
         }
 
 // Preamble: AA AA AA AA AA
@@ -226,14 +225,14 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
         {
             log_e("%s Error setting sync words: [%d]", RECEIVER_CHIP, state);
             while (true)
-                ;
+                delay(10);
         }
     }
     else
     {
         log_e("%s Error initialising: [%d]", RECEIVER_CHIP, state);
         while (true)
-            ;
+            delay(10);
     }
     log_d("%s Setup complete - awaiting incoming messages...", RECEIVER_CHIP);
     rssi = radio.getRSSI();
@@ -246,7 +245,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters)
     {
         log_e("%s startReceive() failed, code %d", RECEIVER_CHIP, state);
         while (true)
-            ;
+            delay(10);
     }
 
     return state;

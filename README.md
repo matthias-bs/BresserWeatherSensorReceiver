@@ -138,10 +138,6 @@ ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be us
 Receiver chip: [SX1276]
 Pin config: RST->0 , CS->6 , GD0/G0/IRQ->5 , GDO2/G1/GPIO->11
 ```
-> [!IMPORTANT]  
-> All configurations using SX1262 must be used with either [RadioLib v6.6.0](https://github.com/jgromes/RadioLib/releases/tag/6.6.0) or [Radiolib eeff547
-](https://github.com/jgromes/RadioLib/commit/eeff547aa4a248b2da187cd6a6a340810ca56ee7) (or later) due to https://github.com/jgromes/RadioLib/issues/1350.
-
 
 > [!NOTE]
 > The AVR architecture &mdash; including Adafruit Feather 32u4 RFM95 LoRa Radio &mdash; is no longer supported due to code size.

@@ -103,6 +103,7 @@
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240714 Added option to skip initialization of include/exclude lists
 // 20241205 Added radio LR1121
+// 20241227 Added LilyGo T3 S3 LR1121 RF switch and TCXO configuration
 //
 // ToDo:
 // -
@@ -113,19 +114,33 @@
 #include "WeatherSensor.h"
 
 #if defined(USE_CC1101)
-static CC1101 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
+#pragma message("Using CC1101 radio module")
+RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
+#else
+RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
-#if defined(USE_SX1276)
-static SX1276 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
-#endif
-#if defined(USE_SX1262)
-static SX1262 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
-#endif
-#if defined(USE_LR1121)
-static LR1121 radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
-#endif
+
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-SPIClass spi(SPI);
+SPIClass *spi = nullptr;
+#endif
+
+#if defined(ARDUINO_LILYGO_T3S3_LR1121)
+const uint32_t rfswitch_dio_pins[] = {
+    RADIOLIB_LR11X0_DIO5, RADIOLIB_LR11X0_DIO6,
+    RADIOLIB_NC, RADIOLIB_NC, RADIOLIB_NC
+};
+
+const Module::RfSwitchMode_t rfswitch_table[] = {
+    // mode                  DIO5  DIO6
+    { LR11x0::MODE_STBY,   { LOW,  LOW  } },
+    { LR11x0::MODE_RX,     { HIGH, LOW  } },
+    { LR11x0::MODE_TX,     { LOW,  HIGH } },
+    { LR11x0::MODE_TX_HP,  { LOW,  HIGH } },
+    { LR11x0::MODE_TX_HF,  { LOW,  LOW  } },
+    { LR11x0::MODE_GNSS,   { LOW,  LOW  } },
+    { LR11x0::MODE_WIFI,   { LOW,  LOW  } },
+    END_OF_MODE_TABLE,
+};
 #endif
 
 // Flag to indicate that a packet was received
@@ -161,11 +176,11 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         std::vector<uint32_t> sensor_ids_inc_def = SENSOR_IDS_INC;
         initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
     }
-
+    
     #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-    SPISettings spiSettings(2000000, MSBFIRST, SPI_MODE0);
-    spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
-    radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
+    spi = new SPIClass(SPI);
+    spi->begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+    radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
     #endif
 
     double frequency = 868.3 + frequency_offset;
@@ -188,9 +203,18 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 #elif defined(USE_SX1262)
     int state = radio.beginFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
 #else
-    // USE_LR1121
+    // defined(USE_LR1121)
     int state = radio.beginGFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
 #endif
+
+#if defined(ARDUINO_LILYGO_T3S3_LR1121)
+    // set RF switch control configuration
+    radio.setRfSwitchTable(rfswitch_dio_pins, rfswitch_table);
+
+    // LR1121 TCXO Voltage 2.85~3.15V
+    radio.setTCXO(3.0);
+#endif
+
     if (state == RADIOLIB_ERR_NONE)
     {
         log_d("success!");
@@ -219,7 +243,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 // so we use a preamble of 32 bits and then use the sync as AA 2D
 // which then uses the last byte of the preamble - we recieve the last sync byte
 // as the 1st byte of the payload.
-#ifdef USE_CC1101
+#if defined(USE_CC1101)
         state = radio.setSyncWord(0xAA, 0x2D, 0, false);
 #else
         uint8_t sync_word[] = {0xAA, 0x2D};

@@ -943,7 +943,13 @@ void loop()
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);
 #endif
-	weatherSensor.sleep();
+        // Note:
+        // Further reduction of sleep current might be possible by
+        // controlling the GPIO pins (including SPI CS) appropriately.
+        // This depends on the actual board/radio chip used.
+        // See
+        // https://github.com/jgromes/RadioLib/discussions/1375#discussioncomment-11763846
+        weatherSensor.sleep();
         ESP.deepSleep(SLEEP_INTERVAL * 1000);
     }
 } // loop()

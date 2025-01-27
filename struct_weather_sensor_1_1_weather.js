@@ -9,6 +9,8 @@ var struct_weather_sensor_1_1_weather =
     [ "rain_ok", "struct_weather_sensor_1_1_weather.html#af1d64d0082a746f487b71134dc6eb186", null ],
     [ "temp_c", "struct_weather_sensor_1_1_weather.html#a34f8c565f99fab4c868f58aa60baf215", null ],
     [ "temp_ok", "struct_weather_sensor_1_1_weather.html#a299d804cac6fa03dc1a472adff068e87", null ],
+    [ "tglobe_c", "struct_weather_sensor_1_1_weather.html#aceb5fdacd59f8aefe47ddd3b7c904992", null ],
+    [ "tglobe_ok", "struct_weather_sensor_1_1_weather.html#af507c720368ff483c11e1baf9ef62904", null ],
     [ "uv", "struct_weather_sensor_1_1_weather.html#a8b9670aa7c3219426a2a319ce2e1d75e", null ],
     [ "uv_ok", "struct_weather_sensor_1_1_weather.html#abb7e6eac7b062270ec7e2bbcb7d1d0f5", null ],
     [ "wind_ok", "struct_weather_sensor_1_1_weather.html#aa3808f22671713aa03bf42aa0cc86e9d", null ]

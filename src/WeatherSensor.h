@@ -84,6 +84,7 @@
 // 20240714 Added decoder to struct Sensor
 // 20240716 Added option to skip initialization of filters in begin()
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
+// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor)
 //
 // ToDo:
 // -
@@ -100,7 +101,7 @@
 #include <RadioLib.h>
 
 
-// Sensor Types
+// Sensor Types / Decoders / Part Numbers
 // 0 - Weather Station                  5-in-1; PN 7002510..12/7902510..12
 // 1 - Weather Station                  6-in-1; PN 7002585
 //   - Professional Wind Gauge          6-in-1; PN 7002531
@@ -114,6 +115,7 @@
 // 9 - Lightning Sensor                 PN 7009976
 // 10 - CO2 Sensor                      7-in-1; PN 7009977
 // 11 - HCHO/VCO Sensor                 7-in-1; PN 7009978
+// 13 - Weather Station (8-in-1)        7-in-1; PN 7003150
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
 #define SENSOR_TYPE_THERMO_HYGRO    2 // Thermo-/Hygro-Sensor
@@ -125,6 +127,7 @@
 #define SENSOR_TYPE_LIGHTNING       9 // Lightning Sensor
 #define SENSOR_TYPE_CO2             10 // CO2 Sensor
 #define SENSOR_TYPE_HCHO_VOC        11 // Air Quality Sensor (HCHO and VOC)
+#define SENSOR_TYPE_WEATHER2        13 // Weather Station (8-in-1)
 
 
 // Sensor specific rain gauge overflow threshold (mm)
@@ -232,12 +235,14 @@ class WeatherSensor {
 
         struct Weather {
             bool     temp_ok = false;         //!< temperature o.k. (only 6-in-1)
+            bool     tglobe_ok = false;       //!< globe temperature o.k. (only 8-in-1)
             bool     humidity_ok = false;     //!< humidity o.k.
             bool     light_ok = false;        //!< light o.k. (only 7-in-1)
             bool     uv_ok = false;           //!< uv radiation o.k. (only 6-in-1)
             bool     wind_ok = false;         //!< wind speed/direction o.k. (only 6-in-1)
             bool     rain_ok = false;         //!< rain gauge level o.k.
             float    temp_c = 0.0;            //!< temperature in degC
+            float    tglobe_c = 0.0;          //!< globe temperature in degC (only 8-in-1)
             float    light_klx = 0.0;         //!< Light KLux (only 7-in-1)
             float    light_lux = 0.0;         //!< Light lux (only 7-in-1)
             float    uv = 0.0;                //!< uv radiation (only 6-in-1 & 7-in-1)

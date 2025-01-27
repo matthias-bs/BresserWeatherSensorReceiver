@@ -44,6 +44,7 @@
 // 20231027 Refactored sensor structure
 // 20240209 Added Air Quality (HCHO/VOC), Air Quality (PM2.5/PM10), CO2 Sensor and Pool Thermometer
 // 20240504 Added board initialization
+// 20250127 Added 8-in-1 Weather Sensor sample data
 //
 // ToDo: 
 // - 
@@ -98,7 +99,11 @@ const uint8_t testData[][MSG_BUF_SIZE-1] = {
 
     // #10: Air Quality (HCHO/VOC) Sensor
     {0x0c, 0x1c, 0xc4, 0xa5, 0xaa, 0xaf, 0xb1, 0xaa, 0xa8, 0xaa, 0xa8, 0xaa, 0xa8, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
-     0xaa, 0xaa, 0xe9, 0xff, 0xaa, 0xaa, 0x00}
+     0xaa, 0xaa, 0xe9, 0xff, 0xaa, 0xaa, 0x00},
+
+    // #11: 8-in-1 Weather Sensor
+    {0x6E, 0xA7, 0xC8, 0xEB, 0x88, 0x2A, 0xD8, 0xAD, 0xAA, 0xFD, 0xAA, 0xA8, 0x98, 0xAA, 0xBF, 0xFC, 0x3E, 0xAA, 0x82,
+     0x22, 0xAA, 0xAA, 0xBE, 0x3A, 0xAA, 0x00}
 };
 
 WeatherSensor ws;
@@ -127,7 +132,7 @@ void loop()
     // Timeout occurs after a small multiple of expected time-on-air.
     DecodeStatus decode_status = ws.decodeMessage(&testData[idx][0], MSG_BUF_SIZE-1);
 
-    idx = (idx == 10) ? 0 : idx+1;
+    idx = (idx == 12) ? 0 : idx+1;
     Serial.printf("testData[%d]\n", idx);
 
     if (decode_status == DECODE_OK) {
@@ -241,6 +246,15 @@ void loop()
             }
             else {
                 Serial.printf("Light: [--.-Klux] ");
+            }
+            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+                if (ws.sensor[i].w.tglobe_ok) {
+                    Serial.printf("T_globe: [%3.1fC] ",
+                        ws.sensor[i].w.tglobe_c);
+                }
+                else {
+                    Serial.printf("T_globe: [--.-C] ");
+                }
             }
             #endif
             Serial.printf("\n");

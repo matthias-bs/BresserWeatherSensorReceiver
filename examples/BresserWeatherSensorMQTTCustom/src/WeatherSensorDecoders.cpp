@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// WeatherSensorDecoder.cpp
+// WeatherSensorDecoders.cpp
 //
 // Sensor data decoding functions
 //
@@ -198,7 +198,7 @@ DecodeStatus WeatherSensor::decodeMessage(const uint8_t *msg, uint8_t msgSize)
 }
 
 //
-// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c (20220212)
+// From rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_5in1.c (20220212)
 //
 // Example input data:
 //   EA EC 7F EB 5F EE EF FA FE 76 BB FA FF 15 13 80 14 A0 11 10 05 01 89 44 05 00
@@ -244,7 +244,7 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
         }
     }
 
-    // Verify checksum (number number bits set in bytes 14-25)
+    // Verify checksum (number bits set in bytes 14-25)
     uint8_t bitsSet = 0;
     uint8_t expectedBitsSet = msg[13];
 
@@ -604,7 +604,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
 #endif
 
 //
-// From from rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c (20230215)
+// From rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c (20230215)
 //
 /**
 Decoder for Bresser Weather Center 7-in-1, outdoor sensor.
@@ -752,8 +752,9 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].complete = true;
     sensor[slot].rssi = rssi;
 
-    if (s_type == SENSOR_TYPE_WEATHER1)
+    if ((s_type == SENSOR_TYPE_WEATHER1) || (s_type == SENSOR_TYPE_WEATHER2))
     {
+        sensor[slot].w.tglobe_ok = false;
         int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
         int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
         int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
@@ -795,6 +796,15 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].w.light_klx = light_klx;
         sensor[slot].w.light_lux = light_lux;
         sensor[slot].w.uv = uv_index;
+
+        if (s_type == SENSOR_TYPE_WEATHER2)
+        {
+            // 8-in-1 sensor
+            if ((msgw[23] >> 4) < 10) {
+                sensor[slot].w.tglobe_ok = true;
+                sensor[slot].w.tglobe_c = (msgw[22] >> 4) * 10 + (msgw[22] & 0x0f) + (msgw[23] >> 4) * 0.1f;
+            }
+        }
     }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {

@@ -105,6 +105,7 @@
 // 20240507 Added configuration of maximum number of sensors at run time
 // 20240603 Modified for arduino-esp32 v3.0.0
 // 20241113 Added getting/setting of sensor include/exclude lists via MQTT
+// 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
 //
 // ToDo:
 //
@@ -900,6 +901,12 @@ void publishWeatherdata(bool complete)
             if (weatherSensor.sensor[i].w.light_ok || complete)
             {
                 mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.light_klx, 1));
+            }
+            if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+                if (weatherSensor.sensor[i].w.tglobe_ok || complete)
+                {
+                    mqtt_payload += String(",\"t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe_c, 1));
+                }
             }
             if (weatherSensor.sensor[i].w.rain_ok || complete)
             {

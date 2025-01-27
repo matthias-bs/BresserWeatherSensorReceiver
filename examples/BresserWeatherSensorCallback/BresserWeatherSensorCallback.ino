@@ -44,6 +44,7 @@
 // 20220815 Changed to modified WeatherSensor class; added support of multiple sensors
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20240507 Added configuration of maximum number of sensors at run time
+// 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
 //
 // ToDo:
 // -
@@ -187,6 +188,15 @@ void loop()
             else
             {
                 Serial.printf("Light: [--.-Klux] ");
+            }
+            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+                if (ws.sensor[i].w.tglobe_ok) {
+                    Serial.printf("T_globe: [%3.1fC] ",
+                    ws.sensor[i].w.tglobe_c);
+                }
+                else {
+                    Serial.printf("T_globe: [--.-C] ");
+                }
             }
 #endif
             Serial.printf("\n");

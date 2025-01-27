@@ -40,13 +40,14 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803300       | Weather Sensor  | decodeBresser**7In1**Payload()  |
+| 7003150       | 8-in-1 Weather Station | decodeBresser**7In1**Payload()  |
 
 Some guesswork:
 
 | Numbering Scheme | Type |
 | ---------------- | ---- |
-| 700[25\|32\|33\|36]*   | Weather Station, Base + Sensor |
-| 780[25\|32\|33]*   | Weather Station Sensor (Replacement) |
+| 700[25\|31\|32\|33\|36]*   | Weather Station, Base + Sensor |
+| 780[25\|31\|32\|33]*   | Weather Station Sensor (Replacement) |
 | 790*             | Weather Station Base (Replacement) |
 | 700[99]*         | Accessory Sensor |
 

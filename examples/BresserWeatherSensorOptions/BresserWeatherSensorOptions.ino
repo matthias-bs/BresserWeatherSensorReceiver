@@ -173,7 +173,7 @@ void print_data(void)
         }
         else
         {
-          Serial.printf("T_globe": [--.-C] ");
+          Serial.printf("T_globe: [--.-C] ");
         }
       }
 #endif

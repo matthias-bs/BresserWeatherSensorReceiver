@@ -44,6 +44,7 @@
 // 20231027 Refactored sensor structure
 // 20240209 Added Air Quality (HCHO/VOC), Air Quality (PM2.5/PM10), CO2 Sensor and Pool Thermometer
 // 20240504 Added board initialization
+// 20250127 Added 8-in-1 Weather Sensor sample data
 //
 // ToDo: 
 // - 

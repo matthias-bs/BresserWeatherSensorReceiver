@@ -84,6 +84,7 @@
 // 20240714 Added decoder to struct Sensor
 // 20240716 Added option to skip initialization of filters in begin()
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
+// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor)
 //
 // ToDo:
 // -

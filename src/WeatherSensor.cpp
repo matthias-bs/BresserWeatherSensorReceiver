@@ -104,6 +104,7 @@
 // 20240714 Added option to skip initialization of include/exclude lists
 // 20241205 Added radio LR1121
 // 20241227 Added LilyGo T3 S3 LR1121 RF switch and TCXO configuration
+// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor) to 7-in-1 decoder
 //
 // ToDo:
 // -

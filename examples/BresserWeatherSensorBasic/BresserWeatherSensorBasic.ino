@@ -51,6 +51,7 @@
 // 20240209 Added Leakage, Air Quality (HCHO/VOC) and CO2 Sensors
 // 20240213 Added PM1.0 to Air Quality (Particulate Matter) Sensor decoder
 // 20240716 Fixed output of invalid battery state with 6-in-1 decoder
+// 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
 //
 // ToDo: 
 // - 
@@ -216,6 +217,15 @@ void loop()
             }
             else {
                 Serial.printf("Light: [--.-klx] ");
+            }
+            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+                if (ws.sensor[i].w.tglobe_ok) {
+                    Serial.printf("T_globe: [%3.1fC] ",
+                    ws.sensor[i].w.tglobe_c);
+                }
+                else {
+                    Serial.printf("T_globe: [--.-C] ");
+                }
             }
             #endif
             Serial.printf("\n");

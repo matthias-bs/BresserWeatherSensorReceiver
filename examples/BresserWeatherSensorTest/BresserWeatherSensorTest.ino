@@ -247,6 +247,15 @@ void loop()
             else {
                 Serial.printf("Light: [--.-Klux] ");
             }
+            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+                if (ws.sensor[i].w.tglobe_ok) {
+                    Serial.printf("T_globe: [%3.1fC] ",
+                        ws.sensor[i].w.tglobe_c);
+                }
+                else {
+                    Serial.printf("T_globe: [--.-C] ");
+                }
+            }
             #endif
             Serial.printf("\n");
         }

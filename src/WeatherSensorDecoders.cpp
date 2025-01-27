@@ -754,6 +754,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
 
     if ((s_type == SENSOR_TYPE_WEATHER1) || (s_type == SENSOR_TYPE_WEATHER2))
     {
+        sensor[slot].w.tglobe_ok = false;
         int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
         int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
         int wavg_raw = (msgw[8] & 0x0f) * 100 + (msgw[9] >> 4) * 10 + (msgw[9] & 0x0f);
@@ -795,7 +796,15 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].w.light_klx = light_klx;
         sensor[slot].w.light_lux = light_lux;
         sensor[slot].w.uv = uv_index;
-    }
+
+        if (s_type == SENSOR_TYPE_WEATHER2)
+        {
+            // 8-in-1 sensor
+            if ((msgw[23] >> 4) < 10) {
+                sensor[slot].w.tglobe_ok = true;
+                sensor[slot].w.tglobe_c = (msgw[22] >> 4) * 10 + (msgw[22] & 0x0f) + (msgw[23] >> 4) * 0.1f;
+            }
+        }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {
 #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG

@@ -125,6 +125,7 @@
 #define SENSOR_TYPE_LIGHTNING       9 // Lightning Sensor
 #define SENSOR_TYPE_CO2             10 // CO2 Sensor
 #define SENSOR_TYPE_HCHO_VOC        11 // Air Quality Sensor (HCHO and VOC)
+#define SENSOR_TYPE_WEATHER2        13 // Weather Station (8-in-1)
 
 
 // Sensor specific rain gauge overflow threshold (mm)

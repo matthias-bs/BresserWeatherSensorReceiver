@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// WeatherSensorDecoder.cpp
+// WeatherSensorDecoders.cpp
 //
 // Sensor data decoding functions
 //
@@ -752,7 +752,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].complete = true;
     sensor[slot].rssi = rssi;
 
-    if (s_type == SENSOR_TYPE_WEATHER1)
+    if ((s_type == SENSOR_TYPE_WEATHER1) || (s_type == SENSOR_TYPE_WEATHER2))
     {
         int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
         int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);

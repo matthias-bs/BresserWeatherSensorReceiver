@@ -722,7 +722,7 @@ void publishWeatherdata(bool complete)
             if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
                 if (weatherSensor.sensor[i].w.tglobe_ok || complete)
                 {
-                    mqtt_payload += String(",\"t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe, 1));
+                    mqtt_payload += String(",\"t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe_c, 1));
                 }
             }
             if (weatherSensor.sensor[i].w.rain_ok || complete)

@@ -805,6 +805,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
                 sensor[slot].w.tglobe_c = (msgw[22] >> 4) * 10 + (msgw[22] & 0x0f) + (msgw[23] >> 4) * 0.1f;
             }
         }
+    }
     else if (s_type == SENSOR_TYPE_AIR_PM)
     {
 #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG

@@ -40,7 +40,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7803200       | Weather Sensor  | decodeBresser**7In1**Payload()  |
 | 7003300       | Weather Station | decodeBresser**7In1**Payload()  |
 | 7803300       | Weather Sensor  | decodeBresser**7In1**Payload()  |
-| 7003150       | 8-in-1 Weather Station | decodeBresser**7In1**Payload()  |
+| 7003150       | 8-in-1 Weather Station | decodeBresser**7In1**Payload() **5** |
 
 Some guesswork:
 
@@ -58,6 +58,8 @@ Some guesswork:
 **3)** Request for testing, see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/139
 
 **4)** The part number is specific to the actual variant, i.e. some more characters are appended
+
+**5)** The value `tglobe_c` is preliminary, see https://github.com/matthias-bs/BresserWeatherSensorReceiver/issues/220
 
 > [!NOTE]
 > Weather sensors which are using the 6-in-1 protocol are actually transmitting two different kind of messages alternately:

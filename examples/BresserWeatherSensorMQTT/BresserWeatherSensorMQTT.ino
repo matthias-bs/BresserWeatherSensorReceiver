@@ -121,6 +121,7 @@
 // 20240603 Modified for arduino-esp32 v3.0.0
 // 20241113 Added getting/setting of sensor include/exclude lists via MQTT
 // 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
+// 20250129 Added calculated WBGT (Wet Bulb Globe Temperature)
 //
 // ToDo:
 //
@@ -709,6 +710,12 @@ void publishWeatherdata(bool complete)
                 if (weatherSensor.sensor[i].w.wind_ok)
                 {
                     mqtt_payload2 += String(",\"perceived_temp_c\":") + JSON_FLOAT(String(perceived_temperature(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.wind_avg_meter_sec, weatherSensor.sensor[i].w.humidity), 1));
+                }
+                if (weatherSensor.sensor[i].w.tglobe_ok)
+                {
+                    float t_wet = calcnaturalwetbulb(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.humidity);
+                    float wbgt = calcwbgt(t_wet, weatherSensor.sensor[i].w.tglobe_c, weatherSensor.sensor[i].w.temp_c);
+                    mqtt_payload2 += String(",\"wgbt\":") + JSON_FLOAT(String(wbgt, 1));
                 }
             }
             if (weatherSensor.sensor[i].w.uv_ok || complete)

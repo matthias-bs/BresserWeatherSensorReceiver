@@ -113,13 +113,18 @@ $(document).ready(function(){initNavTree('_weather_utils_8h_source.html',''); in
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keywordtype">float</span> calchumidex(<span class="keywordtype">float</span> temperature, <span class="keywordtype">float</span> humidity);</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span><span class="keywordtype">float</span> perceived_temperature(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed, <span class="keywordtype">float</span> humidity);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="keywordtype">char</span> * winddir_flt_to_str(<span class="keywordtype">float</span> dir, <span class="keywordtype">char</span> * buf);</div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>uint8_t windspeed_ms_to_bft(<span class="keywordtype">float</span> ms);</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="keywordtype">float</span> calcnaturalwetbulb(<span class="keywordtype">float</span> temperature, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keywordtype">float</span> calcwbgt(<span class="keywordtype">float</span> t_wet, <span class="keywordtype">float</span> t_globe, <span class="keywordtype">float</span> t_dry);</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keywordtype">float</span> perceived_temperature(<span class="keywordtype">float</span> celsius, <span class="keywordtype">float</span> windspeed, <span class="keywordtype">float</span> humidity);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="keywordtype">char</span> * winddir_flt_to_str(<span class="keywordtype">float</span> dir, <span class="keywordtype">char</span> * buf);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>uint8_t windspeed_ms_to_bft(<span class="keywordtype">float</span> ms);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

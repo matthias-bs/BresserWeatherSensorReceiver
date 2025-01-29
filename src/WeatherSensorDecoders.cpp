@@ -50,6 +50,8 @@
 //          and
 //          https://github.com/merbanan/rtl_433/commit/9928efe5c8d55e9ca01f1ebab9e8b20b0e7ba01e
 // 20240716 Added assignment of sensor[slot].decoder
+// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor)
+// 20250129 Minor change in SENSOR_TYPE_WEATHER2 handling
 //
 // ToDo:
 // -
@@ -802,8 +804,8 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
             // 8-in-1 sensor
             if ((msgw[23] >> 4) < 10) {
                 sensor[slot].w.tglobe_ok = true;
-                sensor[slot].w.tglobe_c = (msgw[22] >> 4) * 10 + (msgw[22] & 0x0f) + (msgw[23] >> 4) * 0.1f;
             }
+            sensor[slot].w.tglobe_c = (msgw[22] >> 4) * 10 + (msgw[22] & 0x0f) + (msgw[23] >> 4) * 0.1f;
         }
     }
     else if (s_type == SENSOR_TYPE_AIR_PM)

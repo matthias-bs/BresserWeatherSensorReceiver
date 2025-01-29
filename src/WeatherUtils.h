@@ -50,6 +50,28 @@ float calcheatindex(float celsius, float humidity);
 float calchumidex(float temperature, float humidity);
 
 /*!
+ * \brief Calculate natural wet bulb temperature
+ *
+ * \param temperature Dry-bulb temperature (air temperature) in °C
+ * \param humidity relative humidity in %
+ * 
+ * \returns natural wet bulb temperature in °C
+ */
+float calcnaturalwetbulb(float temperature, float humidity);
+
+/*!
+ * \brief Calculate wet bulb globe temperature (WBGT)
+ *
+ * \param t_wet Natural wet-bulb temperature in °C
+ * \param t_globe Globe thermometer temperature (black globe thermometer) in °C
+ * \param t_dry Dry-bulb temperature (actual air temperature) in °C
+ * 
+ * \returns WBGT in °C
+ */
+float calcwbgt(float t_wet, float t_globe, float t_dry);
+
+
+/*!
  * \brief Calculate perceived temperature (feels-like temperature)
  * 
  * Apply windchill or heat index depending on current data or

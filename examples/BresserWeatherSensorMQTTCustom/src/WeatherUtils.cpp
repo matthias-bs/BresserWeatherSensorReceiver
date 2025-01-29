@@ -1,8 +1,12 @@
+#include <Arduino.h>
 #include <math.h>
-#include <string>
+#if defined(ESP32) || defined(ESP8266)
+  #include <string>
+#endif
 #include <string.h>
 #include "WeatherUtils.h"
 
+#if defined(ESP32) || defined(ESP8266)
 // Mapping of wind direction in degrees to text
 // Note: add your localization as desired
 const std::string COMPASS_POINTS[17] = {
@@ -24,6 +28,7 @@ char * winddir_flt_to_str(float dir, char * buf)
     
     return buf;
 };
+#endif
 
 //
 // Convert wind speed from meters per second to Beaufort
@@ -136,10 +141,41 @@ float calcheatindex(float celsius, float humidity) {
   return (-8.784695 + 1.61139411 * celsius + 2.338549 * humidity - 0.14611605 * celsius * humidity - 0.012308094 * celsius * celsius - 0.016424828 * humidity * humidity + 0.002211732 * celsius * celsius * humidity + 0.00072546 * celsius * humidity * humidity - 0.000003582 * celsius * celsius * humidity * humidity);
 }
 
+/* 
+ * Calculate natural wet bulb temperature
+ *
+ * Source:
+ * Stull, Roland B., 1950-. 
+ * “Wet-Bulb Temperature from Relative Humidity and Air Temperature.”
+ * A. American Meteorological Society, 2011. Web. 29 Jan. 2025. 
+ * https://open.library.ubc.ca/collections/facultyresearchandpublications/52383/items/1.0041967. 
+ * Faculty Research and Publications.
+ */
+float calcnaturalwetbulb(float temperature, float humidity)
+{
+  return temperature * atan(0.151977 * pow(humidity + 8.313659, 0.5))
+      + atan(temperature + humidity) 
+      - atan(humidity - 1.676331) 
+      + 0.00391838 * pow(humidity, 1.5) * atan(0.023101 * humidity) 
+      - 4.686035;
+}
+
+
+/*
+ * Calculate wet bulb globe temperature (WBGT)
+ *
+ * Source:
+ * https://en.wikipedia.org/wiki/Wet-bulb_globe_temperature
+ */
+float calcwbgt(float t_wet, float t_globe, float t_dry)
+{
+  return 0.7 * t_wet + 0.2 * t_globe + 0.1 * t_dry;
+}
+
 /*
  * Source:  https://myscope.net/hitzeindex-gefuehle-temperatur/
  *
- *          Valid for Valid for temperatures >= 27°C and humidity >=40%
+ *          Valid for temperatures >= 27°C and humidity >=40%
  */
 float calchumidex(float temperature, float humidity) {
   float e = (6.112 * pow(10,(7.5 * temperature/(237.7 + temperature))) * humidity/100); //vapor pressure

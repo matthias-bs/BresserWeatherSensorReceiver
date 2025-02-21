@@ -40,6 +40,7 @@
 //                                                          triggered by 'get_sensors_inc' MQTT topic
 //     <base_topic>/sensors_exc                             sensors exclude list as JSON string;
 //                                                          triggered by 'get_sensors_exc' MQTT topic
+//     homeassistant/sensor/<sensor_id>_<json_ele>/config   Home Assistand auto discovery
 //
 // MQTT subscriptions:
 //     <base_topic>/reset <flags>                           reset rain counters (see RainGauge.h for <flags>)
@@ -107,6 +108,7 @@
 // 20241113 Added getting/setting of sensor include/exclude lists via MQTT
 // 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
 // 20250129 Added calculated WBGT (Wet Bulb Globe Temperature)
+// 20250220 Added Home Assistant auto discovery
 //
 // ToDo:
 //
@@ -164,11 +166,13 @@
 #define RX_TIMEOUT 90000      // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
 #define DATA_INTERVAL 15000   // MQTT data message interval [ms]
+#define DISCOVERY_INTERVAL 30 // Home Assistant auto discovery interval [min]
 #define AWAKE_TIMEOUT 300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL 300000 // sleep interval [ms]
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
+#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
 // #define USE_SECUREWIFI          // use secure WIFI
 #define USE_WIFI // use non-secure WIFI
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
@@ -245,10 +249,23 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr";
 
-// Map sensor IDs to Names
+// Map sensor IDs to Names - replace by your IDs!
 SensorMap sensor_map[] = {
-    {0x39582376, "WeatherSensor"}
+    {0x39582376, "WeatherSensor"},
+    {0x67566300, "SoilSensor"},
+    {0x5680, "AirQualitySensor"},
+    {0x28966796, "LeakageSensor"},
+    {0xeefb, "LightningSensor"},
+    {0x22400873, "PoolThermometer"}
     //,{0x83750871, "SoilMoisture-1"}
+};
+
+// Sensor information for Home Assistant auto discovery
+struct sensor_info
+{
+    String manufacturer;
+    String model;
+    String identifier;
 };
 
 // enable only one of these below, disabling both is fine too.
@@ -394,6 +411,9 @@ MQTTClient client(PAYLOAD_SIZE);
 
 uint32_t lastMillis = 0;
 uint32_t statusPublishPreviousMillis = 0;
+#if defined(AUTO_DISCOVERY)
+uint32_t discoveryPublishPreviousMillis = 0;
+#endif
 
 void publishWeatherdata(bool complete = false);
 void mqtt_connect(void);
@@ -861,6 +881,7 @@ void publishWeatherdata(bool complete)
         }
         else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
@@ -985,6 +1006,201 @@ void publishRadio(void)
     client.publish(mqttPubRadio, mqtt_payload, false, 0);
     payload.clear();
 }
+
+#if defined(AUTO_DISCOVERY)
+/*!
+ * \brief Home Assistant Auto-Discovery
+ *
+ * Create and publish MQTT messages for Home Assistant auto-discovery.
+ */
+void haAutoDiscovery(void)
+{
+    String topic;
+
+    for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
+    {
+        uint32_t sensor_id = weatherSensor.sensor[i].sensor_id;
+
+        if (!weatherSensor.sensor[i].valid)
+            continue;
+
+        if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+        {
+            topic = String(Hostname) + "/WeatherSensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Weather Sensor",
+                .identifier = "weather_sensor_1"};
+
+            publishAutoDiscovery(info, "Outside Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
+            publishAutoDiscovery(info, "Outside Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
+            if (weatherSensor.sensor[i].w.tglobe_ok)
+            {
+                publishAutoDiscovery(info, "Globe Temperature", sensor_id, "temperature", "°C", topic.c_str(), "tglobe_c");
+            }
+            if (weatherSensor.sensor[i].w.uv_ok)
+            {
+                publishAutoDiscovery(info, "UV Index", sensor_id, "uv", "UV Index", topic.c_str(), "uv");
+            }
+            if (weatherSensor.sensor[i].w.light_ok)
+            {
+                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "Lux", topic.c_str(), "light_lux");
+            }
+            if (weatherSensor.sensor[i].w.rain_ok)
+            {
+                publishAutoDiscovery(info, "Rainfall", sensor_id, "precipitation", "mm", topic.c_str(), "rain");
+                publishAutoDiscovery(info, "Rainfall Hourly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_h");
+                publishAutoDiscovery(info, "Rainfall Daily", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d");
+                publishAutoDiscovery(info, "Rainfall Weekly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_w");
+                publishAutoDiscovery(info, "Rainfall Monthly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_m");
+            }
+            if (weatherSensor.sensor[i].w.wind_ok)
+            {
+                publishAutoDiscovery(info, "Wind Direction", sensor_id, NULL, "°", topic.c_str(), "wind_dir");
+                publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
+                publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
+            }
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
+        {
+            topic = String(Hostname) + "/SoilSensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Soil Sensor",
+                .identifier = "soil_sensor_1"};
+
+            publishAutoDiscovery(info, "Soil Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
+            publishAutoDiscovery(info, "Soil Moisture", sensor_id, "moisture", "%", topic.c_str(), "moisture");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO)
+        {
+            topic = String(Hostname) + "/ThermoHygroSensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Thermo-Hygrometer Sensor",
+                .identifier = "thermo_hygrometer_sensor_1"};
+
+            publishAutoDiscovery(info, "Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
+            publishAutoDiscovery(info, "Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO)
+        {
+            topic = String(Hostname) + "/PoolThermometer/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Pool Thermometer",
+                .identifier = "pool_thermometer_1"};
+
+            publishAutoDiscovery(info, "Pool Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
+        {
+            topic = String(Hostname) + "/AirQualitySensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Air Quality (PM) Sensor",
+                .identifier = "air_quality_sensor_1"};
+
+            publishAutoDiscovery(info, "PM1.0", sensor_id, "pm1", "µg/m³", topic.c_str(), "pm1_0_ug_m3");
+            publishAutoDiscovery(info, "PM2.5", sensor_id, "pm25", "µg/m³", topic.c_str(), "pm2_5_ug_m3");
+            publishAutoDiscovery(info, "PM10", sensor_id, "pm10", "µg/m³", topic.c_str(), "pm10_ug_m3");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
+        {
+            topic = String(Hostname) + "/LightningSensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Lightning Sensor",
+                .identifier = "lightning_sensor"};
+
+            publishAutoDiscovery(info, "Lightning Count", sensor_id, NULL, "", topic.c_str(), "lightning_count");
+            publishAutoDiscovery(info, "Lightning Distance", sensor_id, "distance", "km", topic.c_str(), "lightning_distance_km");
+            publishAutoDiscovery(info, "Lightning Hour", sensor_id, NULL, "", topic.c_str(), "lightning_hr");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
+        {
+            topic = String(Hostname) + "/LeakageSensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Leakage Sensor",
+                .identifier = "leakage_sensor_1"};
+
+            publishAutoDiscovery(info, "Leakage Alarm", sensor_id, "enum", "", topic.c_str(), "leakage");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
+        {
+            topic = String(Hostname) + "/CO2Sensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "CO2 Sensor",
+                .identifier = "co2_sensor_1"};
+
+            publishAutoDiscovery(info, "CO2", sensor_id, "co2", "ppm", topic.c_str(), "co2_ppm");
+        }
+        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
+        {
+            topic = String(Hostname) + "/HCHO_VOC_Sensor/data";
+
+            struct sensor_info info = {
+                .manufacturer = "Bresser",
+                .model = "Air Quality (HCHO/VOC) Sensor",
+                .identifier = "air_quality_sensor_2"};
+
+            publishAutoDiscovery(info, "HCHO", sensor_id, "hcho", "ppb", topic.c_str(), "hcho_ppb");
+            publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
+        }
+    } // for (int i=0; i<weatherSensor.sensor.size(); i++)
+}
+
+/*!
+ * \brief Publish auto-discovery configuration for Home Assistant
+ *
+ * \param info          Sensor information (manufacturer, model, identifier)
+ * \param sensor_name   Sensor name (e.g. "Outside Temperature")
+ * \param sensor_id     Sensor ID (unique)
+ * \param device_class  Device class (e.g. temperature, humidity, etc.)
+ * \param unit          Unit of measurement
+ * \param state_topic   State topic; MQTT topic where sensor data is published
+ * \param value_json    Sensor value in MQTT message JSON string
+ */
+void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json)
+{
+    JsonDocument doc;
+
+    doc["name"] = sensor_name;
+    if (device_class != NULL)
+        doc["device_class"] = device_class;
+    doc["unique_id"] = String(sensor_id) + String("_") + String(value_json);
+    doc["state_topic"] = state_topic;
+    doc["availability_topic"] = String(Hostname) + "/status";
+    doc["unit_of_measurement"] = unit;
+    doc["value_template"] = String("{{ value_json.") + value_json + " }}";
+
+    JsonObject device = doc["device"].to<JsonObject>();
+    device["identifiers"] = info.identifier;
+    device["name"] = info.manufacturer + " " + info.model;
+    device["model"] = info.model;
+    device["manufacturer"] = info.manufacturer;
+
+    char buffer[512];
+    serializeJson(doc, buffer);
+
+    String topic = String("homeassistant/sensor/") + String(sensor_id) + "_" + String(value_json) + "/config";
+    log_d("Publishing auto-discovery configuration: %s: %s", topic.c_str(), buffer);
+    client.publish(topic, buffer, true /* retained */, 0 /* qos */);
+    log_d("Published auto-discovery configuration for %s", sensor_name);
+}
+#endif // AUTO_DISCOVERY
 
 //
 // Setup
@@ -1147,6 +1363,15 @@ void loop()
         if (decode_ok)
             publishWeatherdata(false);
     }
+    
+#if defined(AUTO_DISCOVERY)
+    // publish a discovery message @DISCOVERY_INTERVAL
+    if (millis() - discoveryPublishPreviousMillis > DISCOVERY_INTERVAL * 60000)
+    {
+        discoveryPublishPreviousMillis = millis();
+        haAutoDiscovery();
+    }
+#endif
 
     bool force_sleep = millis() > AWAKE_TIMEOUT;
 

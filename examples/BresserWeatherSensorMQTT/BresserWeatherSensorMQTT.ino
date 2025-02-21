@@ -162,7 +162,7 @@
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 #define AUTO_DISCOVERY        // enable Home Assistant auto discovery
 //#define USE_SECUREWIFI        // use secure WIFI
-//#define USE_WIFI // use non-secure WIFI
+#define USE_WIFI // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";

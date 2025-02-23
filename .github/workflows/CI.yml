@@ -110,11 +110,11 @@ jobs:
           arduino-cli lib install ESP_DoubleResetDetector@1.3.2
           arduino-cli lib install Preferences@2.1.0
           # The following libs are only needed for M5Stack Core2
-          arduino-cli lib install M5Unified@0.2.1
+          arduino-cli lib install M5Unified@0.2.4
           arduino-cli lib install M5Core2@0.2.0
-          arduino-cli lib install M5GFX@0.2.0
+          arduino-cli lib install M5GFX@0.2.6
           # Only ESP32-S3 PowerFeather
-          arduino-cli lib install powerfeather-sdk@1.0.7
+          arduino-cli lib install powerfeather-sdk@1.1.0
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

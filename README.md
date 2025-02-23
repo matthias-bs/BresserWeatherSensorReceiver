@@ -326,7 +326,7 @@ Home Assistant auto-discovery is available.
 MQTT topic scheme: `homeassistant/sensor/<sensor_id>_<json_ele>/config`
 
 * `<sensor_id>`: Sensor ID as hex number
-* `<json_ele>`: JSON element as in `data` topic, e.g. `temp_c`.
+* `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
 
 Customization of discovery messages can be done in `haAutoDiscovery()` in the sketches' `mqtt_comm.cpp` if desired.
 

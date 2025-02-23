@@ -59,6 +59,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifndef _RAINGAUGE_H
+#define _RAINGAUGE_H
+
 #include "time.h"
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
@@ -256,3 +259,4 @@ public:
      */
     float currentMonth(void);
 };
+#endif // _RAINGAUGE_H

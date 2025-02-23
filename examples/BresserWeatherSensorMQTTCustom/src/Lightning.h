@@ -65,6 +65,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifndef _LIGHTNING_H
+#define _LIGHTNING_H
+
 #include "time.h"
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
@@ -243,3 +246,4 @@ public:
      */
     bool lastEvent(time_t &timestamp, int &events, uint8_t &distance);
 };
+#endif // _LIGHTNING_H

@@ -14,6 +14,9 @@
 // MQTT topic, otherwise the ID is used.
 // From the sensor data, some additional data is calculated and published with the 'extra' topic.
 //
+// Furthermore, Home Assistant auto-discovery messages are published at an interval of
+// DISCOVERY_INTERVAL.
+//
 // The data topics are published at an interval of >DATA_INTERVAL.
 // The 'status' and the 'radio' topics are published at an interval of STATUS_INTERVAL.
 //
@@ -109,6 +112,7 @@
 // 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
 // 20250129 Added calculated WBGT (Wet Bulb Globe Temperature)
 // 20250220 Added Home Assistant auto discovery
+// 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
 //
 // ToDo:
 //
@@ -240,12 +244,8 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "RainGauge.h"
 #include "Lightning.h"
 #include "InitBoard.h"
+#include "src/mqtt_comm.h"
 
-#if defined(JSON_FLOAT_AS_STRING)
-#define JSON_FLOAT(x) String("\"") + x + String("\"")
-#else
-#define JSON_FLOAT(x) x
-#endif
 
 const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr";
 
@@ -260,13 +260,6 @@ SensorMap sensor_map[] = {
     //,{0x83750871, "SoilMoisture-1"}
 };
 
-// Sensor information for Home Assistant auto discovery
-struct sensor_info
-{
-    String manufacturer;
-    String model;
-    String identifier;
-};
 
 // enable only one of these below, disabling both is fine too.
 //  #define CHECK_CA_ROOT
@@ -357,30 +350,20 @@ WeatherSensor weatherSensor;
 RainGauge rainGauge;
 Lightning lightning;
 
-// MQTT topics
-const char MQTT_PUB_STATUS[] = "status";
-const char MQTT_PUB_RADIO[] = "radio";
-const char MQTT_PUB_DATA[] = "data";
-const char MQTT_PUB_RSSI[] = "rssi";
-const char MQTT_PUB_EXTRA[] = "extra";
-const char MQTT_PUB_INC[] = "sensors_inc";
-const char MQTT_PUB_EXC[] = "sensors_exc";
-const char MQTT_SUB_RESET[] = "reset";
-const char MQTT_SUB_GET_INC[] = "get_sensors_inc";
-const char MQTT_SUB_GET_EXC[] = "get_sensors_exc";
-const char MQTT_SUB_SET_INC[] = "set_sensors_inc";
-const char MQTT_SUB_SET_EXC[] = "set_sensors_exc";
-
-String mqttPubStatus;
-String mqttPubRadio;
-String mqttPubInc;
-String mqttPubExc;
-String mqttSubReset;
-String mqttSubGetInc;
-String mqttSubGetExc;
-String mqttSubSetInc;
-String mqttSubSetExc;
-char Hostname[HOSTNAME_SIZE];
+// MQTT topics - change if needed
+String Hostname = String(HOSTNAME);
+String mqttPubStatus = "status";
+String mqttPubRadio = "radio";
+String mqttPubData = "data";
+String mqttPubRssi = "rssi";
+String mqttPubExtra = "extra";
+String mqttPubInc = "sensors_inc";
+String mqttPubExc = "sensors_exc";
+String mqttSubReset = "reset";
+String mqttSubGetInc = "get_sensors_inc";
+String mqttSubGetExc = "get_sensors_exc";
+String mqttSubSetInc = "set_sensors_inc";
+String mqttSubSetExc = "set_sensors_exc";
 
 //////////////////////////////////////////////////////
 
@@ -415,8 +398,8 @@ uint32_t statusPublishPreviousMillis = 0;
 uint32_t discoveryPublishPreviousMillis = 0;
 #endif
 
-void publishWeatherdata(bool complete = false);
-void mqtt_connect(void);
+//void publishWeatherdata(bool complete = false);
+//void mqtt_connect(void);
 
 /*! 
  * \brief Set RTC
@@ -540,7 +523,7 @@ void wifimgr_setup(void)
     // end read
 
     // WiFi.disconnect();
-    WiFi.hostname(Hostname);
+    WiFi.hostname(Hostname.c_str());
     WiFi.mode(WIFI_STA); // explicitly set mode, esp defaults to STA+AP
     delay(10);
 
@@ -589,7 +572,7 @@ void wifimgr_setup(void)
     // fetches ssid and pass and tries to connect
     // if it does not connect it starts an access point with the specified name
     // and goes into a blocking loop awaiting configuration
-    if (!wifiManager.autoConnect(Hostname, "password"))
+    if (!wifiManager.autoConnect(Hostname.c_str(), "password"))
     {
         Serial.println("failed to connect and hit timeout");
         delay(3000);
@@ -713,7 +696,7 @@ void mqtt_connect(void)
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
     Serial.print(F("\nMQTT connecting... "));
-    while (!client.connect(Hostname, mqtt_user, mqtt_pass))
+    while (!client.connect(Hostname.c_str(), mqtt_user, mqtt_pass))
     {
         Serial.print(".");
         delay(1000);
@@ -725,482 +708,6 @@ void mqtt_connect(void)
     client.publish(mqttPubStatus, "online");
 }
 
-/*!
- * \brief MQTT message received callback
- */
-void messageReceived(String &topic, String &payload)
-{
-    if (topic == mqttSubReset)
-    {
-        uint8_t flags = payload.toInt() & 0xFF;
-        log_d("MQTT msg received: reset(0x%X)", flags);
-        rainGauge.reset(flags);
-        if (flags & 0x10) {
-            lightning.reset();
-        }
-    }
-    else if (topic == mqttSubGetInc)
-    {
-        log_d("MQTT msg received: get_sensors_inc");
-        client.publish(mqttPubInc, weatherSensor.getSensorsIncJson());
-    }
-    else if (topic == mqttSubGetExc)
-    {
-        log_d("MQTT msg received: get_sensors_exc");
-        client.publish(mqttPubExc, weatherSensor.getSensorsExcJson());
-    }
-    else if (topic == mqttSubSetInc)
-    {
-        log_d("MQTT msg received: set_sensors_inc");
-        weatherSensor.setSensorsIncJson(payload);
-    }
-    else if (topic == mqttSubSetExc)
-    {
-        log_d("MQTT msg received: set_sensors_exc");
-        weatherSensor.setSensorsExcJson(payload);
-    }
-    else
-    {
-        log_d("MQTT msg received: %s", topic.c_str());
-    }
-}
-
-/*!
-  \brief Publish weather data as MQTT message
-
-  \param complete Indicate that entire data is complete, regardless of the flags temp_ok/wind_ok/rain_ok
-                  (which reflect only the state of the last message)
-*/
-void publishWeatherdata(bool complete)
-{
-    String mqtt_payload;  // sensor data
-    String mqtt_payload2; // calculated extra data
-    String mqtt_topic;    // MQTT topic including ID/name
-
-    // ArduinoJson does not allow to set number of decimals for floating point data -
-    // neither does MQTT Dashboard...
-    // Therefore the JSON string is created manually.
-
-    for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
-    {
-        // Reset string buffers
-        mqtt_payload = "";
-        mqtt_payload2 = "";
-
-        if (!weatherSensor.sensor[i].valid)
-            continue;
-
-        if (weatherSensor.sensor[i].w.rain_ok)
-        {
-            struct tm timeinfo;
-            time_t now = time(nullptr);
-            localtime_r(&now, &timeinfo);
-            #ifdef RAINGAUGE_OLD
-            rainGauge.update(timeinfo, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
-            #else
-            rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
-            #endif
-        }
-
-        // Example:
-        // {"ch":0,"battery_ok":1,"humidity":44,"wind_gust":1.2,"wind_avg":1.2,"wind_dir":150,"rain":146}
-        mqtt_payload = "{";
-        mqtt_payload2 = "{";
-        mqtt_payload += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
-        mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
-        mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
-
-        if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
-        {
-            mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
-            mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
-        {
-            mqtt_payload += String(",\"lightning_count\":") + String(weatherSensor.sensor[i].lgt.strike_count);
-            mqtt_payload += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lgt.distance_km);
-            mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
-            mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
-            struct tm timeinfo;
-            time_t now = time(nullptr);
-            localtime_r(&now, &timeinfo);
-            lightning.update(
-                now, 
-                weatherSensor.sensor[i].lgt.strike_count,
-                weatherSensor.sensor[i].lgt.distance_km,
-                weatherSensor.sensor[i].startup
-            );
-            mqtt_payload += String(",\"lightning_hr\":") + String(lightning.pastHour());
-            int events;
-            time_t timestamp;
-            uint8_t distance;
-            if (lightning.lastEvent(timestamp, events, distance)) {
-                char tbuf[25];
-                struct tm timeinfo;
-                gmtime_r(&timestamp, &timeinfo);
-                strftime(tbuf, 25, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
-                mqtt_payload += String(",\"lightning_event_time\":\"") + String(tbuf) + String("\"");
-                mqtt_payload += String(",\"lightning_event_count\":") + String(events);
-                mqtt_payload += String(",\"lightning_event_distance_km\":") + String(distance);
-            }
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE) {
-            // Water Leakage Sensor
-            mqtt_payload += String(",\"leakage\":") + String(weatherSensor.sensor[i].leak.alarm);
-      
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM) {
-            // Air Quality (Particular Matter) Sensor
-            if (!weatherSensor.sensor[i].pm.pm_1_0_init) {
-                mqtt_payload += String(",\"pm1_0_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_1_0);
-            }
-            if (!weatherSensor.sensor[i].pm.pm_2_5_init) {
-                mqtt_payload += String(",\"pm2_5_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_2_5);
-            }
-            if (!weatherSensor.sensor[i].pm.pm_10_init) {
-                mqtt_payload += String(",\"pm10_ug_m3\":") + String(weatherSensor.sensor[i].pm.pm_10);
-            }
-            
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2) {
-            // CO2 Sensor
-            if (!weatherSensor.sensor[i].co2.co2_init) {
-                mqtt_payload += String(",\"co2_ppm\":") + String(weatherSensor.sensor[i].co2.co2_ppm);
-            }
-
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC) {
-            // HCHO / VOC Sensor
-            if (!weatherSensor.sensor[i].voc.hcho_init) {
-                mqtt_payload += String(",\"hcho_ppb\":") + String(weatherSensor.sensor[i].voc.hcho_ppb);
-            }
-            if (!weatherSensor.sensor[i].voc.voc_init) {
-                mqtt_payload += String(",\"voc\":") + String(weatherSensor.sensor[i].voc.voc_level);
-            }
-
-        }
-        else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || 
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) ||
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) || 
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
-        {
-
-            if (weatherSensor.sensor[i].w.temp_ok || complete)
-            {
-                mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
-            }
-            if (weatherSensor.sensor[i].w.humidity_ok || complete)
-            {
-                mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].w.humidity);
-            }
-            if (weatherSensor.sensor[i].w.wind_ok || complete)
-            {
-                mqtt_payload += String(",\"wind_gust\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_gust_meter_sec, 1));
-                mqtt_payload += String(",\"wind_avg\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_avg_meter_sec, 1));
-                mqtt_payload += String(",\"wind_dir\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_direction_deg, 1));
-            }
-            if (weatherSensor.sensor[i].w.wind_ok)
-            {
-                char buf[4];
-                mqtt_payload2 += String("\"wind_dir_txt\":\"") + String(winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf)) + "\"";
-                mqtt_payload2 += String(",\"wind_gust_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_gust_meter_sec));
-                mqtt_payload2 += String(",\"wind_avg_bft\":") + String(windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_avg_meter_sec));
-            }
-            if ((weatherSensor.sensor[i].w.temp_ok) && (weatherSensor.sensor[i].w.humidity_ok))
-            {
-                mqtt_payload2 += String(",\"dewpoint_c\":") + JSON_FLOAT(String(calcdewpoint(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.humidity), 1));
-
-                if (weatherSensor.sensor[i].w.wind_ok)
-                {
-                    mqtt_payload2 += String(",\"perceived_temp_c\":") + JSON_FLOAT(String(perceived_temperature(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.wind_avg_meter_sec, weatherSensor.sensor[i].w.humidity), 1));
-                }
-                if (weatherSensor.sensor[i].w.tglobe_ok)
-                {
-                    float t_wet = calcnaturalwetbulb(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.humidity);
-                    float wbgt = calcwbgt(t_wet, weatherSensor.sensor[i].w.tglobe_c, weatherSensor.sensor[i].w.temp_c);
-                    mqtt_payload2 += String(",\"wgbt\":") + JSON_FLOAT(String(wbgt, 1));
-                }
-            }
-            if (weatherSensor.sensor[i].w.uv_ok || complete)
-            {
-                mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.uv, 1));
-            }
-            if (weatherSensor.sensor[i].w.light_ok || complete)
-            {
-                mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.light_klx, 1));
-            }
-            if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
-                if (weatherSensor.sensor[i].w.tglobe_ok || complete)
-                {
-                    mqtt_payload += String(",\"t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe_c, 1));
-                }
-            }
-            if (weatherSensor.sensor[i].w.rain_ok || complete)
-            {
-                mqtt_payload += String(",\"rain\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.rain_mm, 1));
-                mqtt_payload += String(",\"rain_h\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
-                mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
-                mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
-                mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
-            }
-        }
-        mqtt_payload += String("}");
-        mqtt_payload2 += String("}");
-
-        if (mqtt_payload.length() > PAYLOAD_SIZE)
-        {
-            log_e("mqtt_payload (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload.length(), PAYLOAD_SIZE);
-        }
-        if (mqtt_payload2.length() > PAYLOAD_SIZE)
-        {
-            log_e("mqtt_payload2 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload2.length(), PAYLOAD_SIZE);
-        }
-
-        // Try to map sensor ID to name to make MQTT topic explanatory
-        String sensor_str = String(weatherSensor.sensor[i].sensor_id, HEX);
-        if (sizeof(sensor_map) > 0) {
-          for (size_t n = 0; n < sizeof(sensor_map)/sizeof(sensor_map[0]); n++) {
-            if (sensor_map[n].id == weatherSensor.sensor[i].sensor_id) {
-              sensor_str = String(sensor_map[n].name.c_str());
-              break;
-            }
-          }
-        }
-
-        String mqtt_topic_base = String(Hostname) + String('/') + sensor_str + String('/');
-        String mqtt_topic;
-
-        // sensor data
-        mqtt_topic = mqtt_topic_base + String(MQTT_PUB_DATA);
-        log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
-        client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), false, 0);
-
-        // sensor specific RSSI
-        mqtt_topic = mqtt_topic_base + String(MQTT_PUB_RSSI);
-        client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
-
-        // extra data
-        mqtt_topic = String(Hostname) + String('/') + String(MQTT_PUB_EXTRA);
-
-        if (mqtt_payload2.length() > 2)
-        {
-            log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload2.c_str());
-            client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
-        }
-    } // for (int i=0; i<weatherSensor.sensor.size(); i++)
-}
-
-//
-// Publish radio receiver info as JSON string via MQTT
-// - RSSI: Received Signal Strength Indication
-//
-void publishRadio(void)
-{
-    JsonDocument payload;
-    String mqtt_payload;
-
-    payload["rssi"] = weatherSensor.rssi;
-    serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload.c_str());
-    client.publish(mqttPubRadio, mqtt_payload, false, 0);
-    payload.clear();
-}
-
-#if defined(AUTO_DISCOVERY)
-/*!
- * \brief Home Assistant Auto-Discovery
- *
- * Create and publish MQTT messages for Home Assistant auto-discovery.
- */
-void haAutoDiscovery(void)
-{
-    String topic;
-
-    for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
-    {
-        uint32_t sensor_id = weatherSensor.sensor[i].sensor_id;
-
-        if (!weatherSensor.sensor[i].valid)
-            continue;
-
-        if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
-            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
-        {
-            topic = String(Hostname) + "/WeatherSensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Weather Sensor",
-                .identifier = "weather_sensor_1"};
-
-            publishAutoDiscovery(info, "Outside Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Outside Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
-            if (weatherSensor.sensor[i].w.tglobe_ok)
-            {
-                publishAutoDiscovery(info, "Globe Temperature", sensor_id, "temperature", "°C", topic.c_str(), "tglobe_c");
-            }
-            if (weatherSensor.sensor[i].w.uv_ok)
-            {
-                publishAutoDiscovery(info, "UV Index", sensor_id, "uv", "UV Index", topic.c_str(), "uv");
-            }
-            if (weatherSensor.sensor[i].w.light_ok)
-            {
-                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "Lux", topic.c_str(), "light_lux");
-            }
-            if (weatherSensor.sensor[i].w.rain_ok)
-            {
-                publishAutoDiscovery(info, "Rainfall", sensor_id, "precipitation", "mm", topic.c_str(), "rain");
-                publishAutoDiscovery(info, "Rainfall Hourly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_h");
-                publishAutoDiscovery(info, "Rainfall Daily", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d");
-                publishAutoDiscovery(info, "Rainfall Weekly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_w");
-                publishAutoDiscovery(info, "Rainfall Monthly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_m");
-            }
-            if (weatherSensor.sensor[i].w.wind_ok)
-            {
-                publishAutoDiscovery(info, "Wind Direction", sensor_id, NULL, "°", topic.c_str(), "wind_dir");
-                publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
-                publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
-            }
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
-        {
-            topic = String(Hostname) + "/SoilSensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Soil Sensor",
-                .identifier = "soil_sensor_1"};
-
-            publishAutoDiscovery(info, "Soil Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Soil Moisture", sensor_id, "moisture", "%", topic.c_str(), "moisture");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO)
-        {
-            topic = String(Hostname) + "/ThermoHygroSensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Thermo-Hygrometer Sensor",
-                .identifier = "thermo_hygrometer_sensor_1"};
-
-            publishAutoDiscovery(info, "Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO)
-        {
-            topic = String(Hostname) + "/PoolThermometer/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Pool Thermometer",
-                .identifier = "pool_thermometer_1"};
-
-            publishAutoDiscovery(info, "Pool Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
-        {
-            topic = String(Hostname) + "/AirQualitySensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Air Quality (PM) Sensor",
-                .identifier = "air_quality_sensor_1"};
-
-            publishAutoDiscovery(info, "PM1.0", sensor_id, "pm1", "µg/m³", topic.c_str(), "pm1_0_ug_m3");
-            publishAutoDiscovery(info, "PM2.5", sensor_id, "pm25", "µg/m³", topic.c_str(), "pm2_5_ug_m3");
-            publishAutoDiscovery(info, "PM10", sensor_id, "pm10", "µg/m³", topic.c_str(), "pm10_ug_m3");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
-        {
-            topic = String(Hostname) + "/LightningSensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Lightning Sensor",
-                .identifier = "lightning_sensor"};
-
-            publishAutoDiscovery(info, "Lightning Count", sensor_id, NULL, "", topic.c_str(), "lightning_count");
-            publishAutoDiscovery(info, "Lightning Distance", sensor_id, "distance", "km", topic.c_str(), "lightning_distance_km");
-            publishAutoDiscovery(info, "Lightning Hour", sensor_id, NULL, "", topic.c_str(), "lightning_hr");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
-        {
-            topic = String(Hostname) + "/LeakageSensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Leakage Sensor",
-                .identifier = "leakage_sensor_1"};
-
-            publishAutoDiscovery(info, "Leakage Alarm", sensor_id, "enum", "", topic.c_str(), "leakage");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
-        {
-            topic = String(Hostname) + "/CO2Sensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "CO2 Sensor",
-                .identifier = "co2_sensor_1"};
-
-            publishAutoDiscovery(info, "CO2", sensor_id, "co2", "ppm", topic.c_str(), "co2_ppm");
-        }
-        else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
-        {
-            topic = String(Hostname) + "/HCHO_VOC_Sensor/data";
-
-            struct sensor_info info = {
-                .manufacturer = "Bresser",
-                .model = "Air Quality (HCHO/VOC) Sensor",
-                .identifier = "air_quality_sensor_2"};
-
-            publishAutoDiscovery(info, "HCHO", sensor_id, "hcho", "ppb", topic.c_str(), "hcho_ppb");
-            publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
-        }
-    } // for (int i=0; i<weatherSensor.sensor.size(); i++)
-}
-
-/*!
- * \brief Publish auto-discovery configuration for Home Assistant
- *
- * \param info          Sensor information (manufacturer, model, identifier)
- * \param sensor_name   Sensor name (e.g. "Outside Temperature")
- * \param sensor_id     Sensor ID (unique)
- * \param device_class  Device class (e.g. temperature, humidity, etc.)
- * \param unit          Unit of measurement
- * \param state_topic   State topic; MQTT topic where sensor data is published
- * \param value_json    Sensor value in MQTT message JSON string
- */
-void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json)
-{
-    JsonDocument doc;
-
-    doc["name"] = sensor_name;
-    if (device_class != NULL)
-        doc["device_class"] = device_class;
-    doc["unique_id"] = String(sensor_id) + String("_") + String(value_json);
-    doc["state_topic"] = state_topic;
-    doc["availability_topic"] = String(Hostname) + "/status";
-    doc["unit_of_measurement"] = unit;
-    doc["value_template"] = String("{{ value_json.") + value_json + " }}";
-
-    JsonObject device = doc["device"].to<JsonObject>();
-    device["identifiers"] = info.identifier;
-    device["name"] = info.manufacturer + " " + info.model;
-    device["model"] = info.model;
-    device["manufacturer"] = info.manufacturer;
-
-    char buffer[512];
-    serializeJson(doc, buffer);
-
-    String topic = String("homeassistant/sensor/") + String(sensor_id) + "_" + String(value_json) + "/config";
-    log_d("Publishing auto-discovery configuration: %s: %s", topic.c_str(), buffer);
-    client.publish(topic, buffer, true /* retained */, 0 /* qos */);
-    log_d("Published auto-discovery configuration for %s", sensor_name);
-}
-#endif // AUTO_DISCOVERY
 
 //
 // Setup
@@ -1230,27 +737,29 @@ void setup()
     digitalWrite(LED_GPIO, HIGH);
 #endif
 
-    strncpy(Hostname, HOSTNAME, 20);
+    char ChipID[8] = "";
+
 #if defined(APPEND_CHIP_ID) && defined(ESP32)
-    uint32_t chipId = 0;
+    uint32_t chip_id = 0;
     for (int i = 0; i < 17; i = i + 8)
     {
-        chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
+        chip_id |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
     }
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
+    sprintf(ChipID, "-%06X", chip_id);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
+    sprintf(ChipID, "-%06X", ESP.getChipId() & 0xFFFFFF);
 #endif
-
-    mqttPubStatus = String(Hostname) + String('/') + String(MQTT_PUB_STATUS);
-    mqttPubRadio = String(Hostname) + String('/') + String(MQTT_PUB_RADIO);
-    mqttPubInc = String(Hostname) + String('/') + String(MQTT_PUB_INC);
-    mqttPubExc = String(Hostname) + String('/') + String(MQTT_PUB_EXC);
-    mqttSubReset = String(Hostname) + String('/') + String(MQTT_SUB_RESET);
-    mqttSubGetInc = String(Hostname) + String('/') + String(MQTT_SUB_GET_INC);
-    mqttSubGetExc = String(Hostname) + String('/') + String(MQTT_SUB_GET_EXC);
-    mqttSubSetInc = String(Hostname) + String('/') + String(MQTT_SUB_SET_INC);
-    mqttSubSetExc = String(Hostname) + String('/') + String(MQTT_SUB_SET_EXC);
+    Hostname = Hostname + ChipID;
+    // Prepend Hostname to MQTT topics
+    mqttPubStatus = Hostname + "/" + mqttPubStatus;
+    mqttPubRadio = Hostname + "/" + mqttPubRadio;
+    mqttPubInc = Hostname + "/" + mqttPubInc;
+    mqttPubExc = Hostname + "/" + mqttPubExc;
+    mqttSubReset = Hostname + "/" + mqttSubReset;
+    mqttSubGetInc = Hostname + "/" + mqttSubGetInc;
+    mqttSubGetExc = Hostname + "/" + mqttSubGetExc;
+    mqttSubSetInc = Hostname + "/" + mqttSubSetInc;
+    mqttSubSetExc = Hostname + "/" + mqttSubSetExc;
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 

@@ -321,6 +321,15 @@ Weather sensor data is presented on the display.
 
 ### Home Assistant
 
+Home Assistant auto-discovery is available.
+
+MQTT topic scheme: `homeassistant/sensor/<sensor_id>_<json_ele>/config`
+
+* `<sensor_id>`: Sensor ID as hex number
+* `<json_ele>`: JSON element as in `data` topic, e.g. `temp_c`.
+
+Customization of discovery messages can be done in `haAutoDiscovery()` in the sketches' `mqtt_comm.cpp` if desired.
+
 [Shadowpost](https://github.com/Shadowpost) provided a Home Assistant configuration which can be modified as required:<br>
 [Bresser_HA_MQTT_custom_config.yaml](Bresser_HA_MQTT_custom_config.yaml)
 

@@ -36,6 +36,7 @@
 // History:
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
+// 20250226 Added parameter 'retain' to publishWeatherdata()
 //
 // ToDo:
 // -
@@ -105,7 +106,7 @@ void messageReceived(String &topic, String &payload);
  * \param complete Indicate that entire data is complete, regardless of the flags temp_ok/wind_ok/rain_ok
  *                 (which reflect only the state of the last message)
  */
-void publishWeatherdata(bool complete = false);
+void publishWeatherdata(bool complete = false, bool retain = false);
 
 /*!
  * \brief Publish radio receiver info as JSON string via MQTT

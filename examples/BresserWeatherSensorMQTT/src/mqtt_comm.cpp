@@ -122,7 +122,7 @@ void messageReceived(String &topic, String &payload)
 }
 
 // Publish weather data as MQTT message
-void publishWeatherdata(bool complete)
+void publishWeatherdata(bool complete, bool retain)
 {
     String mqtt_payload;  // sensor data
     String mqtt_payload2; // calculated extra data
@@ -321,7 +321,7 @@ void publishWeatherdata(bool complete)
         mqtt_topic = mqtt_topic_base + mqttPubData;
 
         log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload.c_str());
-        client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), false, 0);
+        client.publish(mqtt_topic, mqtt_payload.substring(0, PAYLOAD_SIZE - 1), retain, 0);
 
         // sensor specific RSSI
         mqtt_topic = mqtt_topic_base + mqttPubRssi;
@@ -333,7 +333,7 @@ void publishWeatherdata(bool complete)
         if (mqtt_payload2.length() > 2)
         {
             log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload2.c_str());
-            client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), false, 0);
+            client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), retain, 0);
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 }
@@ -384,7 +384,7 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.uv_ok)
             {
-                publishAutoDiscovery(info, "UV Index", sensor_id, "uv", "UV Index", topic.c_str(), "uv");
+                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV Index", topic.c_str(), "uv");
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
@@ -403,6 +403,22 @@ void haAutoDiscovery(void)
                 publishAutoDiscovery(info, "Wind Direction", sensor_id, NULL, "°", topic.c_str(), "wind_dir");
                 publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
                 publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
+                String topic = Hostname + "/extra";
+                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_gust_bft");
+                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_avg_bft");
+                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, "enum", "", topic.c_str(), "wind_dir_txt");
+            }
+            if (weatherSensor.sensor[i].w.wind_ok &&
+                weatherSensor.sensor[i].w.temp_ok &&
+                weatherSensor.sensor[i].w.humidity_ok)
+            {
+                String topic = Hostname + "/extra";
+                publishAutoDiscovery(info, "Dewpoint", sensor_id, "temperature", "°C", topic.c_str(), "dewpoint_c");
+                publishAutoDiscovery(info, "Perceived Temperature", sensor_id, "temperature", "°C", topic.c_str(), "perceived_temp_c");
+                if (weatherSensor.sensor[i].w.tglobe_ok)
+                {
+                    publishAutoDiscovery(info, "WGBT", sensor_id, "temperature", "°C", topic.c_str(), "wgbt");
+                }
             }
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
@@ -485,7 +501,77 @@ void haAutoDiscovery(void)
             publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
+    
+
+    String discoveryTopic = "homeassistant/sensor/" + Hostname + "/sensors_exc/config";
+    String discoveryPayload = R"({
+        "name": "Sensor Exclude List",
+        "unique_id":")" + Hostname + R"(_sensors_exc",
+        "state_topic": ")";
+    discoveryPayload += Hostname;
+    discoveryPayload += R"(/sensors_exc",
+        "value_template": "{{ value_json.ids }}",
+        "icon": "mdi:code-array",
+        "device": {
+            "identifiers": ")" + Hostname + R"(_1",
+            "name": "Weather Sensor Receiver Configuration"
+        }
+    })";
+    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
+
+    discoveryTopic = "homeassistant/sensor/" + Hostname + "/sensors_inc/config";
+    discoveryPayload = R"({
+        "name": "Sensor Include List",
+        "unique_id":")" + Hostname + R"(_sensors_inc",
+        "state_topic": ")";
+    discoveryPayload += Hostname;
+    discoveryPayload += R"(/sensors_inc",
+        "value_template": "{{ value_json.ids }}",
+        "icon": "mdi:code-array",
+        "device": {
+            "identifiers": ")" + Hostname + R"(_1",
+            "name": "Weather Sensor Receiver Configuration"
+        }
+    })";
+    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
+
+    discoveryTopic = "homeassistant/button/" + Hostname + "/get_sensors_exc/config";
+    discoveryPayload = R"({
+        "name": "Get Sensor Exclude List",
+        "platform": "button",
+        "unique_id": ")" + Hostname + R"(_get_sensors_exc",
+        "command_topic": ")" + Hostname + R"(/get_sensors_exc",
+        "icon": "mdi:information",
+        "qos": 1,
+        "retain": true,
+        "device": {
+            "identifiers": ")" + Hostname + R"(_1",
+            "name": "Weather Sensor Receiver Configuration"
+        }
+    })";
+    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
+
+    discoveryTopic = "homeassistant/button/" + Hostname + "/get_sensors_inc/config";
+    discoveryPayload = R"({
+        "name": "Get Sensor Include List",
+        "platform": "button",
+        "unique_id": ")" + Hostname + R"(_get_sensors_inc",
+        "command_topic": ")" + Hostname + R"(/get_sensors_inc",
+        "icon": "mdi:information",
+        "retain": true,
+        "qos": 1,
+        "device": {
+            "identifiers": ")" + Hostname + R"(_1",
+            "name": "Weather Sensor Receiver Configuration"
+        }
+    })";
+    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
 }
+
 
 // Publish auto-discovery configuration for Home Assistant
 void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json)
@@ -504,8 +590,10 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
     device["name"] = info.manufacturer + " " + info.model;
-    device["model"] = info.model;
-    device["manufacturer"] = info.manufacturer;
+    if (info.model != "")
+        device["model"] = info.model;
+    if (info.manufacturer != "")
+        device["manufacturer"] = info.manufacturer;
 
     char buffer[512];
     serializeJson(doc, buffer);

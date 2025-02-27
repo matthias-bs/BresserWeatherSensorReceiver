@@ -37,6 +37,7 @@
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
 // 20250226 Added parameter 'retain' to publishWeatherdata()
+// 20250227 Added publishControlDiscovery()
 //
 // ToDo:
 // -
@@ -135,6 +136,14 @@ void haAutoDiscovery(void);
  * \param value_json    Sensor value in MQTT message JSON string
  */
 void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json);
+
+/*!
+ * \brief Publish Home Assistant auto discovery for receiver control
+ *
+ * \param name  Control name
+ * \param topic MQTT topic
+ */
+void publishControlDiscovery(String name, String topic);
 
 #endif // AUTO_DISCOVERY
 #endif // MQTT_COMM_H

@@ -36,6 +36,7 @@
 // History:
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
+// 20250227 Added publishControlDiscovery()
 //
 // ToDo:
 // -
@@ -367,6 +368,7 @@ void haAutoDiscovery(void)
 
         String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
         String topic = Hostname + "/" + sensor_str + "/data";
+        String rssi = Hostname + "/" + sensor_str + "/rssi";
         if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
@@ -376,6 +378,8 @@ void haAutoDiscovery(void)
                 .model = "Weather Sensor",
                 .identifier = "weather_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Outside Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
             publishAutoDiscovery(info, "Outside Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
             if (weatherSensor.sensor[i].w.tglobe_ok)
@@ -428,6 +432,8 @@ void haAutoDiscovery(void)
                 .model = "Soil Sensor",
                 .identifier = "soil_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Soil Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
             publishAutoDiscovery(info, "Soil Moisture", sensor_id, "moisture", "%", topic.c_str(), "moisture");
         }
@@ -438,6 +444,8 @@ void haAutoDiscovery(void)
                 .model = "Thermo-Hygrometer Sensor",
                 .identifier = "thermo_hygrometer_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
             publishAutoDiscovery(info, "Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
         }
@@ -448,6 +456,8 @@ void haAutoDiscovery(void)
                 .model = "Pool Thermometer",
                 .identifier = "pool_thermometer_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Pool Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
@@ -457,6 +467,8 @@ void haAutoDiscovery(void)
                 .model = "Air Quality (PM) Sensor",
                 .identifier = "air_quality_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "PM1.0", sensor_id, "pm1", "µg/m³", topic.c_str(), "pm1_0_ug_m3");
             publishAutoDiscovery(info, "PM2.5", sensor_id, "pm25", "µg/m³", topic.c_str(), "pm2_5_ug_m3");
             publishAutoDiscovery(info, "PM10", sensor_id, "pm10", "µg/m³", topic.c_str(), "pm10_ug_m3");
@@ -468,6 +480,8 @@ void haAutoDiscovery(void)
                 .model = "Lightning Sensor",
                 .identifier = "lightning_sensor"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Lightning Count", sensor_id, NULL, "", topic.c_str(), "lightning_count");
             publishAutoDiscovery(info, "Lightning Distance", sensor_id, "distance", "km", topic.c_str(), "lightning_distance_km");
             publishAutoDiscovery(info, "Lightning Hour", sensor_id, NULL, "", topic.c_str(), "lightning_hr");
@@ -479,6 +493,8 @@ void haAutoDiscovery(void)
                 .model = "Leakage Sensor",
                 .identifier = "leakage_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "Leakage Alarm", sensor_id, "enum", "", topic.c_str(), "leakage");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
@@ -488,6 +504,8 @@ void haAutoDiscovery(void)
                 .model = "CO2 Sensor",
                 .identifier = "co2_sensor_1"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "CO2", sensor_id, "co2", "ppm", topic.c_str(), "co2_ppm");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
@@ -497,19 +515,24 @@ void haAutoDiscovery(void)
                 .model = "Air Quality (HCHO/VOC) Sensor",
                 .identifier = "air_quality_sensor_2"};
 
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
             publishAutoDiscovery(info, "HCHO", sensor_id, "hcho", "ppb", topic.c_str(), "hcho_ppb");
             publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
     
+    publishControlDiscovery("Sensor Exclude List", "sensors_exc");
+    publishControlDiscovery("Sensor Include List", "sensors_inc");
+}
 
-    String discoveryTopic = "homeassistant/sensor/" + Hostname + "/sensors_exc/config";
+void publishControlDiscovery(String name, String topic)
+{
+    String discoveryTopic = "homeassistant/sensor/" + Hostname + "/" + topic + "/config";
     String discoveryPayload = R"({
-        "name": "Sensor Exclude List",
-        "unique_id":")" + Hostname + R"(_sensors_exc",
-        "state_topic": ")";
-    discoveryPayload += Hostname;
-    discoveryPayload += R"(/sensors_exc",
+        "name": ")" + name + R"(",
+        "unique_id":")" + Hostname + "_" + topic + R"(",
+        "state_topic": ")" + Hostname + R"(/)" + topic + R"(",
         "value_template": "{{ value_json.ids }}",
         "icon": "mdi:code-array",
         "device": {
@@ -520,46 +543,12 @@ void haAutoDiscovery(void)
     log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
     client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
 
-    discoveryTopic = "homeassistant/sensor/" + Hostname + "/sensors_inc/config";
+    discoveryTopic = "homeassistant/button/" + Hostname + "/get_" + topic + "/config";
     discoveryPayload = R"({
-        "name": "Sensor Include List",
-        "unique_id":")" + Hostname + R"(_sensors_inc",
-        "state_topic": ")";
-    discoveryPayload += Hostname;
-    discoveryPayload += R"(/sensors_inc",
-        "value_template": "{{ value_json.ids }}",
-        "icon": "mdi:code-array",
-        "device": {
-            "identifiers": ")" + Hostname + R"(_1",
-            "name": "Weather Sensor Receiver Configuration"
-        }
-    })";
-    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
-    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
-
-    discoveryTopic = "homeassistant/button/" + Hostname + "/get_sensors_exc/config";
-    discoveryPayload = R"({
-        "name": "Get Sensor Exclude List",
+        "name": "Get )" + name + R"(",
         "platform": "button",
-        "unique_id": ")" + Hostname + R"(_get_sensors_exc",
-        "command_topic": ")" + Hostname + R"(/get_sensors_exc",
-        "icon": "mdi:information",
-        "qos": 1,
-        "retain": true,
-        "device": {
-            "identifiers": ")" + Hostname + R"(_1",
-            "name": "Weather Sensor Receiver Configuration"
-        }
-    })";
-    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
-    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
-
-    discoveryTopic = "homeassistant/button/" + Hostname + "/get_sensors_inc/config";
-    discoveryPayload = R"({
-        "name": "Get Sensor Include List",
-        "platform": "button",
-        "unique_id": ")" + Hostname + R"(_get_sensors_inc",
-        "command_topic": ")" + Hostname + R"(/get_sensors_inc",
+        "unique_id": ")" + Hostname + "_get_" + topic + R"(",
+        "command_topic": ")" + Hostname + "/get_" + topic + R"(",
         "icon": "mdi:information",
         "retain": true,
         "qos": 1,
@@ -572,7 +561,6 @@ void haAutoDiscovery(void)
     client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
 }
 
-
 // Publish auto-discovery configuration for Home Assistant
 void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json)
 {
@@ -584,9 +572,23 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     doc["unique_id"] = String(sensor_id, HEX) + String("_") + String(value_json);
     doc["state_topic"] = state_topic;
     doc["availability_topic"] = Hostname + "/status";
+    doc["payload_not_available"] = "dead"; // default: "offline"
     doc["unit_of_measurement"] = unit;
-    doc["value_template"] = String("{{ value_json.") + value_json + " }}";
-
+    if (device_class != NULL)
+    {
+        if (strcmp(device_class, "battery") == 0)
+        {
+            doc["value_template"] = String("{{ (value_json.") + value_json + " | float) * 100.0 }}";
+        }
+        else if (strcmp(device_class, "signal_strength") == 0)
+        {
+            doc["value_template"] = "{{ value }}";
+        }
+        else
+        {
+            doc["value_template"] = String("{{ value_json.") + value_json + " }}";
+        }
+    }
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
     device["name"] = info.manufacturer + " " + info.model;

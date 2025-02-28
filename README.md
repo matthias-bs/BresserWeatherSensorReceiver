@@ -250,15 +250,29 @@ If the sensor ID can be mapped to a name (edit `sensor_map[]`), this name is use
 
 The data topics are published at an interval of >`DATA_INTERVAL`. The _status_ and the _radio_ topics are published at an interval of `STATUS_INTERVAL`.
 
+Furthermore, Home Assistant MQTT discovery messages are published at an interval of DISCOVERY_INTERVAL. See section [Home Assistant](#home-assistant) for more details.
+
 If sleep mode is enabled (`SLEEP_EN`), the device goes into deep sleep mode after data has been published. If `AWAKE_TIMEOUT` is reached before data has been published, deep sleep is entered, too. After `SLEEP_INTERVAL`, the controller is restarted. 
 
 MQTT publications:
 
 `<base_topic>/data/<ID|name>`    sensor data as JSON string - see `publishWeatherdata()`
-     
-`<base_topic>/radio`             CC1101 radio transceiver info as JSON string - see `publishRadio()`
+
+`<base_topic>/extra`             calculated data
+
+`<base_topic>/radio`             radio transceiver info as JSON string - see `publishRadio()`
      
 `<base_topic>/status`            "online"|"offline"|"dead"$
+
+`homeassistant/sensor/<sensor_id>_<json_ele>/config`   Home Assistand auto discovery for sensor data
+`homeassistant/sensor/<hostname>_<json_ele>/config`    Home Assistand auto discovery for receiver control/status
+
+MQTT subscriptions:
+`<base_topic>/reset <flags>`                           reset rain counters (see RainGauge.h for `<flags>`) and lightning post-processing (`flags & 0x10`)
+`<base_topic>/get_sensors_inc`                         get sensors include list
+`<base_topic>/get_sensors_exc`                         get sensors exclude list
+`<base_topic>/set_sensors_inc {"ids": [<id0>, ... ]}`  set sensors include list, e.g. `{"ids": ["0x89ABCDEF"]}`
+`<base_topic>/set_sensors_exc {"ids": [<id0>, ... ]}`  set sensors exclude list, e.g. `{"ids": ["0x89ABCDEF"]}`
 
 $ via LWT
 

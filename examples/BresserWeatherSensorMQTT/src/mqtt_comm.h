@@ -52,6 +52,7 @@
 
 #include <Arduino.h>
 #include <string>
+#include <vector>
 #include <time.h>
 #include <MQTT.h>
 #include <ArduinoJson.h>

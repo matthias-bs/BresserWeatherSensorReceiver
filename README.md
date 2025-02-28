@@ -348,7 +348,7 @@ MQTT topic schemes:
 * `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
 
 > [!NOTE]
-> The sensors transmit a binary battery status, but Home Assistant expects a percentage. Therefore the status is shown as 0\% or 100\%.
+> The sensors transmit the battery status as binary value (`battery_ok`), but Home Assistant expects a percentage. Therefore the battery status is converted to 0\% or 100\%.
 
 
 Customization of MQTT discovery messages can be done in `haAutoDiscovery()` in the sketches' `mqtt_comm.cpp` if desired.

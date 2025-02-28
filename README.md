@@ -340,12 +340,11 @@ Home Assistant [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/
 
 MQTT topic schemes:
 
-`homeassistant/sensor/<hostname>_<json_ele>/config` &ndash; weather sensor receiver configuration status
-`homeassistant/button/<hostname>_<json_ele>/config` &ndash; weather sensor receiver command
-`homeassistant/sensor/<sensor_id>_<json_ele>/config` &ndash; sensor data
-
-* `<sensor_id>`: Sensor ID as hex number
-* `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
+* `homeassistant/sensor/<hostname>_<json_ele>/config` &ndash; weather sensor receiver configuration status
+* `homeassistant/button/<hostname>_<json_ele>/config` &ndash; weather sensor receiver command
+* `homeassistant/sensor/<sensor_id>_<json_ele>/config` &ndash; sensor data
+  * `<sensor_id>`: Sensor ID as hex number
+  * `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
 
 > [!NOTE]
 > The sensors transmit the battery status as binary value (`battery_ok`), but Home Assistant expects a percentage. Therefore the battery status is converted to 0\% or 100\%.

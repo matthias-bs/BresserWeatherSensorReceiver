@@ -37,6 +37,7 @@
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
 // 20250227 Added publishControlDiscovery()
+// 20250228 Added publishStatusDiscovery()
 //
 // ToDo:
 // -

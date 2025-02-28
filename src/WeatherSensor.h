@@ -163,7 +163,7 @@ typedef enum DecodeStatus {
  */
 typedef struct SensorMap {
     uint32_t        id;    //!< ID of sensor (as transmitted in radio message)
-    std::string     name;  //!< Name of sensor (e.g. for MQTT topic)
+    String          name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
 
 

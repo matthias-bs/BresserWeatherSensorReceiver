@@ -37,7 +37,7 @@
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
 // 20250227 Added publishControlDiscovery()
-// 20250228 Added publishStatusDiscovery()
+// 20250228 Added publishStatusDiscovery(), fixed sensorName()
 //
 // ToDo:
 // -
@@ -64,21 +64,18 @@ extern MQTTClient client;
 extern WeatherSensor weatherSensor;
 extern RainGauge rainGauge;
 extern Lightning lightning;
-
-extern const SensorMap *sensor_map;
+extern std::vector<SensorMap> sensor_map;
 
 String sensorName(uint32_t sensor_id)
 {
     String sensor_str = String(sensor_id, HEX);
-    if (sizeof(sensor_map) > 0)
+
+    for (size_t n = 0; n < sensor_map.size(); n++)
     {
-        for (size_t n = 0; n < sizeof(sensor_map) / sizeof(sensor_map[0]); n++)
+        if (sensor_map[n].id == sensor_id)
         {
-            if (sensor_map[n].id == sensor_id)
-            {
-                sensor_str = String(sensor_map[n].name.c_str());
-                break;
-            }
+            sensor_str = sensor_map[n].name;
+            break;
         }
     }
     return sensor_str;
@@ -522,7 +519,7 @@ void haAutoDiscovery(void)
             publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
-    
+
     publishControlDiscovery("Sensor Exclude List", "sensors_exc");
     publishControlDiscovery("Sensor Include List", "sensors_inc");
     publishStatusDiscovery("Receiver status", "status");
@@ -534,12 +531,15 @@ void publishStatusDiscovery(String name, String topic)
     String discoveryTopic = "homeassistant/sensor/" + Hostname + "/" + topic + "/config";
     String discoveryPayload = R"({
         "name": ")" + name + R"(",
-        "unique_id":")" + Hostname + "_" + topic + R"(",
-        "state_topic": ")" + Hostname + R"(/)" + topic + R"(",
+        "unique_id":")" + Hostname +
+                              "_" + topic + R"(",
+        "state_topic": ")" + Hostname +
+                              R"(/)" + topic + R"(",
         "value_template": "{{ value }}",
         "icon": "mdi:wifi",
         "device": {
-            "identifiers": ")" + Hostname + R"(_1",
+            "identifiers": ")" +
+                              Hostname + R"(_1",
             "name": "Weather Sensor Receiver"
         }
     })";
@@ -553,12 +553,15 @@ void publishControlDiscovery(String name, String topic)
     String discoveryTopic = "homeassistant/sensor/" + Hostname + "/" + topic + "/config";
     String discoveryPayload = R"({
         "name": ")" + name + R"(",
-        "unique_id":")" + Hostname + "_" + topic + R"(",
-        "state_topic": ")" + Hostname + R"(/)" + topic + R"(",
+        "unique_id":")" + Hostname +
+                              "_" + topic + R"(",
+        "state_topic": ")" + Hostname +
+                              R"(/)" + topic + R"(",
         "value_template": "{{ value_json.ids }}",
         "icon": "mdi:code-array",
         "device": {
-            "identifiers": ")" + Hostname + R"(_1",
+            "identifiers": ")" +
+                              Hostname + R"(_1",
             "name": "Weather Sensor Receiver"
         }
     })";
@@ -567,15 +570,19 @@ void publishControlDiscovery(String name, String topic)
 
     discoveryTopic = "homeassistant/button/" + Hostname + "/get_" + topic + "/config";
     discoveryPayload = R"({
-        "name": "Get )" + name + R"(",
+        "name": "Get )" +
+                       name + R"(",
         "platform": "button",
-        "unique_id": ")" + Hostname + "_get_" + topic + R"(",
-        "command_topic": ")" + Hostname + "/get_" + topic + R"(",
+        "unique_id": ")" +
+                       Hostname + "_get_" + topic + R"(",
+        "command_topic": ")" +
+                       Hostname + "/get_" + topic + R"(",
         "icon": "mdi:information",
         "retain": true,
         "qos": 1,
         "device": {
-            "identifiers": ")" + Hostname + R"(_1",
+            "identifiers": ")" +
+                       Hostname + R"(_1",
             "name": "Weather Sensor Receiver"
         }
     })";

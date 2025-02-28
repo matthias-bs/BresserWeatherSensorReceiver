@@ -524,8 +524,29 @@ void haAutoDiscovery(void)
     
     publishControlDiscovery("Sensor Exclude List", "sensors_exc");
     publishControlDiscovery("Sensor Include List", "sensors_inc");
+    publishStatusDiscovery("Receiver status", "status");
 }
 
+// Publish discovery message for MQTT node status
+void publishStatusDiscovery(String name, String topic)
+{
+    String discoveryTopic = "homeassistant/sensor/" + Hostname + "/" + topic + "/config";
+    String discoveryPayload = R"({
+        "name": ")" + name + R"(",
+        "unique_id":")" + Hostname + "_" + topic + R"(",
+        "state_topic": ")" + Hostname + R"(/)" + topic + R"(",
+        "value_template": "{{ value }}",
+        "icon": "mdi:wifi",
+        "device": {
+            "identifiers": ")" + Hostname + R"(_1",
+            "name": "Weather Sensor Receiver"
+        }
+    })";
+    log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), false, 0);
+}
+
+// Publish discovery messages for receiver control
 void publishControlDiscovery(String name, String topic)
 {
     String discoveryTopic = "homeassistant/sensor/" + Hostname + "/" + topic + "/config";
@@ -537,7 +558,7 @@ void publishControlDiscovery(String name, String topic)
         "icon": "mdi:code-array",
         "device": {
             "identifiers": ")" + Hostname + R"(_1",
-            "name": "Weather Sensor Receiver Configuration"
+            "name": "Weather Sensor Receiver"
         }
     })";
     log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
@@ -554,11 +575,11 @@ void publishControlDiscovery(String name, String topic)
         "qos": 1,
         "device": {
             "identifiers": ")" + Hostname + R"(_1",
-            "name": "Weather Sensor Receiver Configuration"
+            "name": "Weather Sensor Receiver"
         }
     })";
     log_d("%s: %s", discoveryTopic.c_str(), discoveryPayload.c_str());
-    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), true, 0);
+    client.publish(discoveryTopic.c_str(), discoveryPayload.c_str(), false, 0);
 }
 
 // Publish auto-discovery configuration for Home Assistant

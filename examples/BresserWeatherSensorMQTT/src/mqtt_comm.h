@@ -138,6 +138,14 @@ void haAutoDiscovery(void);
 void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json);
 
 /*!
+ * \brief Publish Home Assistant auto discovery for MQTT node status
+ *
+ * \param name  Control name
+ * \param topic MQTT topic
+ */
+void publishStatusDiscovery(String name, String topic);
+
+/*!
  * \brief Publish Home Assistant auto discovery for receiver control
  *
  * \param name  Control name

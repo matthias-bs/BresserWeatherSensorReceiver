@@ -43,7 +43,8 @@
 //                                                          triggered by 'get_sensors_inc' MQTT topic
 //     <base_topic>/sensors_exc                             sensors exclude list as JSON string;
 //                                                          triggered by 'get_sensors_exc' MQTT topic
-//     homeassistant/sensor/<sensor_id>_<json_ele>/config   Home Assistand auto discovery
+//     homeassistant/sensor/<sensor_id>_<json_ele>/config   Home Assistand auto discovery for sensor data
+//     homeassistant/sensor/<hostname>_<json_ele>/config    Home Assistand auto discovery for receiver control/status
 //
 // MQTT subscriptions:
 //     <base_topic>/reset <flags>                           reset rain counters (see RainGauge.h for <flags>)

@@ -522,7 +522,7 @@ void haAutoDiscovery(void)
 
     publishControlDiscovery("Sensor Exclude List", "sensors_exc");
     publishControlDiscovery("Sensor Include List", "sensors_inc");
-    publishStatusDiscovery("Receiver status", "status");
+    publishStatusDiscovery("Receiver Status", "status");
 }
 
 // Publish discovery message for MQTT node status

@@ -250,15 +250,29 @@ If the sensor ID can be mapped to a name (edit `sensor_map[]`), this name is use
 
 The data topics are published at an interval of >`DATA_INTERVAL`. The _status_ and the _radio_ topics are published at an interval of `STATUS_INTERVAL`.
 
+Furthermore, Home Assistant MQTT discovery messages are published at an interval of DISCOVERY_INTERVAL. See section [Home Assistant](#home-assistant) for more details.
+
 If sleep mode is enabled (`SLEEP_EN`), the device goes into deep sleep mode after data has been published. If `AWAKE_TIMEOUT` is reached before data has been published, deep sleep is entered, too. After `SLEEP_INTERVAL`, the controller is restarted. 
 
 MQTT publications:
 
 `<base_topic>/data/<ID|name>`    sensor data as JSON string - see `publishWeatherdata()`
-     
-`<base_topic>/radio`             CC1101 radio transceiver info as JSON string - see `publishRadio()`
+
+`<base_topic>/extra`             calculated data
+
+`<base_topic>/radio`             radio transceiver info as JSON string - see `publishRadio()`
      
 `<base_topic>/status`            "online"|"offline"|"dead"$
+
+`homeassistant/sensor/<sensor_id>_<json_ele>/config`   Home Assistand auto discovery for sensor data
+`homeassistant/sensor/<hostname>_<json_ele>/config`    Home Assistand auto discovery for receiver control/status
+
+MQTT subscriptions:
+`<base_topic>/reset <flags>`                           reset rain counters (see RainGauge.h for `<flags>`) and lightning post-processing (`flags & 0x10`)
+`<base_topic>/get_sensors_inc`                         get sensors include list
+`<base_topic>/get_sensors_exc`                         get sensors exclude list
+`<base_topic>/set_sensors_inc {"ids": [<id0>, ... ]}`  set sensors include list, e.g. `{"ids": ["0x89ABCDEF"]}`
+`<base_topic>/set_sensors_exc {"ids": [<id0>, ... ]}`  set sensors exclude list, e.g. `{"ids": ["0x89ABCDEF"]}`
 
 $ via LWT
 
@@ -286,9 +300,8 @@ See [examples/BresserWeatherSensorMQTTCustom/Readme.md](https://github.com/matth
 
 Same core functionality as [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorMQTT/BresserWeatherSensorMQTT.ino), but instead of using static WiFi- and MQTT-connection data, [WiFiManager](https://github.com/tzapu/WiFiManager) is used instead.
 
-**Note:**
-
-When using the sketch on a device for the first time, you must format the flash file system (SPIFFS) first, otherwise the configuration cannot be saved.
+> [!NOTE]
+> When using the sketch on a device for the first time, you must format the flash file system (SPIFFS) first, otherwise the configuration cannot be saved.
 
 **Configuration:**
 
@@ -321,16 +334,29 @@ Weather sensor data is presented on the display.
 
 ### Home Assistant
 
+#### MQTT Discovery
+
 Home Assistant [MQTT Discovery](https://www.home-assistant.io/integrations/mqtt/#mqtt-discovery) is available.
 
-MQTT topic scheme: `homeassistant/sensor/<sensor_id>_<json_ele>/config`
+MQTT topic schemes:
 
-* `<sensor_id>`: Sensor ID as hex number
-* `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
+* `homeassistant/sensor/<hostname>_<json_ele>/config` &ndash; weather sensor receiver configuration status
+* `homeassistant/button/<hostname>_<json_ele>/config` &ndash; weather sensor receiver command
+* `homeassistant/sensor/<sensor_id>_<json_ele>/config` &ndash; sensor data
+  * `<sensor_id>`: Sensor ID as hex number
+  * `<json_ele>`: JSON element as in `data` message, e.g. `temp_c`.
+
+> [!NOTE]
+> The sensors transmit the battery status as binary value (`battery_ok`), but Home Assistant expects a percentage. Therefore the battery status is converted to 0\% or 100\%.
+
 
 Customization of MQTT discovery messages can be done in `haAutoDiscovery()` in the sketches' `mqtt_comm.cpp` if desired.
 
-Prior to this, [Shadowpost](https://github.com/Shadowpost) provided a Home Assistant configuration which can be modified as required:<br>
+[weather_sensor_receiver_config.yml](weather_sensor_receiver_config.yml) allows to configure sensor include/exclude lists.
+
+#### Manual Configuration
+
+Manual configuration of Home Assistant can be done using a file template provided by [Shadowpost](https://github.com/Shadowpost):<br>
 [Bresser_HA_MQTT_custom_config.yaml](Bresser_HA_MQTT_custom_config.yaml)
 
 ## Debug Output Configuration
@@ -339,8 +365,8 @@ See [Debug Output Configuration in Arduino IDE](DEBUG_OUTPUT.md)
 
 ## HW Examples
 
-**Note:**
-The SX1276/RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
+> [!NOTE]
+> The SX1276/RFM95W also supports FSK modulation and thus can be used to receive the weather sensor data.
 
 ### ESP8266 D1 Mini with CC1101
 
@@ -352,7 +378,8 @@ The SX1276/RFM95W also supports FSK modulation and thus can be used to receive t
 
 [Texas Instruments CC1101 Product Page](https://www.ti.com/product/CC1101)
 
-**Note: CC1101 Module Connector Pitch is 2.0mm!!!**
+> [!NOTE]
+> CC1101 Module Connector Pitch is 2.0mm!!!**
 
 Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on common e-commerce platforms have a pitch (distance between pins) of 2.0mm. To connect it to breadboards or jumper wires with 2.54mm/100mil pitch (standard), the following options exist:
 
@@ -360,11 +387,13 @@ Unlike most modules/breakout boards, most (if not all) CC1101 modules sold on co
 * use a 2.0mm pin header and make/buy jumper wires with 2.54mm at one end and 2.0mm at the other (e.g. [Adafruit Female-Female 2.54 to 2.0mm Jumper Wires](https://www.adafruit.com/product/1919))
 * use a [2.0mm to 2.54 adapter PCB](https://www.amazon.de/Lazmin-1-27MM-2-54MM-Adapter-Platten-Brett-drahtlose-default/dp/B07V873N52)
 
-**Note 2: Make sure to use the 868MHz version!**
+> [!NOTE]
+> Make sure to use the 868MHz version!
 
 ### Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing
 
-**Note: Make sure to use the 868MHz version!**
+> [!NOTE]
+> Make sure to use the 868MHz version!
 * [ADA3231](https://www.adafruit.com/product/3231) - Adafruit LoRa Radio FeatherWing - RFM95W 900 MHz - RadioFruit
 * [ADA3232](https://www.adafruit.com/product/3232) - Adafruit LoRa Radio FeatherWing - RFM95W 433 MHz - RadioFruit
 * [ADA5303](https://www.adafruit.com/product/5303) - Adafruit ESP32-S2 Feather with BME280 Sensor - STEMMA QT - 4MB Flash + 2 MB PSRAM
@@ -379,7 +408,8 @@ Solder-Bridges on the Module/Wing:
 ### Adafruit Feather ESP32 or ThingPulse ePulse Feather with Adafruit LoRa Radio FeatherWing
 ![ePulse_Feather+FeatherWing](https://user-images.githubusercontent.com/83612361/228173195-f13fe4c4-7f86-4e73-b485-d5d553034554.jpg)
 
-**Note: Make sure to use the 868MHz version!**
+> [!NOTE]
+> Make sure to use the 868MHz version!
 * [ADA3231](https://www.adafruit.com/product/3231) - Adafruit LoRa Radio FeatherWing - RFM95W 900 MHz - RadioFruit
 * [ADA3232](https://www.adafruit.com/product/3232) - Adafruit LoRa Radio FeatherWing - RFM95W 433 MHz - RadioFruit
 * [ADA3405](https://www.adafruit.com/product/3405) - Adafruit HUZZAH32 – ESP32 Feather Board
@@ -393,7 +423,8 @@ Solder-Bridges on the Module/Wing:
 
 ### Adafruit RFM95W LoRa Radio Transceiver Breakout
 
-**Note: Make sure to use the 868MHz version!**
+> [!NOTE]
+> Make sure to use the 868MHz version!
 * [ADA3072](https://www.adafruit.com/product/3072) - 868/915 MHz version
 * [ADA3073](https://www.adafruit.com/product/3073) - 433 MHz version
 * RF connector
@@ -404,9 +435,11 @@ See [Adafruit RFM69HCW and RFM9X LoRa Packet Radio Breakouts - Pinouts](https://
 
 ### DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio 868MHz
 ![firebeetle_esp32+cover_lora](https://user-images.githubusercontent.com/83612361/233463592-e99a9d1c-5100-4ac2-9b33-bcfc974406f0.jpg)
-Note: Stacking headers were included with TEL0125.
+> [!NOTE]
+> Stacking headers were included with TEL0125.
 
-**Note: Make sure to use the 868MHz version!**
+> [!NOTE]
+> Make sure to use the 868MHz version!**
 * [DFR0478](https://www.dfrobot.com/product-1590.html) - FireBeetle ESP32 IoT Microcontroller
 * [TEL0125](https://www.dfrobot.com/product-1831.html) - LoRa Radio 868MHz - FireBeetle Covers
 

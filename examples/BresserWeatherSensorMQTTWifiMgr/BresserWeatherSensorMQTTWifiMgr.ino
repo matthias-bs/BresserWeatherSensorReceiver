@@ -43,7 +43,8 @@
 //                                                          triggered by 'get_sensors_inc' MQTT topic
 //     <base_topic>/sensors_exc                             sensors exclude list as JSON string;
 //                                                          triggered by 'get_sensors_exc' MQTT topic
-//     homeassistant/sensor/<sensor_id>_<json_ele>/config   Home Assistand auto discovery
+//     homeassistant/sensor/<sensor_id>_<json_ele>/config   Home Assistand auto discovery for sensor data
+//     homeassistant/sensor/<hostname>_<json_ele>/config    Home Assistand auto discovery for receiver control/status
 //
 // MQTT subscriptions:
 //     <base_topic>/reset <flags>                           reset rain counters (see RainGauge.h for <flags>)
@@ -231,6 +232,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #endif
 
 #include <string>
+#include <vector>
 #include <MQTT.h>
 #include <FS.h>
 #include <LittleFS.h>
@@ -247,17 +249,18 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/mqtt_comm.h"
 
 
-const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr";
+const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr 20250228";
 
-// Map sensor IDs to Names - replace by your IDs!
-SensorMap sensor_map[] = {
+// Map sensor IDs to Names - replace by your own IDs!
+std::vector<SensorMap> sensor_map = {
     {0x39582376, "WeatherSensor"},
+    {0x21103427, "WeatherSensor"},
     {0x67566300, "SoilSensor"},
     {0x5680, "AirQualitySensor"},
     {0x28966796, "LeakageSensor"},
     {0xeefb, "LightningSensor"},
     {0x22400873, "PoolThermometer"}
-    //,{0x83750871, "SoilMoisture-1"}
+    //{0x83750871, "SoilMoisture-1"}
 };
 
 

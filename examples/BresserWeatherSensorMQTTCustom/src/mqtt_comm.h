@@ -36,6 +36,8 @@
 // History:
 //
 // 20250221 Created from BresserWeatherSensorMQTT.ino
+// 20250226 Added parameter 'retain' to publishWeatherdata()
+// 20250227 Added publishControlDiscovery()
 //
 // ToDo:
 // -
@@ -50,6 +52,7 @@
 
 #include <Arduino.h>
 #include <string>
+#include <vector>
 #include <time.h>
 #include <MQTT.h>
 #include <ArduinoJson.h>
@@ -105,7 +108,7 @@ void messageReceived(String &topic, String &payload);
  * \param complete Indicate that entire data is complete, regardless of the flags temp_ok/wind_ok/rain_ok
  *                 (which reflect only the state of the last message)
  */
-void publishWeatherdata(bool complete = false);
+void publishWeatherdata(bool complete = false, bool retain = false);
 
 /*!
  * \brief Publish radio receiver info as JSON string via MQTT
@@ -134,6 +137,22 @@ void haAutoDiscovery(void);
  * \param value_json    Sensor value in MQTT message JSON string
  */
 void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name, const uint32_t sensor_id, const char *device_class, const char *unit, const char *state_topic, const char *value_json);
+
+/*!
+ * \brief Publish Home Assistant auto discovery for MQTT node status
+ *
+ * \param name  Control name
+ * \param topic MQTT topic
+ */
+void publishStatusDiscovery(String name, String topic);
+
+/*!
+ * \brief Publish Home Assistant auto discovery for receiver control
+ *
+ * \param name  Control name
+ * \param topic MQTT topic
+ */
+void publishControlDiscovery(String name, String topic);
 
 #endif // AUTO_DISCOVERY
 #endif // MQTT_COMM_H

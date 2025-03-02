@@ -1,0 +1,43 @@
+# weather_sensor_receiver_config.yaml
+#
+# - Add the following to your configuration.yaml file
+# - Replace the AAAE6C with your ESPWeather device ID
+# 
+# This file is used to configure Home Assistant
+# to provide controls for setting the sensors 
+# include/exclude lists via MQTT messages.
+
+
+input_text:
+  set_sensors_exc:
+    name: Set Sensors Exclude List
+    initial: ""
+    max: 255
+    
+  set_sensors_inc:
+    name: Set Sensors Include List
+    initial: ""
+    max: 255
+
+automation:
+  - alias: Send MQTT message when set_sensors_exc changes
+    trigger:
+      platform: state
+      entity_id: input_text.set_sensors_exc
+    action:
+      service: mqtt.publish
+      data:
+        topic: "ESPWeather-AAAE6C/set_sensors_exc"
+        payload: "{ \"ids\": [ {{ states('input_text.set_sensors_exc') }} ] }"
+        retain: true
+
+  - alias: Send MQTT message when set_sensors_inc changes
+    trigger:
+      platform: state
+      entity_id: input_text.set_sensors_inc
+    action:
+      service: mqtt.publish
+      data:
+        topic: "ESPWeather-AAAE6C/set_sensors_inc"
+        payload: "{ \"ids\": [ {{ states('input_text.set_sensors_inc')}} ] }"
+        retain: true

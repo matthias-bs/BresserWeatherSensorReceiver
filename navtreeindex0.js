@@ -62,7 +62,7 @@ var NAVTREEINDEX0 =
 "index.html":[],
 "pages.html":[],
 "struct_sensor_map.html":[1,0,4],
-"struct_sensor_map.html#a67056237cfe5029dfebc682216edc524":[1,0,4,1],
+"struct_sensor_map.html#acd404e64c03a1f259039e2476dd139f8":[1,0,4,1],
 "struct_sensor_map.html#aed559727b1c275362724332e45b08993":[1,0,4,0],
 "struct_weather_sensor_1_1_air_c_o2.html":[1,0,5,0],
 "struct_weather_sensor_1_1_air_c_o2.html#a11c1bd5a0c9e743781e5ab2b95ce6f66":[1,0,5,0,0],

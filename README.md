@@ -357,7 +357,7 @@ Customization of MQTT discovery messages can be done in `haAutoDiscovery()` in t
 #### Manual Configuration
 
 Manual configuration of Home Assistant can be done using a file template provided by [Shadowpost](https://github.com/Shadowpost):<br>
-[Bresser_HA_MQTT_custom_config.yaml](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/weather_sensor_receiver_config.yaml)
+[Bresser_HA_MQTT_custom_config.yaml](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/Bresser_HA_MQTT_custom_config.yaml)
 
 ## Debug Output Configuration
 

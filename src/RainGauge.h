@@ -97,9 +97,9 @@
 /**
  * \def
  * 
- * Number of valid rain_hist entries required for valid result
+ * Fraction of valid rain_hist entries required for valid result
  */
-#define DEFAULT_QUALITY_THRESHOLD 8
+#define DEFAULT_QUALITY_THRESHOLD 0.8
 
 /**
  * \defgroup Reset rain counters
@@ -156,7 +156,7 @@ class RainGauge {
 private:
     float rainCurr;
     float raingaugeMax;
-    int qualityThreshold;
+    float qualityThreshold;
 
     #if defined(RAINGAUGE_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvData_t nvData = {
@@ -185,9 +185,9 @@ public:
      * Constructor
      * 
      * \param raingauge_max     raingauge value which causes a counter overflow
-     * \param quality_threshold number of valid rain_hist entries required for valid pastHour() result
+     * \param quality_threshold fraction of valid rain_hist entries required for valid pastHour() result
      */
-    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
         raingaugeMax(raingauge_max),
         qualityThreshold(quality_threshold)
     {};
@@ -229,7 +229,7 @@ public:
      * 
      * \param rate    update rate in minutes (default: 6)
      */
-    void set_update_rate(uint8_t rate = RAINGAUGE_UPD_RATE) {
+    void setUpdateRate(uint8_t rate = RAINGAUGE_UPD_RATE) {
         #if !defined(INSIDE_UNITTEST)
         preferences.begin("BWS-RAIN", false);
         uint8_t updateRatePrev = preferences.getUChar("updateRate", RAINGAUGE_UPD_RATE);
@@ -278,7 +278,7 @@ public:
     /**
      * Rainfall during past 60 minutes
      * 
-     * \param valid     number of valid entries in rain_hist >= qualityThreshold
+     * \param valid     number of valid entries in rain_hist >= qualityThreshold * 60 / updateRate
      * \param quality   number of valid entries in rain_hist
      * 
      * \returns amount of rain during past 60 minutes

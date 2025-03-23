@@ -53,6 +53,7 @@
 // 20240122 Changed scope of nvData -
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
+// 20250323 Added changing of update rate at run-time
 //
 // ToDo: 
 // -
@@ -88,7 +89,7 @@
 /**
  * \def
  * 
- * Set to 3600 [sec] / update_rate_rate [sec]
+ * Set to 3600 [sec] / min_update_rate_rate [sec]
  */
 #define RAIN_HIST_SIZE 10
 
@@ -140,6 +141,8 @@ typedef struct {
 
     float     rainPrev;  // rain gauge at previous run - to detect overflow
     float     rainAcc; // accumulated rain (overflows and startups)
+
+    uint8_t   updateRate; // update rate for pastHour() calculation
 } nvData_t;
 
 /**
@@ -169,7 +172,8 @@ private:
         .tsMonthBegin = 0xFF,
         .rainMonthBegin = 0,
         .rainPrev = 0,
-        .rainAcc = 0
+        .rainAcc = 0,
+        .updateRate = RAINGAUGE_UPD_RATE
     };
     #endif
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
@@ -198,6 +202,49 @@ public:
         raingaugeMax = raingauge_max;
     }
     
+    /**
+     * \brief Set update rate for pastHour() calculation
+     * 
+     * RAIN_HIST_SIZE: number of entries in rain_hist[]
+     * updateRate: update rate in minutes
+     * 
+     * 60 minutes / updateRate = no_of_hist_bins
+     * The resulting number of history bins must be an integer value which
+     * does not exceed RAIN_HIST_SIZE.
+     * 
+     * Examples: 
+     * 
+     * 1. updateRate =  6 -> 60 / 6 = 10 entries
+     * 2. updateRate = 12 -> 60 / 12 = 5 entries
+     * 
+     * Changing the update rate will reset the history buffer, therefore
+     * the caller should avoid frequent changes.
+     * 
+     * Actual update intervals shorter than updateRate will lead to a reduced
+     * resolution of the pastHour() result and a higher risk of an invalid
+     * result if a bin in the history buffer was missed.
+     * 
+     * Actual update intervals longer than updateRate will lead to an invalid
+     * result, because bins in the history buffer will be missed.
+     * 
+     * \param rate    update rate in minutes (default: 6)
+     */
+    void set_update_rate(uint8_t rate = RAINGAUGE_UPD_RATE) {
+        #if !defined(INSIDE_UNITTEST)
+        preferences.begin("BWS-RAIN", false);
+        uint8_t updateRatePrev = preferences.getUChar("updateRate", RAINGAUGE_UPD_RATE);
+        preferences.putUChar("updateRate", rate);
+        preferences.end();
+        #else
+        static uint8_t updateRatePrev = RAINGAUGE_UPD_RATE;
+        updateRatePrev = nvData.updateRate;
+        #endif
+        nvData.updateRate = rate;
+        if (nvData.updateRate != updateRatePrev) {
+            hist_init();
+        }
+    }
+
     /**
      * Reset non-volatile data and current rain counter value
      * 

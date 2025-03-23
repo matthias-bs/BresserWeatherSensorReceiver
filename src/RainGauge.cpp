@@ -82,7 +82,8 @@ RTC_DATA_ATTR nvData_t nvData = {
    .tsMonthBegin = 0xFF,
    .rainMonthBegin = 0,
    .rainPrev = 0,
-   .rainAcc = 0
+   .rainAcc = 0,
+   .updateRate = RAINGAUGE_UPD_RATE
 };
 #endif
 
@@ -190,6 +191,7 @@ RainGauge::prefs_load(void)
     nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
     nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
     nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
+    nvData.updateRate        = preferences.getUChar("updateRate", RAINGAUGE_UPD_RATE);
 
     log_d("lastUpdate        =%s", String(nvData.lastUpdate).c_str());
     log_d("startupPrev       =%d", nvData.startupPrev);
@@ -240,7 +242,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
         prefs_load();
     #endif
-
+    
     struct tm t;
     localtime_r(&timestamp, &t);
 
@@ -292,7 +294,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
      *
      * In each update():
      * - timestamp (time_t) ->                  t (localtime, struct tm)
-     * - calculate index into hist[]:           idx = t.tm_min / RAINGAUGE_UPD_RATE
+     * - calculate index into hist[]:           idx = t.tm_min / updateRate
      * - expired time since last update:        t_delta = timestamp - nvData.lastUpdate
      * - amount of rain since last update:      rainDelta = rainCurr - nvData.rainPrev
      * - t_delta
@@ -309,7 +311,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
      *   ---------------     -----------
      *        ^
      *        |
-     *       idx = t.tm_min / RAINGAUGE_UPD_RATE
+     *       idx = t.tm_min / updateRate
      *
      * - Calculate hourly rate:
      *   pastHour = sum of all valid hist[] entries
@@ -331,15 +333,15 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     }
 
 
-    int idx = t.tm_min / RAINGAUGE_UPD_RATE;
+    int idx = t.tm_min / nvData.updateRate;
 
-    if (t_delta / 60 < RAINGAUGE_UPD_RATE) {
+    if (t_delta / 60 < nvData.updateRate) {
         // t_delta shorter than expected update rate
         if (nvData.hist[idx] < 0)
             nvData.hist[idx] = 0;
         struct tm t_prev;
         localtime_r(&nvData.lastUpdate, &t_prev);
-        if (t_prev.tm_min / RAINGAUGE_UPD_RATE == idx) {
+        if (t_prev.tm_min / nvData.updateRate == idx) {
             // same index as in previous cycle - add value
             nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
             log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
@@ -349,7 +351,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
             log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
         }
     }
-    else if (t_delta >= RAIN_HIST_SIZE * RAINGAUGE_UPD_RATE * 60) {
+    else if (t_delta >= RAIN_HIST_SIZE * nvData.updateRate * 60) {
         // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
         log_w("History time frame expired, resetting!");
         hist_init();
@@ -359,10 +361,10 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
         // Mark all history entries in interval [expected_index, current_index) as invalid
         // N.B.: excluding current index!
-        for (time_t ts = nvData.lastUpdate + (RAINGAUGE_UPD_RATE * 60); ts < timestamp; ts += RAINGAUGE_UPD_RATE * 60) {
+        for (time_t ts = nvData.lastUpdate + (nvData.updateRate * 60); ts < timestamp; ts += nvData.updateRate * 60) {
             struct tm timeinfo;
             localtime_r(&ts, &timeinfo);
-            int idx = timeinfo.tm_min / RAINGAUGE_UPD_RATE;
+            int idx = timeinfo.tm_min / nvData.updateRate;
             nvData.hist[idx] = -1;
             log_d("hist[%d]=-1", idx);
         }

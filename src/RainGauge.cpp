@@ -451,7 +451,7 @@ RainGauge::pastHour(bool *valid, int *quality)
     
     // Optional: return valid flag
     if (valid) {
-        if (_quality >= qualityThreshold) {
+        if (_quality >= qualityThreshold * 60 / nvData.updateRate) {
             *valid = true;
         } else {
             *valid = false;

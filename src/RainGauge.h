@@ -53,7 +53,8 @@
 // 20240122 Changed scope of nvData -
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
-// 20250323 Added changing of update rate at run-time
+// 20250323 Added configuration of expected update rate at run-time
+//          pastHour(): modified parameters
 //
 // ToDo: 
 // -
@@ -279,11 +280,12 @@ public:
      * Rainfall during past 60 minutes
      * 
      * \param valid     number of valid entries in rain_hist >= qualityThreshold * 60 / updateRate
-     * \param quality   number of valid entries in rain_hist
+     * \param nbins     number of valid entries in rain_hist
+     * \param quality   fraction of valid entries in rain_hist (0..1); quality = nbins / (60 / updateRate)
      * 
      * \returns amount of rain during past 60 minutes
      */
-    float pastHour(bool *valid = nullptr, int *quality = nullptr);
+    float pastHour(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
 
     /**
      * Rainfall of current calendar day

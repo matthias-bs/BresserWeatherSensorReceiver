@@ -432,30 +432,35 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 }
 
 float
-RainGauge::pastHour(bool *valid, int *quality)
+RainGauge::pastHour(bool *valid, int *nbins, float *quality)
 {
-    int _quality = 0;
+    int entries = 0;
     float res = 0;
 
     // Sum of all valid entries
     for (size_t i=0; i<RAIN_HIST_SIZE; i++){
         if (nvData.hist[i] >= 0) {
             res += nvData.hist[i] * 0.01;
-            _quality++;
+            entries++;
         }
     }
 
     // Optional: return quality indication
-    if (quality)
-        *quality = _quality;
+    if (nbins != nullptr)
+        *nbins = entries;
     
     // Optional: return valid flag
-    if (valid) {
-        if (_quality >= qualityThreshold * 60 / nvData.updateRate) {
+    if (valid != nullptr) {
+        if (entries >= qualityThreshold * 60 / nvData.updateRate) {
             *valid = true;
         } else {
             *valid = false;
         }
+    }
+
+    // Optional: return quality
+    if (quality != nullptr) {
+        *quality = static_cast<float>(entries) / (60 / nvData.updateRate);
     }
 
     return res;

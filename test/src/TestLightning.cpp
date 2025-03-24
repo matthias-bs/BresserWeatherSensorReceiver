@@ -34,6 +34,7 @@
 // History:
 //
 // 20230722 Created
+// 20250324 Updated tests for modified pastHour() return values
 //
 // ToDo: 
 // -
@@ -44,6 +45,7 @@
 
 #include "Lightning.h"
 
+#define TOLERANCE_QUAL 0.001
 
 /**
  * \example
@@ -191,7 +193,8 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   tm        tm;
   time_t    ts;
   bool      res;
-  int       qual;
+  int       nbins;
+  float     qual;
   int       counter;
   int       res_events;
   int       exp_events;
@@ -202,9 +205,10 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   setTime("2023-07-22 8:00", tm, ts);
   lightning.hist_init();
   lightning.update(ts, counter=48, 5);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 1);
+  CHECK_EQUAL(nbins, 1);
+  DOUBLES_EQUAL(qual, 0.1, TOLERANCE_QUAL);
   CHECK_EQUAL(exp_events=0, res_events);
 
   // Step 1
@@ -213,9 +217,10 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 2;
   exp_events += 2;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 2);
+  CHECK_EQUAL(nbins, 2);
+  DOUBLES_EQUAL(qual, 0.2, TOLERANCE_QUAL);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 2
@@ -224,9 +229,10 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 3;
   exp_events += 3;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 3);
+  CHECK_EQUAL(nbins, 3);
+  DOUBLES_EQUAL(qual, 0.3, TOLERANCE_QUAL);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 3
@@ -235,9 +241,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 4;
   exp_events += 4;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 4);
+  CHECK_EQUAL(nbins, 4);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 4
@@ -246,9 +252,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 5;
   exp_events += 5;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 5);
+  CHECK_EQUAL(nbins, 5);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 5
@@ -257,9 +263,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 6;
   exp_events += 6;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 6);
+  CHECK_EQUAL(nbins, 6);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 6
@@ -268,9 +274,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 7;
   exp_events += 7;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 7);
+  CHECK_EQUAL(nbins, 7);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 7
@@ -279,9 +285,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 8;
   exp_events += 8;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 8);
+  CHECK_EQUAL(nbins, 8);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 8
@@ -290,9 +296,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 9;
   exp_events += 9;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 9);
+  CHECK_EQUAL(nbins, 9);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 9
@@ -301,9 +307,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 10;
   exp_events += 10;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 10);
+  CHECK_EQUAL(nbins, 10);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 10
@@ -312,9 +318,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   counter += 11;
   exp_events += 11;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 10);
+  CHECK_EQUAL(nbins, 10);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 11
@@ -325,9 +331,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   exp_events += 12;
   exp_events -= 2;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 10);
+  CHECK_EQUAL(nbins, 10);
   CHECK_EQUAL(exp_events, res_events);
 
   // Step 12
@@ -338,9 +344,9 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   exp_events += 13;
   exp_events -= 3;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
-  CHECK_EQUAL(qual, 10);
+  CHECK_EQUAL(nbins, 10);
   CHECK_EQUAL(exp_events, res_events);
 }
 
@@ -353,6 +359,7 @@ TEST(TG_LightningDouble, Test_LightningDouble) {
   tm        tm;
   time_t    ts;
   bool      res;
+  int       nbins;
   int       counter;
   int       res_events;
   int       exp_events;
@@ -395,7 +402,8 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   tm        tm;
   time_t    ts;
   bool      res;
-  int       qual;
+  int       nbins;
+  float     qual;
   int       counter;
   int       res_events;
   int       exp_events;
@@ -558,9 +566,9 @@ TEST(TG_LightningSkip, Test_LightningSkip) {
   counter += 16;
   exp_events = 0;
   lightning.update(ts, counter, 7);
-  res_events = lightning.pastHour(&res, &qual);
+  res_events = lightning.pastHour(&res, &nbins);
   CHECK_FALSE(res);
-  CHECK_EQUAL(qual, 0);
+  CHECK_EQUAL(nbins, 0);
   CHECK_EQUAL(exp_events, res_events);
 }
 

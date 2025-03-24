@@ -204,7 +204,7 @@ public:
     }
     
     /**
-     * \brief Set update rate for pastHour() calculation
+     * \brief Set expected update rate for pastHour() calculation
      * 
      * RAIN_HIST_SIZE: number of entries in rain_hist[]
      * updateRate: update rate in minutes

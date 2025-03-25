@@ -35,6 +35,7 @@
 //
 // 20230722 Created
 // 20250324 Updated tests for modified pastHour() return values
+// 20250325 Added tests for changing update rate (effective history buffer size) at run-time
 //
 // ToDo: 
 // -
@@ -75,6 +76,14 @@ TEST_GROUP(TG_LightningBasic) {
 };
 
 TEST_GROUP(TG_LightningHourly) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+TEST_GROUP(TG_LightningHourlyRateChg) {
   void setup() {
   }
 
@@ -347,6 +356,187 @@ TEST(TG_LightningHourly, Test_LightningHourly) {
   res_events = lightning.pastHour(&res, &nbins);
   CHECK(res);
   CHECK_EQUAL(nbins, 10);
+  CHECK_EQUAL(exp_events, res_events);
+}
+
+
+/*
+ * Test hourly lightning events with change of expected update rate
+ */
+TEST(TG_LightningHourlyRateChg, Test_LightningHourlyRateChg) {
+  tm        tm;
+  time_t    ts;
+  bool      res;
+  int       nbins;
+  float     qual;
+  int       counter;
+  int       res_events;
+  int       exp_events;
+  Lightning lightning;
+
+  printf("< LightningHourlyRateChg >\n");
+  
+  setTime("2025-03-25 8:00", tm, ts);
+  lightning.hist_init();
+  lightning.update(ts, counter=48, 5);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 1);
+  DOUBLES_EQUAL(qual, 0.1, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events=0, res_events);
+
+  // Step 1
+  // Counter +2
+  setTime("2025-03-25 8:06", tm, ts);
+  counter += 2;
+  exp_events += 2;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 2);
+  DOUBLES_EQUAL(qual, 0.2, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Change expected udate rate from 6 (default) to 10 min
+  lightning.setUpdateRate(10);
+
+  // Step 2
+  // Counter +3
+  setTime("2025-03-25 8:16", tm, ts);
+  counter += 3;
+  exp_events = 3; // after rate change, only last event is considered
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 1);
+  DOUBLES_EQUAL(qual, 0.166, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 3
+  // Counter +4
+  setTime("2025-03-25 8:26", tm, ts);
+  counter += 4;
+  exp_events += 4;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 2);
+  DOUBLES_EQUAL(qual, 0.333, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 4
+  // Counter +5
+  setTime("2025-03-25 8:36", tm, ts);
+  counter += 5;
+  exp_events += 5;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 3);
+  DOUBLES_EQUAL(qual, 0.5, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 5
+  // Counter +6
+  setTime("2025-03-25 8:46", tm, ts);
+  counter += 6;
+  exp_events += 6;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 4);
+  DOUBLES_EQUAL(qual, 0.666, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 6
+  // Counter +7
+  setTime("2025-03-25 8:56", tm, ts);
+  counter += 7;
+  exp_events += 7;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK(res);
+  CHECK_EQUAL(nbins, 5);
+  DOUBLES_EQUAL(qual, 0.833, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 7
+  // Counter +8
+  setTime("2025-03-25 9:06", tm, ts);
+  counter += 8;
+  exp_events += 8;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK(res);
+  CHECK_EQUAL(nbins, 6);
+  DOUBLES_EQUAL(qual, 1.0, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 8
+  // Counter +9
+  // Events from Step 3 are discarded!
+  setTime("2025-03-25 9:12", tm, ts);
+  counter += 9;
+  exp_events += 9;
+  exp_events -= 3;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK(res);
+  CHECK_EQUAL(nbins, 6);
+  DOUBLES_EQUAL(qual, 1.0, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 9
+  // Counter +10
+  // Events from Step 4 are discarded!
+  setTime("2025-03-25 9:22", tm, ts);
+  counter += 10;
+  exp_events += 10;
+  exp_events -= 4;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK(res);
+  CHECK_EQUAL(nbins, 6);
+  DOUBLES_EQUAL(qual, 1.0, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Change expected udate rate from 10 to 6 min (default)
+  lightning.setUpdateRate(6);
+
+  // Step 10
+  // Counter +11
+  setTime("2025-03-25 9:30", tm, ts);
+  counter += 11;
+  exp_events = 11; // after rate change, only last event is considered
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 1);
+  DOUBLES_EQUAL(qual, 0.1, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 11
+  // Counter +12
+  setTime("2025-03-25 9:36", tm, ts);
+  counter += 12;
+  exp_events += 12;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 2);
+  DOUBLES_EQUAL(qual, 0.2, TOLERANCE_QUAL);
+  CHECK_EQUAL(exp_events, res_events);
+
+  // Step 12
+  // Counter +13
+  setTime("2025-03-25 9:42", tm, ts);
+  counter += 13;
+  exp_events += 13;
+  lightning.update(ts, counter, 7);
+  res_events = lightning.pastHour(&res, &nbins, &qual);
+  CHECK_FALSE(res);
+  CHECK_EQUAL(nbins, 3);
+  DOUBLES_EQUAL(qual, 0.3, TOLERANCE_QUAL);
   CHECK_EQUAL(exp_events, res_events);
 }
 

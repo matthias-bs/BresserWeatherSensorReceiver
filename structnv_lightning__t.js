@@ -7,5 +7,6 @@ var structnv_lightning__t =
     [ "preStCount", "structnv_lightning__t.html#afbfb201f9622fae40981d0a4d9fb0b6d", null ],
     [ "prevCount", "structnv_lightning__t.html#afa9e737588d8b84853e706d360969562", null ],
     [ "startupPrev", "structnv_lightning__t.html#a4b5a90f14843e701da0ff8bbb38b768b", null ],
-    [ "timestamp", "structnv_lightning__t.html#a20a5bd6643924f83336634b53f364f7b", null ]
+    [ "timestamp", "structnv_lightning__t.html#a20a5bd6643924f83336634b53f364f7b", null ],
+    [ "updateRate", "structnv_lightning__t.html#a1932bd10238c0e373b0ff305b7c13348", null ]
 ];

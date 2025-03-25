@@ -11,9 +11,10 @@ var searchData=
   ['setsensorsexcjson_8',['setSensorsExcJson',['../class_weather_sensor.html#ab04af1949e91b6ca76d913306ff6674c',1,'WeatherSensor']]],
   ['setsensorsinc_9',['setSensorsInc',['../class_weather_sensor.html#aecf60e2ae2e51eff69fdd20b00f3f487',1,'WeatherSensor']]],
   ['setsensorsincjson_10',['setSensorsIncJson',['../class_weather_sensor.html#aae056e7b7ef390e5180f5652c68e2ac5',1,'WeatherSensor']]],
-  ['sleep_11',['sleep',['../class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794',1,'WeatherSensor']]],
-  ['soil_12',['Soil',['../struct_weather_sensor_1_1_soil.html',1,'WeatherSensor']]],
-  ['startup_13',['startup',['../struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4',1,'WeatherSensor::Sensor']]],
-  ['startupprev_14',['startupPrev',['../structnv_lightning__t.html#a4b5a90f14843e701da0ff8bbb38b768b',1,'nvLightning_t']]],
-  ['strike_5fcount_15',['strike_count',['../struct_weather_sensor_1_1_lightning.html#af17bf0e440e9fa44b99c52fa36b0b542',1,'WeatherSensor::Lightning']]]
+  ['setupdaterate_11',['setupdaterate',['../class_lightning.html#a8615e5f1b10025445aaa102f5f2fd57e',1,'Lightning::setUpdateRate()'],['../class_rain_gauge.html#a0e70fd453d3b74503fc472e4367bb425',1,'RainGauge::setUpdateRate()']]],
+  ['sleep_12',['sleep',['../class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794',1,'WeatherSensor']]],
+  ['soil_13',['Soil',['../struct_weather_sensor_1_1_soil.html',1,'WeatherSensor']]],
+  ['startup_14',['startup',['../struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4',1,'WeatherSensor::Sensor']]],
+  ['startupprev_15',['startupPrev',['../structnv_lightning__t.html#a4b5a90f14843e701da0ff8bbb38b768b',1,'nvLightning_t']]],
+  ['strike_5fcount_16',['strike_count',['../struct_weather_sensor_1_1_lightning.html#af17bf0e440e9fa44b99c52fa36b0b542',1,'WeatherSensor::Lightning']]]
 ];

@@ -104,8 +104,11 @@ $(document).ready(function(){initNavTree('class_lightning.html',''); initResizab
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a2a214ac4ed02d390fd64709e46478968" id="r_a2a214ac4ed02d390fd64709e46478968"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a2a214ac4ed02d390fd64709e46478968">Lightning</a> (const int quality_threshold=DEFAULT_QUALITY_THRESHOLD)</td></tr>
-<tr class="separator:a2a214ac4ed02d390fd64709e46478968"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a7132ae949303f5601cbf9c14520b7b" id="r_a8a7132ae949303f5601cbf9c14520b7b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a8a7132ae949303f5601cbf9c14520b7b">Lightning</a> (const float quality_threshold=DEFAULT_QUALITY_THRESHOLD)</td></tr>
+<tr class="separator:a8a7132ae949303f5601cbf9c14520b7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8615e5f1b10025445aaa102f5f2fd57e" id="r_a8615e5f1b10025445aaa102f5f2fd57e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a8615e5f1b10025445aaa102f5f2fd57e">setUpdateRate</a> (uint8_t rate=LIGHTNING_UPD_RATE)</td></tr>
+<tr class="memdesc:a8615e5f1b10025445aaa102f5f2fd57e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set expected update rate for <a class="el" href="class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e" title="Get number of lightning events during past 60 minutes.">pastHour()</a> calculation.  <br /></td></tr>
+<tr class="separator:a8615e5f1b10025445aaa102f5f2fd57e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af73224d91b7318c3769ca126bd37e684" id="r_af73224d91b7318c3769ca126bd37e684"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#af73224d91b7318c3769ca126bd37e684">reset</a> (void)</td></tr>
 <tr class="separator:af73224d91b7318c3769ca126bd37e684"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd08eac418bb1b608624fc7ca98d7a4e" id="r_abd08eac418bb1b608624fc7ca98d7a4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#abd08eac418bb1b608624fc7ca98d7a4e">hist_init</a> (int16_t count=-1)</td></tr>
@@ -119,9 +122,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>prefs_save</b> (void)
 <tr class="memitem:ad53a85fe73e25ed6dc31f6fed02984e7" id="r_ad53a85fe73e25ed6dc31f6fed02984e7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#ad53a85fe73e25ed6dc31f6fed02984e7">update</a> (time_t timestamp, int16_t count, uint8_t distance, bool startup=false)</td></tr>
 <tr class="memdesc:ad53a85fe73e25ed6dc31f6fed02984e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update lightning data.  <br /></td></tr>
 <tr class="separator:ad53a85fe73e25ed6dc31f6fed02984e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abef17e45ab846ccba788b55ab1806611" id="r_abef17e45ab846ccba788b55ab1806611"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#abef17e45ab846ccba788b55ab1806611">pastHour</a> (bool *valid=nullptr, int *quality=nullptr)</td></tr>
-<tr class="memdesc:abef17e45ab846ccba788b55ab1806611"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of lightning events during past 60 minutes.  <br /></td></tr>
-<tr class="separator:abef17e45ab846ccba788b55ab1806611"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d20a9e52b13734713b8dc8200233e0e" id="r_a1d20a9e52b13734713b8dc8200233e0e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e">pastHour</a> (bool *valid=nullptr, int *nbins=nullptr, float *quality=nullptr)</td></tr>
+<tr class="memdesc:a1d20a9e52b13734713b8dc8200233e0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get number of lightning events during past 60 minutes.  <br /></td></tr>
+<tr class="separator:a1d20a9e52b13734713b8dc8200233e0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae04597ca4ce1c067c842fd66382fc022" id="r_ae04597ca4ce1c067c842fd66382fc022"><td class="memItemLeft" align="right" valign="top"><a id="ae04597ca4ce1c067c842fd66382fc022" name="ae04597ca4ce1c067c842fd66382fc022"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>lastCycle</b> (void)</td></tr>
 <tr class="separator:ae04597ca4ce1c067c842fd66382fc022"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -132,8 +135,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Calculation number of lightning events during last sensor update cycle and during last hour (past 60 minutes); storing timestamp and distance of last event. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a2a214ac4ed02d390fd64709e46478968" name="a2a214ac4ed02d390fd64709e46478968"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2a214ac4ed02d390fd64709e46478968">&#9670;&#160;</a></span>Lightning()</h2>
+<a id="a8a7132ae949303f5601cbf9c14520b7b" name="a8a7132ae949303f5601cbf9c14520b7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a7132ae949303f5601cbf9c14520b7b">&#9670;&#160;</a></span>Lightning()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -144,7 +147,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
         <tr>
           <td class="memname">Lightning::Lightning </td>
           <td>(</td>
-          <td class="paramtype">const int&#160;</td>
+          <td class="paramtype">const float&#160;</td>
           <td class="paramname"><em>quality_threshold</em> = <code>DEFAULT_QUALITY_THRESHOLD</code></td><td>)</td>
           <td></td>
         </tr>
@@ -158,7 +161,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 <p>Constructor</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">quality_threshold</td><td>number of valid hist entries required for valid <a class="el" href="class_lightning.html#abef17e45ab846ccba788b55ab1806611" title="Get number of lightning events during past 60 minutes.">pastHour()</a> result </td></tr>
+    <tr><td class="paramname">quality_threshold</td><td>fraction of valid hist entries required for valid <a class="el" href="class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e" title="Get number of lightning events during past 60 minutes.">pastHour()</a> result </td></tr>
   </table>
   </dd>
 </dl>
@@ -191,8 +194,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 
 </div>
 </div>
-<a id="abef17e45ab846ccba788b55ab1806611" name="abef17e45ab846ccba788b55ab1806611"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abef17e45ab846ccba788b55ab1806611">&#9670;&#160;</a></span>pastHour()</h2>
+<a id="a1d20a9e52b13734713b8dc8200233e0e" name="a1d20a9e52b13734713b8dc8200233e0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d20a9e52b13734713b8dc8200233e0e">&#9670;&#160;</a></span>pastHour()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -207,6 +210,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>nbins</em> = <code>nullptr</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
           <td class="paramname"><em>quality</em> = <code>nullptr</code>&#160;</td>
         </tr>
         <tr>
@@ -220,8 +229,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 <p>Get number of lightning events during past 60 minutes. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">valid</td><td>number of valid entries in hist &gt;= qualityThreshold </td></tr>
-    <tr><td class="paramname">quality</td><td>number of valid entries in hist</td></tr>
+    <tr><td class="paramname">valid</td><td>number of valid entries in hist &gt;= qualityThreshold * 60 / updateRate </td></tr>
+    <tr><td class="paramname">nbins</td><td>number of valid entries in hist </td></tr>
+    <tr><td class="paramname">quality</td><td>fraction of valid entries in hist (0..1); quality = nbins / (60 / updateRate)</td></tr>
   </table>
   </dd>
 </dl>
@@ -245,6 +255,50 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
       </table>
 </div><div class="memdoc">
 <p>Initialize/reset non-volatile data </p>
+
+</div>
+</div>
+<a id="a8615e5f1b10025445aaa102f5f2fd57e" name="a8615e5f1b10025445aaa102f5f2fd57e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8615e5f1b10025445aaa102f5f2fd57e">&#9670;&#160;</a></span>setUpdateRate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Lightning::setUpdateRate </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>rate</em> = <code>LIGHTNING_UPD_RATE</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Set expected update rate for <a class="el" href="class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e" title="Get number of lightning events during past 60 minutes.">pastHour()</a> calculation. </p>
+<p>LIGHTNING_HIST_SIZE: number of entries in hist[] updateRate: update rate in minutes</p>
+<p>60 minutes / updateRate = no_of_hist_bins The resulting number of history bins must be an integer value which does not exceed LIGHTNING_HIST_SIZE.</p>
+<p>Examples:</p>
+<ol type="1">
+<li>updateRate = 6 -&gt; 60 / 6 = 10 entries</li>
+<li>updateRate = 12 -&gt; 60 / 12 = 5 entries</li>
+</ol>
+<p>Changing the update rate will reset the history buffer, therefore the caller should avoid frequent changes.</p>
+<p>Actual update intervals shorter than updateRate will lead to a reduced resolution of the <a class="el" href="class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e" title="Get number of lightning events during past 60 minutes.">pastHour()</a> result and a higher risk of an invalid result if a bin in the history buffer was missed.</p>
+<p>Actual update intervals longer than updateRate will lead to an invalid result, because bins in the history buffer will be missed.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rate</td><td>update rate in minutes (default: 6) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -301,7 +355,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 * 
 * In each update():
 * - timestamp (time_t) -&gt;                  t (localtime, struct tm)
-* - calculate index into hist[]:           idx = t.tm_min / LIGHTNING_UPD_RATE
+* - calculate index into hist[]:           idx = t.tm_min / updateRate
 * - expired time since last update:        t_delta = timestamp - nvLightning.lastUpdate
 * - number of events since last update:    delta = currCount - nvLightning.prevCount
 * - t_delta
@@ -318,7 +372,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lastEvent</b> (time_t
 *   ---------------     -----------
 *        ^
 *        |
-*       idx = t.tm_min / LIGHTNING_UPD_RATE
+*       idx = t.tm_min / updateRate
 *
 * - Calculate hourly rate:
 *   pastHour = sum of all valid hist[] entries

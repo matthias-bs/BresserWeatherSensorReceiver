@@ -539,6 +539,7 @@ TEST(TestRainGaugeHourRate10, Test_RainHourRate10) {
   CHECK_EQUAL(1, nbins);
   DOUBLES_EQUAL(0.1, qual, TOLERANCE_QUAL);
 
+  // Change expected update rate from 6 (default) to 10 minutes
   rainGauge.setUpdateRate(10);
 
   setTime("2025-03-23 8:10", tm, ts);
@@ -547,6 +548,9 @@ TEST(TestRainGaugeHourRate10, Test_RainHourRate10) {
   CHECK_FALSE(val);
   CHECK_EQUAL(1, nbins);
   DOUBLES_EQUAL(0.166, qual, TOLERANCE_QUAL);
+
+  // No change in expected rate!
+  rainGauge.setUpdateRate(10);
 
   setTime("2025-03-23 8:20", tm, ts);
   rainGauge.update(ts, rainSensor=10.3);
@@ -597,6 +601,7 @@ TEST(TestRainGaugeHourRate10, Test_RainHourRate10) {
   CHECK_EQUAL(6, nbins);
   DOUBLES_EQUAL(1, qual, TOLERANCE_QUAL);
 
+  // Change expected update rate from 10 to 6 minutes (default)
   rainGauge.setUpdateRate(6);
 
   setTime("2025-03-23 9:26", tm, ts);

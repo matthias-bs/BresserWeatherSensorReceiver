@@ -412,6 +412,9 @@ TEST(TG_LightningHourlyRateChg, Test_LightningHourlyRateChg) {
   DOUBLES_EQUAL(qual, 0.166, TOLERANCE_QUAL);
   CHECK_EQUAL(exp_events, res_events);
 
+  // No change in expected rate!
+  lightning.setUpdateRate(10);
+
   // Step 3
   // Counter +4
   setTime("2025-03-25 8:26", tm, ts);

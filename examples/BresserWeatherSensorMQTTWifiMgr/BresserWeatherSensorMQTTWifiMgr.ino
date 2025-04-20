@@ -114,6 +114,8 @@
 // 20250129 Added calculated WBGT (Wet Bulb Globe Temperature)
 // 20250220 Added Home Assistant auto discovery
 // 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
+// 20250420 Added Option to not to subscribe to reset topic, extend mqtt-hostname length to 55
+//          and add yield() to clientLoopWrapper to avoid WD-Resets when it takes longer
 //
 // ToDo:
 //
@@ -174,6 +176,7 @@
 #define DISCOVERY_INTERVAL 30 // Home Assistant auto discovery interval [min]
 #define AWAKE_TIMEOUT 300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL 300000 // sleep interval [ms]
+//#define RESET_SUBSCRIBE       // subscribe to reset topic
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
@@ -279,7 +282,7 @@ const char pass[] = "WiFiPassword";
 #define APPEND_CHIP_ID
 
 // define your default values here, if there are different values in config.json, they are overwritten.
-char mqtt_host[40];
+char mqtt_host[55];
 char mqtt_port[6] = "1883";
 char mqtt_user[21] = "";
 char mqtt_pass[21] = "";
@@ -535,7 +538,7 @@ void wifimgr_setup(void)
     // The extra parameters to be configured (can be either global or just in the setup)
     // After connecting, parameter.getValue() will get you the configured value
     // id/name placeholder/prompt default length
-    WiFiManagerParameter custom_mqtt_server("server", "MQTT Server (Broker)", mqtt_host, 40);
+    WiFiManagerParameter custom_mqtt_server("server", "MQTT Server (Broker)", mqtt_host, 55);
     WiFiManagerParameter custom_mqtt_port("port", "MQTT Port", mqtt_port, 6);
     WiFiManagerParameter custom_mqtt_user("user", "MQTT Username", mqtt_user, 20);
     WiFiManagerParameter custom_mqtt_pass("pass", "MQTT Password", mqtt_pass, 20);
@@ -706,7 +709,9 @@ void mqtt_connect(void)
     }
 
     log_i("\nconnected!");
+#ifdef RESET_SUBSCRIBE
     client.subscribe(mqttSubReset);
+#endif
     log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
     client.publish(mqttPubStatus, "online");
 }
@@ -792,6 +797,7 @@ void setup()
     wifimgr_setup();
     mqtt_setup();
     weatherSensor.begin();
+    Serial.println(F("\nSetup Completed."));
 }
 
 /*!
@@ -801,6 +807,7 @@ void clientLoopWrapper(void)
 {
     client.loop();
     drd->loop();
+    yield();
 }
 
 //
@@ -811,7 +818,7 @@ void loop()
     drd->loop();
     if (WiFi.status() != WL_CONNECTED)
     {
-        Serial.print(F("Checking wifi"));
+        Serial.println(F("Wifi not connected, checking"));
         while (WiFi.waitForConnectResult() != WL_CONNECTED)
         {
             WiFi.begin(ssid, pass);
@@ -824,7 +831,9 @@ void loop()
     {
         if (!client.connected())
         {
+            Serial.println(F("MQTT not connected, checking"));
             mqtt_connect();
+            Serial.println(F("MQTT check done"));
         }
         else
         {

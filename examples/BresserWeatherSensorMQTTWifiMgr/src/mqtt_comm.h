@@ -38,6 +38,7 @@
 // 20250221 Created from BresserWeatherSensorMQTT.ino
 // 20250226 Added parameter 'retain' to publishWeatherdata()
 // 20250227 Added publishControlDiscovery()
+// 20250420 removed AUTO_DISCOVERY here, as it is defined in sketch
 //
 // ToDo:
 // -
@@ -48,7 +49,7 @@
 #define MQTT_COMM_H
 
 #define PAYLOAD_SIZE 300      // maximum MQTT message size
-#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
+//#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
 
 #include <Arduino.h>
 #include <string>

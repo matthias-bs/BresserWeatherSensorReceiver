@@ -38,6 +38,7 @@
 // 20250221 Created from BresserWeatherSensorMQTT.ino
 // 20250227 Added publishControlDiscovery()
 // 20250228 Added publishStatusDiscovery(), fixed sensorName()
+// 20250420 Added timestamp to measument data,fixed base-topic in extra data
 //
 // ToDo:
 // -
@@ -155,6 +156,18 @@ void publishWeatherdata(bool complete, bool retain)
         mqtt_payload += String("\"id\":") + String(weatherSensor.sensor[i].sensor_id);
         mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
         mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
+
+        #if defined(DATA_TIMESTAMP)
+        {
+            // Generate timestamp in ISO 8601 format
+            time_t now = time(nullptr);
+            struct tm timeinfo;
+            gmtime_r(&now, &timeinfo); // Convert to UTC time
+            char tbuf[25];
+            strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
+            mqtt_payload += String(",\"timestamp\":\"") + String(tbuf) + String("\"");
+        }
+        #endif // DATA_TIMESTAMP
 
         if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
         {
@@ -327,7 +340,7 @@ void publishWeatherdata(bool complete, bool retain)
         client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
 
         // extra data
-        mqtt_topic = mqttPubExtra;
+        mqtt_topic = mqtt_topic_base + mqttPubExtra;
 
         if (mqtt_payload2.length() > 2)
         {
@@ -351,7 +364,6 @@ void publishRadio(void)
     payload.clear();
 }
 
-#if defined(AUTO_DISCOVERY)
 // Home Assistant Auto-Discovery
 void haAutoDiscovery(void)
 {
@@ -634,4 +646,3 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     client.publish(topic, buffer, true /* retained */, 0 /* qos */);
     log_d("Published auto-discovery configuration for %s", sensor_name);
 }
-#endif // AUTO_DISCOVERY

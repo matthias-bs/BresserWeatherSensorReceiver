@@ -49,7 +49,7 @@
 #define MQTT_COMM_H
 
 #define PAYLOAD_SIZE 300      // maximum MQTT message size
-//#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
+#define AUTO_DISCOVERY_CODE        // enable Home Assistant auto discovery
 
 #include <Arduino.h>
 #include <string>
@@ -118,7 +118,7 @@ void publishWeatherdata(bool complete = false, bool retain = false);
  */
 void publishRadio(void);
 
-#if defined(AUTO_DISCOVERY)
+#if defined(AUTO_DISCOVERY_CODE)
 /*!
  * \brief Home Assistant Auto-Discovery
  *
@@ -155,5 +155,5 @@ void publishStatusDiscovery(String name, String topic);
  */
 void publishControlDiscovery(String name, String topic);
 
-#endif // AUTO_DISCOVERY
+#endif // AUTO_DISCOVERY_CODE
 #endif // MQTT_COMM_H

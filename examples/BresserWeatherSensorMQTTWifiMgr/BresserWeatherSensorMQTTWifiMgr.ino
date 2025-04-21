@@ -181,7 +181,8 @@
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
-#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
+#define AUTO_DISCOVERY        // enable Home Assistant auto discovery (you can save some  
+                              // memory by disabling AUTO_DISCOVERY_CODE in mqtt_comm.h as well)
 // #define USE_SECUREWIFI          // use secure WIFI
 #define USE_WIFI // use non-secure WIFI
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)

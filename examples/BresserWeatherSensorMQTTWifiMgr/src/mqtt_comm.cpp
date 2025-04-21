@@ -364,7 +364,6 @@ void publishRadio(void)
     payload.clear();
 }
 
-#if defined(AUTO_DISCOVERY_CODE)
 // Home Assistant Auto-Discovery
 void haAutoDiscovery(void)
 {
@@ -647,4 +646,3 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     client.publish(topic, buffer, true /* retained */, 0 /* qos */);
     log_d("Published auto-discovery configuration for %s", sensor_name);
 }
-#endif // AUTO_DISCOVERY_CODE

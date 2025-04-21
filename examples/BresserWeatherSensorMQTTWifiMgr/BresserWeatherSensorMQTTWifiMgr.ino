@@ -173,10 +173,11 @@
 #define RX_TIMEOUT 90000      // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
 #define DATA_INTERVAL 15000   // MQTT data message interval [ms]
+//#define DATA_TIMESTAMP      // add timestamp to published Weatherdata
+#define RESET_SUBSCRIBE       // subscribe to reset topic
 #define DISCOVERY_INTERVAL 30 // Home Assistant auto discovery interval [min]
 #define AWAKE_TIMEOUT 300000  // maximum time until sketch is forced to sleep [ms]
 #define SLEEP_INTERVAL 300000 // sleep interval [ms]
-//#define RESET_SUBSCRIBE       // subscribe to reset topic
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)

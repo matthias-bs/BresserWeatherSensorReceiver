@@ -49,7 +49,8 @@
 #define MQTT_COMM_H
 
 #define PAYLOAD_SIZE 300      // maximum MQTT message size
-#define AUTO_DISCOVERY_CODE        // enable Home Assistant auto discovery
+#define AUTO_DISCOVERY_CODE   // enable Home Assistant auto discovery (only code enabled,
+                              // enable feature in ino-file as well)
 
 #include <Arduino.h>
 #include <string>

@@ -138,7 +138,6 @@ void publishWeatherdata(bool complete, bool retain)
         mqtt_payload = "";
         mqtt_payload2 = "";
 
-
         if (!weatherSensor.sensor[i].valid)
             continue;
 
@@ -158,7 +157,7 @@ void publishWeatherdata(bool complete, bool retain)
         mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
         mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
 
-		#if defined(DATA_TIMESTAMP)
+        #if defined(DATA_TIMESTAMP)
         {
             // Generate timestamp in ISO 8601 format
             time_t now = time(nullptr);
@@ -168,7 +167,7 @@ void publishWeatherdata(bool complete, bool retain)
             strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
             mqtt_payload += String(",\"timestamp\":\"") + String(tbuf) + String("\"");
         }
-		#endif // DATA_TIMESTAMP
+        #endif // DATA_TIMESTAMP
 
         if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
         {

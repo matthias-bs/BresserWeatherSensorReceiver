@@ -45,6 +45,7 @@
 // 20221227 Replaced DEBUG_PRINT/DEBUG_PRINTLN by Arduino logging functions
 // 20240507 Added configuration of maximum number of sensors at run time
 // 20250127 Added Globe Thermometer Temperature (8-in-1 Weather Sensor)
+// 20250510 Changed hardcoded receive timeout to define
 //
 // ToDo:
 // -
@@ -55,6 +56,12 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "InitBoard.h"
+
+// Set RX_TIMEOUT depending on
+// - Configured number of sensors
+// - Sensors' transmit duty cycles
+// - Reception failure rate
+#define RX_TIMEOUT 60000 // sensor receive timeout [ms]
 
 WeatherSensor ws;
 
@@ -79,8 +86,8 @@ void loop()
     // Clear all sensor data
     ws.clearSlots();
 
-    // Attempt to receive entire data set with timeout of <xxx> s and callback function
-    bool decode_ok = ws.getData(60000, DATA_COMPLETE, 0, &loopCallback);
+    // Attempt to receive entire data set with timeout of <xxx> ms and callback function
+    bool decode_ok = ws.getData(RX_TIMEOUT, DATA_COMPLETE, 0, &loopCallback);
     Serial.println();
 
     if (!decode_ok)

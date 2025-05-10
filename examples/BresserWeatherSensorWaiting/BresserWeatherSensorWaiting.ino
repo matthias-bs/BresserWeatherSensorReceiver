@@ -44,6 +44,7 @@
 // 20231027 Refactored sensor structure
 // 20240504 Added board initialization
 // 20240507 Added configuration of maximum number of sensors at run time
+// 20250510 Changed hardcoded receive timeout to define
 //
 // ToDo:
 // -
@@ -54,6 +55,12 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "InitBoard.h"
+
+// Set RX_TIMEOUT depending on
+// - Configured number of sensors
+// - Sensors' transmit duty cycles
+// - Reception failure rate
+#define RX_TIMEOUT 60000 // sensor receive timeout [ms]
 
 WeatherSensor ws;
 
@@ -75,7 +82,7 @@ void loop()
     // Attempt to receive entire data set with timeout of <xx> s
     // Try to receive at least one complete set of data, even if
     // data is distributed across multiple radio messages.
-    bool decode_ok = ws.getData(60000, DATA_COMPLETE);
+    bool decode_ok = ws.getData(RX_TIMEOUT, DATA_COMPLETE);
 
     if (!decode_ok) {
         Serial.printf("Sensor timeout\n");

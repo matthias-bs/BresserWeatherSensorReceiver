@@ -37,6 +37,7 @@
 // 20240124 Fixed setTime(), fixed test cases / adjusted test cases to new algorithm
 // 20250323 Added tests for changing update rate (effective history buffer size) at run-time
 //          Updated tests for modified pastHour() return values
+// 20250601 Added tests for rainGauge.past24Hours() (using GitHub Copilot)
 //
 // ToDo: 
 // -
@@ -1156,7 +1157,7 @@ TEST(TestRainGaugeWeeklyOv, Test_RainWeeklyOv) {
 
 
 /*
- * Test monthly rainfall (no rain gauge overflow)
+ * Test monthly rainfall (with rain gauge overflow)
  */
 TEST(TestRainGaugeMonthlyOv, Test_RainMonthlyOv) {
   RainGauge rainGauge(100);
@@ -1332,4 +1333,165 @@ TEST(TestRainGaugeInvReq, TestRainInvReq) {
   DOUBLES_EQUAL(-1, rainGauge.currentDay(), TOLERANCE);
   DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
   DOUBLES_EQUAL(-1, rainGauge.currentMonth(), TOLERANCE);
+}
+
+/*
+ * Test rainfall during past 24 hours (no rain gauge overflow)
+ * Default update interval: 6 minutes, but history buffer has 24 bins (1 per hour)
+ */
+TEST(TestRainGauge24Hours, Test_Rain24Hours_DefaultInterval) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor = 0.0;
+  bool      val;
+  int       nbins;
+  float     qual;
+
+  printf("< Rain24Hours_DefaultInterval >\n");
+
+  setTime("2025-06-01 00:00", tm, ts);
+  for (int i = 0; i < 240; ++i) { // 24h / 6min = 240
+    rainGauge.update(ts, rainSensor += 0.1);
+    if (i % 10 == 0) { // Every hour
+      int bins = (i < 24 * 10) ? (i / 10 + 1) : 24;
+      float expected = (i < 24 * 10) ? (i + 1) * 0.1 : 2.4;
+      DOUBLES_EQUAL(expected, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+      CHECK_EQUAL(bins, nbins);
+      DOUBLES_EQUAL((float)bins / 24.0, qual, TOLERANCE_QUAL);
+    }
+    ts += 6 * 60;
+  }
+  // After 24h, next hour should drop first bin
+  rainGauge.update(ts, rainSensor += 0.1);
+  DOUBLES_EQUAL(2.4, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  DOUBLES_EQUAL(1.0, qual, TOLERANCE_QUAL);
+}
+
+/*
+ * Test rainfall during past 24 hours with short interval (3 minutes)
+ * History buffer has 24 bins (1 per hour)
+ */
+TEST(TestRainGauge24Hours, Test_Rain24Hours_ShortInterval) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor = 0.0;
+  bool      val;
+  int       nbins;
+  float     qual;
+
+  printf("< Rain24Hours_ShortInterval >\n");
+
+  setTime("2025-06-01 00:00", tm, ts);
+  for (int i = 0; i < 480; ++i) { // 24h / 3min = 480
+    rainGauge.update(ts, rainSensor += 0.05);
+    if (i % 20 == 0) { // Every hour
+      int bins = (i < 24 * 20) ? (i / 20 + 1) : 24;
+      float expected = (i < 24 * 20) ? (i + 1) * 0.05 : 1.2;
+      DOUBLES_EQUAL(expected, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+      CHECK_EQUAL(bins, nbins);
+      DOUBLES_EQUAL((float)bins / 24.0, qual, TOLERANCE_QUAL);
+    }
+    ts += 3 * 60;
+  }
+  rainGauge.update(ts, rainSensor += 0.05);
+  DOUBLES_EQUAL(1.2, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  DOUBLES_EQUAL(1.0, qual, TOLERANCE_QUAL);
+}
+
+/*
+ * Test rainfall during past 24 hours with long interval (12 minutes)
+ * History buffer has 24 bins (1 per hour)
+ */
+TEST(TestRainGauge24Hours, Test_Rain24Hours_LongInterval) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor = 0.0;
+  bool      val;
+  int       nbins;
+  float     qual;
+
+  printf("< Rain24Hours_LongInterval >\n");
+
+  setTime("2025-06-01 00:00", tm, ts);
+  for (int i = 0; i < 120; ++i) { // 24h / 12min = 120
+    rainGauge.update(ts, rainSensor += 0.2);
+    if (i % 5 == 0) { // Every hour
+      int bins = (i < 24 * 5) ? (i / 5 + 1) : 24;
+      float expected = (i < 24 * 5) ? (i + 1) * 0.2 : 4.8;
+      DOUBLES_EQUAL(expected, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+      CHECK_EQUAL(bins, nbins);
+      DOUBLES_EQUAL((float)bins / 24.0, qual, TOLERANCE_QUAL);
+    }
+    ts += 12 * 60;
+  }
+  rainGauge.update(ts, rainSensor += 0.2);
+  DOUBLES_EQUAL(4.8, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  DOUBLES_EQUAL(1.0, qual, TOLERANCE_QUAL);
+}
+
+/*
+ * Test rainfall during past 24 hours with extremely long interval (67 minutes)
+ * Only a few bins will be present in 24 hours, buffer has 24 bins.
+ */
+TEST(TestRainGauge24Hours, Test_Rain24Hours_ExtremeInterval) {
+  RainGauge rainGauge(100);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor = 0.0;
+  bool      val;
+  int       nbins;
+  float     qual;
+
+  printf("< Rain24Hours_ExtremeInterval >\n");
+
+  setTime("2025-06-01 00:00", tm, ts);
+  time_t end_ts = ts + 24 * 3600;
+  int i = 0;
+  while (ts < end_ts) {
+    // Check if current time is 12:00 or 18:00
+    struct tm cur_tm;
+    localtime_r(&ts, &cur_tm);
+    bool skip67 = (cur_tm.tm_hour == 12 && cur_tm.tm_min == 0) ||
+                  (cur_tm.tm_hour == 18 && cur_tm.tm_min == 0);
+
+    rainGauge.update(ts, rainSensor += 0.1);
+
+    // Check at each full hour
+    if (cur_tm.tm_min == 0) {
+      int bins = (i < 24) ? (i + 1) : 24;
+      float expected = (i < 24) ? (i + 1) * 0.1 : 2.4;
+      DOUBLES_EQUAL(expected, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+      CHECK_EQUAL(bins, nbins);
+      CHECK(qual <= 1.0);
+    }
+
+    if (skip67) {
+      ts += 67 * 60;
+    } else {
+      ts += 6 * 60;
+    }
+    ++i;
+  }
+  // Final check after 24h
+  DOUBLES_EQUAL(2.4, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  CHECK(qual <= 1.0);
 }

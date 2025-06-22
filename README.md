@@ -8,7 +8,7 @@ Badge is not updated any more!
 [![arduino-library-badge](https://www.ardu-badge.com/badge/BresserWeatherSensorReceiver.svg?)](https://www.ardu-badge.com/BresserWeatherSensorReceiver)
 -->
 
-Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W, SX1262 or LR1121
+Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on [RadioLib](https://github.com/jgromes/RadioLib) using CC1101, SX1276/RFM95W, SX1262 or LR1121
 
 **See the [Wiki](https://github.com/matthias-bs/BresserWeatherSensorReceiver/wiki) for additional information.**
 

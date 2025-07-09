@@ -105,6 +105,7 @@
 // 20241205 Added radio LR1121
 // 20241227 Added LilyGo T3 S3 LR1121 RF switch and TCXO configuration
 // 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor) to 7-in-1 decoder
+// 20250709 Fixed radio.readData() state check in getMessage()
 //
 // ToDo:
 // -
@@ -376,7 +377,7 @@ DecodeStatus WeatherSensor::getMessage(void)
 
         int state = radio.readData(recvData, MSG_BUF_SIZE);
         rssi = radio.getRSSI();
-        state = radio.startReceive();
+        radio.startReceive();
 
         if (state == RADIOLIB_ERR_NONE)
         {

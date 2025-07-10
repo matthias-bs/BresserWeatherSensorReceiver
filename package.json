@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/matthias-bs/BresserWeatherSensorReceiver#README",
   "dependencies": {
-    "RadioLib": "jgromes/RadioLib#semver:^7.2.0",
+    "RadioLib": "jgromes/RadioLib#semver:^7.2.1",
     "lora-serialization": "thesolarnomad/lora-serialization#semver:^3.3.1",
     "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.2",
     "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.4.2",

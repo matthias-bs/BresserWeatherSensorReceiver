@@ -362,7 +362,7 @@ Manual configuration of Home Assistant can be done using a file template provide
 
 ### Datacake
 
-See [Datacake MQTT Integration Documentation](https://docs.datacake.de/integrations/mqtt)
+See [Datacake MQTT Integration Documentation](https://docs.datacake.de/integrations/mqtt).
 
 [datacake_uplink_decoder.js](scripts/datacake_uplink_decoder.js) is an example [payload decoder](https://docs.datacake.de/integrations/mqtt#write-payload-decoder). Change `device_id` and the MQTT topic variables as required. 
 

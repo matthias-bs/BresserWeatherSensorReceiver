@@ -229,7 +229,7 @@ std::vector<SensorMap> sensor_map = {
 };
 
 // enable only one of these below, disabling both is fine too.
-#define CHECK_CA_ROOT
+//  #define CHECK_CA_ROOT
 //  #define CHECK_PUB_KEY
 ////--------------------------////
 
@@ -462,8 +462,7 @@ void mqtt_setup(void)
     net.setCACert(digicert);
 #endif
 #ifdef CHECK_PUB_KEY
-    error "CHECK_PUB_KEY: not implemented"
-#endif
+    #error "CHECK_PUB_KEY: not implemented"
 #endif
 #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))
     // do not verify tls certificate

@@ -324,27 +324,18 @@ String mqttSubSetExc = "set_sensors_exc";
 #error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
-#ifdef USE_SECUREWIFI
-#if defined(ESP8266)
-#ifdef CHECK_CA_ROOT
-    BearSSL::X509List cert(digicert);
-    net.setTrustAnchors(&cert);
+// Generate WiFi network instance
+#if defined(ESP32)
+#if defined(USE_WIFI)
+WiFiClient net;
+#elif defined(USE_SECUREWIFI)
+NetworkClientSecure net;
 #endif
-#ifdef CHECK_PUB_KEY
-    BearSSL::PublicKey key(pubkey);
-    net.setKnownKey(&key);
-#endif
-#elif defined(ESP32)
-#ifdef CHECK_CA_ROOT
-    net.setCACert(digicert);
-#endif
-#ifdef CHECK_PUB_KEY
-    #error "CHECK_PUB_KEY: not implemented"
-#endif
-#endif
-#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))
-    // do not verify tls certificate
-    net.setInsecure();
+#elif defined(ESP8266)
+#if defined(USE_WIFI)
+WiFiClient net;
+#elif defined(USE_SECUREWIFI)
+BearSSL::WiFiClientSecure net;
 #endif
 #endif
 
@@ -473,11 +464,13 @@ void mqtt_setup(void)
 #ifdef CHECK_PUB_KEY
     #error "CHECK_PUB_KEY: not implemented"
 #endif
+#endif
 #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))
     // do not verify tls certificate
     net.setInsecure();
 #endif
 #endif
+
     client.begin(MQTT_HOST, MQTT_PORT, net);
 
     // set up MQTT receive callback

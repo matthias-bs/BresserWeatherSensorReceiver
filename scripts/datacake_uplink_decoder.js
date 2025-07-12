@@ -128,19 +128,18 @@ function Decoder(topic, payload) {
         return [
             {
                 device: device_id,
-                field: "LGT_EV_EVENTS",
-                value: payload.lightning_count
+                field: "LGT_EV_TIME",
+                value: payload.lightning_event_time
             },
             {
                 device: device_id,
                 field: "LGT_EV_DIST_KM",
-                value: payload.lightning_distance_km
+                value: payload.lightning_event_distance_km
             },
             {
                 device: device_id,
-                field: "LGT_EV_HR",
-                value: payload.lightning_hr
+                field: "LGT_EV_COUNT",
+                value: payload.lightning_event_count
             }
-        ];
     }
 }

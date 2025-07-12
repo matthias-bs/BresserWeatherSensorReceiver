@@ -129,6 +129,8 @@
 // 20250129 Added calculated WBGT (Wet Bulb Globe Temperature)
 // 20250220 Added Home Assistant auto discovery
 // 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
+// 20250712 Removed TLS fingerprint option (insecure)
+//          Improved MQTT "offline" status message handling (avoid inadvertent LWT message)
 //
 // ToDo:
 //
@@ -162,8 +164,9 @@
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
+//#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
 //#define USE_SECUREWIFI        // use secure WIFI
-#define USE_WIFI // use non-secure WIFI
+ #define USE_WIFI // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
@@ -211,7 +214,6 @@ const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "InitBoard.h"
 #include "src/mqtt_comm.h"
 
-
 const char sketch_id[] = "BresserWeatherSensorMQTT 20250228";
 
 // Map sensor IDs to Names - replace by your own IDs!
@@ -229,8 +231,6 @@ std::vector<SensorMap> sensor_map = {
 // enable only one of these below, disabling both is fine too.
 //  #define CHECK_CA_ROOT
 //  #define CHECK_PUB_KEY
-//  Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
-//  #define CHECK_FINGERPRINT
 ////--------------------------////
 
 #include "secrets.h"
@@ -297,11 +297,6 @@ static const char pubkey[] PROGMEM = R"KEY(
     -----END PUBLIC KEY-----
     )KEY";
 #endif
-
-#ifdef CHECK_FINGERPRINT
-// Extracted by: openssl x509 -fingerprint -in fullchain.pem
-static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
-#endif
 #endif
 
 WeatherSensor weatherSensor;
@@ -355,7 +350,6 @@ uint32_t statusPublishPreviousMillis = 0;
 #if defined(AUTO_DISCOVERY)
 uint32_t discoveryPublishPreviousMillis = 0;
 #endif
-
 
 /*!
  * \brief Set RTC
@@ -473,11 +467,8 @@ void mqtt_setup(void)
 #ifdef CHECK_PUB_KEY
     error "CHECK_PUB_KEY: not implemented"
 #endif
-#ifdef CHECK_FINGERPRINT
-        net.setFingerprint(fp);
 #endif
-#endif
-#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))
     // do not verify tls certificate
     net.setInsecure();
 #endif
@@ -536,7 +527,7 @@ void setup()
 #endif
 
     char ChipID[8] = "";
-    
+
 #if defined(APPEND_CHIP_ID) && defined(ESP32)
     uint32_t chip_id = 0;
     for (int i = 0; i < 17; i = i + 8)
@@ -547,7 +538,7 @@ void setup()
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
     sprintf(ChipID, "-%06X", ESP.getChipId() & 0xFFFFFF);
 #endif
-    
+
     Hostname = Hostname + ChipID;
     // Prepend Hostname to MQTT topics
     mqttPubStatus = Hostname + "/" + mqttPubStatus;
@@ -644,12 +635,9 @@ void loop()
     if (millis() - lastMillis > DATA_INTERVAL)
     {
         lastMillis = millis();
-        if (decode_ok)
-        {
-            publishWeatherdata(false);
-            client.loop();
-            published_ok = true;
-        }
+        publishWeatherdata(false);
+        client.loop();
+        published_ok = true;
     }
 
 #if defined(AUTO_DISCOVERY)
@@ -680,8 +668,13 @@ void loop()
         log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
-        client.loop();
+        for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
+        {
+            client.loop();
+            delay(500); // Allow time for the message to be sent
+        };
         client.disconnect();
+        delay(1000); // Allow time for the client to disconnect properly
         net.stop();
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);

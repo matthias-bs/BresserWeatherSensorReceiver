@@ -462,7 +462,7 @@ void mqtt_setup(void)
     net.setCACert(digicert);
 #endif
 #ifdef CHECK_PUB_KEY
-    error "CHECK_PUB_KEY: not implemented"
+    #error "CHECK_PUB_KEY: not implemented"
 #endif
 #endif
 #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))

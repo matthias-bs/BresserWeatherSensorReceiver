@@ -116,6 +116,8 @@
 // 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
 // 20250420 Added Option to not to subscribe to reset topic, extend mqtt-hostname length to 55
 //          and add yield() to clientLoopWrapper to avoid WD-Resets when it takes longer
+// 20250712 Removed TLS fingerprint option (insecure)
+//          Improved MQTT "offline" status message handling (avoid inadvertent LWT message)
 //
 // ToDo:
 //
@@ -253,7 +255,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/mqtt_comm.h"
 
 
-const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr 20250228";
+const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr 20250712";
 
 // Map sensor IDs to Names - replace by your own IDs!
 std::vector<SensorMap> sensor_map = {
@@ -271,8 +273,6 @@ std::vector<SensorMap> sensor_map = {
 // enable only one of these below, disabling both is fine too.
 //  #define CHECK_CA_ROOT
 //  #define CHECK_PUB_KEY
-//  Arduino 1.8.19 ESP32 WiFiClientSecure.h: "SHA1 fingerprint is broken now!"
-//  #define CHECK_FINGERPRINT
 ////--------------------------////
 
 #ifndef SECRETS
@@ -338,11 +338,6 @@ static const char pubkey[] PROGMEM = R"KEY(
     -----END PUBLIC KEY-----
     )KEY";
 #endif
-
-#ifdef CHECK_FINGERPRINT
-// Extracted by: openssl x509 -fingerprint -in fillchain.pem
-static const char fp[] PROGMEM = "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD";
-#endif
 #endif
 
 DoubleResetDetector *drd;
@@ -374,7 +369,7 @@ String mqttSubSetExc = "set_sensors_exc";
 
 //////////////////////////////////////////////////////
 
-#if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
+#if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT))
 #error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
@@ -667,9 +662,6 @@ void mqtt_setup(void)
     BearSSL::PublicKey key(pubkey);
     net.setKnownKey(&key);
 #endif
-#ifdef CHECK_FINGERPRINT
-    net.setFingerprint(fp);
-#endif
 #elif defined(ESP32)
 #ifdef CHECK_CA_ROOT
     net.setCACert(digicert);
@@ -677,11 +669,8 @@ void mqtt_setup(void)
 #ifdef CHECK_PUB_KEY
     error "CHECK_PUB_KEY: not implemented"
 #endif
-#ifdef CHECK_FINGERPRINT
-        net.setFingerprint(fp);
 #endif
-#endif
-#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+#if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT))
     // do not verify tls certificate
     net.setInsecure();
 #endif
@@ -913,8 +902,13 @@ void loop()
         log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
         Serial.flush();
         client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
-        client.loop();
+        for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
+        {
+            client.loop();
+            delay(500); // Allow time for the message to be sent
+        };
         client.disconnect();
+        delay(1000); // Allow time for the client to disconnect properly
         net.stop();
 #ifdef LED_EN
         pinMode(LED_GPIO, INPUT);

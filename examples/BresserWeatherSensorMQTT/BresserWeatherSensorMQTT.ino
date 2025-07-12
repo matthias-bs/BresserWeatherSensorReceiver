@@ -320,7 +320,7 @@ String mqttSubSetExc = "set_sensors_exc";
 
 //////////////////////////////////////////////////////
 
-#if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
+#if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT))
 #error "Can't have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
 
@@ -456,9 +456,6 @@ void mqtt_setup(void)
 #ifdef CHECK_PUB_KEY
     BearSSL::PublicKey key(pubkey);
     net.setKnownKey(&key);
-#endif
-#ifdef CHECK_FINGERPRINT
-    net.setFingerprint(fp);
 #endif
 #elif defined(ESP32)
 #ifdef CHECK_CA_ROOT
@@ -672,7 +669,7 @@ void loop()
         {
             client.loop();
             delay(500); // Allow time for the message to be sent
-        };
+        }
         client.disconnect();
         delay(1000); // Allow time for the client to disconnect properly
         net.stop();

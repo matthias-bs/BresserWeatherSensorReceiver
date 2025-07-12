@@ -92,6 +92,7 @@ which buffers and combines messages from the 6-in-1 protocol until a complete se
   * [BresserWeatherSensorM5Core2](#bresserweathersensorm5core2)
 * [MQTT Integrations](#mqtt-integrations)
   * [Home Assistant](#home-assistant)
+  * [Datacake](#datacake)
 * [Debug Output Configuration](#debug-output-configuration)
 * [HW Examples](#hw-examples)
   * [ESP8266 D1 Mini with CC1101](#esp8266-d1-mini-with-cc1101)
@@ -358,6 +359,12 @@ Customization of MQTT discovery messages can be done in `haAutoDiscovery()` in t
 
 Manual configuration of Home Assistant can be done using a file template provided by [Shadowpost](https://github.com/Shadowpost):<br>
 [Bresser_HA_MQTT_custom_config.yaml](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/Bresser_HA_MQTT_custom_config.yaml)
+
+### Datacake
+
+See [Datacake MQTT Integration Documentation](https://docs.datacake.de/integrations/mqtt)
+
+[datacake_uplink_decoder.js](scripts/datacake_uplink_decoder.js) is an example [payload decoder](https://docs.datacake.de/integrations/mqtt#write-payload-decoder). Change `device_id` and the MQTT topic variables as required. 
 
 ## Debug Output Configuration
 

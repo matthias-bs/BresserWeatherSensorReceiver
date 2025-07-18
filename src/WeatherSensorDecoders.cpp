@@ -329,8 +329,8 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     }
     else
     {
-        sensor[slot].w.humidity_ok = true;
-        sensor[slot].w.wind_ok = (msg[22] & 0x0f) <= 9; // BCD, 0x0f on error
+        sensor[slot].w.wind_ok = true;
+        sensor[slot].w.humidity_ok = (msg[22] & 0x0f) <= 9; // BCD, 0x0f on error
     }
 
     sensor[slot].s_type = type_tmp;

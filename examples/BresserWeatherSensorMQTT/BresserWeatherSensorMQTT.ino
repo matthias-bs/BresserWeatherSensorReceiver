@@ -34,6 +34,7 @@
 //
 // MQTT publications:
 //     <base_topic>/<ID|Name>/data                          sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/combined                                combined sensor data (Weather & Soil) as JSON string
 //     <base_topic>/<ID|Name>/rssi                          sensor specific RSSI
 //     <base_topic>/extra                                   calculated data
 //     <base_topic>/radio                                   radio transceiver info as JSON string - see publishRadio()
@@ -155,7 +156,7 @@
 #define LED_EN                // Enable LED indicating successful data reception
 #define LED_GPIO 2            // LED pin
 #define TIMEZONE 1            // UTC + TIMEZONE
-#define RX_TIMEOUT 90000      // sensor receive timeout [ms]
+#define RX_TIMEOUT 180000      // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
 #define DATA_INTERVAL 15000   // MQTT data message interval [ms]
 #define DISCOVERY_INTERVAL 30 // Home Assistant auto discovery interval [min]
@@ -166,7 +167,7 @@
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
 //#define AUTO_DISCOVERY        // enable Home Assistant auto discovery
 //#define USE_SECUREWIFI        // use secure WIFI
- #define USE_WIFI // use non-secure WIFI
+#define USE_WIFI // use non-secure WIFI
 
 // Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
 const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
@@ -308,6 +309,7 @@ String Hostname = String(HOSTNAME);
 String mqttPubStatus = "status";
 String mqttPubRadio = "radio";
 String mqttPubData = "data";
+String mqttPubCombined = "combined";
 String mqttPubRssi = "rssi";
 String mqttPubExtra = "extra";
 String mqttPubInc = "sensors_inc";
@@ -419,7 +421,7 @@ void mqtt_setup(void)
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
-    log_i("connected!");
+    log_i("\nconnected!");
 
     // Note: TLS security and rain/lightning statistics need correct time
     log_i("Setting time using SNTP");
@@ -483,10 +485,10 @@ void mqtt_setup(void)
  */
 void mqtt_connect(void)
 {
-    Serial.print(F("Checking wifi..."));
+    log_i("Checking wifi...");
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
-    Serial.print(F("\nMQTT connecting... "));
+    log_i("MQTT connecting...");
     while (!client.connect(Hostname.c_str(), MQTT_USER, MQTT_PASS))
     {
         Serial.print(".");

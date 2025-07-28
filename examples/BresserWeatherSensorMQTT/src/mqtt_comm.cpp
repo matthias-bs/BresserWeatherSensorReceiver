@@ -39,6 +39,7 @@
 // 20250227 Added publishControlDiscovery()
 // 20250228 Added publishStatusDiscovery(), fixed sensorName()
 // 20250420 Added timestamp to measurement data, fixed base-topic in extra data
+// 20250728 Added combined (Weather & Soil Sensor) MQTT payload
 //
 // ToDo:
 // -
@@ -49,6 +50,7 @@
 
 extern String Hostname;
 extern String mqttPubData;
+extern String mqttPubCombined;
 extern String mqttPubRssi;
 extern String mqttPubStatus;
 extern String mqttPubRadio;
@@ -126,7 +128,12 @@ void publishWeatherdata(bool complete, bool retain)
 {
     String mqtt_payload;  // sensor data
     String mqtt_payload2; // calculated extra data
+    String mqtt_payload3; // combined payload for ESP32-e-Paper-Weather-Display
     String mqtt_topic;    // MQTT topic including ID/name
+    bool ws_batt_ok = false;
+    bool soil1_batt_ok = false;
+
+    mqtt_payload3 = "{";
 
     // ArduinoJson does not allow to set number of decimals for floating point data -
     // neither does MQTT Dashboard...
@@ -173,6 +180,9 @@ void publishWeatherdata(bool complete, bool retain)
         {
             mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
+            mqtt_payload3 += String("\"soil1_temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
+            mqtt_payload3 += String(",\"soil1_moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
+            soil1_batt_ok = weatherSensor.sensor[i].battery_ok;
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
@@ -250,20 +260,29 @@ void publishWeatherdata(bool complete, bool retain)
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
-
+            if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2)) {
+                    ws_batt_ok = weatherSensor.sensor[i].battery_ok;
+            }
             if (weatherSensor.sensor[i].w.temp_ok || complete)
             {
                 mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
+                mqtt_payload3 += String("\"ws_temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
             }
             if (weatherSensor.sensor[i].w.humidity_ok || complete)
             {
                 mqtt_payload += String(",\"humidity\":") + String(weatherSensor.sensor[i].w.humidity);
+                mqtt_payload3 += String(",\"ws_humidity\":") + String(weatherSensor.sensor[i].w.humidity);
             }
             if (weatherSensor.sensor[i].w.wind_ok || complete)
             {
                 mqtt_payload += String(",\"wind_gust\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_gust_meter_sec, 1));
                 mqtt_payload += String(",\"wind_avg\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_avg_meter_sec, 1));
                 mqtt_payload += String(",\"wind_dir\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_direction_deg, 1));
+                mqtt_payload3 += String(",\"ws_wind_gust_ws\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_gust_meter_sec, 1));
+                mqtt_payload3 += String(",\"ws_wind_avg_ws\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_avg_meter_sec, 1));
+                mqtt_payload3 += String(",\"ws_wind_dir_deg\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.wind_direction_deg, 1));
             }
             if (weatherSensor.sensor[i].w.wind_ok)
             {
@@ -290,16 +309,19 @@ void publishWeatherdata(bool complete, bool retain)
             if (weatherSensor.sensor[i].w.uv_ok || complete)
             {
                 mqtt_payload += String(",\"uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.uv, 1));
+                mqtt_payload3 += String(",\"ws_uv\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.uv, 1));
             }
             if (weatherSensor.sensor[i].w.light_ok || complete)
             {
                 mqtt_payload += String(",\"light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.light_klx, 1));
+                mqtt_payload3 += String(",\"ws_light_klx\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.light_klx, 1));
             }
             if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2)
             {
                 if (weatherSensor.sensor[i].w.tglobe_ok || complete)
                 {
                     mqtt_payload += String(",\"t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe_c, 1));
+                    mqtt_payload3 += String(",\"ws_t_globe_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.tglobe_c, 1));
                 }
             }
             if (weatherSensor.sensor[i].w.rain_ok || complete)
@@ -309,6 +331,11 @@ void publishWeatherdata(bool complete, bool retain)
                 mqtt_payload += String(",\"rain_d\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
                 mqtt_payload += String(",\"rain_w\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
                 mqtt_payload += String(",\"rain_m\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
+                mqtt_payload3 += String(",\"ws_rain_mm\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
+                mqtt_payload3 += String(",\"ws_rain_hourly_mm\":") + JSON_FLOAT(String(rainGauge.pastHour(), 1));
+                mqtt_payload3 += String(",\"ws_rain_daily_mm\":") + JSON_FLOAT(String(rainGauge.currentDay(), 1));
+                mqtt_payload3 += String(",\"ws_rain_weekly_mm\":") + JSON_FLOAT(String(rainGauge.currentWeek(), 1));
+                mqtt_payload3 += String(",\"ws_rain_monthly_mm\":") + JSON_FLOAT(String(rainGauge.currentMonth(), 1));
             }
         }
         mqtt_payload += String("}");
@@ -348,6 +375,21 @@ void publishWeatherdata(bool complete, bool retain)
             client.publish(mqtt_topic, mqtt_payload2.substring(0, PAYLOAD_SIZE - 1), retain, 0);
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
+
+    if (mqtt_payload3.length() > 2)
+    {
+        mqtt_payload3 += String(",");
+    }
+    mqtt_payload3 += String("\"status\": {\"ws_batt_ok\":") + (ws_batt_ok ? String("1") : String("0"));
+    mqtt_payload3 += String(",\"s1_batt_ok\":") + (soil1_batt_ok ? String("1") : String("0")) + String("}"); 
+    mqtt_payload3 += String("}");
+    if (mqtt_payload3.length() >= PAYLOAD_SIZE)
+    {
+        log_e("mqtt_payload3 (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", mqtt_payload3.length(), PAYLOAD_SIZE);
+    }
+    mqtt_topic = Hostname + '/' + mqttPubCombined;
+    log_i("%s: %s\n", mqtt_topic.c_str(), mqtt_payload3.c_str());
+    client.publish(mqtt_topic, mqtt_payload3.substring(0, PAYLOAD_SIZE - 1), retain, 0);
 }
 
 // Publish radio receiver info as JSON string via MQTT

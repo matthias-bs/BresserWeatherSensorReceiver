@@ -485,9 +485,9 @@ void setup()
     {
         chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
     }
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", chipId);
+    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06lX", chipId);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06X", ESP.getChipId() & 0xFFFFFF);
+    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06lX", ESP.getChipId() & 0xFFFFFF);
 #endif
 
     mqttPubStatus = String(Hostname) + String(MQTT_PUB_STATUS);

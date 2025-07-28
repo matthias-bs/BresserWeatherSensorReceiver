@@ -743,9 +743,9 @@ void setup()
     {
         chip_id |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
     }
-    sprintf(ChipID, "-%06X", chip_id);
+    sprintf(ChipID, "-%06lX", chip_id);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    sprintf(ChipID, "-%06X", ESP.getChipId() & 0xFFFFFF);
+    sprintf(ChipID, "-%06lX", ESP.getChipId() & 0xFFFFFF);
 #endif
     Hostname = Hostname + ChipID;
     // Prepend Hostname to MQTT topics

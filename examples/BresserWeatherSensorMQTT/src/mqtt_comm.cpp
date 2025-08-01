@@ -40,6 +40,7 @@
 // 20250228 Added publishStatusDiscovery(), fixed sensorName()
 // 20250420 Added timestamp to measurement data, fixed base-topic in extra data
 // 20250728 Added combined (Weather & Soil Sensor) MQTT payload
+// 20250801 Added Lightning Sensor to combined MQTT payload
 //
 // ToDo:
 // -
@@ -132,6 +133,7 @@ void publishWeatherdata(bool complete, bool retain)
     String mqtt_topic;    // MQTT topic including ID/name
     bool ws_batt_ok = false;
     bool soil1_batt_ok = false;
+    bool ls_batt_ok = false;
 
     mqtt_payload3 = "{";
 
@@ -164,7 +166,7 @@ void publishWeatherdata(bool complete, bool retain)
         mqtt_payload += String(",\"ch\":") + String(weatherSensor.sensor[i].chan);
         mqtt_payload += String(",\"battery_ok\":") + (weatherSensor.sensor[i].battery_ok ? String("1") : String("0"));
 
-        #if defined(DATA_TIMESTAMP)
+#if defined(DATA_TIMESTAMP)
         {
             // Generate timestamp in ISO 8601 format
             time_t now = time(nullptr);
@@ -174,12 +176,16 @@ void publishWeatherdata(bool complete, bool retain)
             strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
             mqtt_payload += String(",\"timestamp\":\"") + String(tbuf) + String("\"");
         }
-        #endif // DATA_TIMESTAMP
+#endif // DATA_TIMESTAMP
 
         if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
         {
             mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
+            if (mqtt_payload3.length() > 2)
+            {
+                mqtt_payload3 += String(",");
+            }
             mqtt_payload3 += String("\"soil1_temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload3 += String(",\"soil1_moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
             soil1_batt_ok = weatherSensor.sensor[i].battery_ok;
@@ -190,6 +196,7 @@ void publishWeatherdata(bool complete, bool retain)
             mqtt_payload += String(",\"lightning_distance_km\":") + String(weatherSensor.sensor[i].lgt.distance_km);
             mqtt_payload += String(",\"lightning_unknown1\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX) + String("\"");
             mqtt_payload += String(",\"lightning_unknown2\":\"0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX) + String("\"");
+            ls_batt_ok = weatherSensor.sensor[i].battery_ok;
             struct tm timeinfo;
             time_t now = time(nullptr);
             localtime_r(&now, &timeinfo);
@@ -211,6 +218,13 @@ void publishWeatherdata(bool complete, bool retain)
                 mqtt_payload += String(",\"lightning_event_time\":\"") + String(tbuf) + String("\"");
                 mqtt_payload += String(",\"lightning_event_count\":") + String(events);
                 mqtt_payload += String(",\"lightning_event_distance_km\":") + String(distance);
+                if (mqtt_payload3.length() > 2)
+                {
+                    mqtt_payload3 += String(",");
+                }
+                mqtt_payload3 += String("\"lgt_ev_time\":") + String(timestamp);
+                mqtt_payload3 += String(",\"lgt_ev_events\":") + String(events);
+                mqtt_payload3 += String(",\"lgt_ev_dist_km\":") + String(distance);
             }
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
@@ -261,13 +275,18 @@ void publishWeatherdata(bool complete, bool retain)
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
             if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2)) {
-                    ws_batt_ok = weatherSensor.sensor[i].battery_ok;
+                (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
+                (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+            {
+                ws_batt_ok = weatherSensor.sensor[i].battery_ok;
             }
             if (weatherSensor.sensor[i].w.temp_ok || complete)
             {
                 mqtt_payload += String(",\"temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
+                if (mqtt_payload3.length() > 2)
+                {
+                    mqtt_payload3 += String(",");
+                }
                 mqtt_payload3 += String("\"ws_temp_c\":") + JSON_FLOAT(String(weatherSensor.sensor[i].w.temp_c, 1));
             }
             if (weatherSensor.sensor[i].w.humidity_ok || complete)
@@ -381,7 +400,8 @@ void publishWeatherdata(bool complete, bool retain)
         mqtt_payload3 += String(",");
     }
     mqtt_payload3 += String("\"status\": {\"ws_batt_ok\":") + (ws_batt_ok ? String("1") : String("0"));
-    mqtt_payload3 += String(",\"s1_batt_ok\":") + (soil1_batt_ok ? String("1") : String("0")) + String("}"); 
+    mqtt_payload3 += String(",\"ls_batt_ok\":") + (ls_batt_ok ? String("1") : String("0"));
+    mqtt_payload3 += String(",\"s1_batt_ok\":") + (soil1_batt_ok ? String("1") : String("0")) + String("}");
     mqtt_payload3 += String("}");
     if (mqtt_payload3.length() >= PAYLOAD_SIZE)
     {

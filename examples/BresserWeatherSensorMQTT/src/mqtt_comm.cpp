@@ -182,6 +182,10 @@ void publishWeatherdata(bool complete, bool retain)
         {
             mqtt_payload += String(",\"temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload += String(",\"moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
+            if (mqtt_payload3.length() > 2)
+            {
+                mqtt_payload3 += String(",");
+            }
             mqtt_payload3 += String("\"soil1_temp_c\":") + String(weatherSensor.sensor[i].soil.temp_c);
             mqtt_payload3 += String(",\"soil1_moisture\":") + String(weatherSensor.sensor[i].soil.moisture);
             soil1_batt_ok = weatherSensor.sensor[i].battery_ok;

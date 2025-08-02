@@ -448,7 +448,7 @@ void publishWeatherdata(void)
 // Publish radio receiver info as JSON string via MQTT
 // - RSSI: Received Signal Strength Indication
 //
-void publishRadio(void)
+static void publishRadio(void)
 {
     JsonDocument payload;
     String mqtt_payload;

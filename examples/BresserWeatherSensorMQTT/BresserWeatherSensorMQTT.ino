@@ -34,7 +34,7 @@
 //
 // MQTT publications:
 //     <base_topic>/<ID|Name>/data                          sensor data as JSON string - see publishWeatherdata()
-//     <base_topic>/combined                                combined sensor data (Weather & Soil) as JSON string
+//     <base_topic>/combined                                combined sensor data as JSON string
 //     <base_topic>/<ID|Name>/rssi                          sensor specific RSSI
 //     <base_topic>/extra                                   calculated data
 //     <base_topic>/radio                                   radio transceiver info as JSON string - see publishRadio()

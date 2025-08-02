@@ -357,6 +357,7 @@ String Hostname = String(HOSTNAME);
 String mqttPubStatus = "status";
 String mqttPubRadio = "radio";
 String mqttPubData = "data";
+String mqttPubCombined = "combined";
 String mqttPubRssi = "rssi";
 String mqttPubExtra = "extra";
 String mqttPubInc = "sensors_inc";

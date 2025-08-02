@@ -213,9 +213,9 @@ const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "RainGauge.h"
 #include "Lightning.h"
 #include "InitBoard.h"
-#include "src/mqtt_comm.h"
+#include "mqtt_comm.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20250228";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20250802";
 
 // Map sensor IDs to Names - replace by your own IDs!
 std::vector<SensorMap> sensor_map = {
@@ -542,7 +542,6 @@ void setup()
     // Prepend Hostname to MQTT topics
     mqttPubStatus = Hostname + "/" + mqttPubStatus;
     mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubExtra = Hostname + "/" + mqttPubExtra;
     mqttPubInc = Hostname + "/" + mqttPubInc;
     mqttPubExc = Hostname + "/" + mqttPubExc;
     mqttSubReset = Hostname + "/" + mqttSubReset;

@@ -130,7 +130,7 @@ void messageReceived(String &topic, String &payload)
 void publishWeatherdata(bool complete, bool retain)
 {
     JsonDocument jsonCombined;
-    JsonObject combinedStatus = jsonCombined.doc["status"].to<JsonObject>();
+    JsonObject combinedStatus = jsonCombined["status"].to<JsonObject>();
 
     String payloadSensor;   // sensor data
     String payloadExtra;    // calculated extra data

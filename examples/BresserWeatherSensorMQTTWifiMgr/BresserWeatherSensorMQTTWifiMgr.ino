@@ -255,7 +255,7 @@ const char* TZ_INFO    = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/mqtt_comm.h"
 
 
-const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr 20250712";
+const char sketch_id[] = "BresserWeatherSensorMQTTWifiMgr 20250802";
 
 // Map sensor IDs to Names - replace by your own IDs!
 std::vector<SensorMap> sensor_map = {
@@ -357,6 +357,7 @@ String Hostname = String(HOSTNAME);
 String mqttPubStatus = "status";
 String mqttPubRadio = "radio";
 String mqttPubData = "data";
+String mqttPubCombined = "combined";
 String mqttPubRssi = "rssi";
 String mqttPubExtra = "extra";
 String mqttPubInc = "sensors_inc";

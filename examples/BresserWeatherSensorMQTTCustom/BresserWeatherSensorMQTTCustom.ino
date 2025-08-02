@@ -34,6 +34,7 @@
 //
 // MQTT publications:
 //     <base_topic>/<ID|Name>/data                          sensor data as JSON string - see publishWeatherdata()
+//     <base_topic>/combined                                combined sensor data as JSON string
 //     <base_topic>/<ID|Name>/rssi                          sensor specific RSSI
 //     <base_topic>/extra                                   calculated data
 //     <base_topic>/radio                                   radio transceiver info as JSON string - see publishRadio()
@@ -214,7 +215,7 @@ const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/InitBoard.h"
 #include "src/mqtt_comm.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTT 20250712";
+const char sketch_id[] = "BresserWeatherSensorMQTTCustom 20250802";
 
 // Map sensor IDs to Names - replace by your own IDs!
 std::vector<SensorMap> sensor_map = {
@@ -308,6 +309,7 @@ String Hostname = String(HOSTNAME);
 String mqttPubStatus = "status";
 String mqttPubRadio = "radio";
 String mqttPubData = "data";
+String mqttPubCombined = "combined";
 String mqttPubRssi = "rssi";
 String mqttPubExtra = "extra";
 String mqttPubInc = "sensors_inc";
@@ -541,7 +543,6 @@ void setup()
     // Prepend Hostname to MQTT topics
     mqttPubStatus = Hostname + "/" + mqttPubStatus;
     mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubExtra = Hostname + "/" + mqttPubExtra;
     mqttPubInc = Hostname + "/" + mqttPubInc;
     mqttPubExc = Hostname + "/" + mqttPubExc;
     mqttSubReset = Hostname + "/" + mqttSubReset;

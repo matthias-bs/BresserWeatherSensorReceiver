@@ -74,7 +74,7 @@
 // #define JSON_FLOAT_AS_STRING
 
 #if defined(JSON_FLOAT_AS_STRING)
-#define JSON_FLOAT(x) String("\"") + x + String("\"")
+#define JSON_FLOAT(x) String("\"") + String(x) + String("\"")
 #else
 #define JSON_FLOAT(x) x
 #endif

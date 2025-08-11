@@ -39,6 +39,7 @@
 // 20250226 Added parameter 'retain' to publishWeatherdata()
 // 20250227 Added publishControlDiscovery()
 // 20250420 removed AUTO_DISCOVERY here, as it is defined in sketch
+// 20250811 Increased PAYLOAD_SIZE
 //
 // ToDo:
 // -
@@ -48,7 +49,7 @@
 #ifndef MQTT_COMM_H
 #define MQTT_COMM_H
 
-#define PAYLOAD_SIZE 300      // maximum MQTT message size
+#define PAYLOAD_SIZE 400      // maximum MQTT message size
 
 #include <Arduino.h>
 #include <string>

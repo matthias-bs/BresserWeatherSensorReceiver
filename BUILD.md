@@ -37,7 +37,7 @@ Please use **either** one of the pre-defined pinnings:
 // Use pinning for LoRaWAN Node 
 #define LORAWAN_NODE
 
-// Use pinning for TTGO ESP32 boards with integrated RF tranceiver (SX1276)
+// Use pinning for TTGO ESP32 boards with integrated RF transceiver (SX1276)
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
 //#define TTGO_LORA32
 

@@ -62,7 +62,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -96,7 +96,7 @@
 //          Changed hostname to append chip ID
 //          Added calculation of additional information using WeatherUtils.h/.cpp
 // 20221006 Modified secure/non-secure client implementation
-//          Modified string buffer size definitons
+//          Modified string buffer size definitions
 //          Added rain gauge statistics
 //          Changed weatherSensor.getData() parameter 'flags' from DATA_ALL_SLOTS to DATA_COMPLETE
 //          to provide data even if less sensors than expected (NUM_SENSORS) have been received.

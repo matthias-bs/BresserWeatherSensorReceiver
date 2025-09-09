@@ -82,10 +82,10 @@ void setup() {
 
 void loop() { 
 
-  // make 1, 2, 3, and 4 lighning spike patterns
+  // make 1, 2, 3, and 4 lightning spike patterns
 
   for (int j=1;j<5;j++){
-    // flash led and beep the numer of patterns
+    // flash led and beep the number of patterns
     for (int i=0;i<j;i++){
       digitalWrite(PIN_LED,HIGH);
       delay(25); //short blink or beep

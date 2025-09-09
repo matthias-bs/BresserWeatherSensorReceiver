@@ -60,7 +60,7 @@
 #  Other flags users can initialize to sneak in their settings
 #	CPPUTEST_CXXFLAGS - flags for the C++ compiler
 #	CPPUTEST_CPPFLAGS - flags for the C++ AND C preprocessor
-#	CPPUTEST_CFLAGS - flags for the C complier
+#	CPPUTEST_CFLAGS - flags for the C compiler
 #	CPPUTEST_LDFLAGS - Linker flags
 #----------
 
@@ -129,7 +129,7 @@ ifeq ($(UNAME_OS),$(CYGWIN_STR))
 endif
 
 
-#Kludge for MacOsX gcc compiler on Darwin9 who can't handle pendantic
+#Kludge for MacOsX gcc compiler on Darwin9 who can't handle pedantic
 ifeq ($(UNAME_OS),$(MACOSX_STR))
 ifeq ($(findstring Version 9,$(UNAME_OUTPUT)),Version 9)
 	CPPUTEST_PEDANTIC_ERRORS = N
@@ -192,7 +192,7 @@ ifeq ($(COMPILER_NAME),$(CLANG_STR))
 # -Wno-disabled-macro-expansion -> Have to disable the macro expansion warning as the operator new overload warns on that.
 # -Wno-padded -> I sort-of like this warning but if there is a bool at the end of the class, it seems impossible to remove it! (except by making padding explicit)
 # -Wno-global-constructors Wno-exit-time-destructors -> Great warnings, but in CppUTest it is impossible to avoid as the automatic test registration depends on the global ctor and dtor
-# -Wno-weak-vtables -> The TEST_GROUP macro declares a class and will automatically inline its methods. Thats ok as they are only in one translation unit. Unfortunately, the warning can't detect that, so it must be disabled.
+# -Wno-weak-vtables -> The TEST_GROUP macro declares a class and will automatically inline its methods. That's ok as they are only in one translation unit. Unfortunately, the warning can't detect that, so it must be disabled.
 # -Wno-old-style-casts -> We only use old style casts by decision
 # -Wno-c++11-long-long -> When it detects long long, then we can use it and no need for a warning about that
 	CPPUTEST_CXX_WARNINGFLAGS += -Weverything -Wno-disabled-macro-expansion -Wno-padded -Wno-global-constructors -Wno-exit-time-destructors -Wno-weak-vtables -Wno-old-style-cast -Wno-c++11-long-long
@@ -222,7 +222,7 @@ else
 endif
 endif
 
-# Default dir for the outout library
+# Default dir for the output library
 ifndef CPPUTEST_LIB_DIR
 ifndef TARGET_PLATFORM
     CPPUTEST_LIB_DIR = lib
@@ -236,7 +236,7 @@ ifndef CPPUTEST_MAP_FILE
 	CPPUTEST_MAP_FILE = N
 endif
 
-# No extentions is default
+# No extensions is default
 ifndef CPPUTEST_USE_EXTENSIONS
 	CPPUTEST_USE_EXTENSIONS = N
 endif

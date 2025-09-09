@@ -14,7 +14,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@
 // 20230817 Implemented partial reset
 // 20231227 Added prerequisites for storing rain data in preferences
 // 20231218 Implemented storing of rain data in preferences, 
-//          new algotrithm for past 60 minutes rainfall
+//          new algorithm for past 60 minutes rainfall
 // 20240118 Changed raingaugeMax to class member set by constructor
 // 20240119 Changed preferences to class member
 //          Modified update at the same index as before

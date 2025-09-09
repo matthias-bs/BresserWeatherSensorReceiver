@@ -20,7 +20,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -241,7 +241,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 // Sync is: 2D D4
 // Preamble 40 bits but the CC1101 doesn't allow us to set that
 // so we use a preamble of 32 bits and then use the sync as AA 2D
-// which then uses the last byte of the preamble - we recieve the last sync byte
+// which then uses the last byte of the preamble - we receive the last sync byte
 // as the 1st byte of the payload.
 #if defined(USE_CC1101)
         state = radio.setSyncWord(0xAA, 0x2D, 0, false);

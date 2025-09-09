@@ -13,7 +13,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -132,7 +132,7 @@
 // --- Board ---
 // ------------------------------------------------------------------------------------------------
 
-// LILYGO TTGO LoRaP32 board with integrated RF tranceiver (SX1276)
+// LILYGO TTGO LoRaP32 board with integrated RF transceiver (SX1276)
 // See pin definitions in
 // https://github.com/espressif/arduino-esp32/tree/master/variants/ttgo-lora32-*
 // and

@@ -25,7 +25,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2023 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@
 // -
 //
 // Notes:
-// Maximum number of lighning strikes on earth:
+// Maximum number of lightning strikes on earth:
 // https://en.wikipedia.org/wiki/Catatumbo_lightning
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////

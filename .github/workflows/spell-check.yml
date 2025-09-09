@@ -29,4 +29,4 @@ jobs:
 
     - name: Run codespell
       run: |
-        codespell --ignore-words-list="thru" --skip="*.pdf" --exclude-file=.github/workflows/spell-check-exclude.txt .
+        codespell --ignore-words-list="accCount" --skip="*.pdf" --exclude-file=.github/workflows/spell-check-exclude.txt .

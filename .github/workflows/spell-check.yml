@@ -1,0 +1,32 @@
+name: Spell Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  spell-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install codespell
+      run: |
+        python -m pip install --upgrade pip
+        pip install codespell
+
+    - name: Run codespell
+      run: |
+        codespell --ignore-words-list="thru" --skip="*.pdf" --exclude-file=.github/workflows/spell-check-exclude.txt .

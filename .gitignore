@@ -64,6 +64,10 @@ Gemfile.lock
 vendor
 *.gem
 
+# credentials
+secrets.h
+
+
 # rspec failure tracking
 .rspec_status
 

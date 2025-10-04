@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bresser Weather Sensor Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!--
+      -- gauge.min.js can be downloaded if the device runs as a WiFi station connected to the internet,
+      -- but if it runs as a WiFi access point, the file has to be served locally.
+      -->
+    <!--<script src="http://cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.7/all/gauge.min.js"></script>-->
+    <script src="gauge.min.js"></script>
+  </head>
+  <body>
+    <div class="topnav">
+      <h1>Weather Sensors</h1>
+    </div>
+    <div class="content">
+      <div class="card-grid">
+        <div class="card">
+          <p class="card-title">Temperature</p>
+          <canvas id="gauge-temperature"></canvas>
+        </div>
+        <div class="card">
+          <p class="card-title">Humidity</p>
+          <canvas id="gauge-humidity"></canvas>
+        </div>
+        <div class="card">
+          <p class="card-title">Wind Speed</p>
+          <canvas id="gauge-windavg"></canvas>
+          <canvas id="gauge-windgust"></canvas>
+        </div>
+        <div class="card">
+          <p class="card-title">Wind Direction</p>
+          <canvas id="gauge-winddir"></canvas>
+        </div>
+        <div class="card">
+          <p class="card-title">Rain Gauge</p>
+          <canvas id="gauge-rainh"></canvas>
+          <canvas id="gauge-raind"></canvas>
+          <canvas id="gauge-rainw"></canvas>
+          <canvas id="gauge-rainm"></canvas>
+        </div>
+      </div>
+      <div class="status" id="status">
+      Last update: <span id="last-update">never</span>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
+

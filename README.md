@@ -90,6 +90,7 @@ which buffers and combines messages from the 6-in-1 protocol until a complete se
   * [BresserWeatherSensorMQTTWiFiMgr](#bresserweathersensormqttwifimgr)
   * [BresserWeatherSensorDomoticz](#bresserweathersensordomoticz)
   * [BresserWeatherSensorM5Core2](#bresserweathersensorm5core2)
+  * [BresserWeatherSensorCanvasGauges](#bresserweathersensorcanvasgauges)
 * [MQTT Integrations](#mqtt-integrations)
   * [Home Assistant](#home-assistant)
   * [Datacake](#datacake)
@@ -330,6 +331,28 @@ Using getMessage() for non-blocking reception of a single data message.
 Weather sensor data is presented on the display.
 
 ![BresserWeatherSensorM5Core2](https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/12edec14-83fc-4f94-b2cb-0190a14357db)
+
+### [BresserWeatherSensorCanvasGauges](examples/BresserWeatherSensorCanvasGauges/)
+
+<img width="1200" height="756" alt="BresserWeatherSensorDashboard" src="https://github.com/user-attachments/assets/d6fa41b9-102e-43bc-9359-4d9f2db9a281" />
+
+This sketch provides a web server to display sensor readings in gauges. Two different types of
+gauges are used: linear and radial. The gauges are implemented using the JavaScript library
+canvas-gauges (https://github.com/Mikhus/canvas-gauges).
+
+The web server serves a simple HTML page with CSS and embedded JavaScript stored in the ESP
+SPIFFS file system to fetch the sensor readings. The readings are updated automatically on
+the web page using Server-Sent Events (SSE). 
+See [ESP32 Web Server: Display Sensor Readings in Gauges](https://randomnerdtutorials.com/esp32-web-server-gauges/) by Rui Santos on Random Nerd Tutorials for details.
+
+#### Notes
+
+* Set your WiFi credentials in [secrets.h](examples/BresserWeatherSensorCanvasGauges/secrets.h)
+* Enable WiFi Access Point mode by uncommenting WIFI_AP_MODE if desired\
+  https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/60028b578836d372931b117c1e8ed4a78aaaa70d/examples/BresserWeatherSensorCanvasGauges/BresserWeatherSensorCanvasGauges.ino#L91
+* Open http://weatherdashboard.local in your web browser (or the IP address shown in the serial monitor) to access the web page
+* Press the on-board button during power-up to reset rain gauge data
+* Rain values are limited to prevent overflow of the linear gauges
 
 ## MQTT Integrations
 

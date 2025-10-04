@@ -92,7 +92,7 @@ jobs:
             # RP2040
             #echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
             echo "index-url=--additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json" >> $GITHUB_OUTPUT
-            echo "skip-pattern=(M5Core2|MQTT|Domoticz|Feather32u4).*ino" >> $GITHUB_OUTPUT
+            echo "skip-pattern=(M5Core2|MQTT|Domoticz|CanvasGauges).*ino" >> $GITHUB_OUTPUT
           
           fi
 
@@ -108,6 +108,9 @@ jobs:
           arduino-cli lib install WiFiManager@2.0.17
           arduino-cli lib install ESP_DoubleResetDetector@1.3.2
           arduino-cli lib install Preferences@2.1.0
+          arduino-cli lib install "ESP Async TCP"@2.0.0
+          arduino-cli lib install "Async TCP"@3.4.9
+          arduino-cli lib install "ESP Async WebServer"@3.8.1
           # The following libs are only needed for M5Stack Core2
           #arduino-cli lib install M5Unified@0.2.8
           ##arduino-cli lib install M5Core2@0.2.0

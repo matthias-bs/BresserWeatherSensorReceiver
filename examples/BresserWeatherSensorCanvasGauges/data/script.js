@@ -537,6 +537,8 @@ function getReadings() {
           var rainm = myObj.ws_rain_m;
           gaugeRainm.value = limitValue(rainm, -1, 104);
         }
+        // show local time of this update
+        updateLastUpdate();
       }
     }
   };
@@ -612,4 +614,5 @@ if (!!window.EventSource) {
     }
   }, false);
 }
+
 

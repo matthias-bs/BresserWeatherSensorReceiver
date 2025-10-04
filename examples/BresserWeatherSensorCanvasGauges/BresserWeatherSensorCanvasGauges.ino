@@ -131,8 +131,7 @@ AsyncEventSource events("/events");
 JsonDocument readings;
 
 // Timer variables
-unsigned long lastTime = 0;
-unsigned long timerDelay = 10000;
+const unsigned long timerDelay = 10000;
 
 // Create weather sensor receiver object
 WeatherSensor weatherSensor;
@@ -188,9 +187,9 @@ void initLittleFS()
 {
   if (!LittleFS.begin())
   {
-    Serial.println("An error has occurred while mounting LittleFS");
+    log_e("An error has occurred while mounting LittleFS");
   }
-  Serial.println("LittleFS mounted successfully");
+  log_d("LittleFS mounted successfully");
 }
 
 // Initialize WiFi
@@ -272,12 +271,12 @@ void printLocalTime()
   struct tm timeinfo;
   if (!getLocalTimeCompat(&timeinfo))
   {
-    Serial.println("Failed to obtain time");
+    log_e("Failed to obtain time");
     return;
   }
   char buf[64];
   strftime(buf, sizeof(buf), "%A, %B %d %Y %H:%M:%S", &timeinfo);
-  Serial.println(buf);
+  log_d("%s", buf);
 }
 
 void setup()
@@ -360,7 +359,7 @@ void setup()
       {
         if (client->lastId())
         {
-          Serial.printf("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
+          log_i("Client reconnected! Last message ID that it got is: %u\n", client->lastId());
         }
         // send event with message "hello!", id current millis
         // and set reconnect delay to 1 second
@@ -381,12 +380,17 @@ void loop()
   weatherSensor.clearSlots();
 
   // Attempt to receive data set with timeout of <xx> s
+  #if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_INFO)
   bool decode_ok = weatherSensor.getData(RX_TIMEOUT, RX_FLAGS, 0, &sendPing);
+  #else
+  weatherSensor.getData(RX_TIMEOUT, RX_FLAGS, 0, &sendPing);
+  #endif
   log_i("decode_ok: %d", decode_ok);
 
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

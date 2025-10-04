@@ -83,45 +83,10 @@
 #include "WeatherSensor.h"
 #include "RainGauge.h"
 #include "secrets.h"
+#include "config.h"
 
-#define MAX_SENSORS 2
+#define MAX_SENSORS 1
 #define RX_TIMEOUT 180000 // sensor receive timeout [ms]
-
-// Raingauge reset button definition - unfortunately a common definition does not exist!
-#if defined(ARDUINO_ARCH_ESP32)
-#if defined(ARDUINO_LILYGO_T3S3_SX1262) || \
-    defined(ARDUINO_LILYGO_T3S3_SX1276) || \
-    defined(ARDUINO_LILYGO_T3S3_LR1121)
-const uint8_t KEY_RAINGAUGE_RESET = (BUTTON_1);
-#elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-const uint8_t KEY_RAINGAUGE_RESET = 0;
-#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V3) || \
-      defined(ARDUINO_HELTEC_VISION_MASTER_T190) || \
-      defined(ARDUINO_HELTEC_WIRELESS_STICK_V3)
-// Check if this GPIO pin is available/connected to a key on your board
-const uint8_t KEY_RAINGAUGE_RESET = 0;
-#elif defined(ARDUINO_FEATHER_ESP32) || \
-      defined(ARDUINO_THINGPULSE_EPULSE_FEATHER) || \
-      defined(ARDUINO_ADAFRUIT_FEATHER_ESP32_V2) || \
-      defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
-// Check if this GPIO pin is available/connected to a key on your board
-const uint8_t KEY_RAINGAUGE_RESET = 4;
-#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
-const uint8_t KEY_RAINGAUGE_RESET = BTN;
-#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V2) || \
-      defined(ARDUINO_HELTEC_WIRELESS_STICK) || \
-      defined(ARDUINO_TTGO_LoRa32_V1) || \
-      defined(ARDUINO_TTGO_LoRa32_V2) || \
-      defined(ARDUINO_TTGO_LoRa32_v21new)
-const uint8_t KEY_RAINGAUGE_RESET = KEY_BUILTIN;
-#else
-// Check if this GPIO pin is available/connected to a key on your board
-const uint8_t KEY_RAINGAUGE_RESET = 4;
-#endif
-#else
-// Check if this GPIO pin is available/connected to a key on your board
-const uint8_t KEY_RAINGAUGE_RESET = 5;
-#endif
 
 // Stop reception when data of at least one sensor is complete
 // #define RX_FLAGS DATA_COMPLETE
@@ -422,6 +387,7 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

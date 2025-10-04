@@ -8,10 +8,17 @@
 // canvas-gauges (https://github.com/Mikhus/canvas-gauges).
 //
 // The web server serves a simple HTML page with CSS and embedded JavaScript stored in the ESP
-// SPIFFS file system to fetch the sensor readings. The readings are updated automatically on 
+// SPIFFS file system to fetch the sensor readings. The readings are updated automatically on
 // the web page using Server-Sent Events (SSE).
 // See "ESP32 Web Server: Display Sensor Readings in Gauges" by Rui Santos
 // on Random Nerd Tutorials (https://randomnerdtutorials.com/esp32-web-server-gauges/) for details.
+//
+// Notes:
+// - Set your WiFi credentials in "secrets.h"
+// - Enable WiFi Access Point mode by uncommenting WIFI_AP_MODE if desired
+// - Open http://weatherdashboard.local in your web browser (or the IP address shown in the
+//   serial monitor) to access the web page
+// - Press the on-board button during power-up to reset rain gauge data
 //
 // https://github.com/matthias-bs/BresserWeatherSensorReceiver
 //
@@ -19,8 +26,8 @@
 // Rui Santos & Sara Santos - Random Nerd Tutorials
 // Complete instructions at https://RandomNerdTutorials.com/esp32-web-server-gauges/
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software
-// and associated documentation files. 
-// The above copyright notice and this permission notice shall be included in all copies or 
+// and associated documentation files.
+// The above copyright notice and this permission notice shall be included in all copies or
 // substantial portions of the Software.
 //
 //
@@ -61,6 +68,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <ESPmDNS.h>
 #include <AsyncTCP.h>          // https://github.com/ESP32Async/AsyncTCP
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
 #include <time.h>
@@ -80,7 +88,7 @@
 // Stop reception when data of all (max_sensors) is complete
 #define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
 
-#define WIFI_AP_MODE // Uncomment to enable WiFi Access Point mode
+// #define WIFI_AP_MODE // Uncomment to enable WiFi Access Point mode
 
 // Replace network credentials in secrets.h
 
@@ -204,6 +212,10 @@ void initWiFi()
   }
   Serial.println();
   log_i("Local IP: %s", WiFi.localIP().toString().c_str());
+  if (!MDNS.begin(hostname))
+  {
+    log_e("Error setting up MDNS responder!");
+  }
 #endif
 }
 

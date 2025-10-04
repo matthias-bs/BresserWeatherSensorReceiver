@@ -334,7 +334,7 @@ Weather sensor data is presented on the display.
 
 ### [BresserWeatherSensorCanvasGauges](examples/BresserWeatherSensorCanvasGauges/)
 
-<img width="1200" height="756" alt="BresserWeatherSensorDashboard" src="https://github.com/user-attachments/assets/cea0c2e6-5297-4f25-8cf5-fbca4587333d" />
+<img width="1200" height="756" alt="BresserWeatherSensorDashboard" src="https://github.com/user-attachments/assets/d6fa41b9-102e-43bc-9359-4d9f2db9a281" />
 
 This sketch provides a web server to display sensor readings in gauges. Two different tpes of
 gauges are used: linear and radial. The gauges are implemented using the JavaScript library

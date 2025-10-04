@@ -110,7 +110,7 @@ jobs:
           arduino-cli lib install Preferences@2.1.0
           arduino-cli lib install "ESP Async TCP"@2.0.0
           arduino-cli lib install "Async TCP"@3.4.9
-          arduino-cli lib install ESPAsyncWebServer@3.8.1
+          arduino-cli lib install "ESP Async WebServer"@3.8.1
           # The following libs are only needed for M5Stack Core2
           #arduino-cli lib install M5Unified@0.2.8
           ##arduino-cli lib install M5Core2@0.2.0

@@ -619,6 +619,7 @@ if (!!window.EventSource) {
         if (myObj.ws_rain_m !== undefined) {
           gaugeRainm.value = limitValue(myObj.ws_rain_m, -1, 104);
         }
+        updateLastUpdate();
       }
     } catch (error) {
       console.error("Error parsing JSON:", error);

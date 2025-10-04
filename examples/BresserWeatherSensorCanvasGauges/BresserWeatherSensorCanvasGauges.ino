@@ -91,7 +91,7 @@
 const uint8_t KEY_RAINGAUGE_RESET = KEY_BUILTIN;
 #else
 // Check if this GPIO pin is available on your board
-const uint8_t KEY_RAINGAUGE_RESET = D0;
+const uint8_t KEY_RAINGAUGE_RESET = (D0);
 #endif
 
 // Stop reception when data of at least one sensor is complete
@@ -393,3 +393,4 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+

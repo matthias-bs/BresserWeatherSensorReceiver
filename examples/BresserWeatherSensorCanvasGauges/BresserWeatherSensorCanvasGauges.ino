@@ -3,7 +3,7 @@
 //
 // Example for BresserWeatherSensorReceiver
 //
-// This sketch provides a web server to display sensor readings in gauges. Two different tpes of
+// This sketch provides a web server to display sensor readings in gauges. Two different types of
 // gauges are used: linear and radial. The gauges are implemented using the JavaScript library
 // canvas-gauges (https://github.com/Mikhus/canvas-gauges).
 //
@@ -393,6 +393,7 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

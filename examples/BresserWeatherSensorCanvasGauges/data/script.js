@@ -486,11 +486,22 @@ function limitValue(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
 
-/* update "last update" element (pass ms since epoch or omit to use now) */
+function formatTimestampDetailed(ms) {
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  }).format(new Date(ms));
+}
+
+/* update "last update" element */
 function updateLastUpdate() {
   const el = document.getElementById('last-update');
   if (!el) return;
-  el.textContent = formatTimestamp(Date.now());
+  el.textContent = formatTimestampDetailed(Date.now());
 }
 
 // Function to get current readings on the webpage when it loads for the first time

@@ -481,8 +481,16 @@ var gaugeRainm = new LinearGauge({
   valueDec: 1
 }).draw();
 
+/* Limit value to prevent overflow of gauge */
 function limitValue(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+/* update "last update" element (pass ms since epoch or omit to use now) */
+function updateLastUpdate() {
+  const el = document.getElementById('last-update');
+  if (!el) return;
+  el.textContent = formatTimestamp(Date.now());
 }
 
 // Function to get current readings on the webpage when it loads for the first time
@@ -604,3 +612,4 @@ if (!!window.EventSource) {
     }
   }, false);
 }
+

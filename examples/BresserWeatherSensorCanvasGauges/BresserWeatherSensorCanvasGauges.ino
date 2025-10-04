@@ -268,6 +268,9 @@ bool getLocalTimeCompat(struct tm *info, uint32_t timeout_ms = 2000)
 // Print local time
 void printLocalTime()
 {
+  setenv("TZ", tz, 1);
+  tzset();
+  
   struct tm timeinfo;
   if (!getLocalTimeCompat(&timeinfo))
   {

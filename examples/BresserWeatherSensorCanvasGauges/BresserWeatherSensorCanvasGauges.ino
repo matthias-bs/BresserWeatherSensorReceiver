@@ -73,7 +73,7 @@
 #else
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
-#include <ESPAsyncTCP.h>
+#include <ESPAsyncTCP.h> // https://github.com/ESP32Async/ESPAsyncTCP
 #endif
 #include <ESPAsyncWebServer.h> // https://github.com/ESP32Async/ESPAsyncWebServer
 #include <time.h>
@@ -393,6 +393,7 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

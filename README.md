@@ -351,7 +351,7 @@ See [ESP32 Web Server: Display Sensor Readings in Gauges](https://randomnerdtuto
 * Upload the contents of [examples/BresserWeatherSensorCanvasGauges/data/](examples/BresserWeatherSensorCanvasGauges/data/) to the board's Flash memory using [earlephilhower/arduino-littlefs-upload](https://github.com/earlephilhower/arduino-littlefs-upload)
 * Enable WiFi Access Point mode by uncommenting WIFI_AP_MODE if desired\
   https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/60028b578836d372931b117c1e8ed4a78aaaa70d/examples/BresserWeatherSensorCanvasGauges/BresserWeatherSensorCanvasGauges.ino#L91
-* Open http://weatherdashboard.local in your web browser (or the IP address shown in the serial monitor) to access the web page
+* Open http://weatherdashboard.local (or the IP address shown in the serial monitor) in your web browser to access the web page
 * Press the on-board button during power-up to reset rain gauge data
 * Rain values are limited to prevent overflow of the linear gauges
 

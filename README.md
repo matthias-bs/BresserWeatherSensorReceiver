@@ -341,7 +341,7 @@ gauges are used: linear and radial. The gauges are implemented using the JavaScr
 [canvas-gauges](https://github.com/Mikhus/canvas-gauges).
 
 The web server serves a simple HTML page with CSS and embedded JavaScript stored in the ESP
-SPIFFS file system to fetch the sensor readings. The readings are updated automatically on
+LittleFS file system to fetch the sensor readings. The readings are updated automatically on
 the web page using Server-Sent Events (SSE). 
 See [ESP32 Web Server: Display Sensor Readings in Gauges](https://randomnerdtutorials.com/esp32-web-server-gauges/) by Rui Santos on Random Nerd Tutorials for details.
 

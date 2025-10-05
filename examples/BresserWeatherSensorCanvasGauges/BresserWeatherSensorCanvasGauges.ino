@@ -8,7 +8,7 @@
 // canvas-gauges (https://github.com/Mikhus/canvas-gauges).
 //
 // The web server serves a simple HTML page with CSS and embedded JavaScript stored in the ESP
-// SPIFFS file system to fetch the sensor readings. The readings are updated automatically on
+// LittleFS file system to fetch the sensor readings. The readings are updated automatically on
 // the web page using Server-Sent Events (SSE).
 // See "ESP32 Web Server: Display Sensor Readings in Gauges" by Rui Santos
 // on Random Nerd Tutorials (https://randomnerdtutorials.com/esp32-web-server-gauges/) for details.
@@ -393,6 +393,7 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

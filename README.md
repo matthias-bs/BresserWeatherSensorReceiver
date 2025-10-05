@@ -338,7 +338,7 @@ Weather sensor data is presented on the display.
 
 This sketch provides a web server to display sensor readings in gauges. Two different types of
 gauges are used: linear and radial. The gauges are implemented using the JavaScript library
-canvas-gauges (https://github.com/Mikhus/canvas-gauges).
+[canvas-gauges](https://github.com/Mikhus/canvas-gauges).
 
 The web server serves a simple HTML page with CSS and embedded JavaScript stored in the ESP
 SPIFFS file system to fetch the sensor readings. The readings are updated automatically on

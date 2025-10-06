@@ -82,6 +82,9 @@ jobs:
             if  [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
                 echo "skip-pattern=(M5Core2).*ino" >> $GITHUB_OUTPUT
             fi
+            if [[ ! "${{ contains(matrix.board, 'ttgo') || contains(matrix.board, 'lilygo') }}" == "true" ]]; then
+                echo "skip-pattern=BresserWeatherSensorOLED.ino" >> $GITHUB_OUTPUT
+            fi
           elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then
             # ESP8266
             echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
@@ -111,6 +114,7 @@ jobs:
           arduino-cli lib install "ESP Async TCP"@2.0.0
           arduino-cli lib install "Async TCP"@3.4.9
           arduino-cli lib install "ESP Async WebServer"@3.8.1
+          arduino-cli lib install "Adafruit SSD1306"@2.5.15
           # The following libs are only needed for M5Stack Core2
           #arduino-cli lib install M5Unified@0.2.8
           ##arduino-cli lib install M5Core2@0.2.0

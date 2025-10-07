@@ -79,12 +79,14 @@ jobs:
             # ESP32
             python -m pip install pyserial
             echo "index-url=--additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json" >> $GITHUB_OUTPUT
-            if  [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
-                echo "skip-pattern=(M5Core2).*ino" >> $GITHUB_OUTPUT
+             skip_patterns=()
+            if [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
+              skip_patterns+=("(M5Core2).*ino")
             fi
             if [[ ! "${{ contains(matrix.board, 'ttgo') || contains(matrix.board, 'lilygo') }}" == "true" ]]; then
-                echo "skip-pattern=BresserWeatherSensorOLED.ino" >> $GITHUB_OUTPUT
+              skip_patterns+=("BresserWeatherSensorOLED.ino")
             fi
+            echo "skip-pattern=$(IFS='|'; echo "${skip_patterns[*]}")" >> $GITHUB_OUTPUT
           elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then
             # ESP8266
             echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT

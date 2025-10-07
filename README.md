@@ -85,6 +85,7 @@ which buffers and combines messages from the 6-in-1 protocol until a complete se
   * [BresserWeatherSensorWaiting](#bresserweathersensorwaiting)
   * [BresserWeatherSensorCallback](#bresserweathersensorcallback)
   * [BresserWeatherSensorOptions](#bresserweathersensoroptions)
+  * [BresserWeatherSensorOLED](#bresserweathersensoroled)
   * [BresserWeatherSensorMQTT](#bresserweathersensormqtt)
   * [BresserWeatherSensorMQTTCustom](#bresserweathersensormqttcustom)
   * [BresserWeatherSensorMQTTWiFiMgr](#bresserweathersensormqttwifimgr)
@@ -240,6 +241,17 @@ Uses default configuration [src/WeatherSensorCfg.h](https://github.com/matthias-
 
 Based on [BresserWeatherSensorWaiting](https://github.com/matthias-bs/BresserWeatherSensorReceiver/tree/main/examples/BresserWeatherSensorWaiting), but demonstrates the different options of the `getData()`-method which defined if enough sensor data has been received before returning. Output is printed to the serial console ([example](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/examples/BresserWeatherSensorOptions/example.log)).
 
+
+### [BresserWeatherSensorOLED](BresserWeatherSensorReceiver/examples/BresserWeatherSensorOLED)
+
+Uses default configuration [src/WeatherSensorCfg.h](https://github.com/matthias-bs/BresserWeatherSensorReceiver/blob/main/src/WeatherSensorCfg.h)
+
+Prints the received weather sensor values to the on-board OLED display. See [Adafruit_SSD1306/examples](https://github.com/adafruit/Adafruit_SSD1306/tree/master/examples) for text style options and scrolling.
+
+<img width="500" height="433" alt="Lilygo TTGO LoRa32 OLED" src="https://github.com/user-attachments/assets/3623b1bb-2130-4ca1-b0e9-333c89d83c67">
+
+> [!NOTE]
+> Currently only the LILYGO boards listed in [Predefined Board Configurations](#predefined-board-configurations) are supported.
 
 ### [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorMQTT)
 

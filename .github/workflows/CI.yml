@@ -79,20 +79,25 @@ jobs:
             # ESP32
             python -m pip install pyserial
             echo "index-url=--additional-urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json" >> $GITHUB_OUTPUT
-            if  [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
-                echo "skip-pattern=(M5Core2).*ino" >> $GITHUB_OUTPUT
+             skip_patterns=()
+            if [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
+              skip_patterns+=("(M5Core2).*ino")
             fi
+            if [[ ! "${{ contains(matrix.board, 'ttgo') || contains(matrix.board, 'lilygo') }}" == "true" ]]; then
+              skip_patterns+=("BresserWeatherSensorOLED.ino")
+            fi
+            echo "skip-pattern=$(IFS='|'; echo "${skip_patterns[*]}")" >> $GITHUB_OUTPUT
           elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then
             # ESP8266
             echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
             echo "index-url=--additional-urls http://arduino.esp8266.com/stable/package_esp8266com_index.json" >> $GITHUB_OUTPUT
-            echo "skip-pattern=(M5Core2).*ino" >> $GITHUB_OUTPUT
+            echo "skip-pattern=(M5Core2|OLED).*ino" >> $GITHUB_OUTPUT
           
           elif [[ "${{ contains(matrix.board, 'rp2040:rp2040') }}" == "true" ]]; then
             # RP2040
             #echo "options=,xtal=80,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=qio,eesz=512K" >> $GITHUB_OUTPUT
             echo "index-url=--additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json" >> $GITHUB_OUTPUT
-            echo "skip-pattern=(M5Core2|MQTT|Domoticz|CanvasGauges).*ino" >> $GITHUB_OUTPUT
+            echo "skip-pattern=(M5Core2|MQTT|Domoticz|CanvasGauges|OLED).*ino" >> $GITHUB_OUTPUT
           
           fi
 
@@ -111,6 +116,7 @@ jobs:
           arduino-cli lib install "ESP Async TCP"@2.0.0
           arduino-cli lib install "Async TCP"@3.4.9
           arduino-cli lib install "ESP Async WebServer"@3.8.1
+          arduino-cli lib install "Adafruit SSD1306"@2.5.15
           # The following libs are only needed for M5Stack Core2
           #arduino-cli lib install M5Unified@0.2.8
           ##arduino-cli lib install M5Core2@0.2.0

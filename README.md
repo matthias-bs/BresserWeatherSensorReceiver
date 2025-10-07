@@ -248,6 +248,8 @@ Uses default configuration [src/WeatherSensorCfg.h](https://github.com/matthias-
 
 Prints the received weather sensor values to the on-board OLED display. See [Adafruit_SSD1306/examples](https://github.com/adafruit/Adafruit_SSD1306/tree/master/examples) for text style options and scrolling.
 
+<img width="500" height="433" alt="Lilygo TTGO LoRa32 OLED" src="https://github.com/user-attachments/assets/3623b1bb-2130-4ca1-b0e9-333c89d83c67">
+
 > [!NOTE]
 > Currently only the LILYGO boards listed in [Predefined Board Configurations](#predefined-board-configurations) are supported.
 

@@ -265,7 +265,10 @@ void setup()
     // LED for indicating failure or SD card activity
     pinMode(LED_BUILTIN, OUTPUT);
     set_rtc();
+
+#if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG) || !defined(IGNORE_IF_RTC_NOT_SET)
     time_t now = time(nullptr);
+#endif
 
 #if !defined(IGNORE_IF_RTC_NOT_SET)
     if (now < 100000)
@@ -296,11 +299,13 @@ void setup()
         failureHalt();
     }
 
+#if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG)
     // Print SD card info
     uint64_t cardSize = SD.cardSize() / (1024 * 1024);
     log_d("SD Card Size: %lluMB", cardSize);
     log_d("Total space: %lluMB", SD.totalBytes() / (1024 * 1024));
     log_d("Used space: %lluMB", SD.usedBytes() / (1024 * 1024));
+#endif
 
     ws.begin();
     ws.setSensorsCfg(MAX_SENSORS, RX_FLAGS);

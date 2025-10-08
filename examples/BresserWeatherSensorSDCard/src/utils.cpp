@@ -68,6 +68,42 @@ void unixtime_to_iso8601(char *buffer, size_t len, time_t t)
     strftime(buffer, len, "%Y-%m-%dT%H:%M:%S", tm_info);
 }
 
+/**
+ * @brief Convert time and date strings to time_t
+ * 
+ * @param time Time string in the format HH:MM:SS (default: __TIME__)
+ * @param date Date string in the format "MMM DD YYYY" (default: __DATE__)
+ * @return time_t unix time
+ */
+time_t convert_time(char const *time = __TIME__, char const *date = __DATE__)
+{
+    char s_month[5];
+    int month;
+    int year;
+    struct tm t = {
+        .tm_min = 0,
+        .tm_hour = 0,
+        .tm_mday = 0,
+        .tm_mon = 0,
+        .tm_year = 0,
+        .tm_wday = 0,
+        .tm_yday = 0,
+        .tm_isdst = 0
+    };
+    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+
+    sscanf(date, "%s %d %d", s_month, &t.tm_mday, &year);
+    sscanf(time, "%d:%d:%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
+
+    month = (strstr(month_names, s_month) - month_names) / 3;
+
+    t.tm_mon = month;
+    t.tm_year = year - 1900;
+    t.tm_isdst = -1;
+
+    return mktime(&t);
+}
+
 #if !defined(EXT_RTC)
 /**
  * @brief Set internal RTC from compile time
@@ -103,39 +139,12 @@ void set_rtc(void)
     if (stored_at < compiled_at) {
         log_d("Setting RTC to compile time");
         rtcPrefs.putULong("time", compiled_at);
-        struct timeval tv = {.tv_sec = compiled_at};
+        struct timeval tv = {.tv_sec = compiled_at, .tv_usec = 0};
         settimeofday(&tv, NULL);
     }
     rtcPrefs.end();
 }
 #endif
-
-/**
- * @brief Convert time and date strings to time_t
- * 
- * @param time Time string in the format HH:MM:SS (default: __TIME__)
- * @param date Date string in the format "MMM DD YYYY" (default: __DATE__)
- * @return time_t unix time
- */
-time_t convert_time(char const *time = __TIME__, char const *date = __DATE__)
-{
-    char s_month[5];
-    int month;
-    int year;
-    struct tm t = {0};
-    static const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
-    sscanf(date, "%s %d %d", s_month, &t.tm_mday, &year);
-    sscanf(time, "%d:%d:%d", &t.tm_hour, &t.tm_min, &t.tm_sec);
-
-    month = (strstr(month_names, s_month) - month_names) / 3;
-
-    t.tm_mon = month;
-    t.tm_year = year - 1900;
-    t.tm_isdst = -1;
-
-    return mktime(&t);
-}
 
 #if defined(EXT_RTC)
 // Synchronize the internal RTC with the external RTC

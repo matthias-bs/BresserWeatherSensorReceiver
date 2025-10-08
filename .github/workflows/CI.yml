@@ -83,8 +83,11 @@ jobs:
             if [[ ! "${{ contains(matrix.board, 'esp32:esp32:m5stack') }}" == "true" ]]; then
               skip_patterns+=("(M5Core2).*ino")
             fi
-            if [[ ! "${{ contains(matrix.board, 'ttgo') || contains(matrix.board, 'lilygo') }}" == "true" ]]; then
+            if [[ ! "${{ contains(matrix.board, 'ttgo') || contains(matrix.board, 'lilygo_t3s3') }}" == "true" ]]; then
               skip_patterns+=("BresserWeatherSensorOLED.ino")
+            fi
+            if [[ ! "${{ contains(matrix.board, 'TTGO_LoRa32_V2') || contains(matrix.board, 'TTGO_LoRa32_v21new') || contains(matrix.board, 'lilygo_t3s3') }}" == "true" ]]; then
+              skip_patterns+=("BresserWeatherSensorSDCard.ino")
             fi
             echo "skip-pattern=$(IFS='|'; echo "${skip_patterns[*]}")" >> $GITHUB_OUTPUT
           elif [[ "${{ contains(matrix.board, 'esp8266:esp8266') }}" == "true" ]]; then
@@ -117,6 +120,7 @@ jobs:
           arduino-cli lib install "Async TCP"@3.4.9
           arduino-cli lib install "ESP Async WebServer"@3.8.1
           arduino-cli lib install "Adafruit SSD1306"@2.5.15
+          arduino-cli lib install "RTClib@2.1.4"
           # The following libs are only needed for M5Stack Core2
           #arduino-cli lib install M5Unified@0.2.8
           ##arduino-cli lib install M5Core2@0.2.0

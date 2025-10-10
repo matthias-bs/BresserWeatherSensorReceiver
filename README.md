@@ -385,8 +385,11 @@ To provide a timestamps for each data set, there are two options:
 
 The on-board LED is used to indicate SD card activity (short flash) and failure (permanent on - see debug output in IDE).
 
+> [!TIP]
+> See [SD library](https://github.com/espressif/arduino-esp32/tree/master/libraries/SD) for more information.
+
 > [!NOTE]
-> Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) are supported.
+> Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) are supported by this example.
 
 ## MQTT Integrations
 

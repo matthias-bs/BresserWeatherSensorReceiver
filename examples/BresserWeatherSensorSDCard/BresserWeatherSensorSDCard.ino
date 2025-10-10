@@ -9,7 +9,7 @@
 // Notes:
 // - Currently only some boards by LILYGO are supported.
 // - SD card must be formatted with FAT32 file system
-// - The in-board LED is used to indicate SD card activity (short flash) and failure (permanent on)
+// - The on-board LED is used to indicate SD card activity (short flash) and failure (permanent on)
 // - The internal RTC of the ESP32 is used to create date-based CSV log files.
 //   This RTC is set to the compile time after flashing the sketch. The time will be lost after
 //   power off (or power failure) or reset. The internal RTC is also not very accurate.

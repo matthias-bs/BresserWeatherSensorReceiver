@@ -216,6 +216,23 @@ void receiveSensorData()
 
             // Write to SD card
             digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while writing
+            if (!SD.exists(fileName))
+            {
+                // Create file and add header line
+                String header = "Timestamp,Temperature_C,Humidity_%,WindGust_m/s,WindAvg_m/s,WindDir_deg,Rain_mm";
+#if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+                header += ",UV_idx";
+#endif
+#ifdef BRESSER_7_IN_1
+                header += ",Light_klx,T_globe_C";
+#endif
+                if (!writeLog(fileName, header))
+                {
+                    Serial.println("Failed to write log header");
+                    failureHalt();
+                }
+            }
+
             if (writeLog(fileName, logEntry))
             {
                 log_i("Logged: %s", logEntry.c_str());

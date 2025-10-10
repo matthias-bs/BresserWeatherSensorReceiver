@@ -48,6 +48,8 @@
 // 20251010 Added CSV header line
 //          Added timezone support
 //          Refactored
+// 20251011 Modified timestamp handling
+//          Adjusted sleep duration to achieve constant wakeup interval
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -62,16 +64,8 @@
 #include "config.h"
 #include "src/utils.h"
 
-#define MAX_SENSORS 1
-#define RX_TIMEOUT 180000 // sensor receive timeout [ms]
-
-// Stop reception when data of at least one sensor is complete
-// #define RX_FLAGS DATA_COMPLETE
-
-// Stop reception when data of all (max_sensors) is complete
-#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
-
-const uint32_t sleepDuration = 30;
+ // Wake up interval [s]
+const uint32_t wakeupInterval = WAKEUP_INTERVAL_SEC;
 
 // Create weather sensor receiver object
 WeatherSensor ws;
@@ -271,17 +265,17 @@ void setup()
     // LED for indicating failure or SD card activity
     pinMode(LED_BUILTIN, OUTPUT);
     set_rtc();
+    time_t timeStart = time(nullptr);
 
 // Print the RTC time in ISO 8601 format
 #if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG)
-    now = time(nullptr);
-    tm_info = localtime(&now);
+    tm_info = localtime(&timeStart);
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
 #endif
     log_d("Time: %s", timestamp);
 
 #if !defined(IGNORE_IF_RTC_NOT_SET)
-    if (now < 100000)
+    if (timeStart < 100000)
     {
         log_e("RTC not set, halting!");
         failureHalt();
@@ -314,8 +308,8 @@ void setup()
     String logEntry = receiveSensorData();
 
     // Print the RTC time in ISO 8601 format
-    now = time(nullptr);
-    tm_info = localtime(&now);
+    time_t timeLog = time(nullptr);
+    tm_info = localtime(&timeLog);
     strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
     String fileName = String('/') + String(FILENAME_PREFIX) + String(timestamp).substring(0, 10) + ".csv";
 
@@ -353,6 +347,14 @@ void setup()
         }
         digitalWrite(LED_BUILTIN, LOW); // Turn off LED after writing
     }
+
+    // Adjust sleepDuration wrt. execution time
+    // to achieve a wakeup interval of 'wakeupInterval'
+    uint32_t sleepDuration;
+    if (static_cast<long long>(timeLog - timeStart + 10) < wakeupInterval)
+        sleepDuration = wakeupInterval - (timeLog - timeStart);
+    else
+        sleepDuration = 10;
 
     esp_sleep_enable_timer_wakeup(sleepDuration * 1000UL * 1000UL); // function uses µs
     log_i("Sleeping for %lu s", sleepDuration);

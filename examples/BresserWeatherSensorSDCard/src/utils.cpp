@@ -141,6 +141,13 @@ void set_rtc(void)
         rtcPrefs.putULong("time", compiled_at);
         struct timeval tv = {.tv_sec = compiled_at, .tv_usec = 0};
         settimeofday(&tv, NULL);
+
+        // Wait until time is set
+        for (int i = 0; i < 10; i++)
+            if (!(time(nullptr) < compiled_at)) {
+                break;
+            }
+            delay(10);
     }
     rtcPrefs.end();
 }

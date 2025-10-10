@@ -46,6 +46,8 @@
 // History:
 // 20251008 Created
 // 20251010 Added CSV header line
+//          Added timezone support
+//          Refactored
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +93,12 @@ static const uint8_t sd_cs = SS;
 #pragma message("Board not supported yet!")
 #endif
 
-void receiveSensorData()
+/**
+ * @brief Receive sensor data and build log entry
+ *
+ * @return String log entry (CSV format) or empty string if no data received
+ */
+String receiveSensorData()
 {
     // Clear sensor data buffer
     ws.clearSlots();
@@ -118,14 +125,6 @@ void receiveSensorData()
             (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
             (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
         {
-            time_t now = time(nullptr);
-            struct tm *tm_info = localtime(&now);
-
-            // Print the RTC time in ISO 8601 format
-            char timestamp[20];
-            strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
-            String fileName = String('/') + String(FILENAME_PREFIX) + String(timestamp).substring(0, 10) + ".csv";
-
             // Any other (weather-like) sensor is very similar
             if (ws.sensor[i].w.temp_ok)
             {
@@ -213,41 +212,16 @@ void receiveSensorData()
                 }
             }
 #endif
-            logEntry = String(timestamp) + "," + logEntry;
-
-            // Write to SD card
-            digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while writing
-            if (!SD.exists(fileName))
-            {
-                // Create file and add header line
-                String header = "Timestamp,Temperature_C,Humidity_%,WindGust_m/s,WindAvg_m/s,WindDir_deg,Rain_mm";
-#if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
-                header += ",UV_idx";
-#endif
-#ifdef BRESSER_7_IN_1
-                header += ",Light_klx,T_globe_C";
-#endif
-                if (!writeLog(fileName, header))
-                {
-                    Serial.println("Failed to write log header");
-                    failureHalt();
-                }
-            }
-
-            if (writeLog(fileName, logEntry))
-            {
-                log_i("Logged: %s", logEntry.c_str());
-            }
-            else
-            {
-                Serial.println("Failed to write log");
-                failureHalt();
-            }
-            digitalWrite(LED_BUILTIN, LOW); // Turn off LED after writing
+            return logEntry;
         } // if weather sensor
     } // for each sensor
+    return "";
 }
 
+/**
+ * @brief Halt execution (indicate failure with LED)
+ *
+ */
 void failureHalt()
 {
     while (1)
@@ -257,7 +231,14 @@ void failureHalt()
     }
 }
 
-// Function to write data to SD card
+/**
+ * @brief Write log data to a specified file
+ *
+ * @param fileName The name of the file to write to
+ * @param data The data to write to the file
+ * @return true if the write was successful
+ * @return false if the write failed
+ */
 bool writeLog(String fileName, String data)
 {
     File logFile = SD.open(fileName, FILE_APPEND);
@@ -277,16 +258,27 @@ bool writeLog(String fileName, String data)
 
 void setup()
 {
+    char timestamp[20];
+    time_t now;
+    struct tm *tm_info;
+
     Serial.begin(115200);
     delay(500);
+
+    setenv("TZ", TZINFO, 1);
+    tzset();
 
     // LED for indicating failure or SD card activity
     pinMode(LED_BUILTIN, OUTPUT);
     set_rtc();
 
-#if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG) || !defined(IGNORE_IF_RTC_NOT_SET)
-    time_t now = time(nullptr);
+// Print the RTC time in ISO 8601 format
+#if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG)
+    now = time(nullptr);
+    tm_info = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
 #endif
+    log_d("Time: %s", timestamp);
 
 #if !defined(IGNORE_IF_RTC_NOT_SET)
     if (now < 100000)
@@ -295,14 +287,6 @@ void setup()
         failureHalt();
     }
 #endif
-
-#if (CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG)
-    // Print the RTC time in ISO 8601 format
-    struct tm *tm_info = localtime(&now);
-    char buffer[20];
-    strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%S", tm_info);
-#endif
-    log_d("Time: %s", buffer);
 
     // Initialize SPI for SD card
     // Using hspi, because SPI is already used by WeatherSensor (with other pins)
@@ -327,7 +311,48 @@ void setup()
 
     ws.begin();
     ws.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
-    receiveSensorData();
+    String logEntry = receiveSensorData();
+
+    // Print the RTC time in ISO 8601 format
+    now = time(nullptr);
+    tm_info = localtime(&now);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
+    String fileName = String('/') + String(FILENAME_PREFIX) + String(timestamp).substring(0, 10) + ".csv";
+
+    if (logEntry.length() != 0)
+    {
+        logEntry = String(timestamp) + "," + logEntry;
+
+        // Write to SD card
+        digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while writing
+        if (!SD.exists(fileName))
+        {
+            // Create file and add header line
+            String header = "Timestamp,Temperature_C,Humidity_%,WindGust_m/s,WindAvg_m/s,WindDir_deg,Rain_mm";
+#if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
+            header += ",UV_idx";
+#endif
+#ifdef BRESSER_7_IN_1
+            header += ",Light_klx,T_globe_C";
+#endif
+            if (!writeLog(fileName, header))
+            {
+                Serial.println("Failed to write log header");
+                failureHalt();
+            }
+        }
+
+        if (writeLog(fileName, logEntry))
+        {
+            log_i("Logged: %s", logEntry.c_str());
+        }
+        else
+        {
+            Serial.println("Failed to write log");
+            failureHalt();
+        }
+        digitalWrite(LED_BUILTIN, LOW); // Turn off LED after writing
+    }
 
     esp_sleep_enable_timer_wakeup(sleepDuration * 1000UL * 1000UL); // function uses µs
     log_i("Sleeping for %lu s", sleepDuration);

@@ -37,6 +37,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+#define MAX_SENSORS 1
+#define RX_TIMEOUT 180000 // sensor receive timeout [ms]
+
+// Stop reception when data of at least one sensor is complete
+// #define RX_FLAGS DATA_COMPLETE
+
+// Stop reception when data of all (max_sensors) is complete
+#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
+
+// Wake up interval [s]
+#define WAKEUP_INTERVAL_SEC 300
+
 // Select one of the external RTC chips supported by Adafruit RTClib (optional)
 // https://github.com/adafruit/RTClib
 //#define EXT_RTC RTC_DS3231

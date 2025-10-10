@@ -92,6 +92,7 @@ which buffers and combines messages from the 6-in-1 protocol until a complete se
   * [BresserWeatherSensorDomoticz](#bresserweathersensordomoticz)
   * [BresserWeatherSensorM5Core2](#bresserweathersensorm5core2)
   * [BresserWeatherSensorCanvasGauges](#bresserweathersensorcanvasgauges)
+  * [BresserWeatherSensorSDCard](#bresserweathersensorsdcard)
 * [MQTT Integrations](#mqtt-integrations)
   * [Home Assistant](#home-assistant)
   * [Datacake](#datacake)
@@ -288,7 +289,7 @@ MQTT subscriptions:
 `<base_topic>/set_sensors_inc {"ids": [<id0>, ... ]}`  set sensors include list, e.g. `{"ids": ["0x89ABCDEF"]}`
 `<base_topic>/set_sensors_exc {"ids": [<id0>, ... ]}`  set sensors exclude list, e.g. `{"ids": ["0x89ABCDEF"]}`
 
-$ via LWT
+\$ via LWT
 
 `<base_topic>` is set by `#define HOSTNAME ...`
 
@@ -366,6 +367,26 @@ See [ESP32 Web Server: Display Sensor Readings in Gauges](https://randomnerdtuto
 * Open http://weatherdashboard.local (or the IP address shown in the serial monitor) in your web browser to access the web page
 * Press the on-board button during power-up to reset rain gauge data
 * Rain values are limited to prevent overflow of the linear gauges
+
+### [BresserWeatherSensorSDCard](examples/BresserWeatherSensorSDCard/)
+
+This sketch logs the received sensor data as CVS files to an SD card. The SD card must be formatted as FAT32 file system.
+
+To provide a timestamps for each data set, there are two options:
+
+* ESP32 built-in RTC
+
+   The RTC is set to compile-time automatically after flashing the sketch, but will be lost power off (or power failure) or reset.
+   The internal RTC is also not very accurate.
+
+* External RTC module with battery backup
+
+  Connect an external RTC module (supported by [RTClib](https://github.com/adafruit/RTClib)) via I²C interface. Use [RTCSet](https://github.com/matthias-bs/BresserWeatherSensorLW/tree/main/extras/RTCSet) for initially setting the RTC.
+
+The on-board LED is used to indicate SD card activity (short flash) and failure (permanent on - see debug output in IDE).
+
+> [!NOTE]
+> Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) are supported.
 
 ## MQTT Integrations
 

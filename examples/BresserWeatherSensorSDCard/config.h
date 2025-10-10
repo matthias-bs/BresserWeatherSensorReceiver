@@ -33,6 +33,7 @@
 //
 // History:
 // 20251008 Created
+// 20251010 Added TZINFO
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +43,9 @@
 //#define EXT_RTC RTC_DS1307
 //#define EXT_RTC RTC_PCF8523
 //#define EXT_RTC RTC_PCF8563
+
+// Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+#define TZINFO "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"
 
 // Filename: <FILENAME_PREFIX><YYYY>-<MM>-<DD>.csv
 #define FILENAME_PREFIX "bresser-"

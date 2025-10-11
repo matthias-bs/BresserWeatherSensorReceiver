@@ -50,6 +50,7 @@
 //          Refactored
 // 20251011 Modified timestamp handling
 //          Adjusted sleep duration to achieve constant wakeup interval
+//          Added delay between LED on and SD write to avoid unwanted removal of SD card
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -317,11 +318,13 @@ void setup()
     {
         logEntry = String(timestamp) + "," + logEntry;
 
-        // Write to SD card
-        digitalWrite(LED_BUILTIN, HIGH); // Turn on LED while writing
+        // Turn on LED _before_ writing
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(500);
+
+        // If file does not exist, create it and add header line
         if (!SD.exists(fileName))
         {
-            // Create file and add header line
             String header = "Timestamp,Temperature_C,Humidity_%,WindGust_m/s,WindAvg_m/s,WindDir_deg,Rain_mm";
 #if defined BRESSER_6_IN_1 || defined BRESSER_7_IN_1
             header += ",UV_idx";
@@ -336,6 +339,7 @@ void setup()
             }
         }
 
+        // Append log entry
         if (writeLog(fileName, logEntry))
         {
             log_i("Logged: %s", logEntry.c_str());
@@ -345,7 +349,8 @@ void setup()
             Serial.println("Failed to write log");
             failureHalt();
         }
-        digitalWrite(LED_BUILTIN, LOW); // Turn off LED after writing
+        // Turn off LED after writing
+        digitalWrite(LED_BUILTIN, LOW);
     }
 
     // Adjust sleepDuration wrt. execution time

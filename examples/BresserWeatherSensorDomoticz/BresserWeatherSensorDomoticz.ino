@@ -107,7 +107,6 @@
 #define DOMO_WIND_IDX 877     // IDX of Domoticz virtual wind sensor
 #define DOMO_RAIN_IDX 878     // IDX of Domoticz virtual rain sensor
 #define DOMO_TH_IDX 876       // IDX of Domoticz virtual temperature/humidity sensor
-#define TIMEZONE 1            // UTC + TIMEZONE
 #define PAYLOAD_SIZE 256      // maximum MQTT message size
 #define HOSTNAME_SIZE 30      // maximum hostname size
 #define RX_TIMEOUT 60000      // sensor receive timeout [ms]
@@ -118,12 +117,15 @@
 #define WIFI_RETRIES 10       // WiFi connection retries
 #define WIFI_DELAY 1000       // Delay between connection attempts [ms]
 #define SLEEP_EN true         // enable sleep mode (see notes above!)
-//#define USE_SECUREWIFI        // use secure WIFI
-#define USE_WIFI              // use non-secure WIFI
+// #define USE_SECUREWIFI        // use secure WIFI
+#define USE_WIFI // use non-secure WIFI
 
 #if (defined(USE_SECUREWIFI) && defined(USE_WIFI)) || (!defined(USE_SECUREWIFI) && !defined(USE_WIFI))
 #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
 #endif
+
+// Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 // #define _DEBUG_MQTT_
@@ -313,7 +315,7 @@ void mqtt_setup(void)
 #ifdef USE_SECUREWIFI
     // Note: TLS security needs correct time
     log_i("Setting time using SNTP");
-    configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
     now = time(nullptr);
     while (now < 1510592825)
     {
@@ -340,7 +342,7 @@ void mqtt_setup(void)
     net.setCACert(digicert);
 #endif
 #ifdef CHECK_PUB_KEY
-    #error "CHECK_PUB_KEY: not implemented"
+#error "CHECK_PUB_KEY: not implemented"
 #endif
 
 #endif
@@ -425,7 +427,7 @@ void publishWeatherdata(void)
     if (weatherSensor.sensor[i].w.rain_ok)
     {
         rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
-        
+
         domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 0);
         domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
         domo2_payload += String("\"}");
@@ -471,6 +473,10 @@ void setup()
     Serial.println();
     Serial.println(sketch_id);
     Serial.println();
+
+    // Set time zone
+    setenv("TZ", TZ_INFO, 1);
+    tzset();
 
 #ifdef LED_EN
     // Configure LED output pins

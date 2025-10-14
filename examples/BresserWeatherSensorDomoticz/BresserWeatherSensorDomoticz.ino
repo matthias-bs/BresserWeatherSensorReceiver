@@ -124,6 +124,9 @@
 #error "Either USE_SECUREWIFI OR USE_WIFI must be defined!"
 #endif
 
+// Enter your time zone (https://remotemonitoringsystems.ca/time-zone-abbreviations.php)
+const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
+
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 // #define _DEBUG_MQTT_
 

@@ -155,7 +155,6 @@
 // BEGIN User specific options
 #define LED_EN                // Enable LED indicating successful data reception
 #define LED_GPIO 2            // LED pin
-#define TIMEZONE 1            // UTC + TIMEZONE
 #define RX_TIMEOUT 90000      // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
 #define DATA_INTERVAL 15000   // MQTT data message interval [ms]
@@ -383,6 +382,7 @@ void printDateTime(void)
 
     time_t tnow;
     time(&tnow);
+    setenv("TZ", TZ_INFO, 1);
     localtime_r(&tnow, &timeinfo);
     strftime(tbuf, 25, "%Y-%m-%d %H:%M:%S", &timeinfo);
     log_i("%s", tbuf);
@@ -425,7 +425,7 @@ void mqtt_setup(void)
 
     // Note: TLS security and rain/lightning statistics need correct time
     log_i("Setting time using SNTP");
-    configTime(TIMEZONE * 3600, 0, "pool.ntp.org", "time.nist.gov");
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
     time_t now = time(nullptr);
     int retries = 10;
     while (now < 1510592825)
@@ -518,6 +518,7 @@ void setup()
 
     // Set time zone
     setenv("TZ", TZ_INFO, 1);
+    tzset();
     printDateTime();
 
 #ifdef LED_EN

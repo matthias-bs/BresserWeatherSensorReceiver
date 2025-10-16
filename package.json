@@ -1,6 +1,6 @@
 {
   "name": "BresserWeatherSensorReceiver",
-  "version": "0.36.0",
+  "version": "0.36.1",
   "description": "Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W, SX1262 or LR1121",
   "main": "WeatherSensor.cpp",
   "frameworks": "arduino",

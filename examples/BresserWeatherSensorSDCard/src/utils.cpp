@@ -33,6 +33,7 @@
 //
 // History:
 // 20251008 Created
+// 20251101 Added M5Stack Core2 support
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +51,26 @@
 
 // Create an instance of the external RTC class
 EXT_RTC ext_rtc; //<! External RTC instance
+#endif
+
+#if defined(ARDUINO_M5STACK_CORE2)
+#include <M5Unified.h>
+#endif
+
+#if defined(ARDUINO_M5STACK_CORE2)
+void setupM5StackCore2(void)
+{
+  auto cfg = M5.config();
+  cfg.clear_display = true; // default=true. clear the screen when begin.
+  cfg.external_display.module_display = false; // default=true. use Module Display.
+  cfg.output_power = true;  // default=true. use external port 5V output.
+  cfg.internal_imu = false; // default=true. use internal IMU.
+  cfg.internal_rtc = true;  // default=true. use internal RTC.
+  cfg.internal_spk = false; // default=true. use internal speaker.
+  cfg.internal_mic = false; // default=true. use internal microphone.
+  M5.begin(cfg);
+  M5.Display.setBrightness(0); // set system LED brightness (0=off / 255=max)
+}
 #endif
 
 /**
@@ -104,7 +125,7 @@ time_t convert_time(char const *time = __TIME__, char const *date = __DATE__)
     return mktime(&t);
 }
 
-#if !defined(EXT_RTC)
+#if !defined(EXT_RTC) && !defined(ARDUINO_M5STACK_CORE2)
 /**
  * @brief Set internal RTC from compile time
  * 
@@ -193,6 +214,92 @@ void set_rtc(void)
     {
         syncRTCWithExtRTC();
         log_i("Set time and date from external RTC");
+    }
+}
+#endif
+
+#if defined(ARDUINO_M5STACK_CORE2)
+// Synchronize the internal RTC with the external RTC
+void syncRTCWithExtRTC(void)
+{
+  auto dt = M5.Rtc.getDateTime();
+
+  // Convert DateTime to time_t
+  struct tm timeinfo;
+  timeinfo.tm_year = dt.date.year - 1900;
+  timeinfo.tm_mon = dt.date.month - 1;
+  timeinfo.tm_mday = dt.date.date;
+  timeinfo.tm_hour = dt.time.hours;
+  timeinfo.tm_min = dt.time.minutes;
+  timeinfo.tm_sec = dt.time.seconds;
+
+  time_t t = mktime(&timeinfo);
+
+  // Set the MCU's internal RTC (ESP32) or SW RTC (RP2040)
+  struct timeval tv = {t, 0}; // `t` is seconds, 0 is microseconds
+  settimeofday(&tv, nullptr);
+}
+#endif // ARDUINO_M5STACK_CORE2
+
+#if defined(ARDUINO_M5STACK_CORE2)
+// Get the time from M5Stack Core2 RTC
+void set_rtc(void)
+{
+  if (!M5.Rtc.begin())
+  {
+    log_w("M5 RTC not available");
+  }
+  else if (M5.Rtc.getVoltLow())
+  {
+    log_w("M5 RTC lost power");
+  }
+  else
+  {
+    syncRTCWithExtRTC();
+    log_i("Set time and date from RTC IC");
+  }
+}
+#endif // ARDUINO_M5STACK_CORE2
+
+#if !defined(ARDUINO_M5STACK_CORE2)
+void initLed(void)
+{
+    // LED for indicating failure or SD card activity
+    // turn LED on (full brightness)
+    // LED for indicating failure or SD card activity
+    pinMode(LED_BUILTIN, OUTPUT);
+}
+#else
+void initLed(void)
+{
+    // LED for indicating failure or SD card activity
+    // turn LED off
+    M5.Power.setLed(0); // off
+}
+#endif
+
+#if !defined(ARDUINO_M5STACK_CORE2)
+void setLed(bool on)
+{
+    if (on)
+    {
+        digitalWrite(LED_BUILTIN, HIGH);
+    }
+    else
+    {
+        digitalWrite(LED_BUILTIN, LOW);
+    }
+}
+#else
+void setLed(bool on)
+{
+    if (on)
+    {
+        M5.Power.setLed(255); // on
+    }
+    else
+    {
+        M5.Power.setLed(0); // off
     }
 }
 #endif

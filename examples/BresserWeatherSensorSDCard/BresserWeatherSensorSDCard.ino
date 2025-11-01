@@ -51,6 +51,7 @@
 // 20251011 Modified timestamp handling
 //          Adjusted sleep duration to achieve constant wakeup interval
 //          Added delay between LED on and SD write to avoid unwanted removal of SD card
+// 20251101 Added M5Stack Core2 support
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +66,7 @@
 #include "config.h"
 #include "src/utils.h"
 
- // Wake up interval [s]
+// Wake up interval [s]
 const uint32_t wakeupInterval = WAKEUP_INTERVAL_SEC;
 
 // Create weather sensor receiver object
@@ -84,6 +85,12 @@ static const uint8_t sd_sck = SCK;
 static const uint8_t sd_miso = MISO;
 static const uint8_t sd_mosi = MOSI;
 static const uint8_t sd_cs = SS;
+#elif defined(ARDUINO_M5STACK_CORE2)
+// See https://docs.m5stack.com/en/core/core2
+static const uint8_t sd_sck = SCK;
+static const uint8_t sd_miso = MISO;
+static const uint8_t sd_mosi = MOSI;
+static const uint8_t sd_cs = 4;
 #else
 #pragma message("Board not supported yet!")
 #endif
@@ -222,7 +229,7 @@ void failureHalt()
     while (1)
     {
         delay(1000);
-        digitalWrite(LED_BUILTIN, HIGH);
+        setLed(true);
     }
 }
 
@@ -253,6 +260,11 @@ bool writeLog(String fileName, String data)
 
 void setup()
 {
+#if defined(ARDUINO_M5STACK_CORE2)
+    setupM5StackCore2();
+#endif
+    initLed();
+    
     char timestamp[20];
     time_t now;
     struct tm *tm_info;
@@ -263,8 +275,7 @@ void setup()
     setenv("TZ", TZINFO, 1);
     tzset();
 
-    // LED for indicating failure or SD card activity
-    pinMode(LED_BUILTIN, OUTPUT);
+
     set_rtc();
     time_t timeStart = time(nullptr);
 
@@ -319,7 +330,7 @@ void setup()
         logEntry = String(timestamp) + "," + logEntry;
 
         // Turn on LED _before_ writing
-        digitalWrite(LED_BUILTIN, HIGH);
+        setLed(true);
         delay(500);
 
         // If file does not exist, create it and add header line
@@ -350,7 +361,7 @@ void setup()
             failureHalt();
         }
         // Turn off LED after writing
-        digitalWrite(LED_BUILTIN, LOW);
+        setLed(false);
     }
 
     // Adjust sleepDuration wrt. execution time

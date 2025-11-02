@@ -264,7 +264,7 @@ void setup()
     setupM5StackCore2();
 #endif
     initLed();
-    
+
     char timestamp[20];
     time_t now;
     struct tm *tm_info;
@@ -274,7 +274,6 @@ void setup()
 
     setenv("TZ", TZINFO, 1);
     tzset();
-
 
     set_rtc();
     time_t timeStart = time(nullptr);
@@ -293,14 +292,18 @@ void setup()
         failureHalt();
     }
 #endif
-
+#if !defined(ARDUINO_M5STACK_CORE2)
     // Initialize SPI for SD card
     // Using hspi, because SPI is already used by WeatherSensor (with other pins)
     SPIClass hspi(HSPI);
     hspi.begin(sd_sck, sd_miso, sd_mosi, sd_cs);
+    bool sd_ok = SD.begin(sd_cs, hspi);
+#else
+    // M5Stack Core2: Using same SPI master for SD card and SX1276 LoRa module
+    bool sd_ok = SD.begin(sd_cs);
+#endif
 
-    // Initialize SD card
-    if (!SD.begin(sd_cs, hspi))
+    if (!sd_ok)
     {
         log_e("SD Card initialization failed!");
         log_e("Check connections and card format (FAT32)");

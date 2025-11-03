@@ -341,7 +341,7 @@ Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeathe
 
 Example for BresserWeatherSensorReceiver on [M5Stack Core2](https://docs.m5stack.com/en/core/core2) with [M5Stack Module LoRa868](https://docs.m5stack.com/en/module/lora868) (and optionally [M5Go Bottom2](http://docs.m5stack.com/en/base/m5go_bottom2)). Using getData() for sensor data reception.
 
-Weather sensor data is presented on the display and logged as CSV files to SD card (if present at startup).
+Weather sensor data is presented on the display and logged as CSV files to SD card (if present at startup). The integrated blue LED is used to indicate SD card activity (short flash)
 
 Logging requires proper timestamps. Time and date are provided by the integrated RTC chip with backup battery. The RTC must be set initially via WiFi and SNTP or manually (see [M5Unified/examples/Basic/Rtc/Rtc.ino](https://github.com/m5stack/M5Unified/blob/master/examples/Basic/Rtc/Rtc.ino)).
 

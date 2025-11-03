@@ -339,9 +339,11 @@ Based on [BresserWeatherSensorMQTT](https://github.com/matthias-bs/BresserWeathe
 
 ### [BresserWeatherSensorM5Core2](https://github.com/matthias-bs/BresserWeatherSensorReceiver/examples/BresserWeatherSensorM5Core2)
 
-Example for BresserWeatherSensorReceiver on [M5Stack Core2](https://docs.m5stack.com/en/core/core2) with [M5Stack Module LoRa868](https://docs.m5stack.com/en/module/lora868) (and optionally [M5Go Bottom2](http://docs.m5stack.com/en/base/m5go_bottom2)).
-Using getMessage() for non-blocking reception of a single data message.
-Weather sensor data is presented on the display.
+Example for BresserWeatherSensorReceiver on [M5Stack Core2](https://docs.m5stack.com/en/core/core2) with [M5Stack Module LoRa868](https://docs.m5stack.com/en/module/lora868) (and optionally [M5Go Bottom2](http://docs.m5stack.com/en/base/m5go_bottom2)). Using getData() for sensor data reception.
+
+Weather sensor data is presented on the display and logged to SD card (if present at startup).
+
+Logging requires proper timestamps. Time and date are provided by the integrated RTC chip with backup battery. The RTC must be set initially via WiFi and SNTP or manually (see [M5Unified/examples/Basic/Rtc/Rtc.ino](https://github.com/m5stack/M5Unified/blob/master/examples/Basic/Rtc/Rtc.ino)).
 
 ![BresserWeatherSensorM5Core2](https://github.com/matthias-bs/BresserWeatherSensorReceiver/assets/83612361/12edec14-83fc-4f94-b2cb-0190a14357db)
 
@@ -379,6 +381,10 @@ To provide a timestamps for each data set, there are two options:
    The RTC is set to compile-time automatically after flashing the sketch, but will be lost power off (or power failure) or reset.
    The internal RTC is also not very accurate.
 
+* M5Stack Core2 integrated RTC
+
+   The integrated RTC chip with backup battery retains operation independently of the node's power supply. It must be set initially via WiFi and SNTP or manually (see [M5Unified/examples/Basic/Rtc/Rtc.ino](https://github.com/m5stack/M5Unified/blob/master/examples/Basic/Rtc/Rtc.ino)).
+
 * External RTC module with battery backup
 
   Connect an external RTC module (supported by [RTClib](https://github.com/adafruit/RTClib)) via I²C interface. Use [RTCSet](https://github.com/matthias-bs/BresserWeatherSensorLW/tree/main/extras/RTCSet) for initially setting the RTC.
@@ -389,7 +395,7 @@ The on-board LED is used to indicate SD card activity (short flash) and failure 
 > See [SD library](https://github.com/espressif/arduino-esp32/tree/master/libraries/SD) for more information.
 
 > [!NOTE]
-> Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) are supported by this example.
+> Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) and the M5Stack Core2 are supported by this example.
 
 ## MQTT Integrations
 

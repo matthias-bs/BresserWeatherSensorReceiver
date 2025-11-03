@@ -38,6 +38,7 @@
 // 20240324 Created from BresserWeatherSensorBasic.ino
 // 20240325 Fake missing degree sign with small 'o', print only weather sensor data on LCD
 // 20240504 Added board initialization
+// 20241103 Added logging to SD card
 //
 // Notes:
 // - The character set does not provide a degrees sign
@@ -48,31 +49,104 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
+#include <SPI.h>
+#include <SD.h>
 #include <M5Unified.h>
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 #include "InitBoard.h"
+#include "src/utils.h"
 
+#define LOG_INTERVAL 600 // Log interval [s]
+#define FILENAME_PREFIX "bresser-" // Filename: <FILENAME_PREFIX><YYYY>-<MM>-<DD>.csv
+#define TZINFO "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00"
+#define MAX_SENSORS 1
+#define RX_TIMEOUT 180000 // sensor receive timeout [ms]
+
+// Stop reception when data of at least one sensor is complete
+// #define RX_FLAGS DATA_COMPLETE
+
+// Stop reception when data of all (max_sensors) is complete
+#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
+
+// See https://docs.m5stack.com/en/core/core2
+static const uint8_t sd_cs = 4;
+
+bool SD_initialized = false;
 WeatherSensor ws;
+
+/**
+ * @brief Write log data to a specified file
+ *
+ * @param fileName The name of the file to write to
+ * @param data The data to write to the file
+ * @return true if the write was successful
+ * @return false if the write failed
+ */
+bool writeLog(String fileName, String data)
+{
+    File logFile = SD.open(fileName, FILE_APPEND);
+
+    if (!logFile)
+    {
+        log_e("Failed to open file for writing");
+        return false;
+    }
+
+    // Add timestamp and data
+    logFile.println(data);
+    logFile.close();
+
+    return true;
+}
 
 void setup()
 {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     initBoard();
+    initLed();
+
+    setenv("TZ", TZINFO, 1);
+    tzset();
 
     Serial.printf("Starting execution...\n");
 
+
     // Note: M5.begin() is called in ws.begin()
     ws.begin();
+    ws.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
+
+    set_rtc();
 
     M5.Lcd.setTextSize(2);    // Set the font size
     M5.Lcd.fillScreen(WHITE); // Set the screen background.
     M5.Lcd.setCursor(10, 10);
     M5.Lcd.setTextColor(BLUE); // Set the font color
     M5.Lcd.printf("Weather Sensor Receiver");
-    M5.Lcd.setCursor(10, 30);
+    M5.Lcd.setCursor(0, 50);
     M5.Lcd.setTextColor(BLACK);
+
+    // Initialize SD card (SPI master shared with SX1276 radio)
+    if (!SD.begin(sd_cs))
+    {
+        M5.Lcd.printf("SD Card initialization failed!");
+    } else {
+        SD_initialized = true;
+        uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+        M5.Lcd.printf("SD Card Size: %5llu MB\n", cardSize);
+        M5.Lcd.printf("Total space:  %5llu MB\n", SD.totalBytes() / (1024 * 1024));
+        M5.Lcd.printf("Used space:   %5llu MB\n\n", SD.usedBytes() / (1024 * 1024));
+
+        time_t now = time(nullptr);
+        struct tm *tm_info;
+        tm_info = localtime(&now);
+        char timestamp[20];
+        strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
+        M5.Lcd.printf("%s\n\n", timestamp);
+        delay(2000);
+    }
+
     M5.Lcd.printf("Waiting for data...");
 }
 
@@ -80,13 +154,22 @@ void loop()
 {
     // This example uses only a single slot in the sensor data array
     int const i = 0;
+    static time_t lastLog = time(nullptr);
+
+    char timestamp[20];
+    struct tm *tm_info;
+    
+    String logEntry;
+
+    logEntry.reserve(128);
+    logEntry = "";
 
     // Clear all sensor data
     ws.clearSlots();
 
     // Tries to receive radio message (non-blocking) and to decode it.
     // Timeout occurs after a small multiple of expected time-on-air.
-    int decode_status = ws.getMessage();
+    int decode_status = ws.getData(RX_TIMEOUT, RX_FLAGS, 0, nullptr);
     uint8_t y = 10;
 
     if (decode_status == DECODE_OK)
@@ -267,11 +350,15 @@ void loop()
                 if (ws.sensor[i].w.temp_ok)
                 {
                     M5.Lcd.printf("Temp: %5.1f", temp_c = ws.sensor[i].w.temp_c);
+                    logEntry += String(ws.sensor[i].w.temp_c, 1);
+
                 }
                 else
                 {
                     M5.Lcd.printf("Temp: %5.1f", temp_c);
                 }
+                logEntry += ",";
+
                 // Fake degrees sign which is not available in character set :-(
                 M5.Lcd.setTextSize(1);
                 M5.Lcd.printf("o");
@@ -284,11 +371,13 @@ void loop()
                 if (ws.sensor[i].w.humidity_ok)
                 {
                     M5.Lcd.printf("Hum:     %3d%% ", humidity = ws.sensor[i].w.humidity);
+                    logEntry += String(ws.sensor[i].w.humidity);
                 }
                 else
                 {
                     M5.Lcd.printf("Hum:     %3d%% ", humidity);
                 }
+                logEntry += ",";
 
                 y += 24;
                 M5.Lcd.setCursor(10, y);
@@ -297,11 +386,14 @@ void loop()
                     M5.Lcd.printf("Wmx: %4.1fm/s Wav: %4.1fm/s",
                                   ws.sensor[i].w.wind_gust_meter_sec,
                                   ws.sensor[i].w.wind_avg_meter_sec);
+                    logEntry += String(ws.sensor[i].w.wind_gust_meter_sec, 1) + ",";
+                    logEntry += String(ws.sensor[i].w.wind_avg_meter_sec, 1) + ",";
 
                     y += 24;
                     M5.Lcd.setCursor(10, y);
                     M5.Lcd.printf("Wdir:  %5.1fdeg",
                                   ws.sensor[i].w.wind_direction_deg);
+                    logEntry += String(ws.sensor[i].w.wind_direction_deg, 1);
                 }
                 else
                 {
@@ -309,7 +401,9 @@ void loop()
                     y += 22;
                     M5.Lcd.setCursor(10, y);
                     M5.Lcd.printf("Wdir:  ---.-deg");
+                    logEntry += ",,";
                 }
+                logEntry += ",";
 
                 y += 24;
                 M5.Lcd.setCursor(10, y);
@@ -318,12 +412,14 @@ void loop()
                 {
                     M5.Lcd.printf("Rain:%7.1fmm ",
                                   rain_mm = ws.sensor[i].w.rain_mm);
+                    logEntry += String(ws.sensor[i].w.rain_mm, 1);
                 }
                 else
                 {
                     M5.Lcd.printf("Rain:%7.1fmm ",
                                   rain_mm);
                 }
+                logEntry += ",";
 
                 M5.Lcd.setTextColor(DARKGREY);
                 y = 195;
@@ -348,6 +444,45 @@ void loop()
             } // if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
         } // weather-like sensor
 
+        time_t now = time(nullptr);
+        log_d("now - lastLog: %llu", now - lastLog);
+        if (SD_initialized && (now - lastLog >= LOG_INTERVAL))
+        {
+            // Print the RTC time in ISO 8601 format
+            tm_info = localtime(&now);
+            strftime(timestamp, sizeof(timestamp), "%Y-%m-%dT%H:%M:%S", tm_info);
+
+            String fileName = String('/') + String(FILENAME_PREFIX) + String(timestamp).substring(0, 10) + ".csv";
+
+            if (logEntry.length() != 0)
+            {
+                lastLog = now;
+                setLed(true);
+                delay(500);
+                logEntry = String(timestamp) + "," + logEntry;
+
+                // If file does not exist, create it and add header line
+                if (!SD.exists(fileName))
+                {
+                    String header = "Timestamp,Temperature_C,Humidity_%,WindGust_m/s,WindAvg_m/s,WindDir_deg,Rain_mm";
+                    if (!writeLog(fileName, header))
+                    {
+                        log_d("Failed to write log header");
+                    }
+                }
+
+                // Append log entry
+                if (writeLog(fileName, logEntry))
+                {
+                    log_d("Logged: %s\n", logEntry.c_str());
+                }
+                else
+                {
+                    log_d("Failed to write log entry");
+                }
+                setLed(false);
+            }
+        } // if time to log
     } // if (decode_status == DECODE_OK)
     delay(100);
 } // loop()

@@ -34,6 +34,7 @@
 // History:
 // 20251008 Created
 // 20251101 Added M5Stack Core2 support
+// 20251103 Fixed check for M5Core2 RTC
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -245,7 +246,7 @@ void syncRTCWithExtRTC(void)
 // Get the time from M5Stack Core2 RTC
 void set_rtc(void)
 {
-  if (!M5.Rtc.begin())
+  if (!M5.Rtc.isEnabled())
   {
     log_w("M5 RTC not available");
   }

@@ -52,6 +52,7 @@
 //          Adjusted sleep duration to achieve constant wakeup interval
 //          Added delay between LED on and SD write to avoid unwanted removal of SD card
 // 20251101 Added M5Stack Core2 support
+// 20251102 Fixed M5Stack Core2 SD card interface config
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -87,9 +88,7 @@ static const uint8_t sd_mosi = MOSI;
 static const uint8_t sd_cs = SS;
 #elif defined(ARDUINO_M5STACK_CORE2)
 // See https://docs.m5stack.com/en/core/core2
-static const uint8_t sd_sck = SCK;
-static const uint8_t sd_miso = MISO;
-static const uint8_t sd_mosi = MOSI;
+// Uses SPI bus shared with SX1276 radio
 static const uint8_t sd_cs = 4;
 #else
 #pragma message("Board not supported yet!")

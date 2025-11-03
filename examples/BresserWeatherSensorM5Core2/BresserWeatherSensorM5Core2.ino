@@ -130,7 +130,7 @@ void setup()
     // Initialize SD card (SPI master shared with SX1276 radio)
     if (!SD.begin(sd_cs))
     {
-        M5.Lcd.printf("SD Card initialization failed!");
+        M5.Lcd.printf("SD Card init. failed!\n\n");
     } else {
         SD_initialized = true;
         uint64_t cardSize = SD.cardSize() / (1024 * 1024);

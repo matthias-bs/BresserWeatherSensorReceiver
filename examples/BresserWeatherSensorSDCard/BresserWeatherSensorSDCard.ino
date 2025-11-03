@@ -51,6 +51,8 @@
 // 20251011 Modified timestamp handling
 //          Adjusted sleep duration to achieve constant wakeup interval
 //          Added delay between LED on and SD write to avoid unwanted removal of SD card
+// 20251101 Added M5Stack Core2 support
+// 20251102 Fixed M5Stack Core2 SD card interface config
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -65,7 +67,7 @@
 #include "config.h"
 #include "src/utils.h"
 
- // Wake up interval [s]
+// Wake up interval [s]
 const uint32_t wakeupInterval = WAKEUP_INTERVAL_SEC;
 
 // Create weather sensor receiver object
@@ -84,6 +86,10 @@ static const uint8_t sd_sck = SCK;
 static const uint8_t sd_miso = MISO;
 static const uint8_t sd_mosi = MOSI;
 static const uint8_t sd_cs = SS;
+#elif defined(ARDUINO_M5STACK_CORE2)
+// See https://docs.m5stack.com/en/core/core2
+// Uses SPI bus shared with SX1276 radio
+static const uint8_t sd_cs = 4;
 #else
 #pragma message("Board not supported yet!")
 #endif
@@ -222,7 +228,7 @@ void failureHalt()
     while (1)
     {
         delay(1000);
-        digitalWrite(LED_BUILTIN, HIGH);
+        setLed(true);
     }
 }
 
@@ -253,6 +259,11 @@ bool writeLog(String fileName, String data)
 
 void setup()
 {
+#if defined(ARDUINO_M5STACK_CORE2)
+    setupM5StackCore2();
+#endif
+    initLed();
+
     char timestamp[20];
     time_t now;
     struct tm *tm_info;
@@ -263,8 +274,6 @@ void setup()
     setenv("TZ", TZINFO, 1);
     tzset();
 
-    // LED for indicating failure or SD card activity
-    pinMode(LED_BUILTIN, OUTPUT);
     set_rtc();
     time_t timeStart = time(nullptr);
 
@@ -282,14 +291,18 @@ void setup()
         failureHalt();
     }
 #endif
-
+#if !defined(ARDUINO_M5STACK_CORE2)
     // Initialize SPI for SD card
     // Using hspi, because SPI is already used by WeatherSensor (with other pins)
     SPIClass hspi(HSPI);
     hspi.begin(sd_sck, sd_miso, sd_mosi, sd_cs);
+    bool sd_ok = SD.begin(sd_cs, hspi);
+#else
+    // M5Stack Core2: Using same SPI master for SD card and SX1276 LoRa module
+    bool sd_ok = SD.begin(sd_cs);
+#endif
 
-    // Initialize SD card
-    if (!SD.begin(sd_cs, hspi))
+    if (!sd_ok)
     {
         log_e("SD Card initialization failed!");
         log_e("Check connections and card format (FAT32)");
@@ -319,7 +332,7 @@ void setup()
         logEntry = String(timestamp) + "," + logEntry;
 
         // Turn on LED _before_ writing
-        digitalWrite(LED_BUILTIN, HIGH);
+        setLed(true);
         delay(500);
 
         // If file does not exist, create it and add header line
@@ -350,7 +363,7 @@ void setup()
             failureHalt();
         }
         // Turn off LED after writing
-        digitalWrite(LED_BUILTIN, LOW);
+        setLed(false);
     }
 
     // Adjust sleepDuration wrt. execution time

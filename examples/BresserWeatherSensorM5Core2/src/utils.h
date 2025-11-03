@@ -32,15 +32,10 @@
 // SOFTWARE.
 //
 // History:
-// 20251008 Created
-// 20251101 Added M5Stack Core2 support
+// 20251103 Created
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 void set_rtc(void);
 void initLed(void);
 void setLed(bool on);
-
-#if defined(ARDUINO_M5STACK_CORE2)
-void setupM5StackCore2(void);
-#endif

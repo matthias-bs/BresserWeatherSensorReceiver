@@ -122,9 +122,8 @@ jobs:
           arduino-cli lib install "Adafruit SSD1306"@2.5.15
           arduino-cli lib install "RTClib@2.1.4"
           # The following libs are only needed for M5Stack Core2
-          #arduino-cli lib install M5Unified@0.2.8
-          ##arduino-cli lib install M5Core2@0.2.0
-          #arduino-cli lib install M5GFX@0.2.13
+          #arduino-cli lib install M5Unified@0.2.10
+          #arduino-cli lib install M5GFX@0.2.16
           # Only ESP32-S3 PowerFeather
           arduino-cli lib install powerfeather-sdk@1.1.0
 

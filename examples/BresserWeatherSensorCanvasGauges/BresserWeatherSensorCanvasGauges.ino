@@ -217,11 +217,11 @@ void initWiFi()
   }
   Serial.println();
   log_i("Local IP: %s", WiFi.localIP().toString().c_str());
+#endif
   if (!MDNS.begin(hostname))
   {
     log_e("Error setting up MDNS responder!");
   }
-#endif
 }
 
 
@@ -393,8 +393,6 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
-
-
 
 
 

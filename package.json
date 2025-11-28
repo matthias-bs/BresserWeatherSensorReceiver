@@ -1,6 +1,6 @@
 {
   "name": "BresserWeatherSensorReceiver",
-  "version": "0.36.2",
+  "version": "0.36.3",
   "description": "Bresser 5-in-1/6-in-1/7-in-1 868 MHz Weather Sensor Radio Receiver for Arduino based on CC1101, SX1276/RFM95W, SX1262 or LR1121",
   "main": "WeatherSensor.cpp",
   "frameworks": "arduino",
@@ -28,7 +28,7 @@
     "Preferences": "vshymanskyy/Preferences#semver:^2.2.2",
     "ESP Async TCP": "ESP32Async/ESPAsyncTCP:^2.0.0",
     "Async TCP":"ESP32Async/AsyncTCP:^3.4.9",
-    "ESP Async WebServer":"ESP32Async/ESPAsyncWebServer:^3.8.1",
+    "ESP Async WebServer":"ESP32Async/ESPAsyncWebServer:^3.9.1",
     "Adafruit SSD1306": "adafruit/Adafruit_SSD1306:^2.5.15",
     "RTClib": "adafruit/RTClib:^2.1.4"
   }

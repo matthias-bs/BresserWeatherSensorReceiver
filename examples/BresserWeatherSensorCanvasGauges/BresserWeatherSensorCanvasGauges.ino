@@ -58,6 +58,7 @@
 //
 // History:
 // 20251003 Created
+// 20251128 Changed mDNS to work in both WiFi STA and WiFi AP mode
 //
 // To Do:
 // - Improved page layout
@@ -217,11 +218,11 @@ void initWiFi()
   }
   Serial.println();
   log_i("Local IP: %s", WiFi.localIP().toString().c_str());
+#endif
   if (!MDNS.begin(hostname))
   {
     log_e("Error setting up MDNS responder!");
   }
-#endif
 }
 
 
@@ -393,7 +394,6 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
-
 
 
 

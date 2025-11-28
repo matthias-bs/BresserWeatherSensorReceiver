@@ -58,6 +58,7 @@
 //
 // History:
 // 20251003 Created
+// 20251128 Changed mDNS to work in both WiFi STA and WiFi AP mode
 //
 // To Do:
 // - Improved page layout
@@ -393,6 +394,7 @@ void loop()
   events.send("ping", NULL, millis());
   events.send(getSensorReadingsBWS().c_str(), "new_readings", millis());
 }
+
 
 
 

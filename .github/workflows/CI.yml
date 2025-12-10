@@ -125,7 +125,7 @@ jobs:
           #arduino-cli lib install M5Unified@0.2.11
           #arduino-cli lib install M5GFX@0.2.17
           # Only ESP32-S3 PowerFeather
-          arduino-cli lib install powerfeather-sdk@1.1.0
+          arduino-cli lib install powerfeather-sdk@1.1.1
 
       - name: Install platform
         if: ${{ env.run-build == 'true' }}

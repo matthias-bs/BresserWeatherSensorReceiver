@@ -142,7 +142,8 @@ void loop()
 
         if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
             display.clearDisplay();
             display.setCursor(0, 0);

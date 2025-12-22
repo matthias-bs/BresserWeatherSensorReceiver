@@ -50,8 +50,8 @@
 //          and
 //          https://github.com/merbanan/rtl_433/commit/9928efe5c8d55e9ca01f1ebab9e8b20b0e7ba01e
 // 20240716 Added assignment of sensor[slot].decoder
-// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor)
-// 20250129 Minor change in SENSOR_TYPE_WEATHER2 handling
+// 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
+// 20250129 Minor change in SENSOR_TYPE_WEATHER8 handling
 //
 // ToDo:
 // -
@@ -609,7 +609,13 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
 // From rtl_433 project - https://github.com/merbanan/rtl_433/blob/master/src/devices/bresser_7in1.c (20230215)
 //
 /**
-Decoder for Bresser Weather Center 7-in-1, outdoor sensor.
+Decoder for Bresser Weather Center 7-in-1 and Air quality sensors.
+- Air Quality PM2.5/PM10 PN 7009970
+- CO2 sensor             PN 7009977
+- HCHO/VOC sensor        PN 7009978
+- 3-in-1 Weather Station PN 7002530
+- 8-in-1 Weather Station PN 7003150
+
 See https://github.com/merbanan/rtl_433/issues/1492
 Preamble:
     aa aa aa aa aa 2d d4
@@ -754,8 +760,11 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].complete = true;
     sensor[slot].rssi = rssi;
 
-    if ((s_type == SENSOR_TYPE_WEATHER1) || (s_type == SENSOR_TYPE_WEATHER2))
+    if ((s_type == SENSOR_TYPE_WEATHER1) || (s_type == SENSOR_TYPE_WEATHER3) || (s_type == SENSOR_TYPE_WEATHER8))
     {
+        // 3-in-1 (type 12) features Temp/Hum/Rain only
+        bool wind_light_ok = (s_type != SENSOR_TYPE_WEATHER3);
+
         sensor[slot].w.tglobe_ok = false;
         int wdir = (msgw[4] >> 4) * 100 + (msgw[4] & 0x0f) * 10 + (msgw[5] >> 4);
         int wgst_raw = (msgw[7] >> 4) * 100 + (msgw[7] & 0x0f) * 10 + (msgw[8] >> 4);
@@ -778,10 +787,10 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
         // are ok, so we are assuming that they are ok if the decode status is ok.
         sensor[slot].w.temp_ok = true;
         sensor[slot].w.humidity_ok = true;
-        sensor[slot].w.wind_ok = true;
+        sensor[slot].w.wind_ok = wind_light_ok;
         sensor[slot].w.rain_ok = true;
-        sensor[slot].w.light_ok = true;
-        sensor[slot].w.uv_ok = true;
+        sensor[slot].w.light_ok = wind_light_ok;
+        sensor[slot].w.uv_ok = wind_light_ok;
         sensor[slot].w.temp_c = temp_c;
         sensor[slot].w.humidity = humidity;
 #ifdef WIND_DATA_FLOATINGPOINT
@@ -799,7 +808,7 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].w.light_lux = light_lux;
         sensor[slot].w.uv = uv_index;
 
-        if (s_type == SENSOR_TYPE_WEATHER2)
+        if (s_type == SENSOR_TYPE_WEATHER8)
         {
             // 8-in-1 sensor
             if ((msgw[23] >> 4) < 10) {

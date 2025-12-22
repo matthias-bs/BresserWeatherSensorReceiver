@@ -159,7 +159,8 @@ String getSensorReadingsBWS()
     log_i("%d: type=%d", i, weatherSensor.sensor[i].s_type);
     if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
         (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-        (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+        (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+        (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
     {
       if (weatherSensor.sensor[i].w.temp_ok)
         readings["ws_temp_c"] = String(weatherSensor.sensor[i].w.temp_c);

@@ -124,7 +124,8 @@ String receiveSensorData()
 
         if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-            (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+            (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+            (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
             // Any other (weather-like) sensor is very similar
             if (ws.sensor[i].w.temp_ok)
@@ -198,7 +199,7 @@ String receiveSensorData()
             {
                 log_i("Light: --.-klx");
             }
-            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2)
+            if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8)
             {
                 logEntry += ",";
                 if (ws.sensor[i].w.tglobe_ok)

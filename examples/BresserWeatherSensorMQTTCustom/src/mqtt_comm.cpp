@@ -258,13 +258,15 @@ void publishWeatherdata(bool complete, bool retain)
         }
         else if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO) ||
                  (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO))
         {
             if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
                 (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-                (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+                (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+                (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
             {
                 combinedStatus["ws_batt_ok"] = weatherSensor.sensor[i].battery_ok ? 1 : 0;
             }
@@ -319,7 +321,7 @@ void publishWeatherdata(bool complete, bool retain)
                 jsonSensor["light_klx"] = weatherSensor.sensor[i].w.light_lux;
                 jsonCombined["ws_light_klx"] = weatherSensor.sensor[i].w.light_lux;
             }
-            if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2)
+            if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8)
             {
                 if (weatherSensor.sensor[i].w.tglobe_ok || complete)
                 {
@@ -421,7 +423,8 @@ void haAutoDiscovery(void)
         String rssi = Hostname + "/" + sensor_str + "/rssi";
         if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
-            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER2))
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
+            (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
             struct sensor_info info = {
                 .manufacturer = "Bresser",

@@ -174,7 +174,7 @@ void loop()
 
     if (decode_status == DECODE_OK)
     {
-        if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
+        if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER3) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
             M5.Lcd.fillScreen(WHITE); // Set the screen background.
             M5.Lcd.setCursor(10, y);
@@ -340,7 +340,7 @@ void loop()
 #endif
             Serial.printf("\n");
 
-            if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
+            if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER3) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
             {
                 y += 30;
                 M5.Lcd.setTextSize(3); // Set the font size
@@ -441,7 +441,7 @@ void loop()
                               ws.sensor[i].startup,
                               battery_ok,
                               ws.sensor[i].rssi);
-            } // if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1))
+            } // if ((ws.sensor[i].s_type == SENSOR_TYPE_WEATHER0) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER1) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER3) || (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         } // weather-like sensor
 
         time_t now = time(nullptr);

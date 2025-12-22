@@ -165,7 +165,7 @@ void print_data(void)
       {
         Serial.printf("Light: [--.-Klux] ");
       }
-      if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER2) {
+      if (ws.sensor[i].s_type == SENSOR_TYPE_WEATHER8) {
         if (ws.sensor[i].w.tglobe_ok)
         {
           Serial.printf("T_globe: [%3.1fC] ",

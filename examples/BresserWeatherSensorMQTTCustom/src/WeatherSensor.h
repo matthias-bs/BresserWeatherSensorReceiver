@@ -22,7 +22,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -84,7 +84,8 @@
 // 20240714 Added decoder to struct Sensor
 // 20240716 Added option to skip initialization of filters in begin()
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
-// 20250127 Added SENSOR_TYPE_WEATHER2 (8-in-1 Weather Sensor)
+// 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
+// 20251222 Added SENSOR_TYPE_WEATHER3 (3-in-1 Professional Rain Gauge)
 //
 // ToDo:
 // -
@@ -115,6 +116,7 @@
 // 9 - Lightning Sensor                 PN 7009976
 // 10 - CO2 Sensor                      7-in-1; PN 7009977
 // 11 - HCHO/VCO Sensor                 7-in-1; PN 7009978
+// 12 - Weather Station (3-in-1)        7-in-1; PN 7002530
 // 13 - Weather Station (8-in-1)        7-in-1; PN 7003150
 #define SENSOR_TYPE_WEATHER0        0 // Weather Station
 #define SENSOR_TYPE_WEATHER1        1 // Weather Station
@@ -127,7 +129,8 @@
 #define SENSOR_TYPE_LIGHTNING       9 // Lightning Sensor
 #define SENSOR_TYPE_CO2             10 // CO2 Sensor
 #define SENSOR_TYPE_HCHO_VOC        11 // Air Quality Sensor (HCHO and VOC)
-#define SENSOR_TYPE_WEATHER2        13 // Weather Station (8-in-1)
+#define SENSOR_TYPE_WEATHER3        12 // Weather Station (3-in-1)
+#define SENSOR_TYPE_WEATHER8        13 // Weather Station (8-in-1)
 
 
 // Sensor specific rain gauge overflow threshold (mm)

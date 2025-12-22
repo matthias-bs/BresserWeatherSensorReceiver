@@ -22,7 +22,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2025 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,7 @@
 // 20240716 Added option to skip initialization of filters in begin()
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
+// 20251222 Added SENSOR_TYPE_WEATHER3 (3-in-1 Professional Rain Gauge)
 //
 // ToDo:
 // -

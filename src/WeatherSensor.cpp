@@ -20,7 +20,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -106,6 +106,7 @@
 // 20241227 Added LilyGo T3 S3 LR1121 RF switch and TCXO configuration
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor) to 7-in-1 decoder
 // 20250709 Fixed radio.readData() state check in getMessage()
+// 20260111 Fixed radio module initialization for LilyGo T3S3 boards using RadioLib 7.5.0
 //
 // ToDo:
 // -
@@ -115,15 +116,17 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+SPIClass * spi = new SPIClass(SPI);
+#endif
+
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
 RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
 #else
 RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
-#endif
-
-#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-SPIClass *spi = nullptr;
 #endif
 
 #if defined(ARDUINO_LILYGO_T3S3_LR1121)
@@ -180,9 +183,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     }
     
     #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-    spi = new SPIClass(SPI);
     spi->begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
-    radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
     #endif
 
     double frequency = 868.3 + frequency_offset;

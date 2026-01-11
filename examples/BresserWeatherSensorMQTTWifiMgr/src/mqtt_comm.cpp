@@ -441,7 +441,7 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.uv_ok)
             {
-                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV Index", topic.c_str(), "uv");
+                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV", topic.c_str(), "uv");
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
@@ -457,7 +457,7 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.wind_ok)
             {
-                publishAutoDiscovery(info, "Wind Direction", sensor_id, NULL, "°", topic.c_str(), "wind_dir");
+                publishAutoDiscovery(info, "Wind Direction", sensor_id, "wind_direction", "°", topic.c_str(), "wind_dir");
                 publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
                 publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
                 String topic = Hostname + "/extra";
@@ -672,7 +672,10 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
         {
             doc["value_template"] = String("{{ value_json.") + value_json + " }}";
         }
+    } else {
+        doc["value_template"] = String("{{ value_json.") + value_json + " }}";
     }
+    
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
     device["name"] = info.manufacturer + " " + info.model;

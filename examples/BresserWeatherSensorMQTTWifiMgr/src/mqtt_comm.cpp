@@ -463,7 +463,7 @@ void haAutoDiscovery(void)
                 String topic = Hostname + "/extra";
                 publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_gust_bft");
                 publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_avg_bft");
-                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, "enum", "", topic.c_str(), "wind_dir_txt");
+                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, NULL, NULL, topic.c_str(), "wind_dir_txt");
             }
             if (weatherSensor.sensor[i].w.wind_ok &&
                 weatherSensor.sensor[i].w.temp_ok &&
@@ -657,7 +657,8 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     doc["state_topic"] = state_topic;
     doc["availability_topic"] = Hostname + "/status";
     doc["payload_not_available"] = "dead"; // default: "offline"
-    doc["unit_of_measurement"] = unit;
+    if (unit != NULL)
+        doc["unit_of_measurement"] = unit;
     if (device_class != NULL)
     {
         if (strcmp(device_class, "battery") == 0)

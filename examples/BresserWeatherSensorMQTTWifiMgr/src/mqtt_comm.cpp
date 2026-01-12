@@ -318,8 +318,8 @@ void publishWeatherdata(bool complete, bool retain)
             }
             if (weatherSensor.sensor[i].w.light_ok || complete)
             {
-                jsonSensor["light_klx"] = weatherSensor.sensor[i].w.light_lux;
-                jsonCombined["ws_light_klx"] = weatherSensor.sensor[i].w.light_lux;
+                jsonSensor["light_lx"] = weatherSensor.sensor[i].w.light_lux;
+                jsonCombined["ws_light_lx"] = weatherSensor.sensor[i].w.light_lux;
             }
             if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8)
             {
@@ -445,7 +445,7 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
-                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topic.c_str(), "light_lux");
+                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topic.c_str(), "light_lx");
             }
             if (weatherSensor.sensor[i].w.rain_ok)
             {

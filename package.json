@@ -27,8 +27,8 @@
     "ESP_DoubleResetDetector": "khoih-prog/ESP_DoubleResetDetector#semver:1.3.2",
     "Preferences": "vshymanskyy/Preferences#semver:^2.2.2",
     "ESP Async TCP": "ESP32Async/ESPAsyncTCP:^2.0.0",
-    "Async TCP":"ESP32Async/AsyncTCP:^3.4.9",
-    "ESP Async WebServer":"ESP32Async/ESPAsyncWebServer:^3.9.3",
+    "Async TCP":"ESP32Async/AsyncTCP:^3.4.10",
+    "ESP Async WebServer":"ESP32Async/ESPAsyncWebServer:^3.9.4",
     "Adafruit SSD1306": "adafruit/Adafruit_SSD1306:^2.5.16",
     "RTClib": "adafruit/RTClib:^2.1.4"
   }

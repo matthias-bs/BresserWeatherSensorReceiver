@@ -445,7 +445,7 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
-                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "Lux", topic.c_str(), "light_lux");
+                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topic.c_str(), "light_lux");
             }
             if (weatherSensor.sensor[i].w.rain_ok)
             {

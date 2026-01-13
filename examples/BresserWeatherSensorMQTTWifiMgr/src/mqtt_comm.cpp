@@ -461,8 +461,8 @@ void haAutoDiscovery(void)
                 publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
                 publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
                 String topic = Hostname + "/extra";
-                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_gust_bft");
-                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_avg_bft");
+                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_gust_bft");
+                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_avg_bft");
                 publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, NULL, NULL, topic.c_str(), "wind_dir_txt");
             }
             if (weatherSensor.sensor[i].w.wind_ok &&

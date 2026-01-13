@@ -13,7 +13,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,10 @@
 // 20250728 Added combined (Weather & Soil Sensor) MQTT payload
 // 20250801 Added Lightning Sensor to combined MQTT payload
 // 20250802 Refactored publishWeatherdata() to use ArduinoJson
+// 20260113 Fixed HA auto-discovery for UV Index, Light Lux, Wind Direction, 
+//          Wind Direction (Cardinal) and Wind Average/Gust Speed (Beaufort)
+//          Changed JSON keys from light_klx/ws_light_klx to light_lx/ws_light_lx
+//          (values are in Lux)
 //
 // ToDo:
 // -
@@ -318,8 +322,8 @@ void publishWeatherdata(bool complete, bool retain)
             }
             if (weatherSensor.sensor[i].w.light_ok || complete)
             {
-                jsonSensor["light_klx"] = weatherSensor.sensor[i].w.light_lux;
-                jsonCombined["ws_light_klx"] = weatherSensor.sensor[i].w.light_lux;
+                jsonSensor["light_lx"] = weatherSensor.sensor[i].w.light_lux;
+                jsonCombined["ws_light_lx"] = weatherSensor.sensor[i].w.light_lux;
             }
             if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8)
             {
@@ -441,11 +445,11 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.uv_ok)
             {
-                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV Index", topic.c_str(), "uv");
+                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV", topic.c_str(), "uv");
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
-                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "Lux", topic.c_str(), "light_lux");
+                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topic.c_str(), "light_lx");
             }
             if (weatherSensor.sensor[i].w.rain_ok)
             {
@@ -457,13 +461,13 @@ void haAutoDiscovery(void)
             }
             if (weatherSensor.sensor[i].w.wind_ok)
             {
-                publishAutoDiscovery(info, "Wind Direction", sensor_id, NULL, "°", topic.c_str(), "wind_dir");
+                publishAutoDiscovery(info, "Wind Direction", sensor_id, "wind_direction", "°", topic.c_str(), "wind_dir");
                 publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
                 publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
                 String topic = Hostname + "/extra";
-                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_gust_bft");
-                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, "wind_speed", "Beaufort", topic.c_str(), "wind_avg_bft");
-                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, "enum", "", topic.c_str(), "wind_dir_txt");
+                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_gust_bft");
+                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_avg_bft");
+                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, NULL, NULL, topic.c_str(), "wind_dir_txt");
             }
             if (weatherSensor.sensor[i].w.wind_ok &&
                 weatherSensor.sensor[i].w.temp_ok &&
@@ -657,7 +661,8 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     doc["state_topic"] = state_topic;
     doc["availability_topic"] = Hostname + "/status";
     doc["payload_not_available"] = "dead"; // default: "offline"
-    doc["unit_of_measurement"] = unit;
+    if (unit != NULL)
+        doc["unit_of_measurement"] = unit;
     if (device_class != NULL)
     {
         if (strcmp(device_class, "battery") == 0)
@@ -672,7 +677,10 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
         {
             doc["value_template"] = String("{{ value_json.") + value_json + " }}";
         }
+    } else {
+        doc["value_template"] = String("{{ value_json.") + value_json + " }}";
     }
+    
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
     device["name"] = info.manufacturer + " " + info.model;

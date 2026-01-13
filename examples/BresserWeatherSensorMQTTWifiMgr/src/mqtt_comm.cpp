@@ -13,7 +13,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,10 @@
 // 20250728 Added combined (Weather & Soil Sensor) MQTT payload
 // 20250801 Added Lightning Sensor to combined MQTT payload
 // 20250802 Refactored publishWeatherdata() to use ArduinoJson
+// 20260113 Fixed HA auto-discovery for UV Index, Light Lux, Wind Direction, 
+//          Wind Direction (Cardinal) and Wind Average/Gust Speed (Beaufort)
+//          Changed JSON keys from light_klx/ws_light_klx to light_lx/ws_light_lx
+//          (values are in Lux)
 //
 // ToDo:
 // -

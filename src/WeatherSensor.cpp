@@ -106,6 +106,7 @@
 // 20241227 Added LilyGo T3 S3 LR1121 RF switch and TCXO configuration
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor) to 7-in-1 decoder
 // 20250709 Fixed radio.readData() state check in getMessage()
+// 20260114 Added RF switch configuration for Seeed Studio XIAO ESP32S3 with Wio-SX1262
 //
 // ToDo:
 // -

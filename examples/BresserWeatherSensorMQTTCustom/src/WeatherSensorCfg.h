@@ -69,6 +69,7 @@
 // 20241130 Added pin definitions for Heltec Vision Master T190
 // 20241205 Added pin definitions for Lilygo T3-S3 (SX1262/SX1276/LR1121)
 // 20241227 Improved maintainability of board definitions
+// 20260114 Added pin definitions for Seeed Studio XIAO ESP32S3 with Wio-SX1262
 //
 // ToDo:
 // -
@@ -335,6 +336,15 @@
     #define PIN_RECEIVER_IRQ  16
     #define PIN_RECEIVER_GPIO 18
     #define PIN_RECEIVER_RST  45
+
+#elif defined(ARDUINO_XIAO_ESP32S3)
+    #pragma message("ARDUINO_XIAO_ESP32S3 defined; assuming Wio-SX1262 will be used")
+    #define USE_SX1262
+    // Use pinning for Seeed XIAO ESP32S3 with Wio-SX1262
+    #define PIN_RECEIVER_CS   41
+    #define PIN_RECEIVER_IRQ  39
+    #define PIN_RECEIVER_GPIO 40
+    #define PIN_RECEIVER_RST  42
 
 #elif defined(ARDUINO_ESP32S3_DEV)
     #pragma message("ARDUINO_ESP32S3_DEV defined; this is a generic (i.e. non-specific) target")

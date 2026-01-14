@@ -107,6 +107,7 @@
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor) to 7-in-1 decoder
 // 20250709 Fixed radio.readData() state check in getMessage()
 // 20260111 Fixed radio module initialization for LilyGo T3S3 boards using RadioLib 7.5.0
+// 20260114 Added RF switch configuration for Seeed Studio XIAO ESP32S3 with Wio-SX1262
 //
 // ToDo:
 // -
@@ -216,6 +217,16 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 
     // LR1121 TCXO Voltage 2.85~3.15V
     radio.setTCXO(3.0);
+#endif
+
+#if defined(ARDUINO_XIAO_ESP32S3)
+    // set RF switch control configuration
+    radio.setRfSwitchPins(38, RADIOLIB_NC);
+
+    // Note:
+    // Uses default TCXO voltage according to Seeed Studio's code example
+    // Wio_SX1262_XIAO_ESP32S3_code_package_20241025
+    // from https://wiki.seeedstudio.com/wio_sx1262_xiao_esp32s3_for_lora_sensor_node/
 #endif
 
     if (state == RADIOLIB_ERR_NONE)

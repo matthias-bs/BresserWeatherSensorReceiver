@@ -108,6 +108,7 @@
 // 20250709 Fixed radio.readData() state check in getMessage()
 // 20260111 Fixed radio module initialization for LilyGo T3S3 boards using RadioLib 7.5.0
 // 20260114 Added RF switch configuration for Seeed Studio XIAO ESP32S3 with Wio-SX1262
+// 20260216 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 3.0V
 //
 // ToDo:
 // -
@@ -223,10 +224,13 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     // set RF switch control configuration
     radio.setRfSwitchPins(38, RADIOLIB_NC);
 
-    // Note:
-    // Uses default TCXO voltage according to Seeed Studio's code example
-    // Wio_SX1262_XIAO_ESP32S3_code_package_20241025
-    // from https://wiki.seeedstudio.com/wio_sx1262_xiao_esp32s3_for_lora_sensor_node/
+    // TCXO Voltage according to
+    // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf
+    // 1.7~3.3V
+    //
+    // Set to 3.0V as in code example
+    // https://github.com/Seeed-Studio/one_channel_hub/blob/4cc771ac02da1bd18be67509f6b52d21bb0feabd/components/smtc_ral/bsp/sx126x/seeed_xiao_esp32s3_devkit_sx1262.c#L351
+    radio.setTCXO(3.0);
 #endif
 
     if (state == RADIOLIB_ERR_NONE)

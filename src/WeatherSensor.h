@@ -86,6 +86,7 @@
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
 // 20251222 Added SENSOR_TYPE_WEATHER3 (3-in-1 Professional Rain Gauge)
+// 20260202 Added forward declaration of WeatherSensorReceiver namespace
 //
 // ToDo:
 // -
@@ -100,6 +101,13 @@
 #include <string>
 #include <Preferences.h>
 #include <RadioLib.h>
+#include "WeatherSensorCfg.h"
+
+
+// Forward declaration of radio module in WeatherSensorReceiver namespace
+namespace WeatherSensorReceiver {
+    extern RADIO_CHIP radio;
+}
 
 
 // Sensor Types / Decoders / Part Numbers
@@ -168,7 +176,6 @@ typedef struct SensorMap {
     uint32_t        id;    //!< ID of sensor (as transmitted in radio message)
     String          name;  //!< Name of sensor (e.g. for MQTT topic)
 } SensorMap;
-
 
 
 /*!

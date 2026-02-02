@@ -108,8 +108,9 @@
 // 20250709 Fixed radio.readData() state check in getMessage()
 // 20260111 Fixed radio module initialization for LilyGo T3S3 boards using RadioLib 7.5.0
 // 20260114 Added RF switch configuration for Seeed Studio XIAO ESP32S3 with Wio-SX1262
-// 20260216 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 3.0V
+// 20260116 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 3.0V
 // 20260119 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 1.7V
+// 20260202 Moved radio object to separate namespace
 //
 // ToDo:
 // -
@@ -119,45 +120,50 @@
 #include "WeatherSensorCfg.h"
 #include "WeatherSensor.h"
 
+namespace WeatherSensorReceiver
+{
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-SPIClass * spi = new SPIClass(SPI);
+    SPIClass *spi = new SPIClass(SPI);
 #endif
 
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
-RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
+    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
 #elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
+    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
 #else
-RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
+    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
 
 #if defined(ARDUINO_LILYGO_T3S3_LR1121)
-const uint32_t rfswitch_dio_pins[] = {
-    RADIOLIB_LR11X0_DIO5, RADIOLIB_LR11X0_DIO6,
-    RADIOLIB_NC, RADIOLIB_NC, RADIOLIB_NC
-};
+    const uint32_t rfswitch_dio_pins[] = {
+        RADIOLIB_LR11X0_DIO5, RADIOLIB_LR11X0_DIO6,
+        RADIOLIB_NC, RADIOLIB_NC, RADIOLIB_NC};
 
-const Module::RfSwitchMode_t rfswitch_table[] = {
-    // mode                  DIO5  DIO6
-    { LR11x0::MODE_STBY,   { LOW,  LOW  } },
-    { LR11x0::MODE_RX,     { HIGH, LOW  } },
-    { LR11x0::MODE_TX,     { LOW,  HIGH } },
-    { LR11x0::MODE_TX_HP,  { LOW,  HIGH } },
-    { LR11x0::MODE_TX_HF,  { LOW,  LOW  } },
-    { LR11x0::MODE_GNSS,   { LOW,  LOW  } },
-    { LR11x0::MODE_WIFI,   { LOW,  LOW  } },
-    END_OF_MODE_TABLE,
-};
+    const Module::RfSwitchMode_t rfswitch_table[] = {
+        // mode             DIO5  DIO6
+        {LR11x0::MODE_STBY, {LOW, LOW}},
+        {LR11x0::MODE_RX, {HIGH, LOW}},
+        {LR11x0::MODE_TX, {LOW, HIGH}},
+        {LR11x0::MODE_TX_HP, {LOW, HIGH}},
+        {LR11x0::MODE_TX_HF, {LOW, LOW}},
+        {LR11x0::MODE_GNSS, {LOW, LOW}},
+        {LR11x0::MODE_WIFI, {LOW, LOW}},
+        END_OF_MODE_TABLE,
+    };
 #endif
 
+}
+
+using namespace WeatherSensorReceiver;
+
 // Flag to indicate that a packet was received
-volatile bool receivedFlag = false;
+static volatile bool receivedFlag = false;
 
 // This function is called when a complete packet is received by the module
 // IMPORTANT: This function MUST be 'void' type and MUST NOT have any arguments!
 #if defined(ESP8266) || defined(ESP32)
-    IRAM_ATTR
+IRAM_ATTR
 #endif
 void setFlag(void)
 {
@@ -184,18 +190,18 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         std::vector<uint32_t> sensor_ids_inc_def = SENSOR_IDS_INC;
         initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
     }
-    
-    #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
     spi->begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
-    #endif
+#endif
 
     double frequency = 868.3 + frequency_offset;
     log_d("Setting frequency to %f MHz", 868.3 + frequency_offset);
-  
+
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     log_d("%s Initializing ... ", RECEIVER_CHIP);
-  
+
     // carrier frequency:                   868.3 MHz
     // bit rate:                            8.22 kbps
     // frequency deviation:                 57.136417 kHz
@@ -226,7 +232,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     radio.setRfSwitchPins(38, RADIOLIB_NC);
 
     // TCXO Voltage according to
-    // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf
+    // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf:
     // 1.7~3.3V
     //
     // Set to 1.7V as recommended by Seeed Studio Support

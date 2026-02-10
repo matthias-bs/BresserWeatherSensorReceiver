@@ -132,7 +132,7 @@ If you see "WARNING: No messages were received during the scan!", check:
 
 - The optimal offset may vary with temperature. Run the test in typical operating conditions.
 - Different sensors from the same manufacturer may have slightly different frequencies.
-- If you have multiple sensors, the test will find the best compromise frequency.
+- If you have multiple sensors, run the test separately for each sensor to determine a suitable compromise frequency for your setup.
 - A well-calibrated module should have an optimal offset close to 0 kHz.
 - Large offsets (>150 kHz) may indicate a defective module.
 

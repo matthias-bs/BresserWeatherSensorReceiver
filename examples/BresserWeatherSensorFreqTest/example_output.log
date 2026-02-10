@@ -8,7 +8,7 @@ to find the optimal setting for your weather sensor.
 Base frequency: 868.300 MHz
 Scan range: -250 to 250 kHz (868.050 to 868.550 MHz)
 Scan step: 25 kHz
-Time per frequency: 30 seconds
+Time per frequency: 60 seconds
 
 Make sure your weather sensor is transmitting!
 Most sensors transmit every 30-60 seconds.

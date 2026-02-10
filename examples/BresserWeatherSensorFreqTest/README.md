@@ -1,6 +1,6 @@
 # Bresser Weather Sensor Frequency Test
 
-This example helps you find the optimal carrier frequency offset for your CC1101/SX1276/SX1262/LR1121 transceiver module. Different modules can have slight frequency deviations from the nominal 868.3 MHz, and finding the optimal offset can improve reception reliability.
+This example helps you find the optimal carrier frequency offset for your CC1101 (or other) transceiver module. Different modules can have slight frequency deviations from the nominal 868.3 MHz, and finding the optimal offset can improve reception reliability.
 
 ## Background
 
@@ -40,7 +40,7 @@ You can adjust the scanning parameters at the top of the sketch:
 #define SCAN_START_OFFSET_KHZ  -250    // Start scanning at -250 kHz
 #define SCAN_END_OFFSET_KHZ     250    // End scanning at +250 kHz
 #define SCAN_STEP_KHZ           25     // Scan in 25 kHz steps
-#define SCAN_TIME_PER_FREQ_MS   30000  // Wait 30 seconds at each frequency
+#define SCAN_TIME_PER_FREQ_MS   60000  // Wait 60 seconds at each frequency
 ```
 
 ### Quick Scan (Faster but less accurate)
@@ -71,7 +71,7 @@ Bresser Weather Sensor Frequency Test
 Base frequency: 868.300 MHz
 Scan range: -250 to 250 kHz (868.050 to 868.550 MHz)
 Scan step: 25 kHz
-Time per frequency: 30 seconds
+Time per frequency: 60 seconds
 
 ========================================
 Scanning Frequencies

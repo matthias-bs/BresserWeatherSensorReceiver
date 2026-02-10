@@ -72,7 +72,7 @@
 #define SCAN_START_OFFSET_KHZ  -250    // Start scanning at -250 kHz from base frequency
 #define SCAN_END_OFFSET_KHZ     250    // End scanning at +250 kHz from base frequency
 #define SCAN_STEP_KHZ           25     // Scan in 25 kHz steps
-#define SCAN_TIME_PER_FREQ_MS   30000  // Wait 30 seconds at each frequency for messages
+#define SCAN_TIME_PER_FREQ_MS   60000  // Wait 60 seconds at each frequency for messages
 
 // Structure to store results for each frequency tested
 struct FreqTestResult {
@@ -144,7 +144,8 @@ void performFrequencyScan() {
                       offset_khz, 868.3 + offset_mhz);
         
         // Initialize receiver with current frequency offset
-        ws.begin(1, true, offset_mhz);
+        // Use MAX_SENSORS_DEFAULT to support multiple sensors during calibration
+        ws.begin(MAX_SENSORS_DEFAULT, true, offset_mhz);
         
         // Clear any previous sensor data
         ws.clearSlots();

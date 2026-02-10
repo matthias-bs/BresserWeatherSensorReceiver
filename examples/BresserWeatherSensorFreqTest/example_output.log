@@ -1,0 +1,85 @@
+========================================
+Bresser Weather Sensor Frequency Test
+========================================
+
+This utility will scan different frequency offsets
+to find the optimal setting for your weather sensor.
+
+Base frequency: 868.300 MHz
+Scan range: -250 to 250 kHz (868.050 to 868.550 MHz)
+Scan step: 25 kHz
+Time per frequency: 60 seconds
+
+Make sure your weather sensor is transmitting!
+Most sensors transmit every 30-60 seconds.
+
+Starting scan in 5 seconds...
+
+========================================
+Scanning Frequencies
+========================================
+
+Testing frequency offset:   -250 kHz (868.050 MHz) ... No messages received
+Testing frequency offset:   -225 kHz (868.075 MHz) ... No messages received
+Testing frequency offset:   -200 kHz (868.100 MHz) ... No messages received
+Testing frequency offset:   -175 kHz (868.125 MHz) ... No messages received
+Testing frequency offset:   -150 kHz (868.150 MHz) ... No messages received
+Testing frequency offset:   -125 kHz (868.175 MHz) ... No messages received
+Testing frequency offset:   -100 kHz (868.200 MHz) .... Received:  4 messages, RSSI: max=-48.5 dBm, avg=-51.2 dBm
+Testing frequency offset:    -75 kHz (868.225 MHz) ..... Received:  5 messages, RSSI: max=-46.8 dBm, avg=-49.3 dBm
+Testing frequency offset:    -50 kHz (868.250 MHz) ....... Received:  7 messages, RSSI: max=-44.2 dBm, avg=-46.8 dBm
+Testing frequency offset:    -25 kHz (868.275 MHz) ......... Received:  9 messages, RSSI: max=-42.5 dBm, avg=-44.1 dBm
+Testing frequency offset:      0 kHz (868.300 MHz) ........... Received: 11 messages, RSSI: max=-40.8 dBm, avg=-42.5 dBm
+Testing frequency offset:    +25 kHz (868.325 MHz) ............. Received: 13 messages, RSSI: max=-39.2 dBm, avg=-41.0 dBm
+Testing frequency offset:    +50 kHz (868.350 MHz) ............... Received: 15 messages, RSSI: max=-38.1 dBm, avg=-39.8 dBm
+Testing frequency offset:    +75 kHz (868.375 MHz) ............. Received: 13 messages, RSSI: max=-39.5 dBm, avg=-41.2 dBm
+Testing frequency offset:   +100 kHz (868.400 MHz) ........... Received: 11 messages, RSSI: max=-41.0 dBm, avg=-43.5 dBm
+Testing frequency offset:   +125 kHz (868.425 MHz) ......... Received:  9 messages, RSSI: max=-42.8 dBm, avg=-45.2 dBm
+Testing frequency offset:   +150 kHz (868.450 MHz) ....... Received:  7 messages, RSSI: max=-45.1 dBm, avg=-47.8 dBm
+Testing frequency offset:   +175 kHz (868.475 MHz) ..... Received:  5 messages, RSSI: max=-47.5 dBm, avg=-50.1 dBm
+Testing frequency offset:   +200 kHz (868.500 MHz) .... Received:  4 messages, RSSI: max=-49.2 dBm, avg=-52.0 dBm
+Testing frequency offset:   +225 kHz (868.525 MHz) ... No messages received
+Testing frequency offset:   +250 kHz (868.550 MHz) ... No messages received
+
+========================================
+Scan Results Summary
+========================================
+
+Offset (kHz) | Frequency (MHz) | Messages | Max RSSI (dBm) | Avg RSSI (dBm)
+-------------|-----------------|----------|----------------|----------------
+   -250      |     868.050     |        0 |         -200.0 |         -200.0
+   -225      |     868.075     |        0 |         -200.0 |         -200.0
+   -200      |     868.100     |        0 |         -200.0 |         -200.0
+   -175      |     868.125     |        0 |         -200.0 |         -200.0
+   -150      |     868.150     |        0 |         -200.0 |         -200.0
+   -125      |     868.175     |        0 |         -200.0 |         -200.0
+   -100      |     868.200     |        4 |          -48.5 |          -51.2
+    -75      |     868.225     |        5 |          -46.8 |          -49.3
+    -50      |     868.250     |        7 |          -44.2 |          -46.8
+    -25      |     868.275     |        9 |          -42.5 |          -44.1
+      0      |     868.300     |       11 |          -40.8 |          -42.5
+    +25      |     868.325     |       13 |          -39.2 |          -41.0
+    +50      |     868.350     |       15 |          -38.1 |          -39.8
+    +75      |     868.375     |       13 |          -39.5 |          -41.2
+   +100      |     868.400     |       11 |          -41.0 |          -43.5
+   +125      |     868.425     |        9 |          -42.8 |          -45.2
+   +150      |     868.450     |        7 |          -45.1 |          -47.8
+   +175      |     868.475     |        5 |          -47.5 |          -50.1
+   +200      |     868.500     |        4 |          -49.2 |          -52.0
+   +225      |     868.525     |        0 |         -200.0 |         -200.0
+   +250      |     868.550     |        0 |         -200.0 |         -200.0
+
+========================================
+Recommendation
+========================================
+
+Based on the scan results:
+  Optimal frequency offset: 0.050 MHz
+  Optimal frequency: 868.350 MHz
+  Messages received: 15
+  Average RSSI: -39.8 dBm
+
+To use this frequency offset in your sketch:
+  ws.begin(1, true, 0.050);
+
+Scan complete. Reset device to run another scan.

@@ -76,7 +76,7 @@
 
 // Structure to store results for each frequency tested
 struct FreqTestResult {
-    double offset_khz;      // Frequency offset in kHz
+    double offset_mhz;      // Frequency offset in MHz
     int message_count;      // Number of messages received
     float max_rssi;         // Maximum RSSI value observed
     float avg_rssi;         // Average RSSI value
@@ -175,7 +175,7 @@ void performFrequencyScan() {
         }
         
         // Store results
-        scanResults[currentResult].offset_khz = offset_mhz;
+        scanResults[currentResult].offset_mhz = offset_mhz;
         scanResults[currentResult].message_count = msg_count;
         scanResults[currentResult].max_rssi = max_rssi;
         scanResults[currentResult].avg_rssi = (msg_count > 0) ? (rssi_sum / msg_count) : -200.0;
@@ -215,8 +215,8 @@ void analyzeResults() {
     
     for (int i = 0; i < scanResultCount; i++) {
         Serial.printf("%+7d      | %11.3f     | %8d | %14.1f | %14.1f\n",
-                      (int)(scanResults[i].offset_khz * 1000),
-                      868.3 + scanResults[i].offset_khz,
+                      (int)(scanResults[i].offset_mhz * 1000),
+                      868.3 + scanResults[i].offset_mhz,
                       scanResults[i].message_count,
                       scanResults[i].max_rssi,
                       scanResults[i].avg_rssi);
@@ -241,7 +241,7 @@ void analyzeResults() {
     Serial.println();
     
     if (best_idx >= 0 && max_messages > 0) {
-        double best_offset = scanResults[best_idx].offset_khz;
+        double best_offset = scanResults[best_idx].offset_mhz;
         Serial.println("Based on the scan results:");
         Serial.printf("  Optimal frequency offset: %.3f MHz\n", best_offset);
         Serial.printf("  Optimal frequency: %.3f MHz\n", 868.3 + best_offset);

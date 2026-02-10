@@ -107,7 +107,7 @@ RainGauge::reset(uint8_t flags)
     if (flags & RESET_RAIN_24H) {
         hist24h_init();
         for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
-            char buf[9];
+            char buf[10];
             sprintf(buf, "h24h%02d", i);
             preferences.putShort(buf, nvData.hist24h[i]);
         }
@@ -203,7 +203,7 @@ RainGauge::prefs_load(void)
         nvData.hist[i] = preferences.getShort(buf, -1);
     }
     for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
-        char buf[9];
+        char buf[10];
         sprintf(buf, "h24h%02d", i);
         nvData.hist24h[i] = preferences.getShort(buf, -1);
     }
@@ -248,7 +248,7 @@ RainGauge::prefs_save(void)
         preferences.putShort(buf, nvData.hist[i]);
     }
     for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
-        char buf[9];
+        char buf[10];
         sprintf(buf, "h24h%02d", i);
         preferences.putShort(buf, nvData.hist24h[i]);
     }
@@ -543,6 +543,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     #endif
     
     // Update 24-hour history buffer (similar logic to hourly buffer above)
+    // Note: This is implemented inline rather than using updateHistory() helper
+    // to avoid complexity with managing lastUpdate timestamps across multiple buffers.
     // Calculate index based on hour (0-23)
     int idx24h = t.tm_hour;
     

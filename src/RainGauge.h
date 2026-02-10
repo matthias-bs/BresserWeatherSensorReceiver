@@ -95,7 +95,7 @@
 #define RAIN_HIST_SIZE 10
 
 /**
- * \def
+ * \def RAIN_HIST_SIZE_24H
  * 
  * Size of 24-hour rain history buffer (24 hours / 1 hour per bin)
  */

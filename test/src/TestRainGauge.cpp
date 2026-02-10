@@ -1333,3 +1333,129 @@ TEST(TestRainGaugeInvReq, TestRainInvReq) {
   DOUBLES_EQUAL(-1, rainGauge.currentWeek(), TOLERANCE);
   DOUBLES_EQUAL(-1, rainGauge.currentMonth(), TOLERANCE);
 }
+
+TEST_GROUP(TestRainGauge24Hours) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+/*
+ * Test rainfall during past 24 hours
+ */
+TEST(TestRainGauge24Hours, Test_Rain24Hours) {
+  RainGauge rainGauge(1000);
+  rainGauge.reset();
+
+  tm        tm;
+  time_t    ts;
+  float     rainSensor;
+  bool      val;
+  int       nbins;
+  float     qual;
+
+  printf("< Rain24Hours >\n");
+  
+  // Start at 8:00 AM
+  setTime("2022-09-06 8:00", tm, ts);
+  rainGauge.update(ts, rainSensor=10.0);
+  DOUBLES_EQUAL(0, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(1, nbins);
+  DOUBLES_EQUAL(1.0/24.0, qual, TOLERANCE_QUAL);
+
+  // Update every hour for 5 hours
+  setTime("2022-09-06 9:00", tm, ts);
+  rainGauge.update(ts, rainSensor=11.0);
+  DOUBLES_EQUAL(1.0, rainGauge.past24Hours(&val, &nbins, &qual), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(2, nbins);
+  DOUBLES_EQUAL(2.0/24.0, qual, TOLERANCE_QUAL);
+
+  setTime("2022-09-06 10:00", tm, ts);
+  rainGauge.update(ts, rainSensor=12.5);
+  DOUBLES_EQUAL(2.5, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(3, nbins);
+
+  setTime("2022-09-06 11:00", tm, ts);
+  rainGauge.update(ts, rainSensor=14.0);
+  DOUBLES_EQUAL(4.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(4, nbins);
+  
+  setTime("2022-09-06 12:00", tm, ts);
+  rainGauge.update(ts, rainSensor=16.0);
+  DOUBLES_EQUAL(6.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(5, nbins);
+
+  // Continue over multiple hours to build up history
+  float currentRain = 16.0;
+  for (int hour = 13; hour <= 20; hour++) {
+    char timeStr[20];
+    sprintf(timeStr, "2022-09-06 %d:00", hour);
+    setTime(timeStr, tm, ts);
+    currentRain += 1.0;
+    rainGauge.update(ts, rainSensor=currentRain);
+  }
+  
+  // After 20:00, we should have 13 hours of data
+  // Rain from hour 8-20: (11-10) + (12.5-11) + (14-12.5) + (16-14) + (17-16) + ... + (24-23) = 14.0
+  DOUBLES_EQUAL(14.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK_FALSE(val);
+  CHECK_EQUAL(13, nbins);
+
+  // Add more hours to reach the threshold
+  for (int hour = 21; hour <= 23; hour++) {
+    char timeStr[20];
+    sprintf(timeStr, "2022-09-06 %d:00", hour);
+    setTime(timeStr, tm, ts);
+    currentRain += 1.0;
+    rainGauge.update(ts, rainSensor=currentRain);
+  }
+
+  // Now continue into the next day
+  for (int hour = 0; hour <= 6; hour++) {
+    char timeStr[20];
+    sprintf(timeStr, "2022-09-07 %02d:00", hour);
+    setTime(timeStr, tm, ts);
+    currentRain += 1.0;
+    rainGauge.update(ts, rainSensor=currentRain);
+  }
+  
+  // After 6:00 on day 2, we should have 23 hours of data
+  // Total rain from hour 8 (day 1) to hour 6 (day 2) = 34.0 - 10.0 = 24.0
+  // Quality = 23/24 = 0.958 > 0.8, so it should be valid!
+  DOUBLES_EQUAL(24.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK(val);  // Valid because 23/24 > 0.8
+  CHECK_EQUAL(23, nbins);
+  
+  // Add one more hour to reach 24 hours
+  setTime("2022-09-07 7:00", tm, ts);
+  rainGauge.update(ts, rainSensor=currentRain+=1.0);
+  // Total rain from hour 8 (day 1) to hour 7 (day 2) = 35.0 - 10.0 = 25.0
+  DOUBLES_EQUAL(25.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  
+  // Move forward one more hour - should overwrite hour 8 (day 1)
+  setTime("2022-09-07 8:00", tm, ts);
+  rainGauge.update(ts, rainSensor=currentRain+=1.0);
+  // The past 24 hours at hour 8 (day 2) should be from hour 8 (day 1) to hour 8 (day 2)
+  // Rain = sensor[8, day 2] - sensor[8, day 1] = 36.0 - 10.0 = 26.0
+  DOUBLES_EQUAL(26.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+  
+  // Move forward another hour
+  setTime("2022-09-07 9:00", tm, ts);
+  rainGauge.update(ts, rainSensor=currentRain+=1.0);
+  // The past 24 hours at hour 9 (day 2) should be from hour 9 (day 1) to hour 9 (day 2)
+  // Rain = sensor[9, day 2] - sensor[9, day 1] = 37.0 - 11.0 = 26.0
+  DOUBLES_EQUAL(26.0, rainGauge.past24Hours(&val, &nbins), TOLERANCE);
+  CHECK(val);
+  CHECK_EQUAL(24, nbins);
+}

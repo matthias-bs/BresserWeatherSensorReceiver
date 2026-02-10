@@ -74,6 +74,7 @@
 RTC_DATA_ATTR nvData_t nvData = {
    .lastUpdate = 0,
    .hist = {-1},
+   .hist24h = {-1},
    .startupPrev = false,
    .rainPreStartup = 0,
    .tsDayBegin = 0xFF,
@@ -101,6 +102,14 @@ RainGauge::reset(uint8_t flags)
             char buf[7];
             sprintf(buf, "hist%02d", i);
             preferences.putShort(buf, nvData.hist[i]);
+        }
+    }
+    if (flags & RESET_RAIN_24H) {
+        hist24h_init();
+        for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+            char buf[9];
+            sprintf(buf, "h24h%02d", i);
+            preferences.putShort(buf, nvData.hist24h[i]);
         }
     }
     if (flags & RESET_RAIN_D) {
@@ -138,6 +147,9 @@ RainGauge::reset(uint8_t flags)
     if (flags & RESET_RAIN_H) {
         hist_init();
     }
+    if (flags & RESET_RAIN_24H) {
+        hist24h_init();
+    }
     if (flags & RESET_RAIN_D) {
         nvData.tsDayBegin     = 0xFF;
         nvData.rainDayBegin   = 0;
@@ -169,6 +181,14 @@ RainGauge::hist_init(int16_t rain)
     }
 }
 
+void
+RainGauge::hist24h_init(int16_t rain)
+{
+    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        nvData.hist24h[i] = rain;
+    }
+}
+
 #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
 void
 RainGauge::prefs_load(void)
@@ -181,6 +201,11 @@ RainGauge::prefs_load(void)
         char buf[7];
         sprintf(buf, "hist%02d", i);
         nvData.hist[i] = preferences.getShort(buf, -1);
+    }
+    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        char buf[9];
+        sprintf(buf, "h24h%02d", i);
+        nvData.hist24h[i] = preferences.getShort(buf, -1);
     }
     nvData.startupPrev       = preferences.getBool("startupPrev", false);
     nvData.rainPreStartup    = preferences.getFloat("rainPreStartup", 0);
@@ -222,6 +247,11 @@ RainGauge::prefs_save(void)
         sprintf(buf, "hist%02d", i);
         preferences.putShort(buf, nvData.hist[i]);
     }
+    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        char buf[9];
+        sprintf(buf, "h24h%02d", i);
+        preferences.putShort(buf, nvData.hist24h[i]);
+    }
     preferences.putBool("startupPrev", nvData.startupPrev);
     preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
     preferences.putUChar("tsDayBegin", nvData.tsDayBegin);
@@ -239,6 +269,130 @@ RainGauge::prefs_save(void)
 
 
 void
+RainGauge::updateHistory(RainHistory& h, time_t timestamp, float rainDelta)
+{
+    struct tm t;
+    localtime_r(&timestamp, &t);
+
+    // Calculate index based on time and update rate
+    int idx;
+    if (h.updateRate == 60) {
+        // For 24-hour buffer: index based on hour
+        idx = t.tm_hour;
+    } else {
+        // For sub-hour buffer: index based on minutes
+        idx = t.tm_min / h.updateRate;
+    }
+    
+    // Ensure index is within bounds
+    if (idx >= (int)h.size) {
+        idx = idx % h.size;
+    }
+
+    // Delta time between last update and current time
+    time_t t_delta = timestamp - h.lastUpdate;
+
+    // t_delta < 0: something is wrong
+    if (t_delta < 0) {
+        log_w("Negative time span since last update for history!?");
+        return; 
+    }
+
+    if (t_delta / 60 < h.updateRate) {
+        // t_delta shorter than expected update rate
+        if (h.hist[idx] < 0)
+            h.hist[idx] = 0;
+        struct tm t_prev;
+        localtime_r(&h.lastUpdate, &t_prev);
+        int idx_prev;
+        if (h.updateRate == 60) {
+            idx_prev = t_prev.tm_hour;
+        } else {
+            idx_prev = t_prev.tm_min / h.updateRate;
+        }
+        if (idx_prev >= (int)h.size) {
+            idx_prev = idx_prev % h.size;
+        }
+        
+        if (idx_prev == idx) {
+            // same index as in previous cycle - add value
+            h.hist[idx] += static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (upd)", idx, h.hist[idx]);
+        } else {
+            // different index - new value
+            h.hist[idx] = static_cast<int16_t>(rainDelta * 100);
+            log_d("hist[%d]=%d (new)", idx, h.hist[idx]);
+        }
+    }
+    else if (t_delta >= (time_t)(h.size * h.updateRate * 60)) {
+        // t_delta >= history size -> reset history
+        log_w("History time frame expired, resetting!");
+        for (size_t i = 0; i < h.size; i++) {
+            h.hist[i] = -1;
+        }
+    }
+    else {
+        // Some other index - mark missed entries as invalid
+        for (time_t ts = h.lastUpdate + (h.updateRate * 60); ts < timestamp; ts += h.updateRate * 60) {
+            struct tm timeinfo;
+            localtime_r(&ts, &timeinfo);
+            int idx_missed;
+            if (h.updateRate == 60) {
+                idx_missed = timeinfo.tm_hour;
+            } else {
+                idx_missed = timeinfo.tm_min / h.updateRate;
+            }
+            if (idx_missed >= (int)h.size) {
+                idx_missed = idx_missed % h.size;
+            }
+            h.hist[idx_missed] = -1;
+            log_d("hist[%d]=-1", idx_missed);
+        }
+
+        // Write delta
+        h.hist[idx] = static_cast<int16_t>(rainDelta * 100);
+        log_d("hist[%d]=%d (new)", idx, h.hist[idx]);
+    }
+
+    h.lastUpdate = timestamp;
+}
+
+float
+RainGauge::sumHistory(const RainHistory& h, bool *valid, int *nbins, float *quality)
+{
+    int entries = 0;
+    float res = 0;
+
+    // Sum of all valid entries
+    for (size_t i=0; i<h.size; i++){
+        if (h.hist[i] >= 0) {
+            res += h.hist[i] * 0.01;
+            entries++;
+        }
+    }
+
+    // Optional: return number of valid bins
+    if (nbins != nullptr)
+        *nbins = entries;
+    
+    // Optional: return valid flag
+    if (valid != nullptr) {
+        if (entries >= qualityThreshold * h.size) {
+            *valid = true;
+        } else {
+            *valid = false;
+        }
+    }
+
+    // Optional: return quality
+    if (quality != nullptr) {
+        *quality = static_cast<float>(entries) / h.size;
+    }
+
+    return res;
+}
+
+void
 RainGauge::update(time_t timestamp, float rain, bool startup)
 {
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
@@ -251,6 +405,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     if (nvData.lastUpdate == 0) {
         // Initialize history
         hist_init();
+        hist24h_init();
     }
 
     if (nvData.rainPrev == -1) {
@@ -387,6 +542,46 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         log_d("%s", buf.c_str());
     #endif
     
+    // Update 24-hour history buffer (similar logic to hourly buffer above)
+    // Calculate index based on hour (0-23)
+    int idx24h = t.tm_hour;
+    
+    if (t_delta / 60 < 60) {
+        // t_delta shorter than 60 minutes
+        if (nvData.hist24h[idx24h] < 0)
+            nvData.hist24h[idx24h] = 0;
+        struct tm t_prev;
+        localtime_r(&nvData.lastUpdate, &t_prev);
+        if (t_prev.tm_hour == idx24h) {
+            // same hour as in previous cycle - add value
+            nvData.hist24h[idx24h] += static_cast<int16_t>(rainDelta * 100);
+            log_d("hist24h[%d]=%d (upd)", idx24h, nvData.hist24h[idx24h]);
+        } else {
+            // different hour - new value
+            nvData.hist24h[idx24h] = static_cast<int16_t>(rainDelta * 100);
+            log_d("hist24h[%d]=%d (new)", idx24h, nvData.hist24h[idx24h]);
+        }
+    }
+    else if (t_delta >= RAIN_HIST_SIZE_24H * 60 * 60) {
+        // t_delta >= 24 hours -> reset 24h history
+        log_w("24h history time frame expired, resetting!");
+        hist24h_init();
+    }
+    else {
+        // Some other index - mark missed entries as invalid
+        for (time_t ts = nvData.lastUpdate + 3600; ts < timestamp; ts += 3600) {
+            struct tm timeinfo;
+            localtime_r(&ts, &timeinfo);
+            int idx_missed = timeinfo.tm_hour;
+            nvData.hist24h[idx_missed] = -1;
+            log_d("hist24h[%d]=-1", idx_missed);
+        }
+
+        // Write delta
+        nvData.hist24h[idx24h] = static_cast<int16_t>(rainDelta * 100);
+        log_d("hist24h[%d]=%d (new)", idx24h, nvData.hist24h[idx24h]);
+    }
+    
     // Check if day of the week has changed
     // or no saved data is available yet
     if ((t.tm_wday != nvData.tsDayBegin) || 
@@ -466,6 +661,18 @@ RainGauge::pastHour(bool *valid, int *nbins, float *quality)
     }
 
     return res;
+}
+
+float
+RainGauge::past24Hours(bool *valid, int *nbins, float *quality)
+{
+    RainHistory dayHist = {
+        .hist = nvData.hist24h,
+        .size = RAIN_HIST_SIZE_24H,
+        .updateRate = 60,
+        .lastUpdate = nvData.lastUpdate
+    };
+    return sumHistory(dayHist, valid, nbins, quality);
 }
 
 float

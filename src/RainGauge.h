@@ -94,6 +94,13 @@
  */
 #define RAIN_HIST_SIZE 10
 
+/**
+ * \def
+ * 
+ * Size of 24-hour rain history buffer (24 hours / 1 hour per bin)
+ */
+#define RAIN_HIST_SIZE_24H 24
+
 
 /**
  * \def
@@ -109,7 +116,20 @@
  #define RESET_RAIN_D 2
  #define RESET_RAIN_W 4
  #define RESET_RAIN_M 8
+ #define RESET_RAIN_24H 16
 
+
+/**
+ * \struct RainHistory
+ *
+ * \brief Rain history buffer with its configuration
+ */
+typedef struct {
+    int16_t*  hist;         // pointer to buffer
+    size_t    size;         // number of bins
+    uint8_t   updateRate;   // minutes per bin
+    time_t    lastUpdate;   // last update timestamp
+} RainHistory;
 
 /**
  * \typedef nvData_t
@@ -122,6 +142,9 @@ typedef struct {
 
     /* Data of past 60 minutes */
     int16_t   hist[RAIN_HIST_SIZE];
+
+    /* Data of past 24 hours */
+    int16_t   hist24h[RAIN_HIST_SIZE_24H];
 
     /* Sensor startup handling */
     bool      startupPrev; // previous state of startup
@@ -163,6 +186,7 @@ private:
     nvData_t nvData = {
         .lastUpdate = 0,
         .hist = {-1},
+        .hist24h = {-1},
         .startupPrev = false,
         .rainPreStartup = 0,
         .tsDayBegin = 0xFF,
@@ -180,6 +204,27 @@ private:
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
+
+    /**
+     * Update a history buffer with rain data
+     * 
+     * \param h          RainHistory buffer to update
+     * \param timestamp  current timestamp
+     * \param rainDelta  amount of rain since last update
+     */
+    void updateHistory(RainHistory& h, time_t timestamp, float rainDelta);
+
+    /**
+     * Sum all valid entries in a history buffer
+     * 
+     * \param h          RainHistory buffer to sum
+     * \param valid      pointer to bool indicating if result is valid (optional)
+     * \param nbins      pointer to int for number of valid bins (optional)
+     * \param quality    pointer to float for quality metric (optional)
+     * 
+     * \returns total rainfall in the history buffer
+     */
+    float sumHistory(const RainHistory& h, bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
 
 public:
     /**
@@ -255,8 +300,17 @@ public:
     
     /**
      * Initialize history buffer for hourly (past 60 minutes) rainfall
+     * 
+     * \param rain  initial value for all entries (default: -1 for invalid)
      */
     void hist_init(int16_t rain = -1);
+    
+    /**
+     * Initialize 24-hour history buffer
+     * 
+     * \param rain  initial value for all entries (default: -1 for invalid)
+     */
+    void hist24h_init(int16_t rain = -1);
 
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
@@ -286,6 +340,17 @@ public:
      * \returns amount of rain during past 60 minutes
      */
     float pastHour(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
+
+    /**
+     * Rainfall during past 24 hours
+     * 
+     * \param valid     number of valid entries in rain_hist24h >= qualityThreshold * 24
+     * \param nbins     number of valid entries in rain_hist24h
+     * \param quality   fraction of valid entries in rain_hist24h (0..1); quality = nbins / 24
+     * 
+     * \returns amount of rain during past 24 hours
+     */
+    float past24Hours(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
 
     /**
      * Rainfall of current calendar day

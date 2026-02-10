@@ -61,6 +61,8 @@ You can adjust the scanning parameters at the top of the sketch:
 
 ## Example Output
 
+See [example_output.log](example_output.log) for a complete sample run.
+
 ```
 ========================================
 Bresser Weather Sensor Frequency Test

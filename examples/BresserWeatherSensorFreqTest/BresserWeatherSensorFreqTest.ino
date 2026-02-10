@@ -161,7 +161,7 @@ void performFrequencyScan() {
             
             if (decode_status == DECODE_OK) {
                 msg_count++;
-                float rssi = ws.sensor[0].rssi;
+                float rssi = ws.rssi;  // Use last packet RSSI instead of assuming sensor[0]
                 rssi_sum += rssi;
                 if (rssi > max_rssi) {
                     max_rssi = rssi;

@@ -5,19 +5,21 @@ This directory contains comprehensive unit tests for the BresserWeatherSensorRec
 ## Test Coverage
 
 ### Current Test Statistics
-- **Total Test Files**: 4
-- **Total Tests**: 48 (44 active)
-- **Total Assertions**: 548+
+- **Total Test Files**: 3 (TestRainGauge.cpp, TestLightning.cpp, TestWeatherUtils.cpp)
+- **Total Tests**: 55
+- **Total Assertions**: 582
 - **Test Framework**: CppUTest
 
 ### Tested Components
 
-#### 1. RainGauge (17 tests)
+#### 1. RainGauge (28 tests)
 Tests for rainfall tracking and calculation functionality:
 - **Hourly tracking**: Past 60 minutes with various update intervals
 - **24-hour tracking**: Rolling 24-hour rainfall measurement
 - **Daily/Weekly/Monthly**: Calendar-based rainfall tracking
-- **Edge cases**: Time jumps, overflow handling, sensor startup
+- **Constructor & Configuration**: Custom parameters (raingauge_max, quality_threshold), set_max()
+- **Reset functionality**: Individual and combined reset flags
+- **Edge cases**: Time jumps, overflow handling, sensor startup, boundary conditions
 - **Quality metrics**: Data validity and quality indicators
 
 Files:
@@ -82,7 +84,7 @@ Tests will display:
 
 Example output:
 ```
-OK (44 tests, 44 ran, 548 checks, 0 ignored, 0 filtered out, 3 ms)
+OK (55 tests, 55 ran, 582 checks, 0 ignored, 0 filtered out, 3 ms)
 ```
 
 ## Test Organization

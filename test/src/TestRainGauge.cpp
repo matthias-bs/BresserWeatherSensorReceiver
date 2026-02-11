@@ -1617,19 +1617,18 @@ TEST(TestRainGaugeReset, Test_Reset_IndividualFlags) {
     setTime("2022-09-06 10:00", tm, ts);  // Stay in same day
     rainGauge.update(ts, 20.0);
     float beforeReset = rainGauge.currentDay();
-    // Should have valid data only if in same day
-    if (beforeReset > 0) {
-      rainGauge.reset(RESET_RAIN_D);
-      // After reset, the next day boundary should start fresh
-      setTime("2022-09-07 8:00", tm, ts);
-      rainGauge.update(ts, 25.0);
-      setTime("2022-09-07 10:00", tm, ts);
-      rainGauge.update(ts, 26.0);
-      float afterReset = rainGauge.currentDay();
-      // Should have new data (not accumulated from before reset)
-      CHECK(afterReset >= 0);
-      CHECK(afterReset <= beforeReset);  // Should be less than or equal
-    }
+    CHECK(beforeReset > 0);  // Should have valid data in same day
+    
+    rainGauge.reset(RESET_RAIN_D);
+    // After reset, the next day boundary should start fresh
+    setTime("2022-09-07 8:00", tm, ts);
+    rainGauge.update(ts, 25.0);
+    setTime("2022-09-07 10:00", tm, ts);
+    rainGauge.update(ts, 26.0);
+    float afterReset = rainGauge.currentDay();
+    // Should have new data (not accumulated from before reset)
+    CHECK(afterReset >= 0);
+    CHECK(afterReset <= beforeReset);  // Should be less than or equal
   }
   
   // Test RESET_RAIN_W (weekly)

@@ -121,18 +121,6 @@
 
 
 /**
- * \struct RainHistory
- *
- * \brief Rain history buffer with its configuration
- */
-typedef struct {
-    int16_t*  hist;         // pointer to buffer
-    size_t    size;         // number of bins
-    uint8_t   updateRate;   // minutes per bin
-    time_t    lastUpdate;   // last update timestamp
-} RainHistory;
-
-/**
  * \typedef nvData_t
  *
  * \brief Data structure for rain statistics to be stored in non-volatile memory
@@ -179,6 +167,18 @@ typedef struct {
  */
 class RainGauge {
 private:
+    /**
+     * \struct RainHistory
+     *
+     * \brief Rain history buffer with its configuration
+     */
+    typedef struct {
+        int16_t*  hist;         // pointer to buffer
+        size_t    size;         // number of bins
+        uint8_t   updateRate;   // minutes per bin
+        time_t    lastUpdate;   // last update timestamp
+    } RainHistory;
+
     float rainCurr;
     float raingaugeMax;
     float qualityThreshold;

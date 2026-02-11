@@ -207,15 +207,6 @@ private:
     #endif
 
     /**
-     * Update a history buffer with rain data
-     * 
-     * \param h          RainHistory buffer to update
-     * \param timestamp  current timestamp
-     * \param rainDelta  amount of rain since last update
-     */
-    void updateHistory(RainHistory& h, time_t timestamp, float rainDelta);
-
-    /**
      * Sum all valid entries in a history buffer
      * 
      * \param h          RainHistory buffer to sum

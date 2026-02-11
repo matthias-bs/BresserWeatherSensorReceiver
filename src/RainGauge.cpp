@@ -269,100 +269,23 @@ RainGauge::prefs_save(void)
 #endif
 
 
-void
-RainGauge::updateHistory(RainHistory& h, time_t timestamp, float rainDelta)
-{
-    struct tm t;
-    localtime_r(&timestamp, &t);
-
-    // Calculate index based on time and update rate
-    int idx;
-    if (h.updateRate == 60) {
-        // For 24-hour buffer: index based on hour
-        idx = t.tm_hour;
-    } else {
-        // For sub-hour buffer: index based on minutes
-        idx = t.tm_min / h.updateRate;
-    }
-    
-    // Ensure index is within bounds
-    if (idx >= (int)h.size) {
-        idx = idx % h.size;
-    }
-
-    // Delta time between last update and current time
-    time_t t_delta = timestamp - h.lastUpdate;
-
-    // t_delta < 0: something is wrong
-    if (t_delta < 0) {
-        log_w("Negative time span since last update for history!?");
-        return; 
-    }
-
-    if (t_delta / 60 < h.updateRate) {
-        // t_delta shorter than expected update rate
-        if (h.hist[idx] < 0)
-            h.hist[idx] = 0;
-        struct tm t_prev;
-        localtime_r(&h.lastUpdate, &t_prev);
-        int idx_prev;
-        if (h.updateRate == 60) {
-            idx_prev = t_prev.tm_hour;
-        } else {
-            idx_prev = t_prev.tm_min / h.updateRate;
-        }
-        if (idx_prev >= (int)h.size) {
-            idx_prev = idx_prev % h.size;
-        }
-        
-        if (idx_prev == idx) {
-            // same index as in previous cycle - add value
-            h.hist[idx] += static_cast<int16_t>(rainDelta * 100);
-            log_d("hist[%d]=%d (upd)", idx, h.hist[idx]);
-        } else {
-            // different index - new value
-            h.hist[idx] = static_cast<int16_t>(rainDelta * 100);
-            log_d("hist[%d]=%d (new)", idx, h.hist[idx]);
-        }
-    }
-    else if (t_delta >= (time_t)(h.size * h.updateRate * 60)) {
-        // t_delta >= history size -> reset history
-        log_w("History time frame expired, resetting!");
-        for (size_t i = 0; i < h.size; i++) {
-            h.hist[i] = -1;
-        }
-    }
-    else {
-        // Some other index - mark missed entries as invalid
-        for (time_t ts = h.lastUpdate + (h.updateRate * 60); ts < timestamp; ts += h.updateRate * 60) {
-            struct tm timeinfo;
-            localtime_r(&ts, &timeinfo);
-            int idx_missed;
-            if (h.updateRate == 60) {
-                idx_missed = timeinfo.tm_hour;
-            } else {
-                idx_missed = timeinfo.tm_min / h.updateRate;
-            }
-            if (idx_missed >= (int)h.size) {
-                idx_missed = idx_missed % h.size;
-            }
-            h.hist[idx_missed] = -1;
-            log_d("hist[%d]=-1", idx_missed);
-        }
-
-        // Write delta
-        h.hist[idx] = static_cast<int16_t>(rainDelta * 100);
-        log_d("hist[%d]=%d (new)", idx, h.hist[idx]);
-    }
-
-    h.lastUpdate = timestamp;
-}
-
 float
 RainGauge::sumHistory(const RainHistory& h, bool *valid, int *nbins, float *quality)
 {
     int entries = 0;
     float res = 0;
+
+    // Calculate the effective number of bins based on size and update rate
+    // For hourly buffer: 60 minutes / updateRate = number of bins
+    // For 24h buffer: size is already correct (24 bins for 24 hours)
+    size_t effectiveBins;
+    if (h.updateRate == 60) {
+        // 24-hour buffer: size is already the effective bin count
+        effectiveBins = h.size;
+    } else {
+        // Hourly buffer: calculate bins based on update rate
+        effectiveBins = 60 / h.updateRate;
+    }
 
     // Sum of all valid entries
     for (size_t i=0; i<h.size; i++){
@@ -378,7 +301,7 @@ RainGauge::sumHistory(const RainHistory& h, bool *valid, int *nbins, float *qual
     
     // Optional: return valid flag
     if (valid != nullptr) {
-        if (entries >= qualityThreshold * h.size) {
+        if (entries >= qualityThreshold * effectiveBins) {
             *valid = true;
         } else {
             *valid = false;
@@ -387,7 +310,7 @@ RainGauge::sumHistory(const RainHistory& h, bool *valid, int *nbins, float *qual
 
     // Optional: return quality
     if (quality != nullptr) {
-        *quality = static_cast<float>(entries) / h.size;
+        *quality = static_cast<float>(entries) / effectiveBins;
     }
 
     return res;
@@ -544,8 +467,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     #endif
     
     // Update 24-hour history buffer (similar logic to hourly buffer above)
-    // Note: This is implemented inline rather than using updateHistory() helper
-    // to avoid complexity with managing lastUpdate timestamps across multiple buffers.
+    // Note: This is implemented inline to avoid complexity with managing
+    // separate lastUpdate timestamps for each buffer.
     // Calculate index based on hour (0-23)
     int idx24h = t.tm_hour;
     
@@ -634,36 +557,13 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 float
 RainGauge::pastHour(bool *valid, int *nbins, float *quality)
 {
-    int entries = 0;
-    float res = 0;
-
-    // Sum of all valid entries
-    for (size_t i=0; i<RAIN_HIST_SIZE; i++){
-        if (nvData.hist[i] >= 0) {
-            res += nvData.hist[i] * 0.01;
-            entries++;
-        }
-    }
-
-    // Optional: return quality indication
-    if (nbins != nullptr)
-        *nbins = entries;
-    
-    // Optional: return valid flag
-    if (valid != nullptr) {
-        if (entries >= qualityThreshold * 60 / nvData.updateRate) {
-            *valid = true;
-        } else {
-            *valid = false;
-        }
-    }
-
-    // Optional: return quality
-    if (quality != nullptr) {
-        *quality = static_cast<float>(entries) / (60 / nvData.updateRate);
-    }
-
-    return res;
+    RainHistory hourHist = {
+        .hist = nvData.hist,
+        .size = RAIN_HIST_SIZE,
+        .updateRate = nvData.updateRate,
+        .lastUpdate = nvData.lastUpdate
+    };
+    return sumHistory(hourHist, valid, nbins, quality);
 }
 
 float

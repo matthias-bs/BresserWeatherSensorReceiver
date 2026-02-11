@@ -56,6 +56,7 @@
 // 20250323 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
 // 20260211 Added past24Hours()
+//          Refactored to use RollingCounter base class
 //
 // ToDo: 
 // -
@@ -69,6 +70,7 @@
 #if defined(ESP32) || defined(ESP8266)
   #include <sys/time.h>
 #endif
+#include "RollingCounter.h"
 #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     #include <Preferences.h>
 #endif
@@ -102,13 +104,6 @@
  */
 #define RAIN_HIST_SIZE_24H 24
 
-
-/**
- * \def
- * 
- * Fraction of valid rain_hist entries required for valid result
- */
-#define DEFAULT_QUALITY_THRESHOLD 0.8
 
 /**
  * \defgroup Reset rain counters
@@ -165,23 +160,10 @@ typedef struct {
  *
  * Additionally overflow of the rain gauge is handled when reaching RAINGAUGE_MAX_VALUE. 
  */
-class RainGauge {
+class RainGauge : public RollingCounter {
 private:
-    /**
-     * \struct RainHistory
-     *
-     * \brief Rain history buffer with its configuration
-     */
-    typedef struct {
-        int16_t*  hist;         // pointer to buffer
-        size_t    size;         // number of bins
-        uint8_t   updateRate;   // minutes per bin
-        time_t    lastUpdate;   // last update timestamp
-    } RainHistory;
-
     float rainCurr;
     float raingaugeMax;
-    float qualityThreshold;
 
     #if defined(RAINGAUGE_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvData_t nvData = {
@@ -206,18 +188,6 @@ private:
     Preferences preferences;
     #endif
 
-    /**
-     * Sum all valid entries in a history buffer
-     * 
-     * \param h          RainHistory buffer to sum
-     * \param valid      pointer to bool indicating if result is valid (optional)
-     * \param nbins      pointer to int for number of valid bins (optional)
-     * \param quality    pointer to float for quality metric (optional)
-     * 
-     * \returns total rainfall in the history buffer
-     */
-    float sumHistory(const RainHistory& h, bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
-
 public:
     /**
      * Constructor
@@ -226,8 +196,8 @@ public:
      * \param quality_threshold fraction of valid rain_hist entries required for valid pastHour() result
      */
     RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
-        raingaugeMax(raingauge_max),
-        qualityThreshold(quality_threshold)
+        RollingCounter(quality_threshold),
+        raingaugeMax(raingauge_max)
     {};
 
     /**

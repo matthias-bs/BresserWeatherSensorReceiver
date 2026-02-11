@@ -61,6 +61,7 @@
 // 20240125 Added lastCycle()
 // 20250324 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
+// 20260211 Refactored to use RollingCounter base class
 //
 // ToDo:
 // -
@@ -75,6 +76,7 @@
   #include <sys/time.h>
 #endif
 #include "WeatherSensorCfg.h"
+#include "RollingCounter.h"
 
 #if defined(LIGHTNING_USE_PREFS)
 #include <Preferences.h>
@@ -102,14 +104,6 @@
  * Set to 3600 [sec] / min_update_rate_rate [sec]
  */
 #define LIGHTNING_HIST_SIZE 10
-
-/**
- * \def
- * 
- * Fraction of valid hist entries required for valid result
- */
-#define DEFAULT_QUALITY_THRESHOLD 0.8
-
 
 /**
  * \typedef nvLightning_t
@@ -146,10 +140,9 @@ typedef struct {
  * \brief Calculation number of lightning events during last sensor update cycle and 
  *        during last hour (past 60 minutes); storing timestamp and distance of last event.
  */
-class Lightning {
+class Lightning : public RollingCounter {
 
 private:
-    float qualityThreshold;
     int currCount;
     int deltaEvents = -1;
 
@@ -179,7 +172,7 @@ public:
      * \param quality_threshold fraction of valid hist entries required for valid pastHour() result
      */
     Lightning(const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
-        qualityThreshold(quality_threshold)
+        RollingCounter(quality_threshold)
     {};
     
 

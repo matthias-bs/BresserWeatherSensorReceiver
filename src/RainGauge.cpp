@@ -56,6 +56,7 @@
 // 20250323 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
 // 20260211 Added past24Hours() algorithm
+//          Refactored to use RollingCounter base class
 //
 // ToDo: 
 // -
@@ -269,53 +270,6 @@ RainGauge::prefs_save(void)
 #endif
 
 
-float
-RainGauge::sumHistory(const RainHistory& h, bool *valid, int *nbins, float *quality)
-{
-    int entries = 0;
-    float res = 0;
-
-    // Calculate the effective number of bins based on size and update rate
-    // For hourly buffer: 60 minutes / updateRate = number of bins
-    // For 24h buffer: size is already correct (24 bins for 24 hours)
-    size_t effectiveBins;
-    if (h.updateRate == 60) {
-        // 24-hour buffer: size is already the effective bin count
-        effectiveBins = h.size;
-    } else {
-        // Hourly buffer: calculate bins based on update rate
-        effectiveBins = 60 / h.updateRate;
-    }
-
-    // Sum of all valid entries
-    for (size_t i=0; i<h.size; i++){
-        if (h.hist[i] >= 0) {
-            res += h.hist[i] * 0.01;
-            entries++;
-        }
-    }
-
-    // Optional: return number of valid bins
-    if (nbins != nullptr)
-        *nbins = entries;
-    
-    // Optional: return valid flag
-    if (valid != nullptr) {
-        if (entries >= qualityThreshold * effectiveBins) {
-            *valid = true;
-        } else {
-            *valid = false;
-        }
-    }
-
-    // Optional: return quality
-    if (quality != nullptr) {
-        *quality = static_cast<float>(entries) / effectiveBins;
-    }
-
-    return res;
-}
-
 void
 RainGauge::update(time_t timestamp, float rain, bool startup)
 {
@@ -336,6 +290,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         // No previous count or counter reset
         nvData.rainPrev = rain;
         nvData.lastUpdate = timestamp;
+        lastUpdate = timestamp;
         
         #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
             prefs_save();
@@ -422,7 +377,7 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
             nvData.hist[idx] = 0;
         struct tm t_prev;
         localtime_r(&nvData.lastUpdate, &t_prev);
-        if (t_prev.tm_min / nvData.updateRate == idx) {
+        if (calculateIndex(t_prev, nvData.updateRate) == idx) {
             // same index as in previous cycle - add value
             nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
             log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
@@ -440,15 +395,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     else {
         // Some other index
 
-        // Mark all history entries in interval [expected_index, current_index) as invalid
-        // N.B.: excluding current index!
-        for (time_t ts = nvData.lastUpdate + (nvData.updateRate * 60); ts < timestamp; ts += nvData.updateRate * 60) {
-            struct tm timeinfo;
-            localtime_r(&ts, &timeinfo);
-            int idx = timeinfo.tm_min / nvData.updateRate;
-            nvData.hist[idx] = -1;
-            log_d("hist[%d]=-1", idx);
-        }
+        // Mark missed entries
+        markMissedEntries(nvData.hist, RAIN_HIST_SIZE, nvData.lastUpdate, timestamp, nvData.updateRate);
 
         // Write delta
         nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
@@ -547,6 +495,8 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
     }
 
     nvData.lastUpdate = timestamp;
+    lastUpdate = timestamp;
+    updateRate = nvData.updateRate;
     nvData.rainPrev = rainCurr;
 
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
@@ -557,25 +507,23 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 float
 RainGauge::pastHour(bool *valid, int *nbins, float *quality)
 {
-    RainHistory hourHist = {
+    History hourHist = {
         .hist = nvData.hist,
         .size = RAIN_HIST_SIZE,
-        .updateRate = nvData.updateRate,
-        .lastUpdate = nvData.lastUpdate
+        .updateRate = nvData.updateRate
     };
-    return sumHistory(hourHist, valid, nbins, quality);
+    return sumHistory(hourHist, valid, nbins, quality, 0.01);
 }
 
 float
 RainGauge::past24Hours(bool *valid, int *nbins, float *quality)
 {
-    RainHistory dayHist = {
+    History dayHist = {
         .hist = nvData.hist24h,
         .size = RAIN_HIST_SIZE_24H,
-        .updateRate = 60,
-        .lastUpdate = nvData.lastUpdate
+        .updateRate = 60
     };
-    return sumHistory(dayHist, valid, nbins, quality);
+    return sumHistory(dayHist, valid, nbins, quality, 0.01);
 }
 
 float

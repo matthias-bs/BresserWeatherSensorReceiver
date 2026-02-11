@@ -9,7 +9,7 @@ This document details the test coverage improvements made to RainGauge.cpp.
 - **Test Files**: TestRainGauge.cpp
 - **Total Tests**: 44
 - **Total Assertions**: 548
-- **Functions Tested**: pastHour(), past24Hours(), currentDay(), currentWeek(), currentMonth(), update(), basic overflow handling
+- **Functions Tested**: pastHour(), currentDay(), currentWeek(), currentMonth(), update(), basic overflow handling
 
 ### After Enhancement
 - **Test Files**: TestRainGauge.cpp (enhanced)

@@ -12,57 +12,55 @@ This document summarizes the test coverage improvements made to the BresserWeath
 - **Components Tested**: RainGauge, Lightning
 
 ### After Improvement
-- **Test Files**: 4 (+ TestWeatherUtils.cpp, + README.md)
-- **Total Tests**: 48 (44 active)
-- **Total Assertions**: 548+
-- **Components Tested**: RainGauge, Lightning, WeatherUtils
+- **Test Files**: Increased from the original 2; notable additions include `TestWeatherUtils.cpp`.
+- **Total Tests / Assertions**: Significantly increased compared to the baseline; see the latest test report (for example, `ctest` output or CI artifacts) for up-to-date counts.
+- **Components Tested**: RainGauge, Lightning, WeatherUtils, plus related utility code.
 
 ### Improvement Metrics
-- **Test Increase**: +92% (25 → 48 tests)
-- **Active Tests**: +76% (25 → 44 tests)
-- **Assertion Increase**: +14% (479 → 548+ checks)
-- **New Test File**: TestWeatherUtils.cpp (475 lines, 22 tests)
+- **Scope**: Test coverage has roughly doubled compared to the original baseline.
+- **Focus Areas**: Weather-related calculations and edge cases (temperature, wind, humidity).
+- **New Test File**: `TestWeatherUtils.cpp`, adding extensive coverage for weather utility functions.
 
 ## New Test Coverage
 
-### WeatherUtils.cpp (22 new tests)
+### WeatherUtils.cpp (new tests)
 
 #### Temperature Calculations
-1. **Dew Point** (`calcdewpoint`) - 3 tests
+1. **Dew Point** (`calcdewpoint`)
    - Positive temperatures with various humidity
    - Negative temperatures
    - Extreme values (100% humidity, low humidity)
 
-2. **Wind Chill** (`calcwindchill`) - 2 tests
+2. **Wind Chill** (`calcwindchill`)
    - Normal wind chill conditions
    - Varying wind speed effects
 
-3. **Heat Index** (`calcheatindex`) - 2 tests
+3. **Heat Index** (`calcheatindex`)
    - Hot weather conditions
    - Humidity effect on perceived heat
 
-4. **Humidex** (`calchumidex`) - 1 test
+4. **Humidex** (`calchumidex`)
    - Canadian humidity index calculation
 
-5. **Wet Bulb Temperature** (`calcnaturalwetbulb`) - 1 test
+5. **Wet Bulb Temperature** (`calcnaturalwetbulb`)
    - Natural wet bulb calculation validation
 
-6. **WBGT** (`calcwbgt`) - 2 tests
+6. **WBGT** (`calcwbgt`)
    - Wet bulb globe temperature calculation
    - Weighted formula validation
 
-7. **Perceived Temperature** (`perceived_temperature`) - 3 tests
+7. **Perceived Temperature** (`perceived_temperature`)
    - Wind chill application (cold + wind)
    - Heat index application (hot + humid)
    - Neutral conditions (no adjustment)
 
 #### Wind Conversions
-8. **Beaufort Scale** (`windspeed_ms_to_bft`) - 5 tests
+8. **Beaufort Scale** (`windspeed_ms_to_bft`)
    - All 13 Beaufort levels (0-12)
    - Boundary conditions
    - Calm to hurricane force winds
 
-9. **Wind Direction** (`winddir_flt_to_str`) - 3 tests (ESP32/ESP8266)
+9. **Wind Direction** (`winddir_flt_to_str`) (ESP32/ESP8266)
    - Cardinal directions (N, E, S, W)
    - Ordinal directions (NE, SE, SW, NW)
    - Secondary directions (NNE, ENE, etc.)

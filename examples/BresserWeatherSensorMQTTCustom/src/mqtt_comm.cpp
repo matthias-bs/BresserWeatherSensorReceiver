@@ -337,11 +337,13 @@ void publishWeatherdata(bool complete, bool retain)
             {
                 jsonSensor["rain"] = weatherSensor.sensor[i].w.rain_mm;
                 jsonSensor["rain_h"] = rainGauge.pastHour();
+                jsonSensor["rain_d24h"] = rainGauge.past24Hours();
                 jsonSensor["rain_d"] = rainGauge.currentDay();
                 jsonSensor["rain_w"] = rainGauge.currentWeek();
                 jsonSensor["rain_m"] = rainGauge.currentMonth();
                 jsonCombined["ws_rain_mm"] = weatherSensor.sensor[i].w.rain_mm;
                 jsonCombined["ws_rain_hourly_mm"] = rainGauge.pastHour();
+                jsonCombined["ws_rain_24h_mm"] = rainGauge.past24Hours();
                 jsonCombined["ws_rain_daily_mm"] = rainGauge.currentDay();
                 jsonCombined["ws_rain_weekly_mm"] = rainGauge.currentWeek();
                 jsonCombined["ws_rain_monthly_mm"] = rainGauge.currentMonth();
@@ -455,6 +457,7 @@ void haAutoDiscovery(void)
             {
                 publishAutoDiscovery(info, "Rainfall", sensor_id, "precipitation", "mm", topic.c_str(), "rain");
                 publishAutoDiscovery(info, "Rainfall Hourly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_h");
+                publishAutoDiscovery(info, "Rainfall 24h", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d24h");
                 publishAutoDiscovery(info, "Rainfall Daily", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d");
                 publishAutoDiscovery(info, "Rainfall Weekly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_w");
                 publishAutoDiscovery(info, "Rainfall Monthly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_m");

@@ -105,7 +105,8 @@
 // BEGIN User specific options
 // Please change Domoticz IDX settings according to your configuration
 #define DOMO_WIND_IDX 877     // IDX of Domoticz virtual wind sensor
-#define DOMO_RAIN_IDX 878     // IDX of Domoticz virtual rain sensor
+#define DOMO_RAIN_IDX 878     // IDX of Domoticz virtual rain sensor (hourly)
+#define DOMO_RAIN24H_IDX 879  // IDX of Domoticz virtual rain sensor (24h)
 #define DOMO_TH_IDX 876       // IDX of Domoticz virtual temperature/humidity sensor
 #define PAYLOAD_SIZE 256      // maximum MQTT message size
 #define HOSTNAME_SIZE 30      // maximum hostname size
@@ -429,6 +430,12 @@ void publishWeatherdata(void)
         rainGauge.update(now, weatherSensor.sensor[i].w.rain_mm, weatherSensor.sensor[i].startup);
 
         domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 0);
+        domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
+        domo2_payload += String("\"}");
+        Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());
+        client.publish(MQTT_PUB_DOMO, domo2_payload.c_str(), false, 0);
+
+        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN24H_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.past24Hours() * 100, 0);
         domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
         domo2_payload += String("\"}");
         Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());

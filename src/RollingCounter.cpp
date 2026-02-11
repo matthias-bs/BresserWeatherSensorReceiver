@@ -42,6 +42,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
+#include "WeatherSensorCfg.h"
 #include "RollingCounter.h"
 
 int 
@@ -54,6 +55,7 @@ void
 RollingCounter::markMissedEntries(int16_t* hist, size_t size, time_t lastUpdate, 
                                   time_t timestamp, uint8_t rate)
 {
+    (void)size; // Parameter reserved for future bounds checking
     // Mark all history entries in interval [expected_index, current_index) as invalid
     // N.B.: excluding current index!
     for (time_t ts = lastUpdate + (rate * 60); ts < timestamp; ts += rate * 60) {

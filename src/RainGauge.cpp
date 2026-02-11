@@ -132,7 +132,7 @@ RainGauge::reset(uint8_t flags)
         preferences.putFloat("rainMonthBegin", nvData.rainMonthBegin);
     }
 
-    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
+    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) {
         nvData.startupPrev       = false;
         nvData.rainPreStartup    = 0;
         nvData.rainPrev          = -1;
@@ -164,7 +164,7 @@ RainGauge::reset(uint8_t flags)
         nvData.rainMonthBegin = 0;
     }
 
-    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M)) {
+    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) {
         nvData.startupPrev       = false;
         nvData.rainPreStartup    = 0;
         nvData.rainPrev          = -1;

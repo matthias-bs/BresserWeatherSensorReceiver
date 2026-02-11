@@ -288,7 +288,7 @@ public:
      * 
      * \param flags Flags defining what to reset:
      */
-    void reset(uint8_t flags=0xF);
+    void reset(uint8_t flags=0x1F);
     
     /**
      * Initialize history buffer for hourly (past 60 minutes) rainfall

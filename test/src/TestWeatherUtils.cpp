@@ -42,7 +42,6 @@
 
 #include "CppUTest/TestHarness.h"
 #include "WeatherUtils.h"
-#include <string.h>
 
 #define TOLERANCE 0.1
 

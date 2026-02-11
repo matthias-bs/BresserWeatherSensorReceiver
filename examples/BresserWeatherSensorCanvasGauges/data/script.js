@@ -370,6 +370,43 @@ var gaugeRainh = new LinearGauge({
   valueDec: 1
 }).draw();
 
+var gaugeRaind24h = new LinearGauge({
+  renderTo: 'gauge-raind24h',
+  width: 90,
+  height: 250,
+  title: "Past 24 hrs",
+  units: "mm",
+  minValue: 0,
+  maxValue: 50,
+  majorTicks: [
+    "0",
+    "10",
+    "20",
+    "30",
+    "40",
+    "50"
+  ],
+  minorTicks: 5,
+  strokeTicks: true,
+  highlights: false,
+  colorPlate: "#fff",
+  colorBar: "#f5f5f5",
+  colorBarProgress: "#327ac0",
+  borderShadowWidth: 0,
+  borders: false,
+  needleType: "arrow",
+  needleWidth: 2,
+  animationDuration: 1500,
+  animationRule: "linear",
+  tickSide: "left",
+  numberSide: "left",
+  needleSide: "left",
+  barStrokeWidth: 4,
+  barBeginCircle: false,
+  valueInt: 1,
+  valueDec: 1
+}).draw();
+
 var gaugeRaind = new LinearGauge({
   renderTo: 'gauge-raind',
   width: 90,
@@ -536,6 +573,10 @@ function getReadings() {
           var rainh = myObj.ws_rain_h;
           gaugeRainh.value = limitValue(rainh, -1, 52);
         }
+        if (myObj.ws_rain_d24h !== undefined) {
+          var raind24h = myObj.ws_rain_d24h;
+          gaugeRaind24h.value = limitValue(raind24h, -1, 52);
+        }
         if (myObj.ws_rain_d !== undefined) {
           var raind = myObj.ws_rain_d;
           gaugeRaind.value = limitValue(raind, -1, 52);
@@ -609,6 +650,9 @@ if (!!window.EventSource) {
         }
         if (myObj.ws_rain_h !== undefined) {
           gaugeRainh.value = limitValue(myObj.ws_rain_h, -1, 52);
+        }
+        if (myObj.ws_rain_d24h !== undefined) {
+          gaugeRaind24h.value = limitValue(myObj.ws_rain_d24h, -1, 52);
         }
         if (myObj.ws_rain_d !== undefined) {
           gaugeRaind.value = limitValue(myObj.ws_rain_d, -1, 52);

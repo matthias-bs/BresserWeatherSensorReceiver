@@ -175,6 +175,7 @@ String getSensorReadingsBWS()
     }
 
     readings["ws_rain_h"] = String(rainGauge.pastHour());
+    readings["ws_rain_d24h"] = String(rainGauge.past24Hours());
     readings["ws_rain_d"] = String(rainGauge.currentDay());
     readings["ws_rain_w"] = String(rainGauge.currentWeek());
     readings["ws_rain_m"] = String(rainGauge.currentMonth());

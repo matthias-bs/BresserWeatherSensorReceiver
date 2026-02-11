@@ -1884,7 +1884,7 @@ TEST(TestRainGaugeEdgeCases, Test_LightContinuousRain) {
   rainGauge.update(ts, rain);
   
   // Very light rain (0.1mm every 6 minutes)
-  for (int i = 1; i <= 10; i++) {
+  for (int i = 1; i <= 9; i++) {
     char timeStr[20];
     sprintf(timeStr, "2022-09-06 8:%02d", i * 6);
     setTime(timeStr, tm, ts);
@@ -1892,5 +1892,5 @@ TEST(TestRainGaugeEdgeCases, Test_LightContinuousRain) {
     rainGauge.update(ts, rain);
   }
   
-  DOUBLES_EQUAL(1.0, rainGauge.pastHour(), TOLERANCE);
+  DOUBLES_EQUAL(0.9, rainGauge.pastHour(), TOLERANCE);
 }

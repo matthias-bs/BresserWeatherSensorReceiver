@@ -69,7 +69,7 @@
 // -
 //
 // Notes:
-// Maximum number of lighting strikes on earth:
+// Maximum number of lightning strikes on earth:
 // https://en.wikipedia.org/wiki/Catatumbo_lightning
 //
 ///////////////////////////////////////////////////////////////////////////////////////////////////

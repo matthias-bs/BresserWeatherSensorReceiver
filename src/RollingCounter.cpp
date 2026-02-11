@@ -55,13 +55,26 @@ void
 RollingCounter::markMissedEntries(int16_t* hist, size_t size, time_t lastUpdate, 
                                   time_t timestamp, uint8_t rate)
 {
-    (void)size; // Parameter reserved for future bounds checking
+    // Guard against invalid rate values to avoid division by zero
+    if (rate == 0) {
+        log_w("markMissedEntries called with invalid rate=0, skipping history update");
+        return;
+    }
+
     // Mark all history entries in interval [expected_index, current_index) as invalid
     // N.B.: excluding current index!
     for (time_t ts = lastUpdate + (rate * 60); ts < timestamp; ts += rate * 60) {
         struct tm timeinfo;
         localtime_r(&ts, &timeinfo);
         int idx = timeinfo.tm_min / rate;
+        
+        // Use provided size to guard against out-of-bounds writes
+        if (idx < 0 || static_cast<size_t>(idx) >= size) {
+            log_w("markMissedEntries: computed index %d out of bounds (size=%u, minute=%d, rate=%u)",
+                  idx, static_cast<unsigned>(size), timeinfo.tm_min, rate);
+            continue;
+        }
+        
         hist[idx] = -1;
         log_d("hist[%d]=-1", idx);
     }
@@ -73,6 +86,18 @@ RollingCounter::sumHistory(const History& h, bool *valid, int *nbins, float *qua
     int entries = 0;
     float res = 0;
 
+    // Validate updateRate to avoid division by zero
+    if (h.updateRate == 0) {
+        log_w("sumHistory called with invalid updateRate=0");
+        if (nbins != nullptr)
+            *nbins = 0;
+        if (valid != nullptr)
+            *valid = false;
+        if (quality != nullptr)
+            *quality = 0.0f;
+        return 0.0f;
+    }
+
     // Calculate the effective number of bins based on size and update rate
     // For hourly buffer: 60 minutes / updateRate = number of bins
     // For 24h buffer: size is already correct (24 bins for 24 hours)
@@ -80,13 +105,22 @@ RollingCounter::sumHistory(const History& h, bool *valid, int *nbins, float *qua
     if (h.updateRate == 60) {
         // 24-hour buffer: size is already the effective bin count
         effectiveBins = h.size;
+    } else if (h.updateRate > 60) {
+        // Invalid rate for hourly buffer, can't have update rate > 60 minutes
+        log_w("sumHistory called with updateRate=%u > 60 minutes", h.updateRate);
+        effectiveBins = 1; // Fallback to avoid division by zero
     } else {
         // Hourly buffer: calculate bins based on update rate
         effectiveBins = 60 / h.updateRate;
+        // Constrain to actual buffer size
+        if (effectiveBins > h.size) {
+            effectiveBins = h.size;
+        }
     }
 
-    // Sum of all valid entries
-    for (size_t i=0; i<h.size; i++){
+    // Sum of all valid entries, but only count bins within the effective range
+    size_t binsToCheck = (effectiveBins < h.size) ? effectiveBins : h.size;
+    for (size_t i = 0; i < binsToCheck; i++){
         if (h.hist[i] >= 0) {
             res += h.hist[i] * scale;
             entries++;
@@ -108,7 +142,11 @@ RollingCounter::sumHistory(const History& h, bool *valid, int *nbins, float *qua
 
     // Optional: return quality
     if (quality != nullptr) {
-        *quality = static_cast<float>(entries) / effectiveBins;
+        if (effectiveBins > 0) {
+            *quality = static_cast<float>(entries) / effectiveBins;
+        } else {
+            *quality = 0.0f;
+        }
     }
 
     return res;

@@ -99,9 +99,9 @@
 #define LIGHTNING_UPD_RATE 6
 
 /**
- * \def
+ * \def LIGHTNING_HIST_SIZE
  * 
- * Set to 3600 [sec] / min_update_rate_rate [sec]
+ * Set to 60 [min] / LIGHTNING_UPD_RATE [min]
  */
 #define LIGHTNING_HIST_SIZE 10
 
@@ -202,8 +202,24 @@ public:
      * result, because bins in the history buffer will be missed.
      * 
      * \param rate    update rate in minutes (default: 6)
+     * \return true if rate is valid and was set, false otherwise
      */
-    void setUpdateRate(uint8_t rate = LIGHTNING_UPD_RATE) {
+    bool setUpdateRate(uint8_t rate = LIGHTNING_UPD_RATE) {
+        // Validate rate: must be > 0, must evenly divide 60, and result must fit in buffer
+        if (rate == 0) {
+            log_w("setUpdateRate: rate cannot be 0");
+            return false;
+        }
+        if (60 % rate != 0) {
+            log_w("setUpdateRate: rate=%u must evenly divide 60 minutes", rate);
+            return false;
+        }
+        if (60 / rate > LIGHTNING_HIST_SIZE) {
+            log_w("setUpdateRate: rate=%u would require %u bins, but only %u available",
+                  rate, 60 / rate, LIGHTNING_HIST_SIZE);
+            return false;
+        }
+        
         #if !defined(INSIDE_UNITTEST)
         preferences.begin("BWS-LGT", false);
         uint8_t updateRatePrev = preferences.getUChar("updateRate", LIGHTNING_UPD_RATE);
@@ -217,6 +233,7 @@ public:
         if (nvLightning.updateRate != updateRatePrev) {
             hist_init();
         }
+        return true;
     }
 
 

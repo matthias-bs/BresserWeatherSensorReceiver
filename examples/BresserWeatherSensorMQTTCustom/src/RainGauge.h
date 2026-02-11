@@ -53,6 +53,9 @@
 // 20240122 Changed scope of nvData -
 //          Using RTC RAM: global
 //          Using Preferences, Unit Tests: class member
+// 20250323 Added configuration of expected update rate at run-time
+//          pastHour(): modified parameters
+// 20260211 Added past24Hours()
 //
 // ToDo: 
 // -
@@ -88,17 +91,24 @@
 /**
  * \def
  * 
- * Set to 3600 [sec] / update_rate_rate [sec]
+ * Set to 3600 [sec] / min_update_rate_rate [sec]
  */
 #define RAIN_HIST_SIZE 10
+
+/**
+ * \def RAIN_HIST_SIZE_24H
+ * 
+ * Size of 24-hour rain history buffer (24 hours / 1 hour per bin)
+ */
+#define RAIN_HIST_SIZE_24H 24
 
 
 /**
  * \def
  * 
- * Number of valid rain_hist entries required for valid result
+ * Fraction of valid rain_hist entries required for valid result
  */
-#define DEFAULT_QUALITY_THRESHOLD 8
+#define DEFAULT_QUALITY_THRESHOLD 0.8
 
 /**
  * \defgroup Reset rain counters
@@ -107,6 +117,7 @@
  #define RESET_RAIN_D 2
  #define RESET_RAIN_W 4
  #define RESET_RAIN_M 8
+ #define RESET_RAIN_24H 16
 
 
 /**
@@ -120,6 +131,9 @@ typedef struct {
 
     /* Data of past 60 minutes */
     int16_t   hist[RAIN_HIST_SIZE];
+
+    /* Data of past 24 hours */
+    int16_t   hist24h[RAIN_HIST_SIZE_24H];
 
     /* Sensor startup handling */
     bool      startupPrev; // previous state of startup
@@ -140,6 +154,8 @@ typedef struct {
 
     float     rainPrev;  // rain gauge at previous run - to detect overflow
     float     rainAcc; // accumulated rain (overflows and startups)
+
+    uint8_t   updateRate; // update rate for pastHour() calculation
 } nvData_t;
 
 /**
@@ -151,14 +167,27 @@ typedef struct {
  */
 class RainGauge {
 private:
+    /**
+     * \struct RainHistory
+     *
+     * \brief Rain history buffer with its configuration
+     */
+    typedef struct {
+        int16_t*  hist;         // pointer to buffer
+        size_t    size;         // number of bins
+        uint8_t   updateRate;   // minutes per bin
+        time_t    lastUpdate;   // last update timestamp
+    } RainHistory;
+
     float rainCurr;
     float raingaugeMax;
-    int qualityThreshold;
+    float qualityThreshold;
 
     #if defined(RAINGAUGE_USE_PREFS) || defined(INSIDE_UNITTEST)
     nvData_t nvData = {
         .lastUpdate = 0,
         .hist = {-1},
+        .hist24h = {-1},
         .startupPrev = false,
         .rainPreStartup = 0,
         .tsDayBegin = 0xFF,
@@ -169,21 +198,34 @@ private:
         .tsMonthBegin = 0xFF,
         .rainMonthBegin = 0,
         .rainPrev = 0,
-        .rainAcc = 0
+        .rainAcc = 0,
+        .updateRate = RAINGAUGE_UPD_RATE
     };
     #endif
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     Preferences preferences;
     #endif
 
+    /**
+     * Sum all valid entries in a history buffer
+     * 
+     * \param h          RainHistory buffer to sum
+     * \param valid      pointer to bool indicating if result is valid (optional)
+     * \param nbins      pointer to int for number of valid bins (optional)
+     * \param quality    pointer to float for quality metric (optional)
+     * 
+     * \returns total rainfall in the history buffer
+     */
+    float sumHistory(const RainHistory& h, bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
+
 public:
     /**
      * Constructor
      * 
      * \param raingauge_max     raingauge value which causes a counter overflow
-     * \param quality_threshold number of valid rain_hist entries required for valid pastHour() result
+     * \param quality_threshold fraction of valid rain_hist entries required for valid pastHour() result
      */
-    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+    RainGauge(const float raingauge_max = RAINGAUGE_MAX_VALUE, const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
         raingaugeMax(raingauge_max),
         qualityThreshold(quality_threshold)
     {};
@@ -199,16 +241,68 @@ public:
     }
     
     /**
+     * \brief Set expected update rate for pastHour() calculation
+     * 
+     * RAIN_HIST_SIZE: number of entries in rain_hist[]
+     * updateRate: update rate in minutes
+     * 
+     * 60 minutes / updateRate = no_of_hist_bins
+     * The resulting number of history bins must be an integer value which
+     * does not exceed RAIN_HIST_SIZE.
+     * 
+     * Examples: 
+     * 
+     * 1. updateRate =  6 -> 60 / 6 = 10 entries
+     * 2. updateRate = 12 -> 60 / 12 = 5 entries
+     * 
+     * Changing the update rate will reset the history buffer, therefore
+     * the caller should avoid frequent changes.
+     * 
+     * Actual update intervals shorter than updateRate will lead to a reduced
+     * resolution of the pastHour() result and a higher risk of an invalid
+     * result if a bin in the history buffer was missed.
+     * 
+     * Actual update intervals longer than updateRate will lead to an invalid
+     * result, because bins in the history buffer will be missed.
+     * 
+     * \param rate    update rate in minutes (default: 6)
+     */
+    void setUpdateRate(uint8_t rate = RAINGAUGE_UPD_RATE) {
+        #if !defined(INSIDE_UNITTEST)
+        preferences.begin("BWS-RAIN", false);
+        uint8_t updateRatePrev = preferences.getUChar("updateRate", RAINGAUGE_UPD_RATE);
+        preferences.putUChar("updateRate", rate);
+        preferences.end();
+        #else
+        static uint8_t updateRatePrev = RAINGAUGE_UPD_RATE;
+        updateRatePrev = nvData.updateRate;
+        #endif
+        nvData.updateRate = rate;
+        if (nvData.updateRate != updateRatePrev) {
+            hist_init();
+        }
+    }
+
+    /**
      * Reset non-volatile data and current rain counter value
      * 
      * \param flags Flags defining what to reset:
      */
-    void reset(uint8_t flags=0xF);
+    void reset(uint8_t flags=0x1F);
     
     /**
      * Initialize history buffer for hourly (past 60 minutes) rainfall
+     * 
+     * \param rain  initial value for all entries (default: -1 for invalid)
      */
     void hist_init(int16_t rain = -1);
+    
+    /**
+     * Initialize 24-hour history buffer
+     * 
+     * \param rain  initial value for all entries (default: -1 for invalid)
+     */
+    void hist24h_init(int16_t rain = -1);
 
     #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
@@ -231,12 +325,24 @@ public:
     /**
      * Rainfall during past 60 minutes
      * 
-     * \param valid     number of valid entries in rain_hist >= qualityThreshold
-     * \param quality   number of valid entries in rain_hist
+     * \param valid     number of valid entries in rain_hist >= qualityThreshold * 60 / updateRate
+     * \param nbins     number of valid entries in rain_hist
+     * \param quality   fraction of valid entries in rain_hist (0..1); quality = nbins / (60 / updateRate)
      * 
      * \returns amount of rain during past 60 minutes
      */
-    float pastHour(bool *valid = nullptr, int *quality = nullptr);
+    float pastHour(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
+
+    /**
+     * Rainfall during past 24 hours
+     * 
+     * \param valid     number of valid entries in rain_hist24h >= qualityThreshold * 24
+     * \param nbins     number of valid entries in rain_hist24h
+     * \param quality   fraction of valid entries in rain_hist24h (0..1); quality = nbins / 24
+     * 
+     * \returns amount of rain during past 24 hours
+     */
+    float past24Hours(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
 
     /**
      * Rainfall of current calendar day

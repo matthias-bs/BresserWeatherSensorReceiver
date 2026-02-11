@@ -55,6 +55,7 @@
 //          Using Preferences, Unit Tests: class member
 // 20250323 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
+// 20260211 Added past24Hours()
 //
 // ToDo: 
 // -

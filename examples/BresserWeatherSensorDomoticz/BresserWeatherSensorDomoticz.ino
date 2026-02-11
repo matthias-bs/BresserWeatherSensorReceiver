@@ -435,8 +435,10 @@ void publishWeatherdata(void)
         Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());
         client.publish(MQTT_PUB_DOMO, domo2_payload.c_str(), false, 0);
 
-        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN24H_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.past24Hours() * 100, 0);
-        domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
+        // Domoticz 24h virtual rain sensor: svalue = "rain_rate;rain_total"
+        // Report a rate of 0 and the 24h accumulation as the total, without extra scaling.
+        domo2_payload = String("{\"idx\":") + String(DOMO_RAIN24H_IDX) + String(",\"nvalue\":0,\"svalue\":\"0");
+        domo2_payload += String(";") + String(rainGauge.past24Hours(), 1);
         domo2_payload += String("\"}");
         Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());
         client.publish(MQTT_PUB_DOMO, domo2_payload.c_str(), false, 0);

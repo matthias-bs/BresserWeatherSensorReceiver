@@ -74,3 +74,6 @@ secrets.h
 # C++ stuff
 *.bin
 *.bin.dSYM
+
+# Other
+_codeql_detected_source_root

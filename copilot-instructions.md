@@ -170,7 +170,8 @@ Decoders should:
 
 ### Board Configurations
 Predefined board configs in `WeatherSensorCfg.h`:
-- `LORAWAN_NODE` - Generic LoRaWAN Node
+- `LORAWAN_NODE` - Custom board based on DFRobot FireBeetle ESP32
+- `DFROBOT_COVER_LORA` - DFRobot FireBeetle ESP32 with FireBeetle Cover LoRa Radio
 - `TTGO_LORA32` - TTGO ESP32 with integrated SX1276
 - `ADAFRUIT_FEATHER_ESP32S2` - Adafruit Feather with RFM95W
 - `ARDUINO_DFROBOT_FIREBEETLE_ESP32` - DFRobot FireBeetle ESP32

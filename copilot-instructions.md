@@ -173,7 +173,7 @@ Predefined board configs in `WeatherSensorCfg.h`:
 - `LORAWAN_NODE` - Generic LoRaWAN Node
 - `TTGO_LORA32` - TTGO ESP32 with integrated SX1276
 - `ADAFRUIT_FEATHER_ESP32S2` - Adafruit Feather with RFM95W
-- `FIREBEETLE_ESP32` - FireBeetle ESP32
+- `ARDUINO_DFROBOT_FIREBEETLE_ESP32` - DFRobot FireBeetle ESP32
 - `ESP32_LORA_V2` - Heltec ESP32 LoRa V2
 - `M5CORE2_MODULE_LORA868` - M5Stack Core2 with LoRa module
 
@@ -286,7 +286,6 @@ make
 ### Sensor ID Filtering
 - Support both include and exclude lists
 - Use `rxFlags.DATA_COMPLETE` cautiously - some sensors never provide complete data
-- Handle broadcast ID (`0xFFFFFFFF`) for sensors without unique IDs
 
 ### Debugging
 - Use `CORE_DEBUG_LEVEL` (ESP32) or `WeatherSensorCfg.h` defines (ESP8266)
@@ -296,6 +295,7 @@ make
 ### Version Management
 - Follow semantic versioning (MAJOR.MINOR.PATCH)
 - Update `library.properties` version field
+- Update `package.json` version field
 - Document changes in file history blocks
 - Update `CHANGELOG.md` (if present)
 

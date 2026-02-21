@@ -57,6 +57,7 @@
 //          pastHour(): modified parameters
 // 20260211 Added past24Hours() algorithm
 //          Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo: 
 // -
@@ -371,37 +372,11 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
 
     int idx = t.tm_min / nvData.updateRate;
 
-    if (t_delta / 60 < nvData.updateRate) {
-        // t_delta shorter than expected update rate
-        if (nvData.hist[idx] < 0)
-            nvData.hist[idx] = 0;
-        struct tm t_prev;
-        localtime_r(&nvData.lastUpdate, &t_prev);
-        if (calculateIndex(t_prev, nvData.updateRate) == idx) {
-            // same index as in previous cycle - add value
-            nvData.hist[idx] += static_cast<int16_t>(rainDelta * 100);
-            log_d("hist[%d]=%d (upd)", idx, nvData.hist[idx]);
-        } else {
-            // different index - new value
-            nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
-            log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
-        }
-    }
-    else if (t_delta >= RAIN_HIST_SIZE * nvData.updateRate * 60) {
-        // t_delta >= RAINGAUGE_HIST_SIZE * RAINGAUGE_UPDATE_RATE -> reset history
-        log_w("History time frame expired, resetting!");
-        hist_init();
-    }
-    else {
-        // Some other index
-
-        // Mark missed entries
-        markMissedEntries(nvData.hist, RAIN_HIST_SIZE, nvData.lastUpdate, timestamp, nvData.updateRate);
-
-        // Write delta
-        nvData.hist[idx] = static_cast<int16_t>(rainDelta * 100);
-        log_d("hist[%d]=%d (new)", idx, nvData.hist[idx]);
-    }
+    // Update history buffer using generalized base class method
+    // Note: rainDelta is scaled by 100 for storage precision
+    updateHistoryBuffer(nvData.hist, RAIN_HIST_SIZE, idx, 
+                       static_cast<int16_t>(rainDelta * 100),
+                       t_delta, timestamp, nvData.lastUpdate, nvData.updateRate);
 
 
     #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
@@ -414,46 +389,18 @@ RainGauge::update(time_t timestamp, float rain, bool startup)
         log_d("%s", buf.c_str());
     #endif
     
-    // Update 24-hour history buffer (similar logic to hourly buffer above)
-    // Note: This is implemented inline to avoid complexity with managing
-    // separate lastUpdate timestamps for each buffer.
+    // Update 24-hour history buffer using generalized base class method
+    // Note: Update rate of 60 minutes (1 hour) triggers hour-based indexing
     // Calculate index based on hour (0-23)
-    int idx24h = t.tm_hour;
+    int idx24h = calculateIndex(t, 60);
     
-    if (t_delta / 60 < 60) {
-        // t_delta shorter than 60 minutes
-        if (nvData.hist24h[idx24h] < 0)
-            nvData.hist24h[idx24h] = 0;
-        struct tm t_prev;
-        localtime_r(&nvData.lastUpdate, &t_prev);
-        if (t_prev.tm_hour == idx24h) {
-            // same hour as in previous cycle - add value
-            nvData.hist24h[idx24h] += static_cast<int16_t>(rainDelta * 100);
-            log_d("hist24h[%d]=%d (upd)", idx24h, nvData.hist24h[idx24h]);
-        } else {
-            // different hour - new value
-            nvData.hist24h[idx24h] = static_cast<int16_t>(rainDelta * 100);
-            log_d("hist24h[%d]=%d (new)", idx24h, nvData.hist24h[idx24h]);
-        }
-    }
-    else if (t_delta >= RAIN_HIST_SIZE_24H * 60 * 60) {
-        // t_delta >= 24 hours -> reset 24h history
-        log_w("24h history time frame expired, resetting!");
+    // Update 24h history buffer using core method (handles init separately)
+    // Note: rainDelta is scaled by 100 for storage precision
+    UpdateResult result24h = updateHistoryBufferCore(nvData.hist24h, RAIN_HIST_SIZE_24H, idx24h,
+                                                     static_cast<int16_t>(rainDelta * 100),
+                                                     t_delta, timestamp, nvData.lastUpdate, 60);
+    if (result24h == UPDATE_EXPIRED) {
         hist24h_init();
-    }
-    else {
-        // Some other index - mark missed entries as invalid
-        for (time_t ts = nvData.lastUpdate + 3600; ts < timestamp; ts += 3600) {
-            struct tm timeinfo;
-            localtime_r(&ts, &timeinfo);
-            int idx_missed = timeinfo.tm_hour;
-            nvData.hist24h[idx_missed] = -1;
-            log_d("hist24h[%d]=-1", idx_missed);
-        }
-
-        // Write delta
-        nvData.hist24h[idx24h] = static_cast<int16_t>(rainDelta * 100);
-        log_d("hist24h[%d]=%d (new)", idx24h, nvData.hist24h[idx24h]);
     }
     
     // Check if day of the week has changed

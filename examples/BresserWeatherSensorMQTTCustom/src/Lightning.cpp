@@ -64,6 +64,7 @@
 // 20250324 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
 // 20260211 Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo:
 // -
@@ -266,38 +267,9 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     localtime_r(&timestamp, &timeinfo);
     int idx = calculateIndex(timeinfo, nvLightning.updateRate);
 
-    if (t_delta / 60 < nvLightning.updateRate) {
-        // t_delta shorter than expected update rate
-        if (nvLightning.hist[idx] < 0)
-            nvLightning.hist[idx] = 0;
-        struct tm t_prev;
-        localtime_r(&nvLightning.lastUpdate, &t_prev);
-        if (calculateIndex(t_prev, nvLightning.updateRate) == idx) {
-            // same index as in previous cycle - add value
-            nvLightning.hist[idx] += delta;
-            log_d("hist[%d]=%d (upd)", idx, nvLightning.hist[idx]);
-        } else {
-            // different index - new value
-            nvLightning.hist[idx] = delta;
-            log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
-        }
-    }
-    else if (t_delta >= LIGHTNING_HIST_SIZE * nvLightning.updateRate * 60) {
-        // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
-        log_w("History time frame expired, resetting!");
-        hist_init();
-    }
-    else {
-        // Some other index
-        
-        // Mark missed entries
-        markMissedEntries(nvLightning.hist, LIGHTNING_HIST_SIZE, nvLightning.lastUpdate, 
-                         timestamp, nvLightning.updateRate);
-        
-        // Write delta
-        nvLightning.hist[idx] = delta;
-        log_d("hist[%d]=%d", idx, delta);
-    }
+    // Update history buffer using generalized base class method
+    updateHistoryBuffer(nvLightning.hist, LIGHTNING_HIST_SIZE, idx, delta,
+                       t_delta, timestamp, nvLightning.lastUpdate, nvLightning.updateRate);
     
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;

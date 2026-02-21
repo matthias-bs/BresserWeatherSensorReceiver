@@ -57,6 +57,7 @@
 //          pastHour(): modified parameters
 // 20260211 Added past24Hours()
 //          Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo: 
 // -
@@ -282,7 +283,7 @@ public:
      * 
      * \param rain  initial value for all entries (default: -1 for invalid)
      */
-    void hist_init(int16_t rain = -1);
+    void hist_init(int16_t rain = -1) override;
     
     /**
      * Initialize 24-hour history buffer

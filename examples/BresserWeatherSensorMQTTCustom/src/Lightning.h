@@ -62,6 +62,7 @@
 // 20250324 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
 // 20260211 Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo:
 // -
@@ -248,7 +249,7 @@ public:
      * 
      * \param count     number of events
      */
-    void  hist_init(int16_t count = -1);
+    void hist_init(int16_t count = -1) override;
     
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
     void prefs_load(void);

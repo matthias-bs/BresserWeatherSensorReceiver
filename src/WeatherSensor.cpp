@@ -409,7 +409,7 @@ DecodeStatus WeatherSensor::getMessage(void)
 #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_VERBOSE
                 char buf[128];
                 *buf = '\0';
-                for (size_t i = 0; i < sizeof(recvData); i++)
+                for (size_t i = 0; (i < sizeof(recvData)) && (i < sizeof(buf) / 3); i++)
                 {
                     sprintf(&buf[strlen(buf)], "%02X ", recvData[i]);
                 }

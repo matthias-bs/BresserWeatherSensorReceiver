@@ -90,10 +90,11 @@ float perceived_temperature(float celsius, float windspeed, float humidity);
  *
  * \param dir Wind direction in degrees
  * \param buf buffer for result (4 characters required)
+ * \param bufsize size of the buffer
  * 
  * \returns pointer to buffer
  */
-char * winddir_flt_to_str(float dir, char * buf);
+char * winddir_flt_to_str(float dir, char * buf, size_t bufsize);
 
 /*!
  * \brief Converts wind speed from Meters per Second to Beaufort.

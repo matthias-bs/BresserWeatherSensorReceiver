@@ -353,19 +353,22 @@ Lightning lightning;
 
 // MQTT topics - change if needed
 String Hostname = String(HOSTNAME);
-String mqttPubStatus = "status";
-String mqttPubRadio = "radio";
-String mqttPubData = "data";
-String mqttPubCombined = "combined";
-String mqttPubRssi = "rssi";
-String mqttPubExtra = "extra";
-String mqttPubInc = "sensors_inc";
-String mqttPubExc = "sensors_exc";
-String mqttSubReset = "reset";
-String mqttSubGetInc = "get_sensors_inc";
-String mqttSubGetExc = "get_sensors_exc";
-String mqttSubSetInc = "set_sensors_inc";
-String mqttSubSetExc = "set_sensors_exc";
+
+MQTTTopics mqttTopics = {
+    .pubStatus = "status",
+    .pubRadio = "radio",
+    .pubData = "data",
+    .pubCombined = "combined",
+    .pubRssi = "rssi",
+    .pubExtra = "extra",
+    .pubInc = "sensors_inc",
+    .pubExc = "sensors_exc",
+    .subReset = "reset",
+    .subGetInc = "get_sensors_inc",
+    .subGetExc = "get_sensors_exc",
+    .subSetInc = "set_sensors_inc",
+    .subSetExc = "set_sensors_exc"
+};
 
 //////////////////////////////////////////////////////
 
@@ -680,7 +683,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback
     client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
+    client.setWill((Hostname + "/" + mqttTopics.pubStatus).c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -701,10 +704,10 @@ void mqtt_connect(void)
 
     log_i("\nconnected!");
 #ifdef RESET_SUBSCRIBE
-    client.subscribe(mqttSubReset);
+    client.subscribe((Hostname + "/" + mqttTopics.subReset).c_str());
 #endif
-    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-    client.publish(mqttPubStatus, "online");
+    log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+    client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
 }
 
 
@@ -747,19 +750,9 @@ void setup()
     }
     sprintf(ChipID, "-%06lX", chip_id);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    sprintf(ChipID, "-%06lX", ESP.getChipId() & 0xFFFFFF);
+    sprintf(ChipID, "-%06X", (unsigned int)(ESP.getChipId() & 0xFFFFFF));
 #endif
     Hostname = Hostname + ChipID;
-    // Prepend Hostname to MQTT topics
-    mqttPubStatus = Hostname + "/" + mqttPubStatus;
-    mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubInc = Hostname + "/" + mqttPubInc;
-    mqttPubExc = Hostname + "/" + mqttPubExc;
-    mqttSubReset = Hostname + "/" + mqttSubReset;
-    mqttSubGetInc = Hostname + "/" + mqttSubGetInc;
-    mqttSubGetExc = Hostname + "/" + mqttSubGetExc;
-    mqttSubSetInc = Hostname + "/" + mqttSubSetInc;
-    mqttSubSetExc = Hostname + "/" + mqttSubSetExc;
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 
@@ -838,8 +831,8 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-        client.publish(mqttPubStatus, "online");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         publishRadio();
     }
 
@@ -901,9 +894,9 @@ void loop()
         }
 
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline");
         Serial.flush();
-        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline", true /* retained */, 0 /* qos */);
         for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
         {
             client.loop();

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-// BresserWeatherSensorMQTTCustom.ino
+// BresserWeatherSensorCustomMQTT.ino
 //
 // Example for BresserWeatherSensorReceiver -
 // this is finally a useful application.
@@ -132,6 +132,8 @@
 // 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
 // 20250712 Removed TLS fingerprint option (insecure)
 //          Improved MQTT "offline" status message handling (avoid inadvertent LWT message)
+// 20260221 Refactored MQTT topic declarations using MQTTTopics struct for cleaner
+//          organization and maintainability (replaces 13 individual declarations)
 //
 // ToDo:
 //
@@ -155,7 +157,7 @@
 // BEGIN User specific options
 #define LED_EN                // Enable LED indicating successful data reception
 #define LED_GPIO 2            // LED pin
-#define RX_TIMEOUT 90000      // sensor receive timeout [ms]
+#define RX_TIMEOUT 180000      // sensor receive timeout [ms]
 #define STATUS_INTERVAL 30000 // MQTT status message interval [ms]
 #define DATA_INTERVAL 15000   // MQTT data message interval [ms]
 #define DISCOVERY_INTERVAL 30 // Home Assistant auto discovery interval [min]
@@ -175,10 +177,10 @@ const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #define MAX_SENSORS 1
 
 // Stop reception when data of at least one sensor is complete
-// #define RX_FLAGS DATA_COMPLETE
+#define RX_FLAGS DATA_COMPLETE
 
 // Stop reception when data of all (max_sensors) is complete
-#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
+//#define RX_FLAGS (DATA_COMPLETE | DATA_ALL_SLOTS)
 
 // Enable to debug MQTT connection; will generate synthetic sensor data.
 // #define _DEBUG_MQTT_
@@ -214,7 +216,7 @@ const char *TZ_INFO = "CET-1CEST-2,M3.5.0/02:00:00,M10.5.0/03:00:00";
 #include "src/InitBoard.h"
 #include "src/mqtt_comm.h"
 
-const char sketch_id[] = "BresserWeatherSensorMQTTCustom 20250802";
+const char sketch_id[] = "BresserWeatherSensorMQTT 20250802";
 
 // Map sensor IDs to Names - replace by your own IDs!
 std::vector<SensorMap> sensor_map = {
@@ -305,19 +307,21 @@ Lightning lightning;
 
 // MQTT topics - change if needed
 String Hostname = String(HOSTNAME);
-String mqttPubStatus = "status";
-String mqttPubRadio = "radio";
-String mqttPubData = "data";
-String mqttPubCombined = "combined";
-String mqttPubRssi = "rssi";
-String mqttPubExtra = "extra";
-String mqttPubInc = "sensors_inc";
-String mqttPubExc = "sensors_exc";
-String mqttSubReset = "reset";
-String mqttSubGetInc = "get_sensors_inc";
-String mqttSubGetExc = "get_sensors_exc";
-String mqttSubSetInc = "set_sensors_inc";
-String mqttSubSetExc = "set_sensors_exc";
+MQTTTopics mqttTopics = {
+    .pubStatus = "status",
+    .pubRadio = "radio",
+    .pubData = "data",
+    .pubCombined = "combined",
+    .pubRssi = "rssi",
+    .pubExtra = "extra",
+    .pubInc = "sensors_inc",
+    .pubExc = "sensors_exc",
+    .subReset = "reset",
+    .subGetInc = "get_sensors_inc",
+    .subGetExc = "get_sensors_exc",
+    .subSetInc = "set_sensors_inc",
+    .subSetExc = "set_sensors_exc"
+};
 
 //////////////////////////////////////////////////////
 
@@ -421,7 +425,7 @@ void mqtt_setup(void)
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
-    log_i("connected!");
+    log_i("\nconnected!");
 
     // Note: TLS security and rain/lightning statistics need correct time
     log_i("Setting time using SNTP");
@@ -472,12 +476,11 @@ void mqtt_setup(void)
     net.setInsecure();
 #endif
 #endif
-
     client.begin(MQTT_HOST, MQTT_PORT, net);
 
     // set up MQTT receive callback
     client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
+    client.setWill((Hostname + "/" + mqttTopics.pubStatus).c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -486,10 +489,10 @@ void mqtt_setup(void)
  */
 void mqtt_connect(void)
 {
-    Serial.print(F("Checking wifi..."));
+    log_i("Checking wifi...");
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
-    Serial.print(F("\nMQTT connecting... "));
+    log_i("MQTT connecting...");
     while (!client.connect(Hostname.c_str(), MQTT_USER, MQTT_PASS))
     {
         Serial.print(".");
@@ -497,13 +500,13 @@ void mqtt_connect(void)
     }
 
     log_i("\nconnected!");
-    client.subscribe(mqttSubReset);
-    client.subscribe(mqttSubGetInc);
-    client.subscribe(mqttSubGetExc);
-    client.subscribe(mqttSubSetInc);
-    client.subscribe(mqttSubSetExc);
-    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-    client.publish(mqttPubStatus, "online");
+    client.subscribe((Hostname + "/" + mqttTopics.subReset).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subGetInc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subGetExc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subSetInc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subSetExc).c_str());
+    log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+    client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
 }
 
 //
@@ -537,20 +540,12 @@ void setup()
     }
     sprintf(ChipID, "-%06lX", chip_id);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    sprintf(ChipID, "-%06lX", ESP.getChipId() & 0xFFFFFF);
+    sprintf(ChipID, "-%06X", (unsigned int)(ESP.getChipId() & 0xFFFFFF));
 #endif
 
     Hostname = Hostname + ChipID;
     // Prepend Hostname to MQTT topics
-    mqttPubStatus = Hostname + "/" + mqttPubStatus;
-    mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubInc = Hostname + "/" + mqttPubInc;
-    mqttPubExc = Hostname + "/" + mqttPubExc;
-    mqttSubReset = Hostname + "/" + mqttSubReset;
-    mqttSubGetInc = Hostname + "/" + mqttSubGetInc;
-    mqttSubGetExc = Hostname + "/" + mqttSubGetExc;
-    mqttSubSetInc = Hostname + "/" + mqttSubSetInc;
-    mqttSubSetExc = Hostname + "/" + mqttSubSetExc;
+
 
     weatherSensor.begin();
     weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
@@ -598,8 +593,8 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-        client.publish(mqttPubStatus, "online");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         publishRadio();
     }
 
@@ -665,9 +660,9 @@ void loop()
             log_d("Data forwarding completed.");
         }
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline");
         Serial.flush();
-        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline", true /* retained */, 0 /* qos */);
         for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
         {
             client.loop();

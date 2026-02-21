@@ -87,6 +87,7 @@
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
 // 20251222 Added SENSOR_TYPE_WEATHER3 (3-in-1 Professional Rain Gauge)
 // 20260202 Added forward declaration of WeatherSensorReceiver namespace
+// 20260221 Improved memory safety
 //
 // ToDo:
 // -
@@ -653,10 +654,10 @@ class WeatherSensor {
                 memset(buf, ' ', prefix_len);
                 buf[prefix_len] = '\0';
                 offs = (len1 < len2) ? (len2 - len1) : 0;
-                strcpy(&buf[offs], txt);
+                snprintf(&buf[offs], sizeof(buf) - offs - 1, "%s", txt);
               
                 // Print byte index
-                for (size_t i = 0 ; i < msgSize; i++) {
+                for (size_t i = 0 ; (i < msgSize) && (strlen(buf) < sizeof(buf) - 4); i++) {
                     sprintf(&buf[strlen(buf)], "%02d ", i);
                 }
                 log_d("%s", buf);
@@ -666,7 +667,7 @@ class WeatherSensor {
                 offs = (len1 > len2) ? (len1 - len2) : 0;
                 sprintf(&buf[offs], "%s: ", descr);
               
-                for (size_t i = 0 ; i < msgSize; i++) {
+                for (size_t i = 0 ; (i < msgSize) && (strlen(buf) < sizeof(buf) - 4); i++) {
                     sprintf(&buf[strlen(buf)], "%02X ", msg[i]);
                 }
                 log_d("%s", buf);

@@ -20,12 +20,11 @@ const std::string COMPASS_POINTS[17] = {
 /*
  * Convert wind direction from Degrees to text (N, NNE, NE, ...)
  */
-char * winddir_flt_to_str(float dir, char * buf)
+char * winddir_flt_to_str(float dir, char * buf, size_t buf_size)
 {
     std::string point = COMPASS_POINTS[(int)((dir + 11.25)/22.5)];
-    strncpy(buf, point.c_str(), sizeof(buf-1));
-    buf[point.length()] = '\0';
-    
+    snprintf(buf, buf_size, "%s", point.c_str());
+
     return buf;
 };
 #endif

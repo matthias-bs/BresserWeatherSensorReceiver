@@ -23,7 +23,7 @@ const std::string COMPASS_POINTS[17] = {
 char * winddir_flt_to_str(float dir, char * buf, size_t buf_size)
 {
     std::string point = COMPASS_POINTS[(int)((dir + 11.25)/22.5)];
-    snprintf(buf, buf_size - 1, "%s", point.c_str());
+    snprintf(buf, buf_size, "%s", point.c_str());
 
     return buf;
 };

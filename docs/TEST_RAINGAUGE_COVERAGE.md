@@ -3,6 +3,9 @@
 ## Overview
 This document details the test coverage improvements made to RainGauge.cpp.
 
+## Refactoring Note
+RainGauge now shares its base class (RollingCounter) with Lightning. Dedicated tests for RollingCounter (see `TestRollingCounter.cpp`) now validate core history and aggregation logic, improving reliability for all derived classes. This ensures that RainGauge benefits from robust base functionality and edge case validation.
+
 ## Test Statistics
 
 ### Before Enhancement

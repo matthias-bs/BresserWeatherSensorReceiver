@@ -353,22 +353,7 @@ Lightning lightning;
 
 // MQTT topics - change if needed
 String Hostname = String(HOSTNAME);
-String Hostname = String(HOSTNAME);
-struct MQTTTopics {
-    const char* pubStatus;
-    const char* pubRadio;
-    const char* pubData;
-    const char* pubCombined;
-    const char* pubRssi;
-    const char* pubExtra;
-    const char* pubInc;
-    const char* pubExc;
-    const char* subReset;
-    const char* subGetInc;
-    const char* subGetExc;
-    const char* subSetInc;
-    const char* subSetExc;
-};
+
 MQTTTopics mqttTopics = {
     .pubStatus = "status",
     .pubRadio = "radio",

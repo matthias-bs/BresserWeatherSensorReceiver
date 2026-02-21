@@ -1,6 +1,6 @@
 #include <CppUTest/TestHarness.h>
 #include <CppUTestExt/MockSupport.h>
-#include "mqtt_comm.h"
+#include "../examples/BresserWeatherSensorMQTT/src/mqtt_comm.h"
 #include <ArduinoJson.h>
 
 // Mock dependencies

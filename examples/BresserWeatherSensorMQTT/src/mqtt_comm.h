@@ -80,6 +80,23 @@
 #define JSON_FLOAT(x) x
 #endif
 
+// MQTT topics structure for organized access
+struct MQTTTopics {
+    const char* pubStatus;
+    const char* pubRadio;
+    const char* pubData;
+    const char* pubCombined;
+    const char* pubRssi;
+    const char* pubExtra;
+    const char* pubInc;
+    const char* pubExc;
+    const char* subReset;
+    const char* subGetInc;
+    const char* subGetExc;
+    const char* subSetInc;
+    const char* subSetExc;
+};
+
 extern void mqtt_setup(void);
 
 // Sensor information for Home Assistant auto discovery
@@ -153,5 +170,8 @@ void publishStatusDiscovery(String name, String topic);
  * \param topic MQTT topic
  */
 void publishControlDiscovery(String name, String topic);
+
+extern MQTTTopics mqttTopics;
+extern String Hostname;
 
 #endif // MQTT_COMM_H

@@ -296,7 +296,7 @@ void publishWeatherdata(bool complete, bool retain)
             if (weatherSensor.sensor[i].w.wind_ok)
             {
                 char buf[4];
-                jsonExtra["wind_dir_txt"] = winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf);
+                jsonExtra["wind_dir_txt"] = winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf, sizeof(buf));
                 jsonExtra["wind_gust_bft"] = windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_gust_meter_sec);
                 jsonExtra["wind_avg_bft"] = windspeed_ms_to_bft(weatherSensor.sensor[i].w.wind_avg_meter_sec);
             }

@@ -413,7 +413,7 @@ void publishWeatherdata(void)
     {
         domo_payload = String("{\"idx\":") + String(DOMO_WIND_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(weatherSensor.sensor[i].w.wind_direction_deg, 1);
         char buf[4];
-        winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf);
+        winddir_flt_to_str(weatherSensor.sensor[i].w.wind_direction_deg, buf, sizeof(buf));
         domo_payload += String(";") + String(buf);
         domo_payload += String(";") + String(weatherSensor.sensor[i].w.wind_avg_meter_sec * 10, 1);
         domo_payload += String(";") + String(weatherSensor.sensor[i].w.wind_gust_meter_sec * 10, 1);

@@ -353,19 +353,37 @@ Lightning lightning;
 
 // MQTT topics - change if needed
 String Hostname = String(HOSTNAME);
-String mqttPubStatus = "status";
-String mqttPubRadio = "radio";
-String mqttPubData = "data";
-String mqttPubCombined = "combined";
-String mqttPubRssi = "rssi";
-String mqttPubExtra = "extra";
-String mqttPubInc = "sensors_inc";
-String mqttPubExc = "sensors_exc";
-String mqttSubReset = "reset";
-String mqttSubGetInc = "get_sensors_inc";
-String mqttSubGetExc = "get_sensors_exc";
-String mqttSubSetInc = "set_sensors_inc";
-String mqttSubSetExc = "set_sensors_exc";
+String Hostname = String(HOSTNAME);
+struct MQTTTopics {
+    const char* pubStatus;
+    const char* pubRadio;
+    const char* pubData;
+    const char* pubCombined;
+    const char* pubRssi;
+    const char* pubExtra;
+    const char* pubInc;
+    const char* pubExc;
+    const char* subReset;
+    const char* subGetInc;
+    const char* subGetExc;
+    const char* subSetInc;
+    const char* subSetExc;
+};
+MQTTTopics mqttTopics = {
+    .pubStatus = "status",
+    .pubRadio = "radio",
+    .pubData = "data",
+    .pubCombined = "combined",
+    .pubRssi = "rssi",
+    .pubExtra = "extra",
+    .pubInc = "sensors_inc",
+    .pubExc = "sensors_exc",
+    .subReset = "reset",
+    .subGetInc = "get_sensors_inc",
+    .subGetExc = "get_sensors_exc",
+    .subSetInc = "set_sensors_inc",
+    .subSetExc = "set_sensors_exc"
+};
 
 //////////////////////////////////////////////////////
 
@@ -680,7 +698,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback
     client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
+    client.setWill(mqttTopics.pubStatus, "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -701,10 +719,10 @@ void mqtt_connect(void)
 
     log_i("\nconnected!");
 #ifdef RESET_SUBSCRIBE
-    client.subscribe(mqttSubReset);
+    client.subscribe(mqttTopics.subReset);
 #endif
-    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-    client.publish(mqttPubStatus, "online");
+    log_i("%s: %s\n", mqttTopics.pubStatus, "online");
+    client.publish(mqttTopics.pubStatus, "online");
 }
 
 

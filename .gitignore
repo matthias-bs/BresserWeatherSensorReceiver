@@ -77,3 +77,6 @@ secrets.h
 
 # Other
 _codeql_detected_source_root
+**/build/
+**/c_cpp_properties.json
+.vscode/arduino.json

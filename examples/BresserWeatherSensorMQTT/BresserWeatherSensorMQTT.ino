@@ -480,7 +480,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback
     client.onMessage(messageReceived);
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
+    client.setWill((Hostname + "/" + mqttTopics.pubStatus).c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -500,13 +500,13 @@ void mqtt_connect(void)
     }
 
     log_i("\nconnected!");
-    client.subscribe(mqttSubReset);
-    client.subscribe(mqttSubGetInc);
-    client.subscribe(mqttSubGetExc);
-    client.subscribe(mqttSubSetInc);
-    client.subscribe(mqttSubSetExc);
-    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-    client.publish(mqttPubStatus, "online");
+    client.subscribe((Hostname + "/" + mqttTopics.subReset).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subGetInc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subGetExc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subSetInc).c_str());
+    client.subscribe((Hostname + "/" + mqttTopics.subSetExc).c_str());
+    log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+    client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
 }
 
 //
@@ -545,15 +545,7 @@ void setup()
 
     Hostname = Hostname + ChipID;
     // Prepend Hostname to MQTT topics
-    mqttPubStatus = Hostname + "/" + mqttPubStatus;
-    mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubInc = Hostname + "/" + mqttPubInc;
-    mqttPubExc = Hostname + "/" + mqttPubExc;
-    mqttSubReset = Hostname + "/" + mqttSubReset;
-    mqttSubGetInc = Hostname + "/" + mqttSubGetInc;
-    mqttSubGetExc = Hostname + "/" + mqttSubGetExc;
-    mqttSubSetInc = Hostname + "/" + mqttSubSetInc;
-    mqttSubSetExc = Hostname + "/" + mqttSubSetExc;
+
 
     weatherSensor.begin();
     weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
@@ -601,8 +593,8 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-        client.publish(mqttPubStatus, "online");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         publishRadio();
     }
 
@@ -668,9 +660,9 @@ void loop()
             log_d("Data forwarding completed.");
         }
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline");
         Serial.flush();
-        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline", true /* retained */, 0 /* qos */);
         for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
         {
             client.loop();

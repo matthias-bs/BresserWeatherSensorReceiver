@@ -545,15 +545,15 @@ void setup()
 
     Hostname = Hostname + ChipID;
     // Prepend Hostname to MQTT topics
-    mqttPubStatus = Hostname + "/" + mqttPubStatus;
-    mqttPubRadio = Hostname + "/" + mqttPubRadio;
-    mqttPubInc = Hostname + "/" + mqttPubInc;
-    mqttPubExc = Hostname + "/" + mqttPubExc;
-    mqttSubReset = Hostname + "/" + mqttSubReset;
-    mqttSubGetInc = Hostname + "/" + mqttSubGetInc;
-    mqttSubGetExc = Hostname + "/" + mqttSubGetExc;
-    mqttSubSetInc = Hostname + "/" + mqttSubSetInc;
-    mqttSubSetExc = Hostname + "/" + mqttSubSetExc;
+    mqttTopics.pubStatus = Hostname + "/" + mqttTopics.pubStatus;
+    mqttTopics.pubRadio = Hostname + "/" + mqttTopics.pubRadio;
+    mqttTopics.pubInc = Hostname + "/" + mqttTopics.pubInc;
+    mqttTopics.pubExc = Hostname + "/" + mqttTopics.pubExc;
+    mqttTopics.subReset = Hostname + "/" + mqttTopics.subReset;
+    mqttTopics.subGetInc = Hostname + "/" + mqttTopics.subGetInc;
+    mqttTopics.subGetExc = Hostname + "/" + mqttTopics.subGetExc;
+    mqttTopics.subSetInc = Hostname + "/" + mqttTopics.subSetInc;
+    mqttTopics.subSetExc = Hostname + "/" + mqttTopics.subSetExc;
 
     weatherSensor.begin();
     weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);

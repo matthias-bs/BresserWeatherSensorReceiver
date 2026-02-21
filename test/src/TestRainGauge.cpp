@@ -47,6 +47,7 @@
 
 #define TOLERANCE 0.1
 #define TOLERANCE_QUAL 0.001
+#include "../mocks/log_w_mock.h"
 #include "RainGauge.h"
 
 /**

@@ -75,6 +75,8 @@
 #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
     #include <Preferences.h>
 #endif
+#include <Arduino.h>
+
 
 /**
  * \def

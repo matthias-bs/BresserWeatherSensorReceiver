@@ -831,7 +831,7 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        log_i("%s: %s\n",  mqttPubStatus.c_str(), "online");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         publishRadio();
     }

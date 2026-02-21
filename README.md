@@ -399,6 +399,10 @@ The on-board LED is used to indicate SD card activity (short flash) and failure 
 > [!NOTE]
 > Currently only the LILYGO boards with on-board SD card slot listed in [Predefined Board Configurations](#predefined-board-configurations) and the M5Stack Core2 are supported by this example.
 
+### [BresserWeatherSensorFreqTest](examples/BresserWeatherSensorFreqTest/)
+
+This example helps you find the optimal carrier frequency offset for your CC1101 (or other) transceiver module. Different modules can have slight frequency deviations from the nominal 868.3 MHz, and finding the optimal offset can improve reception reliability.
+
 ## MQTT Integrations
 
 ### Home Assistant

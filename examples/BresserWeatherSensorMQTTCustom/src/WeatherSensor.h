@@ -654,7 +654,7 @@ class WeatherSensor {
                 memset(buf, ' ', prefix_len);
                 buf[prefix_len] = '\0';
                 offs = (len1 < len2) ? (len2 - len1) : 0;
-                strnprintf(&buf[offs], sizeof(buf) - offs - 1, "%s", txt);
+                snprintf(&buf[offs], sizeof(buf) - offs - 1, "%s", txt);
               
                 // Print byte index
                 for (size_t i = 0 ; (i < msgSize) && (strlen(buf) < sizeof(buf) - 4); i++) {

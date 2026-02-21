@@ -683,7 +683,7 @@ void mqtt_setup(void)
 
     // set up MQTT receive callback
     client.onMessage(messageReceived);
-    client.setWill(mqttTopics.pubStatus, "dead", true /* retained */, 1 /* qos */);
+    client.setWill((Hostname + "/" + mqttTopics.pubStatus).c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -704,10 +704,10 @@ void mqtt_connect(void)
 
     log_i("\nconnected!");
 #ifdef RESET_SUBSCRIBE
-    client.subscribe(mqttTopics.subReset);
+    client.subscribe((Hostname + "/" + mqttTopics.subReset).c_str());
 #endif
-    log_i("%s: %s\n", mqttTopics.pubStatus, "online");
-    client.publish(mqttTopics.pubStatus, "online");
+    log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
+    client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
 }
 
 
@@ -753,16 +753,6 @@ void setup()
     sprintf(ChipID, "-%06X", (unsigned int)(ESP.getChipId() & 0xFFFFFF));
 #endif
     Hostname = Hostname + ChipID;
-    // Prepend Hostname to MQTT topics
-    mqttTopics.pubStatus = Hostname + "/" + mqttTopics.pubStatus;
-    mqttTopics.pubRadio = Hostname + "/" + mqttTopics.pubRadio;
-    mqttTopics.pubInc = Hostname + "/" + mqttTopics.pubInc;
-    mqttTopics.pubExc = Hostname + "/" + mqttTopics.pubExc;
-    mqttTopics.subReset = Hostname + "/" + mqttTopics.subReset;
-    mqttTopics.subGetInc = Hostname + "/" + mqttTopics.subGetInc;
-    mqttTopics.subGetExc = Hostname + "/" + mqttTopics.subGetExc;
-    mqttTopics.subSetInc = Hostname + "/" + mqttTopics.subSetInc;
-    mqttTopics.subSetExc = Hostname + "/" + mqttTopics.subSetExc;
 
     drd = new DoubleResetDetector(DRD_TIMEOUT, DRD_ADDRESS);
 
@@ -841,8 +831,8 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-        client.publish(mqttPubStatus, "online");
+        log_i("%s: %s\n",  mqttPubStatus.c_str(), "online");
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "online");
         publishRadio();
     }
 
@@ -904,9 +894,9 @@ void loop()
         }
 
         log_i("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        log_i("%s: %s\n", mqttPubStatus.c_str(), "offline");
+        log_i("%s: %s\n", (Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline");
         Serial.flush();
-        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.publish((Hostname + "/" + mqttTopics.pubStatus).c_str(), "offline", true /* retained */, 0 /* qos */);
         for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
         {
             client.loop();

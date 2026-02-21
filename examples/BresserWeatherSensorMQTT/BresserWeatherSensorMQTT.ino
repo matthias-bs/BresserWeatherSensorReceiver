@@ -544,8 +544,6 @@ void setup()
 #endif
 
     Hostname = Hostname + ChipID;
-    // Prepend Hostname to MQTT topics
-
 
     weatherSensor.begin();
     weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);

@@ -19,6 +19,7 @@ SensorMap	KEYWORD1
 WeatherSensor::Soil	KEYWORD1
 WeatherSensor::Weather	KEYWORD1
 WeatherSensor	KEYWORD1
+RollingCounter	KEYWORD1
 #######################################
 # Methods (KEYWORD2)
 #######################################
@@ -75,6 +76,11 @@ calchumidex	KEYWORD2
 perceived_temperature	KEYWORD2
 winddir_flt_to_str	KEYWORD2
 windspeed_ms_to_bft	KEYWORD2
+calculateIndex	KEYWORD2
+markMissedEntries	KEYWORD2
+sumHistory	KEYWORD2
+getLastUpdate	KEYWORD2
+getUpdateRate	KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################

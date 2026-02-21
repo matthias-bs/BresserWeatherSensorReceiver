@@ -46,6 +46,10 @@
 
 #if defined(ESP32) || defined(ESP8266)
 #include <sys/time.h>
+#else
+#include <time.h>
+#include <stdint.h>
+#include <stddef.h>
 #endif
 
 /**

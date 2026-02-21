@@ -1,6 +1,7 @@
 COMPONENT_NAME=RainGauge
 
 SRC_FILES = \
+  $(PROJECT_SRC_DIR)/RollingCounter.cpp \
   $(PROJECT_SRC_DIR)/RainGauge.cpp \
   $(PROJECT_SRC_DIR)/Lightning.cpp \
   $(PROJECT_SRC_DIR)/WeatherUtils.cpp

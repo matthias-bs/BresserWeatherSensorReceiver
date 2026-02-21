@@ -94,6 +94,7 @@ which buffers and combines messages from the 6-in-1 protocol until a complete se
   * [BresserWeatherSensorM5Core2](#bresserweathersensorm5core2)
   * [BresserWeatherSensorCanvasGauges](#bresserweathersensorcanvasgauges)
   * [BresserWeatherSensorSDCard](#bresserweathersensorsdcard)
+  * [BresserWeatherSensorFreqTest](#bresserweathersensorfreqtest)
 * [MQTT Integrations](#mqtt-integrations)
   * [Home Assistant](#home-assistant)
   * [Datacake](#datacake)

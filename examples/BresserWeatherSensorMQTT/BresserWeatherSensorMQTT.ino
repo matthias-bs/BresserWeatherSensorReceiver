@@ -540,7 +540,7 @@ void setup()
     }
     sprintf(ChipID, "-%06lX", chip_id);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    sprintf(ChipID, "-%06lX", ESP.getChipId() & 0xFFFFFF);
+    sprintf(ChipID, "-%06X", (unsigned int)(ESP.getChipId() & 0xFFFFFF));
 #endif
 
     Hostname = Hostname + ChipID;

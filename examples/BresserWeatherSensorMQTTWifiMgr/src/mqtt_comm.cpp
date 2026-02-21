@@ -137,7 +137,7 @@ void publishWeatherdata(bool complete, bool retain)
     String payloadSensor;   // sensor data
     String payloadExtra;    // calculated extra data
     String payloadCombined; // combined payload for ESP32-e-Paper-Weather-Display
-    String mqtt_topic;      // MQTT topic including ID/name
+    char mqtt_topic[256];   // MQTT topic including ID/name (increased size for all uses)
 
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
@@ -361,8 +361,6 @@ void publishWeatherdata(bool complete, bool retain)
 
         // Try to map sensor ID to name to make MQTT topic explanatory
         String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
-
-        char mqtt_topic[256];
 
         // sensor data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s", 

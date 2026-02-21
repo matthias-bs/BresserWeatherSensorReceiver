@@ -25,7 +25,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2023 Matthias Prinke
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -61,6 +61,10 @@
 // 20240124 Fixed handling of overflow, startup and missing update cycles
 // 20240125 Added lastCycle()
 // 20240130 Update pastHour() documentation
+// 20250324 Added configuration of expected update rate at run-time
+//          pastHour(): modified parameters
+// 20260211 Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo:
 // -
@@ -85,7 +89,8 @@ RTC_DATA_ATTR nvLightning_t nvLightning = {
     .events = 0,
     .distance = 0,
     .timestamp = 0,
-    .hist = {0}
+    .hist = {0},
+    .updateRate = LIGHTNING_UPD_RATE
 };
 #endif
 
@@ -123,6 +128,7 @@ void Lightning::prefs_load(void)
     nvLightning.events       = preferences.getUShort("events", -1);
     nvLightning.distance     = preferences.getUChar("distance", 0);
     nvLightning.timestamp    = preferences.getULong64("timestamp", 0);
+    nvLightning.updateRate   = preferences.getUChar("updateRate", LIGHTNING_UPD_RATE);
     //preferences.getBytes("hist", nvLightning.hist, sizeof(nvLightning.hist));
     // Optimization: Reduces number of Flash writes
     for (int i=0; i<LIGHTNING_HIST_SIZE; i++) {
@@ -179,6 +185,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
         // No previous count or counter reset
         nvLightning.prevCount = count;
         nvLightning.lastUpdate = timestamp;
+        lastUpdate = timestamp;
 
         #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
             prefs_save();
@@ -190,7 +197,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     if (currCount < nvLightning.prevCount) {
        // Startup change 0->1 detected
        if (!nvLightning.startupPrev && startup) {
-           // Add last rain gauge reading before startup
+           // Add last counter reading before startup
            nvLightning.accCount += nvLightning.preStCount;
        } else {
            // Add counter overflow
@@ -209,7 +216,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
      * 
      * In each update():
      * - timestamp (time_t) ->                  t (localtime, struct tm)
-     * - calculate index into hist[]:           idx = t.tm_min / LIGHTNING_UPD_RATE
+     * - calculate index into hist[]:           idx = t.tm_min / updateRate
      * - expired time since last update:        t_delta = timestamp - nvLightning.lastUpdate
      * - number of events since last update:    delta = currCount - nvLightning.prevCount
      * - t_delta
@@ -226,7 +233,7 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
      *   ---------------     -----------
      *        ^
      *        |
-     *       idx = t.tm_min / LIGHTNING_UPD_RATE
+     *       idx = t.tm_min / updateRate
      *
      * - Calculate hourly rate:
      *   pastHour = sum of all valid hist[] entries
@@ -258,46 +265,11 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
 
     struct tm timeinfo;
     localtime_r(&timestamp, &timeinfo);
-    int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
+    int idx = calculateIndex(timeinfo, nvLightning.updateRate);
 
-    if (t_delta / 60 < LIGHTNING_UPD_RATE) {
-        // t_delta shorter than expected update rate
-        if (nvLightning.hist[idx] < 0)
-            nvLightning.hist[idx] = 0;
-        struct tm t_prev;
-        localtime_r(&nvLightning.lastUpdate, &t_prev);
-        if (t_prev.tm_min / LIGHTNING_UPD_RATE == idx) {
-            // same index as in previous cycle - add value
-            nvLightning.hist[idx] += delta;
-            log_d("hist[%d]=%d (upd)", idx, nvLightning.hist[idx]);
-        } else {
-            // different index - new value
-            nvLightning.hist[idx] = delta;
-            log_d("hist[%d]=%d (new)", idx, nvLightning.hist[idx]);
-        }
-    }
-    else if (t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPD_RATE * 60) {
-        // t_delta >= LIGHTNING_HIST_SIZE * LIGHTNING_UPDATE_RATE -> reset history
-        log_w("History time frame expired, resetting!");
-        hist_init();
-    }
-    else {
-        // Some other index
-        
-        // Mark all history entries in interval [expected_index, current_index) as invalid
-        // N.B.: excluding current index!
-        for (time_t ts = nvLightning.lastUpdate + (LIGHTNING_UPD_RATE * 60); ts < timestamp; ts += LIGHTNING_UPD_RATE * 60) {
-            log_d("ts: %ld, timestamp: %ld", ts, timestamp);
-            localtime_r(&ts, &timeinfo);
-            int idx = timeinfo.tm_min / LIGHTNING_UPD_RATE;
-            nvLightning.hist[idx] = -1;
-            log_d("hist[%d]=-1", idx);
-        }
-        
-        // Write delta
-        nvLightning.hist[idx] = delta;
-        log_d("hist[%d]=%d", idx, delta);
-    }
+    // Update history buffer using generalized base class method
+    updateHistoryBuffer(nvLightning.hist, LIGHTNING_HIST_SIZE, idx, delta,
+                       t_delta, timestamp, nvLightning.lastUpdate, nvLightning.updateRate);
     
     #if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
         String buf;
@@ -310,6 +282,8 @@ Lightning::update(time_t timestamp, int16_t count, uint8_t distance, bool startu
     #endif
 
     nvLightning.lastUpdate = timestamp;
+    lastUpdate = timestamp;
+    updateRate = nvLightning.updateRate;
     nvLightning.prevCount = currCount;
 
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
@@ -339,31 +313,12 @@ Lightning::lastEvent(time_t &timestamp, int &events, uint8_t &distance)
 }
 
 int
-Lightning::pastHour(bool *valid, int *quality)
+Lightning::pastHour(bool *valid, int *nbins, float *quality)
 {
-    int _quality = 0;
-    int sum = 0;
-
-    // Sum of all valid entries
-    for (size_t i=0; i<LIGHTNING_HIST_SIZE; i++){
-        if (nvLightning.hist[i] >= 0) {
-            sum += nvLightning.hist[i];
-            _quality++;
-        }
-    }
-
-    // Optional: return quality indication
-    if (quality)
-        *quality = _quality;
-
-    // Optional: return valid flag
-    if (valid) {
-        if (_quality >= qualityThreshold) {
-            *valid = true;
-        } else {
-            *valid = false;
-        }
-    }
-
-    return sum;
+    History hourHist = {
+        .hist = nvLightning.hist,
+        .size = LIGHTNING_HIST_SIZE,
+        .updateRate = nvLightning.updateRate
+    };
+    return static_cast<int>(sumHistory(hourHist, valid, nbins, quality, 1.0));
 }

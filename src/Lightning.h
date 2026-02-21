@@ -61,6 +61,8 @@
 // 20240125 Added lastCycle()
 // 20250324 Added configuration of expected update rate at run-time
 //          pastHour(): modified parameters
+// 20260211 Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo:
 // -
@@ -75,6 +77,7 @@
   #include <sys/time.h>
 #endif
 #include "WeatherSensorCfg.h"
+#include "RollingCounter.h"
 
 #if defined(LIGHTNING_USE_PREFS)
 #include <Preferences.h>
@@ -97,19 +100,11 @@
 #define LIGHTNING_UPD_RATE 6
 
 /**
- * \def
+ * \def LIGHTNING_HIST_SIZE
  * 
- * Set to 3600 [sec] / min_update_rate_rate [sec]
+ * Set to 60 [min] / LIGHTNING_UPD_RATE [min]
  */
 #define LIGHTNING_HIST_SIZE 10
-
-/**
- * \def
- * 
- * Fraction of valid hist entries required for valid result
- */
-#define DEFAULT_QUALITY_THRESHOLD 0.8
-
 
 /**
  * \typedef nvLightning_t
@@ -146,10 +141,9 @@ typedef struct {
  * \brief Calculation number of lightning events during last sensor update cycle and 
  *        during last hour (past 60 minutes); storing timestamp and distance of last event.
  */
-class Lightning {
+class Lightning : public RollingCounter {
 
 private:
-    float qualityThreshold;
     int currCount;
     int deltaEvents = -1;
 
@@ -179,7 +173,7 @@ public:
      * \param quality_threshold fraction of valid hist entries required for valid pastHour() result
      */
     Lightning(const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
-        qualityThreshold(quality_threshold)
+        RollingCounter(quality_threshold)
     {};
     
 
@@ -209,8 +203,24 @@ public:
      * result, because bins in the history buffer will be missed.
      * 
      * \param rate    update rate in minutes (default: 6)
+     * \return true if rate is valid and was set, false otherwise
      */
-    void setUpdateRate(uint8_t rate = LIGHTNING_UPD_RATE) {
+    bool setUpdateRate(uint8_t rate = LIGHTNING_UPD_RATE) {
+        // Validate rate: must be > 0, must evenly divide 60, and result must fit in buffer
+        if (rate == 0) {
+            log_w("setUpdateRate: rate cannot be 0");
+            return false;
+        }
+        if (60 % rate != 0) {
+            log_w("setUpdateRate: rate=%u must evenly divide 60 minutes", rate);
+            return false;
+        }
+        if (60 / rate > LIGHTNING_HIST_SIZE) {
+            log_w("setUpdateRate: rate=%u would require %u bins, but only %u available",
+                  rate, 60 / rate, LIGHTNING_HIST_SIZE);
+            return false;
+        }
+        
         #if !defined(INSIDE_UNITTEST)
         preferences.begin("BWS-LGT", false);
         uint8_t updateRatePrev = preferences.getUChar("updateRate", LIGHTNING_UPD_RATE);
@@ -224,6 +234,7 @@ public:
         if (nvLightning.updateRate != updateRatePrev) {
             hist_init();
         }
+        return true;
     }
 
 
@@ -238,7 +249,7 @@ public:
      * 
      * \param count     number of events
      */
-    void  hist_init(int16_t count = -1);
+    void hist_init(int16_t count = -1) override;
     
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
     void prefs_load(void);

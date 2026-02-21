@@ -45,6 +45,7 @@
 #include "CppUTest/TestHarness.h"
 
 #define TOLERANCE 0.2
+#include "../mocks/log_w_mock.h"
 #include "RainGauge.h"
 
 #if defined(_DEBUG_CIRCULAR_BUFFER_)

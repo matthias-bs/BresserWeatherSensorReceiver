@@ -65,6 +65,20 @@ This document summarizes the test coverage improvements made to the BresserWeath
    - Ordinal directions (NE, SE, SW, NW)
    - Secondary directions (NNE, ENE, etc.)
 
+### RollingCounter.cpp (new tests)
+
+#### Base Class Functionality
+1. **Constructor & Quality Threshold**
+   - Default and custom threshold values
+2. **Index Calculation**
+   - Hourly and sub-hourly index logic
+3. **History Buffer Management**
+   - Marking missed entries, handling invalid rates
+4. **Aggregation**
+   - Summing valid/invalid entries, quality metrics
+
+These tests validate the core logic used by RainGauge and Lightning, improving maintainability and reliability for all rolling counter implementations.
+
 ## Test Quality
 
 ### Coverage Characteristics

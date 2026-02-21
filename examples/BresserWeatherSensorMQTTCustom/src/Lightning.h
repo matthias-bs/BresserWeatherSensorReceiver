@@ -59,6 +59,10 @@
 //          Added qualityThreshold
 // 20240124 Fixed handling of overflow, startup and missing update cycles
 // 20240125 Added lastCycle()
+// 20250324 Added configuration of expected update rate at run-time
+//          pastHour(): modified parameters
+// 20260211 Refactored to use RollingCounter base class
+// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
 //
 // ToDo:
 // -
@@ -73,6 +77,7 @@
   #include <sys/time.h>
 #endif
 #include "WeatherSensorCfg.h"
+#include "RollingCounter.h"
 
 #if defined(LIGHTNING_USE_PREFS)
 #include <Preferences.h>
@@ -95,22 +100,14 @@
 #define LIGHTNING_UPD_RATE 6
 
 /**
- * \def
+ * \def LIGHTNING_HIST_SIZE
  * 
- * Set to 3600 [sec] / update_rate_rate [sec]
+ * Set to 60 [min] / LIGHTNING_UPD_RATE [min]
  */
 #define LIGHTNING_HIST_SIZE 10
 
 /**
- * \def
- * 
- * Number of valid rain_hist entries required for valid result
- */
-#define DEFAULT_QUALITY_THRESHOLD 8
-
-
-/**
- * \typedef nvData_t
+ * \typedef nvLightning_t
  *
  * \brief Data structure for lightning sensor to be stored in non-volatile memory
  *
@@ -134,6 +131,7 @@ typedef struct {
     /* Data of past 60 minutes */
     int16_t   hist[LIGHTNING_HIST_SIZE];
 
+    uint8_t updateRate;     //!< expected update rate for pastHour() calculation
 } nvLightning_t;
 
 
@@ -143,10 +141,9 @@ typedef struct {
  * \brief Calculation number of lightning events during last sensor update cycle and 
  *        during last hour (past 60 minutes); storing timestamp and distance of last event.
  */
-class Lightning {
+class Lightning : public RollingCounter {
 
 private:
-    int qualityThreshold;
     int currCount;
     int deltaEvents = -1;
 
@@ -160,7 +157,8 @@ private:
     .events = 0,
     .distance = 0,
     .timestamp = 0,
-    .hist = {0}
+    .hist = {0},
+    .updateRate = LIGHTNING_UPD_RATE
     };
     #endif
     
@@ -172,12 +170,74 @@ public:
     /**
      * Constructor
      *
-     * \param quality_threshold number of valid hist entries required for valid pastHour() result
+     * \param quality_threshold fraction of valid hist entries required for valid pastHour() result
      */
-    Lightning(const int quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
-        qualityThreshold(quality_threshold)
+    Lightning(const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) :
+        RollingCounter(quality_threshold)
     {};
     
+
+    /**
+     * \brief Set expected update rate for pastHour() calculation
+     * 
+     * LIGHTNING_HIST_SIZE: number of entries in hist[]
+     * updateRate: update rate in minutes
+     * 
+     * 60 minutes / updateRate = no_of_hist_bins
+     * The resulting number of history bins must be an integer value which
+     * does not exceed LIGHTNING_HIST_SIZE.
+     * 
+     * Examples: 
+     * 
+     * 1. updateRate =  6 -> 60 / 6 = 10 entries
+     * 2. updateRate = 12 -> 60 / 12 = 5 entries
+     * 
+     * Changing the update rate will reset the history buffer, therefore
+     * the caller should avoid frequent changes.
+     * 
+     * Actual update intervals shorter than updateRate will lead to a reduced
+     * resolution of the pastHour() result and a higher risk of an invalid
+     * result if a bin in the history buffer was missed.
+     * 
+     * Actual update intervals longer than updateRate will lead to an invalid
+     * result, because bins in the history buffer will be missed.
+     * 
+     * \param rate    update rate in minutes (default: 6)
+     * \return true if rate is valid and was set, false otherwise
+     */
+    bool setUpdateRate(uint8_t rate = LIGHTNING_UPD_RATE) {
+        // Validate rate: must be > 0, must evenly divide 60, and result must fit in buffer
+        if (rate == 0) {
+            log_w("setUpdateRate: rate cannot be 0");
+            return false;
+        }
+        if (60 % rate != 0) {
+            log_w("setUpdateRate: rate=%u must evenly divide 60 minutes", rate);
+            return false;
+        }
+        if (60 / rate > LIGHTNING_HIST_SIZE) {
+            log_w("setUpdateRate: rate=%u would require %u bins, but only %u available",
+                  rate, 60 / rate, LIGHTNING_HIST_SIZE);
+            return false;
+        }
+        
+        #if !defined(INSIDE_UNITTEST)
+        preferences.begin("BWS-LGT", false);
+        uint8_t updateRatePrev = preferences.getUChar("updateRate", LIGHTNING_UPD_RATE);
+        preferences.putUChar("updateRate", rate);
+        preferences.end();
+        #else
+        static uint8_t updateRatePrev = LIGHTNING_UPD_RATE;
+        updateRatePrev = nvLightning.updateRate;
+        #endif
+        nvLightning.updateRate = rate;
+        if (nvLightning.updateRate != updateRatePrev) {
+            hist_init();
+        }
+        return true;
+    }
+
+
     /**
      * Initialize/reset non-volatile data
      */
@@ -189,7 +249,7 @@ public:
      * 
      * \param count     number of events
      */
-    void  hist_init(int16_t count = -1);
+    void hist_init(int16_t count = -1) override;
     
     #if defined(LIGHTNING_USE_PREFS)  && !defined(INSIDE_UNITTEST)
     void prefs_load(void);
@@ -217,12 +277,13 @@ public:
      * 
      * \brief Get number of lightning events during past 60 minutes
      * 
-     * \param valid     number of valid entries in hist >= qualityThreshold
-     * \param quality   number of valid entries in hist
+     * \param valid     number of valid entries in hist >= qualityThreshold * 60 / updateRate
+     * \param nbins     number of valid entries in hist
+     * \param quality   fraction of valid entries in hist (0..1); quality = nbins / (60 / updateRate)
      * 
      * \return number of events during past 60 minutes
      */
-    int pastHour(bool *valid = nullptr, int *quality = nullptr);
+    int pastHour(bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr);
 
     /*
      * \fn lastCycle

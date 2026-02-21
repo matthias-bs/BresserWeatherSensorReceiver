@@ -27,8 +27,8 @@ public:
     }
     // Adapter to call sumHistory with PublicHistory
     float sumHistoryPublic(const PublicHistory& ph, bool *valid = nullptr, int *nbins = nullptr, float *quality = nullptr, float scale = 1.0) {
-        // Cast to protected History type
-        return sumHistory(reinterpret_cast<const History&>(ph), valid, nbins, quality, scale);
+        History h{ph.hist, ph.size, ph.updateRate};
+        return sumHistory(h, valid, nbins, quality, scale);
     }
 };
 

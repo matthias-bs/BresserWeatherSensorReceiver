@@ -6,6 +6,6 @@ var searchData=
   ['setsensorsexcjson_3',['setSensorsExcJson',['../class_weather_sensor.html#ab04af1949e91b6ca76d913306ff6674c',1,'WeatherSensor']]],
   ['setsensorsinc_4',['setSensorsInc',['../class_weather_sensor.html#aecf60e2ae2e51eff69fdd20b00f3f487',1,'WeatherSensor']]],
   ['setsensorsincjson_5',['setSensorsIncJson',['../class_weather_sensor.html#aae056e7b7ef390e5180f5652c68e2ac5',1,'WeatherSensor']]],
-  ['setupdaterate_6',['setupdaterate',['../class_lightning.html#a8615e5f1b10025445aaa102f5f2fd57e',1,'Lightning::setUpdateRate()'],['../class_rain_gauge.html#a0e70fd453d3b74503fc472e4367bb425',1,'RainGauge::setUpdateRate()']]],
+  ['setupdaterate_6',['setupdaterate',['../class_lightning.html#abc4ea48c82b041a3ff4c33268df5fd2a',1,'Lightning::setUpdateRate()'],['../class_rain_gauge.html#a70d6b3be637ccb2e84b32c66ad3d6cd3',1,'RainGauge::setUpdateRate()']]],
   ['sleep_7',['sleep',['../class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794',1,'WeatherSensor']]]
 ];

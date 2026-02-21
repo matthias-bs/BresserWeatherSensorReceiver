@@ -140,6 +140,7 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
 <li>genMessage()&#160;:&#160;<a class="el" href="class_weather_sensor.html#adffc6603766560fe6aa0cdd1200fc2a0">WeatherSensor</a></li>
 <li>getData()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a">WeatherSensor</a></li>
+<li>getLastUpdate()&#160;:&#160;<a class="el" href="class_rolling_counter.html#aa43a6c426f1703cc025c1e7f17488784">RollingCounter</a></li>
 <li>getMessage()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a05fbfc16fb2e13543591cb0b3cd8baaf">WeatherSensor</a></li>
 <li>getSensorsCfg()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a522c70d5d83fe975ad85ff5994ae7a72">WeatherSensor</a></li>
 <li>getSensorsExc()&#160;:&#160;<a class="el" href="class_weather_sensor.html#af6ffcbf06bb5aea95203fbb3a53aaf3d">WeatherSensor</a></li>
@@ -147,6 +148,7 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <li>getSensorsInc()&#160;:&#160;<a class="el" href="class_weather_sensor.html#ac6f489c26a476d658c2ce5161ea48441">WeatherSensor</a></li>
 <li>getSensorsIncJson()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a68b2d87f2b1781a000f1fc7a52654f5f">WeatherSensor</a></li>
 <li>getSensorsJson()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a85315b1e223b9b2ad86f5558a41b71ee">WeatherSensor</a></li>
+<li>getUpdateRate()&#160;:&#160;<a class="el" href="class_rolling_counter.html#aec020e229ccee9fc560de05642e11bf1">RollingCounter</a></li>
 </ul>
 
 
@@ -154,7 +156,7 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <li>hcho_init&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_air_v_o_c.html#a27ba994472c3437709f1811517dbf449">WeatherSensor::AirVOC</a></li>
 <li>hcho_ppb&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_air_v_o_c.html#afd00fb6fcfb89f52d9464f1622cd9404">WeatherSensor::AirVOC</a></li>
 <li>hist24h_init()&#160;:&#160;<a class="el" href="class_rain_gauge.html#a94d2098d0e47a60d1532f4a093adff3d">RainGauge</a></li>
-<li>hist_init()&#160;:&#160;<a class="el" href="class_lightning.html#abd08eac418bb1b608624fc7ca98d7a4e">Lightning</a>, <a class="el" href="class_rain_gauge.html#a505d07a7ea924cfa32e958b7b00152db">RainGauge</a></li>
+<li>hist_init()&#160;:&#160;<a class="el" href="class_lightning.html#af424396d8684efb0dfcf2423b52ef09e">Lightning</a>, <a class="el" href="class_rain_gauge.html#af7e59588cdd924475673d65e16bd23be">RainGauge</a></li>
 <li>humidity&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#a6d6b2a367f2d206722bb93486679f19b">WeatherSensor::Weather</a></li>
 <li>humidity_ok&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#a9ab54478c197fa9cfded3e5d7699a919">WeatherSensor::Weather</a></li>
 </ul>
@@ -204,6 +206,7 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <li>rain_ok&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#af1d64d0082a746f487b71134dc6eb186">WeatherSensor::Weather</a></li>
 <li>RainGauge()&#160;:&#160;<a class="el" href="class_rain_gauge.html#a89b06f5cb82b0f91460a468f7a0a4545">RainGauge</a></li>
 <li>reset()&#160;:&#160;<a class="el" href="class_lightning.html#af73224d91b7318c3769ca126bd37e684">Lightning</a>, <a class="el" href="class_rain_gauge.html#acc302142458cd82976821b8d277aeef2">RainGauge</a></li>
+<li>RollingCounter()&#160;:&#160;<a class="el" href="class_rolling_counter.html#af482b3e6746add9b19172b0c5f903948">RollingCounter</a></li>
 <li>rssi&#160;:&#160;<a class="el" href="class_weather_sensor.html#a50b72bc1883935f2ede454f57c12625e">WeatherSensor</a>, <a class="el" href="struct_weather_sensor_1_1_sensor.html#a56ca10defbfb8bb7bab5862a3fa2b7d1">WeatherSensor::Sensor</a></li>
 <li>rxFlags&#160;:&#160;<a class="el" href="class_weather_sensor.html#a3d8e81b016a72815676e93441642a8a8">WeatherSensor</a></li>
 </ul>
@@ -220,7 +223,7 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <li>setSensorsExcJson()&#160;:&#160;<a class="el" href="class_weather_sensor.html#ab04af1949e91b6ca76d913306ff6674c">WeatherSensor</a></li>
 <li>setSensorsInc()&#160;:&#160;<a class="el" href="class_weather_sensor.html#aecf60e2ae2e51eff69fdd20b00f3f487">WeatherSensor</a></li>
 <li>setSensorsIncJson()&#160;:&#160;<a class="el" href="class_weather_sensor.html#aae056e7b7ef390e5180f5652c68e2ac5">WeatherSensor</a></li>
-<li>setUpdateRate()&#160;:&#160;<a class="el" href="class_lightning.html#a8615e5f1b10025445aaa102f5f2fd57e">Lightning</a>, <a class="el" href="class_rain_gauge.html#a0e70fd453d3b74503fc472e4367bb425">RainGauge</a></li>
+<li>setUpdateRate()&#160;:&#160;<a class="el" href="class_lightning.html#abc4ea48c82b041a3ff4c33268df5fd2a">Lightning</a>, <a class="el" href="class_rain_gauge.html#a70d6b3be637ccb2e84b32c66ad3d6cd3">RainGauge</a></li>
 <li>sleep()&#160;:&#160;<a class="el" href="class_weather_sensor.html#a7f48011241803c5d42d45f2c3e5d3794">WeatherSensor</a></li>
 <li>startup&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_sensor.html#ab1fb3b6988f2a14d8246b1dc239426a4">WeatherSensor::Sensor</a></li>
 <li>startupPrev&#160;:&#160;<a class="el" href="structnv_lightning__t.html#a4b5a90f14843e701da0ff8bbb38b768b">nvLightning_t</a></li>
@@ -262,6 +265,11 @@ $(document).ready(function(){initNavTree('functions.html',''); initResizable(); 
 <li>wind_gust_meter_sec&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#adf0cd1deda13205b98c6d7937e236d05">WeatherSensor::Weather</a></li>
 <li>wind_gust_meter_sec_fp1&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#a4fdbd9927bf9394da858b5e5b99f345c">WeatherSensor::Weather</a></li>
 <li>wind_ok&#160;:&#160;<a class="el" href="struct_weather_sensor_1_1_weather.html#aa3808f22671713aa03bf42aa0cc86e9d">WeatherSensor::Weather</a></li>
+</ul>
+
+
+<h3><a id="index__7E" name="index__7E"></a>- ~ -</h3><ul>
+<li>~RollingCounter()&#160;:&#160;<a class="el" href="class_rolling_counter.html#afd643d0bae2bf6419774d7d2406ba075">RollingCounter</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

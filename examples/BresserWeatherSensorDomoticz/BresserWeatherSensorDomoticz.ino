@@ -78,6 +78,7 @@
 // 20240603 Modified for arduino-esp32 v3.0.0
 // 20250712 Removed TLS fingerprint option (insecure)
 //          Improved MQTT "offline" status message handling (avoid inadvertent LWT message)
+// 20260221 Unified MQTT topic management using struct, hostname handling, and code style with other sketches
 //
 // ToDo:
 //
@@ -206,8 +207,6 @@ static const char digicert[] PROGMEM = R"EOF(
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     -----END CERTIFICATE-----
     )EOF";
@@ -235,14 +234,13 @@ WeatherSensor weatherSensor;
 RainGauge rainGauge;
 
 // MQTT topics
-const char MQTT_PUB_STATUS[] = "/status";
-const char MQTT_PUB_RADIO[] = "/radio";
-const char MQTT_PUB_DOMO[] = "domoticz/in"; // mqtt plugin for domoticz needed
-
-String mqttPubStatus;
-String mqttPubRadio;
-String mqttSubReset;
-char Hostname[HOSTNAME_SIZE];
+struct MQTTTopics {
+    String pubStatus;
+    String pubRadio;
+    String pubDomo;
+};
+MQTTTopics mqttTopics;
+String Hostname;
 
 //////////////////////////////////////////////////////
 
@@ -307,7 +305,7 @@ void wifi_wait(int wifi_retries, int wifi_delay)
 void mqtt_setup(void)
 {
     log_i("Attempting to connect to SSID: %s", ssid);
-    WiFi.hostname(Hostname);
+    WiFi.hostname(Hostname.c_str());
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, pass);
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
@@ -358,7 +356,7 @@ void mqtt_setup(void)
     // set up MQTT receive callback (if required)
     // client.onMessage(messageReceived);
 
-    client.setWill(mqttPubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
+    client.setWill(mqttTopics.pubStatus.c_str(), "dead", true /* retained */, 1 /* qos */);
     mqtt_connect();
 }
 
@@ -371,7 +369,7 @@ void mqtt_connect(void)
     wifi_wait(WIFI_RETRIES, WIFI_DELAY);
 
     Serial.print(F("\nMQTT connecting... "));
-    while (!client.connect(Hostname, MQTT_USER, MQTT_PASS))
+    while (!client.connect(Hostname.c_str(), MQTT_USER, MQTT_PASS))
     {
         Serial.print(".");
         delay(1000);
@@ -379,8 +377,8 @@ void mqtt_connect(void)
 
     log_i("\nconnected!");
     // client.subscribe(mqttSubReset);
-    log_i("%s: %s\n", mqttPubStatus.c_str(), "online");
-    client.publish(mqttPubStatus.c_str(), "online");
+    log_i("%s: %s\n", mqttTopics.pubStatus.c_str(), "online");
+    client.publish(mqttTopics.pubStatus.c_str(), "online");
 }
 
 /*!
@@ -420,8 +418,8 @@ void publishWeatherdata(void)
         domo_payload += String(";") + String(weatherSensor.sensor[i].w.temp_c, 1);
         domo_payload += String(";") + String(perceived_temperature(weatherSensor.sensor[i].w.temp_c, weatherSensor.sensor[i].w.wind_avg_meter_sec, weatherSensor.sensor[i].w.humidity), 1);
         domo_payload += String("\"}");
-        Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo_payload.c_str());
-        client.publish(MQTT_PUB_DOMO, domo_payload.c_str(), false, 0);
+        Serial.printf("%s: %s\n", mqttTopics.pubDomo.c_str(), domo_payload.c_str());
+        client.publish(mqttTopics.pubDomo.c_str(), domo_payload.c_str(), false, 0);
     }
 
     // domoticz virtual rain sensor
@@ -432,16 +430,16 @@ void publishWeatherdata(void)
         domo2_payload = String("{\"idx\":") + String(DOMO_RAIN_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(rainGauge.pastHour() * 100, 0);
         domo2_payload += String(";") + String(weatherSensor.sensor[i].w.rain_mm, 1);
         domo2_payload += String("\"}");
-        Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());
-        client.publish(MQTT_PUB_DOMO, domo2_payload.c_str(), false, 0);
+        Serial.printf("%s: %s\n", mqttTopics.pubDomo.c_str(), domo2_payload.c_str());
+        client.publish(mqttTopics.pubDomo.c_str(), domo2_payload.c_str(), false, 0);
 
         // Domoticz 24h virtual rain sensor: svalue = "rain_rate;rain_total"
         // Report a rate of 0 and the 24h accumulation as the total, without extra scaling.
         domo2_payload = String("{\"idx\":") + String(DOMO_RAIN24H_IDX) + String(",\"nvalue\":0,\"svalue\":\"0");
         domo2_payload += String(";") + String(rainGauge.past24Hours(), 1);
         domo2_payload += String("\"}");
-        Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo2_payload.c_str());
-        client.publish(MQTT_PUB_DOMO, domo2_payload.c_str(), false, 0);
+        Serial.printf("%s: %s\n", mqttTopics.pubDomo.c_str(), domo2_payload.c_str());
+        client.publish(mqttTopics.pubDomo.c_str(), domo2_payload.c_str(), false, 0);
     }
 
     // domoticz virtual temp & humidity sensor
@@ -450,8 +448,8 @@ void publishWeatherdata(void)
         domo3_payload = String("{\"idx\":") + String(DOMO_TH_IDX) + String(",\"nvalue\":0,\"svalue\":\"") + String(weatherSensor.sensor[i].w.temp_c, 1);
         domo3_payload += String(";") + String(weatherSensor.sensor[i].w.humidity);
         domo3_payload += String(";0\"}");
-        Serial.printf("%s: %s\n", MQTT_PUB_DOMO, domo3_payload.c_str());
-        client.publish(MQTT_PUB_DOMO, domo3_payload.c_str(), false, 0);
+        Serial.printf("%s: %s\n", mqttTopics.pubDomo.c_str(), domo3_payload.c_str());
+        client.publish(mqttTopics.pubDomo.c_str(), domo3_payload.c_str(), false, 0);
     }
 }
 
@@ -463,11 +461,10 @@ static void publishRadio(void)
 {
     JsonDocument payload;
     String mqtt_payload;
-
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload);
-    Serial.printf("%s: %s\n", mqttPubRadio.c_str(), mqtt_payload.c_str());
-    client.publish(mqttPubRadio, mqtt_payload, false, 0);
+    Serial.printf("%s: %s\n", mqttTopics.pubRadio.c_str(), mqtt_payload.c_str());
+    client.publish(mqttTopics.pubRadio.c_str(), mqtt_payload, false, 0);
     payload.clear();
 }
 
@@ -493,20 +490,21 @@ void setup()
     digitalWrite(LED_GPIO, HIGH);
 #endif
 
-    strncpy(Hostname, HOSTNAME, 20);
+    Hostname = String(HOSTNAME);
 #if defined(APPEND_CHIP_ID) && defined(ESP32)
     uint32_t chipId = 0;
     for (int i = 0; i < 17; i = i + 8)
     {
         chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
     }
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06lX", chipId);
+    Hostname += String("-") + String(chipId, HEX);
 #elif defined(APPEND_CHIP_ID) && defined(ESP8266)
-    snprintf(&Hostname[strlen(Hostname)], HOSTNAME_SIZE, "-%06lX", ESP.getChipId() & 0xFFFFFF);
+    Hostname += String("-") + String(ESP.getChipId() & 0xFFFFFF, HEX);
 #endif
 
-    mqttPubStatus = String(Hostname) + String(MQTT_PUB_STATUS);
-    mqttPubRadio = String(Hostname) + String(MQTT_PUB_RADIO);
+    mqttTopics.pubStatus = Hostname + "/status";
+    mqttTopics.pubRadio = Hostname + "/radio";
+    mqttTopics.pubDomo = "domoticz/in";
 
     mqtt_setup();
 
@@ -554,8 +552,8 @@ void loop()
     {
         // publish a status message @STATUS_INTERVAL
         statusPublishPreviousMillis = currentMillis;
-        Serial.printf("%s: %s\n", mqttPubStatus.c_str(), "online");
-        client.publish(mqttPubStatus, "online");
+        Serial.printf("%s: %s\n", mqttTopics.pubStatus.c_str(), "online");
+        client.publish(mqttTopics.pubStatus, "online");
         publishRadio();
     }
 
@@ -605,9 +603,9 @@ void loop()
         }
 #endif
         Serial.printf("Sleeping for %d ms\n", SLEEP_INTERVAL);
-        Serial.printf("%s: %s\n", mqttPubStatus.c_str(), "offline");
+        Serial.printf("%s: %s\n", mqttTopics.pubStatus.c_str(), "offline");
         Serial.flush();
-        client.publish(mqttPubStatus, "offline", true /* retained */, 0 /* qos */);
+        client.publish(mqttTopics.pubStatus, "offline", true /* retained */, 0 /* qos */);
         for (int i = 0; i < 5; i++) // Retry loop to ensure message delivery
         {
             client.loop();

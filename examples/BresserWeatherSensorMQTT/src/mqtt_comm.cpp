@@ -392,8 +392,9 @@ void publishWeatherdata(bool complete, bool retain)
     {
         log_e("payloadCombined (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadCombined.length(), PAYLOAD_SIZE);
     }
-    mqtt_topic = Hostname + '/' + mqttTopics.pubCombined;
-    log_i("%s: %s\n", mqtt_topic.c_str(), payloadCombined.c_str());
+    snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
+             Hostname.c_str(), mqttTopics.pubCombined);
+    log_i("%s: %s\n", mqtt_topic, payloadCombined.c_str());
     client.publish(mqtt_topic, payloadCombined.substring(0, PAYLOAD_SIZE - 1), retain, 0);
 }
 

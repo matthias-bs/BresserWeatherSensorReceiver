@@ -12,7 +12,8 @@ MOCKS_SRC_DIRS = \
 TEST_SRC_FILES = \
   $(UNITTEST_SRC_DIR)/TestRainGauge.cpp \
   $(UNITTEST_SRC_DIR)/TestLightning.cpp \
-  $(UNITTEST_SRC_DIR)/TestWeatherUtils.cpp
-  #$(UNITTEST_SRC_DIR)/TestRainGaugeReal.cpp
+  $(UNITTEST_SRC_DIR)/TestWeatherUtils.cpp \
+  $(UNITTEST_SRC_DIR)/TestRollingCounter.cpp
+  #$(UNITTEST_SRC_DIR)/TestRainGaugeReal.cpp  
   
 include $(CPPUTEST_MAKFILE_INFRA)

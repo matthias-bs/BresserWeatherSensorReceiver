@@ -132,6 +132,8 @@
 // 20250223 Moved MQTT functions to src/mqtt_comm.h/.cpp
 // 20250712 Removed TLS fingerprint option (insecure)
 //          Improved MQTT "offline" status message handling (avoid inadvertent LWT message)
+// 20260221 Refactored MQTT topic declarations using MQTTTopics struct for cleaner
+//          organization and maintainability (replaces 13 individual declarations)
 //
 // ToDo:
 //
@@ -305,19 +307,21 @@ Lightning lightning;
 
 // MQTT topics - change if needed
 String Hostname = String(HOSTNAME);
-String mqttPubStatus = "status";
-String mqttPubRadio = "radio";
-String mqttPubData = "data";
-String mqttPubCombined = "combined";
-String mqttPubRssi = "rssi";
-String mqttPubExtra = "extra";
-String mqttPubInc = "sensors_inc";
-String mqttPubExc = "sensors_exc";
-String mqttSubReset = "reset";
-String mqttSubGetInc = "get_sensors_inc";
-String mqttSubGetExc = "get_sensors_exc";
-String mqttSubSetInc = "set_sensors_inc";
-String mqttSubSetExc = "set_sensors_exc";
+MQTTTopics mqttTopics = {
+    .pubStatus = "status",
+    .pubRadio = "radio",
+    .pubData = "data",
+    .pubCombined = "combined",
+    .pubRssi = "rssi",
+    .pubExtra = "extra",
+    .pubInc = "sensors_inc",
+    .pubExc = "sensors_exc",
+    .subReset = "reset",
+    .subGetInc = "get_sensors_inc",
+    .subGetExc = "get_sensors_exc",
+    .subSetInc = "set_sensors_inc",
+    .subSetExc = "set_sensors_exc"
+};
 
 //////////////////////////////////////////////////////
 

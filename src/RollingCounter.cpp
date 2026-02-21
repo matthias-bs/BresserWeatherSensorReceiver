@@ -35,6 +35,7 @@
 // History:
 //
 // 20260211 Created from common code in RainGauge and Lightning
+// 20260221 Improved generalization, documentation, and code deduplication
 //
 // ToDo: 
 // -
@@ -48,7 +49,13 @@
 int 
 RollingCounter::calculateIndex(const struct tm& tm, uint8_t rate) const
 {
-    return tm.tm_min / rate;
+    if (rate >= 60) {
+        // Hourly or greater - use hour of day (0-23)
+        return tm.tm_hour;
+    } else {
+        // Sub-hourly - use minute within hour divided by rate
+        return tm.tm_min / rate;
+    }
 }
 
 void 
@@ -66,12 +73,12 @@ RollingCounter::markMissedEntries(int16_t* hist, size_t size, time_t lastUpdate,
     for (time_t ts = lastUpdate + (rate * 60); ts < timestamp; ts += rate * 60) {
         struct tm timeinfo;
         localtime_r(&ts, &timeinfo);
-        int idx = timeinfo.tm_min / rate;
+        int idx = calculateIndex(timeinfo, rate);
         
         // Use provided size to guard against out-of-bounds writes
         if (idx < 0 || static_cast<size_t>(idx) >= size) {
-            log_w("markMissedEntries: computed index %d out of bounds (size=%u, minute=%d, rate=%u)",
-                  idx, static_cast<unsigned>(size), timeinfo.tm_min, rate);
+            log_w("markMissedEntries: computed index %d out of bounds (size=%u, hour=%d, minute=%d, rate=%u)",
+                  idx, static_cast<unsigned>(size), timeinfo.tm_hour, timeinfo.tm_min, rate);
             continue;
         }
         
@@ -150,4 +157,56 @@ RollingCounter::sumHistory(const History& h, bool *valid, int *nbins, float *qua
     }
 
     return res;
+}
+
+RollingCounter::UpdateResult
+RollingCounter::updateHistoryBufferCore(int16_t* hist, size_t size, int idx, int16_t delta,
+                                       time_t t_delta, time_t timestamp, time_t lastUpdate,
+                                       uint8_t updateRate)
+{
+    if (t_delta / 60 < updateRate) {
+        // t_delta shorter than expected update rate
+        if (hist[idx] < 0)
+            hist[idx] = 0;
+        struct tm t_prev;
+        localtime_r(&lastUpdate, &t_prev);
+        if (calculateIndex(t_prev, updateRate) == idx) {
+            // same index as in previous cycle - add value
+            hist[idx] += delta;
+            log_d("hist[%d]=%d (upd)", idx, hist[idx]);
+        } else {
+            // different index - new value
+            hist[idx] = delta;
+            log_d("hist[%d]=%d (new)", idx, hist[idx]);
+        }
+        return UPDATE_SUCCESS;
+    }
+    else if (t_delta >= size * updateRate * 60) {
+        // t_delta >= HIST_SIZE * UPDATE_RATE -> reset history
+        log_w("History time frame expired, resetting!");
+        return UPDATE_EXPIRED;
+    }
+    else {
+        // Some other index
+        
+        // Mark missed entries
+        markMissedEntries(hist, size, lastUpdate, timestamp, updateRate);
+        
+        // Write delta
+        hist[idx] = delta;
+        log_d("hist[%d]=%d", idx, delta);
+        return UPDATE_SUCCESS;
+    }
+}
+
+void
+RollingCounter::updateHistoryBuffer(int16_t* hist, size_t size, int idx, int16_t delta,
+                                   time_t t_delta, time_t timestamp, time_t lastUpdate,
+                                   uint8_t updateRate)
+{
+    UpdateResult result = updateHistoryBufferCore(hist, size, idx, delta, t_delta, 
+                                                  timestamp, lastUpdate, updateRate);
+    if (result == UPDATE_EXPIRED) {
+        hist_init();
+    }
 }

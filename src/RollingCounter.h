@@ -35,6 +35,7 @@
 // History:
 //
 // 20260211 Created from common code in RainGauge and Lightning
+// 20260221 Improved generalization, documentation, and code deduplication
 //
 // ToDo: 
 // -
@@ -78,6 +79,23 @@ protected:
     uint8_t updateRate;
 
     /**
+     * \typedef HistInitCallback
+     *
+     * \brief Callback function type for history buffer initialization
+     */
+    typedef void (*HistInitCallback)();
+
+    /**
+     * \enum UpdateResult
+     *
+     * \brief Result codes for history buffer updates
+     */
+    enum UpdateResult {
+        UPDATE_SUCCESS,         ///< Update completed successfully
+        UPDATE_EXPIRED          ///< History expired, initialization needed
+    };
+
+    /**
      * \struct History
      *
      * \brief History buffer configuration
@@ -109,6 +127,59 @@ protected:
      */
     void markMissedEntries(int16_t* hist, size_t size, time_t lastUpdate, 
                           time_t timestamp, uint8_t rate);
+
+    /**
+     * Update history buffer with new delta value (core logic without init)
+     * 
+     * Handles three cases:
+     * 1. Update within expected rate: adds or replaces value at current index
+     * 2. History expired: returns UPDATE_EXPIRED (caller must handle init)
+     * 3. Missed updates: marks missed entries and writes new value
+     * 
+     * \param hist          history buffer
+     * \param size          buffer size  
+     * \param idx           current index in history
+     * \param delta         delta value to add
+     * \param t_delta       time since last update (seconds)
+     * \param timestamp     current timestamp
+     * \param lastUpdate    timestamp of last update
+     * \param updateRate    update rate in minutes
+     *
+     * \returns UPDATE_SUCCESS or UPDATE_EXPIRED
+     */
+    UpdateResult updateHistoryBufferCore(int16_t* hist, size_t size, int idx, int16_t delta,
+                                        time_t t_delta, time_t timestamp, time_t lastUpdate,
+                                        uint8_t updateRate);
+
+    /**
+     * Update history buffer with new delta value
+     * 
+     * Handles three cases:
+     * 1. Update within expected rate: adds or replaces value at current index
+     * 2. History expired: calls hist_init() to reset
+     * 3. Missed updates: marks missed entries and writes new value
+     * 
+     * \param hist          history buffer
+     * \param size          buffer size
+     * \param idx           current index in history
+     * \param delta         delta value to add
+     * \param t_delta       time since last update (seconds)
+     * \param timestamp     current timestamp
+     * \param lastUpdate    timestamp of last update
+     * \param updateRate    update rate in minutes
+     */
+    void updateHistoryBuffer(int16_t* hist, size_t size, int idx, int16_t delta,
+                            time_t t_delta, time_t timestamp, time_t lastUpdate,
+                            uint8_t updateRate);
+
+    /**
+     * Initialize history buffer - must be implemented by derived classes
+     * 
+     * Called when history time frame has expired
+     * 
+     * \param value     initial value for history entries (default: -1 = invalid)
+     */
+    virtual void hist_init(int16_t value = -1) = 0;
 
     /**
      * Sum all valid entries in a history buffer
@@ -156,4 +227,13 @@ public:
     uint8_t getUpdateRate() const { return updateRate; }
 };
 
+    /**
+     * Calculate index into history buffer based on current time
+     * 
+     * \param tm        time structure
+     * \param rate      update rate in minutes
+     * 
+     * \returns index into history buffer
+     */
+    int calculateIndex(const struct tm& tm, uint8_t rate) const;
 #endif // _ROLLINGCOUNTER_H

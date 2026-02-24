@@ -116,7 +116,7 @@ namespace WeatherSensorReceiver {
 // 1 - Weather Station                  6-in-1; PN 7002585
 //   - Professional Wind Gauge          6-in-1; PN 7002531
 //   - Weather Station                  7-in-1; PN 7003300
-// 2 - Thermo-/Hygro-Sensor             6-in-1; PN 7009999
+// 2 - Thermo-/Hygro-Sensor             6-in-1; PN 7009999/7009971
 // 3 - Pool / Spa Thermometer           6-in-1; PN 7000073 
 // 4 - Soil Moisture Sensor             6-in-1; PN 7009972
 // 5 - Water Leakage Sensor             6-in-1; PN 7009975

@@ -53,6 +53,7 @@
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
 // 20250129 Minor change in SENSOR_TYPE_WEATHER8 handling
 // 20260224 Removed obsolete variable f_3in1 and related code in decodeBresser6In1Payload()
+//          Fixed High Precision Thermo Hygro Sensor (P/N 7009971) in decodeBresser6In1Payload()
 //
 // ToDo:
 // -
@@ -561,8 +562,8 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         humidity_ok = false;
     }
 
-    // the moisture sensor might present valid readings but does not have the hardware
-    if (sensor[slot].s_type == SENSOR_TYPE_SOIL)
+    // The thermo hydro sensor and the soil moisture sensor might present valid readings but do not have the hardware
+    if ((sensor[slot].s_type == SENSOR_TYPE_SOIL) || (sensor[slot].s_type == SENSOR_TYPE_THERMO_HYGRO))
     {
         wind_ok = 0;
         uv_ok = 0;

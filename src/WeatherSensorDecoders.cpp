@@ -52,6 +52,7 @@
 // 20240716 Added assignment of sensor[slot].decoder
 // 20250127 Added SENSOR_TYPE_WEATHER8 (8-in-1 Weather Sensor)
 // 20250129 Minor change in SENSOR_TYPE_WEATHER8 handling
+// 20260224 Removed obsolete variable f_3in1 and related code in decodeBresser6In1Payload()
 //
 // ToDo:
 // -
@@ -441,7 +442,6 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     bool uv_ok = false;
     bool wind_ok = false;
     bool rain_ok = false;
-    bool f_3in1 = false;
 
     // LFSR-16 digest, generator 0x8810 init 0x5412
     int chkdgst = (msg[0] << 8) | msg[1];
@@ -508,7 +508,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].w.humidity = (msg[14] >> 4) * 10 + (msg[14] & 0x0f);
 
         // apparently ff01 or 0000 if not available, ???0 if valid, inverted BCD
-        uv_ok = ((~msg[15] & 0xff) <= 0x99) && ((~msg[16] & 0xf0) <= 0x90) && !f_3in1;
+        uv_ok = ((~msg[15] & 0xff) <= 0x99) && ((~msg[16] & 0xf0) <= 0x90);
         if (uv_ok)
         {
             int uv_raw = ((~msg[15] & 0xf0) >> 4) * 100 + (~msg[15] & 0x0f) * 10 + ((~msg[16] & 0xf0) >> 4);
@@ -588,7 +588,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     // Weather station data is split into two separate messages (except for Professional Wind Gauge)
     if (sensor[slot].s_type == SENSOR_TYPE_WEATHER1)
     {
-        if (f_3in1 || (sensor[slot].w.temp_ok && sensor[slot].w.rain_ok))
+        if (sensor[slot].w.temp_ok && sensor[slot].w.rain_ok)
         {
             sensor[slot].complete = true;
         }

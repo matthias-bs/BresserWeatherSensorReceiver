@@ -30,6 +30,7 @@ To allow automatic handling of all Bresser weather station variants, the decoder
 | 7002585       | Weather Station | decodeBresser**6In1**Payload()  |
 | 7009999       | Thermo-/Hygrometer Sensor | decodeBresser**6in1**Payload() |
 | 7009970       | Air Quality Sensor PM 2.5 / PM 10 | decodeBresser**7In1**Payload() |
+| 7009971       | High Precision Thermo Hygro Sensor | decodeBresser**6In1**Payload() |
 | 7009972       | Soil Moisture/Temperature Sensor | decodeBresser**6In1**Payload() |
 | 7009973       | Pool / Spa Thermometer           | decodeBresser**6In1**Payload() |
 | 7009975       | Water Leakage Sensor             | decodeBresser**Leakage**Payload() |

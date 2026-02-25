@@ -562,7 +562,7 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
         humidity_ok = false;
     }
 
-    // The thermo hydro sensor and the soil moisture sensor might present valid readings but do not have the hardware
+    // The thermo hygro sensor and the soil moisture sensor might present valid readings but do not have the hardware
     if ((sensor[slot].s_type == SENSOR_TYPE_SOIL) || (sensor[slot].s_type == SENSOR_TYPE_THERMO_HYGRO))
     {
         wind_ok = 0;

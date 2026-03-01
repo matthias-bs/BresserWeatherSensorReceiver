@@ -1895,3 +1895,32 @@ TEST(TestRainGaugeEdgeCases, Test_LightContinuousRain) {
   
   DOUBLES_EQUAL(0.9, rainGauge.pastHour(), TOLERANCE);
 }
+
+TEST_GROUP(TestRainGaugeSetUpdateRate) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+/*
+ * Test setUpdateRate() with invalid inputs
+ */
+TEST(TestRainGaugeSetUpdateRate, Test_SetUpdateRateInvalid) {
+  RainGauge rainGauge;
+
+  printf("< SetUpdateRateInvalid >\n");
+
+  // rate=0: invalid (cannot be zero)
+  CHECK_FALSE(rainGauge.setUpdateRate(0));
+
+  // rate=7: invalid (60 % 7 != 0)
+  CHECK_FALSE(rainGauge.setUpdateRate(7));
+
+  // rate=4: invalid (60/4=15 > RAIN_HIST_SIZE=10)
+  CHECK_FALSE(rainGauge.setUpdateRate(4));
+
+  // rate=6: valid (default)
+  CHECK_TRUE(rainGauge.setUpdateRate(6));
+}

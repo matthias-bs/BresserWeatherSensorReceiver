@@ -917,3 +917,32 @@ TEST(TG_LightningIrregular, Test_LightningIrregular) {
   res_events = lightning.pastHour();
   CHECK_EQUAL(exp_events, res_events);
 }
+
+TEST_GROUP(TG_LightningUpdateRate) {
+  void setup() {
+  }
+
+  void teardown() {
+  }
+};
+
+/*
+ * Test setUpdateRate() with invalid inputs
+ */
+TEST(TG_LightningUpdateRate, Test_LightningSetUpdateRateInvalid) {
+  Lightning lightning;
+
+  printf("< LightningSetUpdateRateInvalid >\n");
+
+  // rate=0: invalid (cannot be zero)
+  CHECK_FALSE(lightning.setUpdateRate(0));
+
+  // rate=7: invalid (60 % 7 != 0)
+  CHECK_FALSE(lightning.setUpdateRate(7));
+
+  // rate=4: invalid (60/4=15 > LIGHTNING_HIST_SIZE=10)
+  CHECK_FALSE(lightning.setUpdateRate(4));
+
+  // rate=6: valid (default)
+  CHECK_TRUE(lightning.setUpdateRate(6));
+}

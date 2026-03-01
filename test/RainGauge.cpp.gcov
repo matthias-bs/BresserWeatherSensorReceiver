@@ -1,0 +1,505 @@
+        -:    0:Source:/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/RainGauge.cpp
+        -:    0:Graph:build/RainGauge/objs/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/RainGauge.gcno
+        -:    0:Data:build/RainGauge/objs/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/RainGauge.gcda
+        -:    0:Runs:1
+        -:    1:///////////////////////////////////////////////////////////////////////////////////////////////////
+        -:    2:// RainGauge.cpp
+        -:    3://
+        -:    4:// Calculation of hourly (past 60 minutes), daily, weekly and monthly rainfall
+        -:    5:// from raw rain gauge data.
+        -:    6:// 
+        -:    7:// Non-volatile data is stored in the ESP32's RTC RAM to allow retention during deep sleep mode.
+        -:    8://
+        -:    9:// https://github.com/matthias-bs/BresserWeatherSensorReceiver
+        -:   10://
+        -:   11://
+        -:   12:// created: 08/2022
+        -:   13://
+        -:   14://
+        -:   15:// MIT License
+        -:   16://
+        -:   17:// Copyright (c) 2026 Matthias Prinke
+        -:   18:// 
+        -:   19:// Permission is hereby granted, free of charge, to any person obtaining a copy
+        -:   20:// of this software and associated documentation files (the "Software"), to deal
+        -:   21:// in the Software without restriction, including without limitation the rights
+        -:   22:// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        -:   23:// copies of the Software, and to permit persons to whom the Software is
+        -:   24:// furnished to do so, subject to the following conditions:
+        -:   25:// 
+        -:   26:// The above copyright notice and this permission notice shall be included in all
+        -:   27:// copies or substantial portions of the Software.
+        -:   28:// 
+        -:   29:// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        -:   30:// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        -:   31:// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        -:   32:// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        -:   33:// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        -:   34:// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        -:   35:// SOFTWARE.
+        -:   36://
+        -:   37:// History:
+        -:   38://
+        -:   39:// 20220830 Created
+        -:   40:// 20230716 Implemented sensor startup handling
+        -:   41:// 20230817 Implemented partial reset
+        -:   42:// 20231227 Added prerequisites for storing rain data in preferences
+        -:   43:// 20231218 Implemented storing of rain data in preferences, 
+        -:   44://          new algorithm for past 60 minutes rainfall
+        -:   45:// 20240118 Changed raingaugeMax to class member set by constructor
+        -:   46://          Modified startup/overflow handling
+        -:   47:// 20240119 Changed preferences to class member
+        -:   48://          Modified update at the same index as before
+        -:   49://          Modified pastHour() algorithm and added features
+        -:   50:// 20240120 Removed old implementation
+        -:   51:// 20240122 Changed scope of nvData -
+        -:   52://          Using RTC RAM: global
+        -:   53://          Using Preferences, Unit Tests: class member
+        -:   54://          Improvements
+        -:   55:// 20240130 Update pastHour() documentation
+        -:   56:// 20250323 Added configuration of expected update rate at run-time
+        -:   57://          pastHour(): modified parameters
+        -:   58:// 20260211 Added past24Hours() algorithm
+        -:   59://          Refactored to use RollingCounter base class
+        -:   60:// 20260221 Improved RollingCounter generalization, documentation, and code deduplication
+        -:   61://
+        -:   62:// ToDo: 
+        -:   63:// -
+        -:   64://
+        -:   65:// Notes:
+        -:   66:// - Extreme values of rainfall: https://en.wikipedia.org/wiki/List_of_weather_records#Rain
+        -:   67://   (for variable widths and evaluation of rain gauge overflows)
+        -:   68://
+        -:   69:///////////////////////////////////////////////////////////////////////////////////////////////////
+        -:   70:
+        -:   71:#include <Arduino.h>
+        -:   72:#include "WeatherSensorCfg.h"
+        -:   73:#include "RainGauge.h"
+        -:   74:
+        -:   75:
+        -:   76:#if !defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:   77:RTC_DATA_ATTR nvData_t nvData = {
+        -:   78:   .lastUpdate = 0,
+        -:   79:   .hist = {-1},
+        -:   80:   .hist24h = {-1},
+        -:   81:   .startupPrev = false,
+        -:   82:   .rainPreStartup = 0,
+        -:   83:   .tsDayBegin = 0xFF,
+        -:   84:   .rainDayBegin = 0,
+        -:   85:   .tsWeekBegin = 0xFF,
+        -:   86:   .rainWeekBegin = 0,
+        -:   87:   .wdayPrev = 0xFF,
+        -:   88:   .tsMonthBegin = 0xFF,
+        -:   89:   .rainMonthBegin = 0,
+        -:   90:   .rainPrev = 0,
+        -:   91:   .rainAcc = 0,
+        -:   92:   .updateRate = RAINGAUGE_UPD_RATE
+        -:   93:};
+        -:   94:#endif
+        -:   95:
+        -:   96:
+        -:   97:void
+       23:   98:RainGauge::reset(uint8_t flags)
+        -:   99:{
+        -:  100:#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:  101:    preferences.begin("BWS-RAIN", false);
+        -:  102:    if (flags & RESET_RAIN_H) {
+        -:  103:        hist_init();
+        -:  104:        for (int i=0; i<RAIN_HIST_SIZE; i++) {
+        -:  105:            char buf[7];
+        -:  106:            sprintf(buf, "hist%02d", i);
+        -:  107:            preferences.putShort(buf, nvData.hist[i]);
+        -:  108:        }
+        -:  109:    }
+        -:  110:    if (flags & RESET_RAIN_24H) {
+        -:  111:        hist24h_init();
+        -:  112:        for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        -:  113:            char buf[10];
+        -:  114:            sprintf(buf, "h24h%02d", i);
+        -:  115:            preferences.putShort(buf, nvData.hist24h[i]);
+        -:  116:        }
+        -:  117:    }
+        -:  118:    if (flags & RESET_RAIN_D) {
+        -:  119:        nvData.tsDayBegin     = 0xFF;
+        -:  120:        nvData.rainDayBegin   = 0;
+        -:  121:        preferences.putUChar("tsDayBegin", nvData.tsDayBegin);
+        -:  122:        preferences.putFloat("rainDayBegin", nvData.rainDayBegin);
+        -:  123:    }
+        -:  124:    if (flags & RESET_RAIN_W) {
+        -:  125:        nvData.tsWeekBegin    = 0xFF;
+        -:  126:        nvData.rainWeekBegin  = 0;
+        -:  127:        preferences.putUChar("tsWeekBegin", nvData.tsWeekBegin);
+        -:  128:        preferences.putFloat("rainWeekBegin", nvData.rainWeekBegin);
+        -:  129:    }
+        -:  130:    if (flags & RESET_RAIN_M) {
+        -:  131:        nvData.tsMonthBegin   = 0xFF;
+        -:  132:        nvData.rainMonthBegin = 0;
+        -:  133:        preferences.putUChar("tsMonthBegin", nvData.tsMonthBegin);
+        -:  134:        preferences.putFloat("rainMonthBegin", nvData.rainMonthBegin);
+        -:  135:    }
+        -:  136:
+        -:  137:    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) {
+        -:  138:        nvData.startupPrev       = false;
+        -:  139:        nvData.rainPreStartup    = 0;
+        -:  140:        nvData.rainPrev          = -1;
+        -:  141:        nvData.rainAcc           = 0;
+        -:  142:        rainCurr                 = 0;
+        -:  143:        preferences.putBool("startupPrev", nvData.startupPrev);
+        -:  144:        preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
+        -:  145:        preferences.putFloat("rainPrev", nvData.rainPrev);
+        -:  146:        preferences.putFloat("rainAcc", nvData.rainAcc);
+        -:  147:    }    
+        -:  148:    preferences.end();
+        -:  149:#else
+       23:  150:    if (flags & RESET_RAIN_H) {
+       19:  151:        hist_init();
+        -:  152:    }
+       23:  153:    if (flags & RESET_RAIN_24H) {
+       19:  154:        hist24h_init();
+        -:  155:    }
+       23:  156:    if (flags & RESET_RAIN_D) {
+       19:  157:        nvData.tsDayBegin     = 0xFF;
+       19:  158:        nvData.rainDayBegin   = 0;
+        -:  159:    }
+       23:  160:    if (flags & RESET_RAIN_W) {
+       18:  161:        nvData.tsWeekBegin    = 0xFF;
+       18:  162:        nvData.rainWeekBegin  = 0;
+        -:  163:    }
+       23:  164:    if (flags & RESET_RAIN_M) {
+       18:  165:        nvData.tsMonthBegin   = 0xFF;
+       18:  166:        nvData.rainMonthBegin = 0;
+        -:  167:    }
+        -:  168:
+       23:  169:    if ((flags & (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) == (RESET_RAIN_H | RESET_RAIN_D | RESET_RAIN_W | RESET_RAIN_M | RESET_RAIN_24H)) {
+       17:  170:        nvData.startupPrev       = false;
+       17:  171:        nvData.rainPreStartup    = 0;
+       17:  172:        nvData.rainPrev          = -1;
+       17:  173:        nvData.rainAcc           = 0;
+       17:  174:        rainCurr                 = 0;
+        -:  175:    }
+        -:  176:#endif
+       23:  177:}
+        -:  178:
+        -:  179:void
+      195:  180:RainGauge::hist_init(int16_t rain)
+        -:  181:{
+     2145:  182:    for (int i=0; i<RAIN_HIST_SIZE; i++) {
+     1950:  183:        nvData.hist[i] = rain;
+        -:  184:    }
+      195:  185:}
+        -:  186:
+        -:  187:void
+      135:  188:RainGauge::hist24h_init(int16_t rain)
+        -:  189:{
+     3375:  190:    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+     3240:  191:        nvData.hist24h[i] = rain;
+        -:  192:    }
+      135:  193:}
+        -:  194:
+        -:  195:#if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:  196:void
+        -:  197:RainGauge::prefs_load(void)
+        -:  198:{
+        -:  199:    preferences.begin("BWS-RAIN", false);
+        -:  200:    nvData.lastUpdate     = preferences.getULong64("lastUpdate", 0);
+        -:  201:    // Optimization: Reduces number of Flash writes
+        -:  202:    // preferences.getBytes("hist", nvData.hist, sizeof(nvData.hist));
+        -:  203:    for (int i=0; i<RAIN_HIST_SIZE; i++) {
+        -:  204:        char buf[7];
+        -:  205:        sprintf(buf, "hist%02d", i);
+        -:  206:        nvData.hist[i] = preferences.getShort(buf, -1);
+        -:  207:    }
+        -:  208:    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        -:  209:        char buf[10];
+        -:  210:        sprintf(buf, "h24h%02d", i);
+        -:  211:        nvData.hist24h[i] = preferences.getShort(buf, -1);
+        -:  212:    }
+        -:  213:    nvData.startupPrev       = preferences.getBool("startupPrev", false);
+        -:  214:    nvData.rainPreStartup    = preferences.getFloat("rainPreStartup", 0);
+        -:  215:    nvData.tsDayBegin        = preferences.getUChar("tsDayBegin", 0xFF);
+        -:  216:    nvData.rainDayBegin      = preferences.getFloat("rainDayBegin", 0);
+        -:  217:    nvData.tsWeekBegin       = preferences.getUChar("tsWeekBegin", 0xFF);
+        -:  218:    nvData.rainWeekBegin     = preferences.getFloat("rainWeekBegin", 0);
+        -:  219:    nvData.wdayPrev          = preferences.getUChar("wdayPrev", 0xFF);
+        -:  220:    nvData.tsMonthBegin      = preferences.getUChar("tsMonthBegin", 0xFF);
+        -:  221:    nvData.rainMonthBegin    = preferences.getFloat("rainMonthBegin", 0);
+        -:  222:    nvData.rainPrev          = preferences.getFloat("rainPrev", -1);
+        -:  223:    nvData.rainAcc           = preferences.getFloat("rainAcc", 0);
+        -:  224:    nvData.updateRate        = preferences.getUChar("updateRate", RAINGAUGE_UPD_RATE);
+        -:  225:
+        -:  226:    log_d("lastUpdate        =%s", String(nvData.lastUpdate).c_str());
+        -:  227:    log_d("startupPrev       =%d", nvData.startupPrev);
+        -:  228:    log_d("rainPreStartup    =%f", nvData.rainPreStartup);
+        -:  229:    log_d("tsDayBegin        =%d", nvData.tsDayBegin);
+        -:  230:    log_d("rainDayBegin      =%f", nvData.rainDayBegin);
+        -:  231:    log_d("tsWeekBegin       =%d", nvData.tsWeekBegin);
+        -:  232:    log_d("rainWeekBegin     =%f", nvData.rainWeekBegin);
+        -:  233:    log_d("wdayPrev          =%d", nvData.wdayPrev);
+        -:  234:    log_d("tsMonthBegin      =%d", nvData.tsMonthBegin);
+        -:  235:    log_d("rainMonthBegin    =%f", nvData.rainMonthBegin);
+        -:  236:    log_d("rainPrev          =%f", nvData.rainPrev);
+        -:  237:    log_d("rainAcc           =%f", nvData.rainAcc);
+        -:  238:    preferences.end();
+        -:  239:}
+        -:  240:
+        -:  241:void
+        -:  242:RainGauge::prefs_save(void)
+        -:  243:{
+        -:  244:    preferences.begin("BWS-RAIN", false);
+        -:  245:    preferences.putULong64("lastUpdate", nvData.lastUpdate);
+        -:  246:    // Optimization: Reduces number of Flash writes
+        -:  247:    // preferences.putBytes("hist", nvData.hist, sizeof(nvData.hist));
+        -:  248:    for (int i=0; i<RAIN_HIST_SIZE; i++) {
+        -:  249:        char buf[7];
+        -:  250:        sprintf(buf, "hist%02d", i);
+        -:  251:        preferences.putShort(buf, nvData.hist[i]);
+        -:  252:    }
+        -:  253:    for (int i=0; i<RAIN_HIST_SIZE_24H; i++) {
+        -:  254:        char buf[10];
+        -:  255:        sprintf(buf, "h24h%02d", i);
+        -:  256:        preferences.putShort(buf, nvData.hist24h[i]);
+        -:  257:    }
+        -:  258:    preferences.putBool("startupPrev", nvData.startupPrev);
+        -:  259:    preferences.putFloat("rainPreStartup", nvData.rainPreStartup);
+        -:  260:    preferences.putUChar("tsDayBegin", nvData.tsDayBegin);
+        -:  261:    preferences.putFloat("rainDayBegin", nvData.rainDayBegin);
+        -:  262:    preferences.putUChar("tsWeekBegin", nvData.tsWeekBegin);
+        -:  263:    preferences.putFloat("rainWeekBegin", nvData.rainWeekBegin);
+        -:  264:    preferences.putUChar("wdayPrev", nvData.wdayPrev);
+        -:  265:    preferences.putUChar("tsMonthBegin", nvData.tsMonthBegin);
+        -:  266:    preferences.putFloat("rainMonthBegin", nvData.rainMonthBegin);
+        -:  267:    preferences.putFloat("rainPrev", nvData.rainPrev);
+        -:  268:    preferences.putFloat("rainAcc", nvData.rainAcc);
+        -:  269:    preferences.end();
+        -:  270:}
+        -:  271:#endif
+        -:  272:
+        -:  273:
+        -:  274:void
+      286:  275:RainGauge::update(time_t timestamp, float rain, bool startup)
+        -:  276:{
+        -:  277:    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:  278:        prefs_load();
+        -:  279:    #endif
+        -:  280:    
+        -:  281:    struct tm t;
+      286:  282:    localtime_r(&timestamp, &t);
+        -:  283:
+      286:  284:    if (nvData.lastUpdate == 0) {
+        -:  285:        // Initialize history
+       33:  286:        hist_init();
+       33:  287:        hist24h_init();
+        -:  288:    }
+        -:  289:
+      286:  290:    if (nvData.rainPrev == -1) {
+        -:  291:        // No previous count or counter reset
+       17:  292:        nvData.rainPrev = rain;
+       17:  293:        nvData.lastUpdate = timestamp;
+       17:  294:        lastUpdate = timestamp;
+        -:  295:        
+        -:  296:        #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:  297:            prefs_save();
+        -:  298:        #endif
+        -:  299:    }
+        -:  300:
+      286:  301:    rainCurr = nvData.rainAcc + rain;
+        -:  302:    
+      286:  303:    if (rainCurr < nvData.rainPrev) {
+        -:  304:       // Startup change 0->1 detected
+       29:  305:       if (!nvData.startupPrev && startup) {
+        -:  306:           // Add last rain gauge reading before startup
+        1:  307:           nvData.rainAcc += nvData.rainPreStartup;
+        -:  308:       } else {
+        -:  309:           // Add counter overflow
+       28:  310:           nvData.rainAcc += raingaugeMax;
+        -:  311:       }
+        -:  312:    }
+        -:  313:    
+      286:  314:    rainCurr = nvData.rainAcc + rain;
+      286:  315:    nvData.startupPrev = startup;
+      286:  316:    nvData.rainPreStartup = rain;
+        -:  317:
+      286:  318:    float rainDelta = rainCurr - nvData.rainPrev;
+      286:  319:    log_d("rainDelta: %.1f", rainDelta);
+        -:  320:
+        -:  321:    // Check if no saved data is available yet
+      286:  322:    if (nvData.wdayPrev == 0xFF) {
+        -:  323:        // Save day of week to allow detection of new week
+       33:  324:        nvData.wdayPrev = t.tm_wday;
+        -:  325:    }
+        -:  326:
+        -:  327:    /**
+        -:  328:     * \verbatim
+        -:  329:     * Total rainfall during past 60 minutes
+        -:  330:     * --------------------------------------
+        -:  331:     *
+        -:  332:     * In each update():
+        -:  333:     * - timestamp (time_t) ->                  t (localtime, struct tm)
+        -:  334:     * - calculate index into hist[]:           idx = t.tm_min / updateRate
+        -:  335:     * - expired time since last update:        t_delta = timestamp - nvData.lastUpdate
+        -:  336:     * - amount of rain since last update:      rainDelta = rainCurr - nvData.rainPrev
+        -:  337:     * - t_delta
+        -:  338:     *      < 0:                                something is wrong, e.g. RTC was not set correctly -> ignore, return
+        -:  339:     *      t_delta < expected update rate:
+        -:  340:     *          idx same as in previous cycle:  hist[idx] += rainDelta
+        -:  341:     *          idx changed by 1:               hist[idx] = rainDelta
+        -:  342:     *      t_delta >= history size:            mark all history entries as invalid
+        -:  343:     *      else (index changed > 1):           mark all history entries in interval [expected_index, current_index) as invalid
+        -:  344:     *                                          hist[idx] = rainDelta
+        -:  345:     *
+        -:  346:     *   ---------------     -----------
+        -:  347:     *  |   |   |   |   |...|   |   |   |   hist[RAIN_HIST_SIZE]
+        -:  348:     *   ---------------     -----------
+        -:  349:     *        ^
+        -:  350:     *        |
+        -:  351:     *       idx = t.tm_min / updateRate
+        -:  352:     *
+        -:  353:     * - Calculate hourly rate:
+        -:  354:     *   pastHour = sum of all valid hist[] entries
+        -:  355:     *
+        -:  356:     * Notes:
+        -:  357:     * - rainDelta values (floating point with resolution of 0.1) are stored as integers to reduce memory consumption.
+        -:  358:     *   To avoid rounding errors, the rainDelta values are multiplied by 100 for conversion to integer.
+        -:  359:     * \endverbatim
+        -:  360:     */
+        -:  361:
+        -:  362:    // Delta time between last update and current time
+      286:  363:    time_t t_delta = timestamp - nvData.lastUpdate;
+      286:  364:    log_d("t_delta: %ld", t_delta);
+        -:  365:
+        -:  366:    // t_delta < 0: something is wrong, e.g. RTC was not set correctly
+      286:  367:    if (t_delta < 0) {
+        2:  368:        log_w("Negative time span since last update!?");
+        2:  369:        return; 
+        -:  370:    }
+        -:  371:
+        -:  372:
+      284:  373:    int idx = t.tm_min / nvData.updateRate;
+        -:  374:
+        -:  375:    // Update history buffer using generalized base class method
+        -:  376:    // Note: rainDelta is scaled by 100 for storage precision
+      284:  377:    updateHistoryBuffer(nvData.hist, RAIN_HIST_SIZE, idx, 
+      284:  378:                       static_cast<int16_t>(rainDelta * 100),
+      284:  379:                       t_delta, timestamp, nvData.lastUpdate, nvData.updateRate);
+        -:  380:
+        -:  381:
+        -:  382:    #if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
+        -:  383:        String buf;
+      284:  384:        buf = String("hist[]={");
+     3124:  385:        for (size_t i=0; i<RAIN_HIST_SIZE; i++) {
+     2840:  386:            buf += String(nvData.hist[i]) + String(", ");
+        -:  387:        }
+      284:  388:        buf += String("}");
+      284:  389:        log_d("%s", buf.c_str());
+        -:  390:    #endif
+        -:  391:    
+        -:  392:    // Update 24-hour history buffer using generalized base class method
+        -:  393:    // Note: Update rate of 60 minutes (1 hour) triggers hour-based indexing
+        -:  394:    // Calculate index based on hour (0-23)
+      284:  395:    int idx24h = calculateIndex(t, 60);
+        -:  396:    
+        -:  397:    // Update 24h history buffer using core method (handles init separately)
+        -:  398:    // Note: rainDelta is scaled by 100 for storage precision
+      568:  399:    UpdateResult result24h = updateHistoryBufferCore(nvData.hist24h, RAIN_HIST_SIZE_24H, idx24h,
+      284:  400:                                                     static_cast<int16_t>(rainDelta * 100),
+        -:  401:                                                     t_delta, timestamp, nvData.lastUpdate, 60);
+      284:  402:    if (result24h == UPDATE_EXPIRED) {
+       83:  403:        hist24h_init();
+        -:  404:    }
+        -:  405:    
+        -:  406:    // Check if day of the week has changed
+        -:  407:    // or no saved data is available yet
+      284:  408:    if ((t.tm_wday != nvData.tsDayBegin) || 
+      176:  409:        (nvData.tsDayBegin == 0xFF)) {
+        -:  410:
+        -:  411:        // save timestamp
+      108:  412:        nvData.tsDayBegin = t.tm_wday;
+        -:  413:        
+        -:  414:        // save rain gauge value
+      108:  415:        nvData.rainDayBegin = rainCurr;
+        -:  416:    }
+        -:  417:    
+        -:  418:    // Check if the week has changed
+        -:  419:    // (transition from 0 - Sunday to 1 - Monday
+        -:  420:    // or no saved data is available yet
+      284:  421:    if (((t.tm_wday == 1) && (nvData.wdayPrev == 0)) ||
+      276:  422:        (nvData.tsWeekBegin == 0xFF)) {
+        -:  423:        // save timestamp
+       43:  424:        nvData.tsWeekBegin = t.tm_wday;
+        -:  425:        
+        -:  426:        // save rain gauge value
+       43:  427:        nvData.rainWeekBegin = rainCurr;
+        -:  428:    }
+        -:  429:    
+        -:  430:    // Update day of week
+      284:  431:    nvData.wdayPrev = t.tm_wday;
+        -:  432:        
+        -:  433:    // Check if month has changed
+        -:  434:    // or no saved data is available yet
+      284:  435:    if ((t.tm_mon != nvData.tsMonthBegin) ||
+      247:  436:        (nvData.tsMonthBegin == 0xFF)) {
+        -:  437:        // save timestamp
+       37:  438:        nvData.tsMonthBegin = t.tm_mon;
+        -:  439:        
+        -:  440:        // save rain gauge value
+       37:  441:        nvData.rainMonthBegin = rainCurr;
+        -:  442:    }
+        -:  443:
+      284:  444:    nvData.lastUpdate = timestamp;
+      284:  445:    lastUpdate = timestamp;
+      284:  446:    updateRate = nvData.updateRate;
+      284:  447:    nvData.rainPrev = rainCurr;
+        -:  448:
+        -:  449:    #if defined(RAINGAUGE_USE_PREFS) && !defined(INSIDE_UNITTEST)
+        -:  450:        prefs_save();
+        -:  451:    #endif
+      284:  452:}
+        -:  453:
+        -:  454:float
+      123:  455:RainGauge::pastHour(bool *valid, int *nbins, float *quality)
+        -:  456:{
+      123:  457:    History hourHist = {
+      123:  458:        .hist = nvData.hist,
+        -:  459:        .size = RAIN_HIST_SIZE,
+      123:  460:        .updateRate = nvData.updateRate
+      123:  461:    };
+      246:  462:    return sumHistory(hourHist, valid, nbins, quality, 0.01);
+        -:  463:}
+        -:  464:
+        -:  465:float
+       14:  466:RainGauge::past24Hours(bool *valid, int *nbins, float *quality)
+        -:  467:{
+       14:  468:    History dayHist = {
+       14:  469:        .hist = nvData.hist24h,
+        -:  470:        .size = RAIN_HIST_SIZE_24H,
+        -:  471:        .updateRate = 60
+       14:  472:    };
+       28:  473:    return sumHistory(dayHist, valid, nbins, quality, 0.01);
+        -:  474:}
+        -:  475:
+        -:  476:float
+       24:  477:RainGauge::currentDay(void)
+        -:  478:{
+       24:  479:    if (nvData.tsMonthBegin == 0xFF)
+        3:  480:        return -1;
+        -:  481:    
+       21:  482:    return rainCurr - nvData.rainDayBegin;
+        -:  483:}
+        -:  484:
+        -:  485:float
+       29:  486:RainGauge::currentWeek(void)
+        -:  487:{
+       29:  488:    if (nvData.tsWeekBegin == 0xFF)
+        4:  489:        return -1;
+        -:  490:    
+       25:  491:    return rainCurr - nvData.rainWeekBegin;
+        -:  492:}
+        -:  493:
+        -:  494:float
+       59:  495:RainGauge::currentMonth(void)
+        -:  496:{
+       59:  497:    if (nvData.tsMonthBegin == 0xFF)
+        3:  498:        return -1;
+        -:  499:    
+       56:  500:    return rainCurr - nvData.rainMonthBegin;
+        -:  501:}

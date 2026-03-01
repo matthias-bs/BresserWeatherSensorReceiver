@@ -1,0 +1,244 @@
+        -:    0:Source:/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/RollingCounter.h
+        -:    0:Graph:build/RainGauge/objs/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/Lightning.gcno
+        -:    0:Data:build/RainGauge/objs/home/runner/work/BresserWeatherSensorReceiver/BresserWeatherSensorReceiver/src/Lightning.gcda
+        -:    0:Runs:1
+        -:    1:///////////////////////////////////////////////////////////////////////////////////////////////////
+        -:    2:// RollingCounter.h
+        -:    3://
+        -:    4:// Base class for rolling counter implementations (RainGauge, Lightning, etc.)
+        -:    5:// Provides common functionality for history buffer management and calculations
+        -:    6://
+        -:    7:// https://github.com/matthias-bs/BresserWeatherSensorReceiver
+        -:    8://
+        -:    9://
+        -:   10:// created: 02/2026
+        -:   11://
+        -:   12://
+        -:   13:// MIT License
+        -:   14://
+        -:   15:// Copyright (c) 2026 Matthias Prinke
+        -:   16://
+        -:   17:// Permission is hereby granted, free of charge, to any person obtaining a copy
+        -:   18:// of this software and associated documentation files (the "Software"), to deal
+        -:   19:// in the Software without restriction, including without limitation the rights
+        -:   20:// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        -:   21:// copies of the Software, and to permit persons to whom the Software is
+        -:   22:// furnished to do so, subject to the following conditions:
+        -:   23://
+        -:   24:// The above copyright notice and this permission notice shall be included in all
+        -:   25:// copies or substantial portions of the Software.
+        -:   26://
+        -:   27:// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        -:   28:// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        -:   29:// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        -:   30:// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        -:   31:// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        -:   32:// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        -:   33:// SOFTWARE.
+        -:   34://
+        -:   35:// History:
+        -:   36://
+        -:   37:// 20260211 Created from common code in RainGauge and Lightning
+        -:   38:// 20260221 Improved generalization, documentation, and code deduplication
+        -:   39://
+        -:   40:// ToDo:
+        -:   41:// -
+        -:   42://
+        -:   43:///////////////////////////////////////////////////////////////////////////////////////////////////
+        -:   44:#ifndef _ROLLINGCOUNTER_H
+        -:   45:#define _ROLLINGCOUNTER_H
+        -:   46:
+        -:   47:#if defined(ESP32) || defined(ESP8266)
+        -:   48:#include <sys/time.h>
+        -:   49:#else
+        -:   50:#include <time.h>
+        -:   51:#include <stdint.h>
+        -:   52:#include <stddef.h>
+        -:   53:#endif
+        -:   54:
+        -:   55:/**
+        -:   56: * \def
+        -:   57: *
+        -:   58: * Default update rate [min]
+        -:   59: */
+        -:   60:#define ROLLING_COUNTER_UPD_RATE 6
+        -:   61:
+        -:   62:/**
+        -:   63: * \def
+        -:   64: *
+        -:   65: * Fraction of valid entries required for valid result
+        -:   66: */
+        -:   67:#define DEFAULT_QUALITY_THRESHOLD 0.8
+        -:   68:
+        -:   69:/**
+        -:   70: * \class RollingCounter
+        -:   71: *
+        -:   72: * \brief Base class for rolling counter implementations
+        -:   73: *
+        -:   74: * Provides common functionality for managing rolling history buffers,
+        -:   75: * handling timestamps, calculating time-based aggregates with quality metrics.
+        -:   76: */
+        -:   77:class RollingCounter
+        -:   78:{
+        -:   79:protected:
+        -:   80:    float qualityThreshold;
+        -:   81:    time_t lastUpdate;
+        -:   82:    uint8_t updateRate;
+        -:   83:
+        -:   84:    /**
+        -:   85:     * \typedef HistInitCallback
+        -:   86:     *
+        -:   87:     * \brief Callback function type for history buffer initialization
+        -:   88:     */
+        -:   89:    typedef void (*HistInitCallback)();
+        -:   90:
+        -:   91:    /**
+        -:   92:     * \enum UpdateResult
+        -:   93:     *
+        -:   94:     * \brief Result codes for history buffer updates
+        -:   95:     */
+        -:   96:    enum UpdateResult
+        -:   97:    {
+        -:   98:        UPDATE_SUCCESS, ///< Update completed successfully
+        -:   99:        UPDATE_EXPIRED  ///< History expired, initialization needed
+        -:  100:    };
+        -:  101:
+        -:  102:    /**
+        -:  103:     * \struct History
+        -:  104:     *
+        -:  105:     * \brief History buffer configuration
+        -:  106:     */
+        -:  107:    typedef struct
+        -:  108:    {
+        -:  109:        int16_t *hist;      // pointer to buffer
+        -:  110:        size_t size;        // number of bins
+        -:  111:        uint8_t updateRate; // minutes per bin
+        -:  112:    } History;
+        -:  113:
+        -:  114:    /**
+        -:  115:     * Calculate index into history buffer based on current time
+        -:  116:     *
+        -:  117:     * \param tm        time structure
+        -:  118:     * \param rate      update rate in minutes
+        -:  119:     *
+        -:  120:     * \returns index into history buffer
+        -:  121:     */
+        -:  122:    int calculateIndex(const struct tm &tm, uint8_t rate) const;
+        -:  123:
+        -:  124:    /**
+        -:  125:     * Mark history entries as invalid for missed update cycles
+        -:  126:     *
+        -:  127:     * \param hist          history buffer
+        -:  128:     * \param size          buffer size
+        -:  129:     * \param lastUpdate    timestamp of last update
+        -:  130:     * \param timestamp     current timestamp
+        -:  131:     * \param rate          update rate in minutes
+        -:  132:     */
+        -:  133:    void markMissedEntries(int16_t *hist, size_t size, time_t lastUpdate,
+        -:  134:                           time_t timestamp, uint8_t rate);
+        -:  135:
+        -:  136:    /**
+        -:  137:     * Update history buffer with new delta value (core logic without init)
+        -:  138:     *
+        -:  139:     * Handles three cases:
+        -:  140:     * 1. Update within expected rate: adds or replaces value at current index
+        -:  141:     * 2. History expired: returns UPDATE_EXPIRED (caller must handle init)
+        -:  142:     * 3. Missed updates: marks missed entries and writes new value
+        -:  143:     *
+        -:  144:     * \param hist          history buffer
+        -:  145:     * \param size          buffer size
+        -:  146:     * \param idx           current index in history
+        -:  147:     * \param delta         delta value to add
+        -:  148:     * \param t_delta       time since last update (seconds)
+        -:  149:     * \param timestamp     current timestamp
+        -:  150:     * \param lastUpdate    timestamp of last update
+        -:  151:     * \param updateRate    update rate in minutes
+        -:  152:     *
+        -:  153:     * \returns UPDATE_SUCCESS or UPDATE_EXPIRED
+        -:  154:     */
+        -:  155:    UpdateResult updateHistoryBufferCore(int16_t *hist, size_t size, int idx, int16_t delta,
+        -:  156:                                         time_t t_delta, time_t timestamp, time_t lastUpdate,
+        -:  157:                                         uint8_t updateRate);
+        -:  158:
+        -:  159:    /**
+        -:  160:     * Update history buffer with new delta value
+        -:  161:     *
+        -:  162:     * Handles three cases:
+        -:  163:     * 1. Update within expected rate: adds or replaces value at current index
+        -:  164:     * 2. History expired: calls hist_init() to reset
+        -:  165:     * 3. Missed updates: marks missed entries and writes new value
+        -:  166:     *
+        -:  167:     * \param hist          history buffer
+        -:  168:     * \param size          buffer size
+        -:  169:     * \param idx           current index in history
+        -:  170:     * \param delta         delta value to add
+        -:  171:     * \param t_delta       time since last update (seconds)
+        -:  172:     * \param timestamp     current timestamp
+        -:  173:     * \param lastUpdate    timestamp of last update
+        -:  174:     * \param updateRate    update rate in minutes
+        -:  175:     */
+        -:  176:    void updateHistoryBuffer(int16_t *hist, size_t size, int idx, int16_t delta,
+        -:  177:                             time_t t_delta, time_t timestamp, time_t lastUpdate,
+        -:  178:                             uint8_t updateRate);
+        -:  179:
+        -:  180:    /**
+        -:  181:     * Initialize history buffer - must be implemented by derived classes
+        -:  182:     *
+        -:  183:     * Called when history time frame has expired
+        -:  184:     *
+        -:  185:     * \param value     initial value for history entries (default: -1 = invalid)
+        -:  186:     */
+        -:  187:    virtual void hist_init(int16_t value = -1) = 0;
+        -:  188:
+        -:  189:    /**
+        -:  190:     * Sum all valid entries in a history buffer
+        -:  191:     *
+        -:  192:     * \param h          History buffer to sum
+        -:  193:     * \param valid      pointer to bool indicating if result is valid (optional)
+        -:  194:     * \param nbins      pointer to int for number of valid bins (optional)
+        -:  195:     * \param quality    pointer to float for quality metric (optional)
+        -:  196:     * \param scale      scaling factor to apply to values (default: 1.0)
+        -:  197:     *
+        -:  198:     * \returns sum of all valid entries
+        -:  199:     */
+        -:  200:    float sumHistory(const History &h, bool *valid = nullptr, int *nbins = nullptr,
+        -:  201:                     float *quality = nullptr, float scale = 1.0);
+        -:  202:
+        -:  203:public:
+        -:  204:    /**
+        -:  205:     * Constructor
+        -:  206:     *
+        -:  207:     * \param quality_threshold fraction of valid entries required for valid result
+        -:  208:     */
+        -:  209:    RollingCounter(const float quality_threshold = DEFAULT_QUALITY_THRESHOLD) : qualityThreshold(quality_threshold),
+        -:  210:                                                                                lastUpdate(0),
+        -:  211:                                                                                updateRate(ROLLING_COUNTER_UPD_RATE) {};
+        -:  212:
+        -:  213:    /**
+        -:  214:     * Virtual destructor for proper cleanup in derived classes
+        -:  215:     */
+    #####:  216:    virtual ~RollingCounter() = default;
+------------------
+_ZN14RollingCounterD0Ev:
+    #####:  216:    virtual ~RollingCounter() = default;
+------------------
+_ZN14RollingCounterD2Ev:
+    #####:  216:    virtual ~RollingCounter() = default;
+------------------
+        -:  217:
+        -:  218:    /**
+        -:  219:     * Get last update timestamp
+        -:  220:     *
+        -:  221:     * \returns last update timestamp
+        -:  222:     */
+        -:  223:    time_t getLastUpdate() const { return lastUpdate; }
+        -:  224:
+        -:  225:    /**
+        -:  226:     * Get update rate
+        -:  227:     *
+        -:  228:     * \returns update rate in minutes
+        -:  229:     */
+        -:  230:    uint8_t getUpdateRate() const { return updateRate; }
+        -:  231:};
+        -:  232:
+        -:  233:#endif // _ROLLINGCOUNTER_H

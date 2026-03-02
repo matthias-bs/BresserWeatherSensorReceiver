@@ -264,7 +264,8 @@ std::vector<SensorMap> sensor_map = {
     {0x5680, "AirQualitySensor"},
     {0x28966796, "LeakageSensor"},
     {0xeefb, "LightningSensor"},
-    {0x22400873, "PoolThermometer"}
+    {0x22400873, "PoolThermometer"},
+    {0x65609601, "ThermoHygroSensor"}
     //{0x83750871, "SoilMoisture-1"}
 };
 

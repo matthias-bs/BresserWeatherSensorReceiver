@@ -342,6 +342,9 @@ DecodeStatus WeatherSensor::decodeBresser5In1Payload(const uint8_t *msg, uint8_t
     sensor[slot].w.uv_ok = false;
     sensor[slot].w.rain_ok = true;
 
+    const int i = slot;
+    log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+
     return DECODE_OK;
 }
 #endif
@@ -602,6 +605,8 @@ DecodeStatus WeatherSensor::decodeBresser6In1Payload(const uint8_t *msg, uint8_t
     // Save rssi to sensor specific data set
     sensor[slot].rssi = rssi;
 
+    const int i = slot;
+    log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
     return DECODE_OK;
 }
 #endif
@@ -846,6 +851,9 @@ DecodeStatus WeatherSensor::decodeBresser7In1Payload(const uint8_t *msg, uint8_t
         sensor[slot].voc.voc_init = msgw[22] == 0x0f;
     }
 
+    const int i = slot;
+    log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+
     return DECODE_OK;
 }
 #endif
@@ -946,6 +954,9 @@ DecodeStatus WeatherSensor::decodeBresserLightningPayload(const uint8_t *msg, ui
 
     log_d("ID: 0x%04X  TYPE: %d  CTR: %u  batt_low: %d  distance_km: %d  unknown1: 0x%x  unknown2: 0x%04x", id_tmp, s_type, ctr, battery_low, distance_km, unknown1, unknown2);
 
+    const int i = slot;
+    log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
+
     return DECODE_OK;
 }
 #endif
@@ -1045,6 +1056,9 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
 
     log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d",
           (unsigned int)id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
+
+    const int i = slot;
+    log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);
 
     return DECODE_OK;
 }

@@ -54,6 +54,7 @@
 // 20250129 Minor change in SENSOR_TYPE_WEATHER8 handling
 // 20260224 Removed obsolete variable f_3in1 and related code in decodeBresser6In1Payload()
 //          Fixed High Precision Thermo Hygro Sensor (P/N 7009971) in decodeBresser6In1Payload()
+// 20260306 Added missing 0x prefix for ID in verbose log message
 //
 // ToDo:
 // -
@@ -68,7 +69,7 @@
 //
 int WeatherSensor::findSlot(uint32_t id, DecodeStatus *status)
 {
-    log_v("find_slot(): ID=%08X", id);
+    log_v("find_slot(): ID=0x%08X", id);
 
     // Skip sensors from exclude-list (if any)
     for (const uint32_t &exc : sensor_ids_exc)

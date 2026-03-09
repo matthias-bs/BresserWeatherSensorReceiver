@@ -111,6 +111,7 @@
 // 20260116 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 3.0V
 // 20260119 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 1.7V
 // 20260202 Moved radio object to separate namespace
+// 20260309 Fixed Static Initialization Order Fiasco (SIOF) for SPIClass on LilyGo T3S3 boards
 //
 // ToDo:
 // -
@@ -123,14 +124,19 @@
 namespace WeatherSensorReceiver
 {
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-    SPIClass *spi = new SPIClass(SPI);
+    // Use a statically allocated SPIClass with the integer bus-number constructor instead of
+    // copying the global SPI object, to avoid a Static Initialization Order Fiasco (SIOF):
+    // the compiler-generated copy constructor copies paramLock from SPI, which may be NULL
+    // if SPI's constructor has not run yet. The integer constructor always creates its own
+    // paramLock via xSemaphoreCreateMutex().
+    SPIClass spi(FSPI);
 #endif
 
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
 #elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, *spi);
+    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
 #else
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
 #endif
@@ -192,7 +198,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     }
 
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
-    spi->begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+    spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
 #endif
 
     double frequency = 868.3 + frequency_offset;

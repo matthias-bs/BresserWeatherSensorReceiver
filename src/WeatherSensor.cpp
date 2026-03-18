@@ -112,6 +112,7 @@
 // 20260119 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 1.7V
 // 20260202 Moved radio object to separate namespace
 // 20260309 Fixed Static Initialization Order Fiasco (SIOF) for SPIClass on LilyGo T3S3 boards
+// 20260310 Added support for selecting SPI bus on ESP32 boards
 //
 // ToDo:
 // -
@@ -130,12 +131,14 @@ namespace WeatherSensorReceiver
     // if SPI's constructor has not run yet. The integer constructor always creates its own
     // paramLock via xSemaphoreCreateMutex().
     SPIClass spi(FSPI);
+#elif defined(LORA_SPI_BUS)
+    SPIClass spi(LORA_SPI_BUS);    
 #endif
 
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
-#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || defined(LORA_SPI_BUS)
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
 #else
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
@@ -197,7 +200,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
     }
 
-#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)|| defined(LORA_SPI_BUS)
     spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
 #endif
 

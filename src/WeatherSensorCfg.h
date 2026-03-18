@@ -422,6 +422,13 @@
     #define PIN_RECEIVER_IRQ  21
     #define PIN_RECEIVER_GPIO 33
     #define PIN_RECEIVER_RST  32
+    
+    // When using SPI bus other than FSPI, e.g. HSPI, define the following
+    //#define LORA_SPI_BUS    HSPI
+    //#define LORA_CS         48
+    //#define LORA_SCK        45
+    //#define LORA_MISO       46
+    //#define LORA_MOSI       47
 #elif defined(ESP8266)
     #pragma message("ESP8266 defined; this is a generic (i.e. non-specific) target")
     #pragma message("Cross check if the selected GPIO pins are really available on your board.")

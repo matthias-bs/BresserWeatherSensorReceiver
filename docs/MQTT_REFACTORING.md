@@ -1,14 +1,110 @@
 # MQTT Communication Refactoring Guide
 
-**Date**: February 21, 2026  
-**Applied to**: BresserWeatherSensorMQTT example  
-**Status**: Completed - Ready to apply to other sketches
+**Created**: February 21, 2026  
+**Last updated**: April 3, 2026  
+**Applied to**: All three MQTT example sketches (MQTT, MQTTCustom, MQTTWifiMgr)  
+**Status**: Completed
 
 ## Overview
 
 This guide documents the memory optimization and code organization refactoring applied to MQTT communication in the BresserWeatherSensorReceiver project. These changes reduce heap fragmentation, persistent memory usage, and improve code maintainability.
 
-## Changes Applied
+---
+
+## Changes Applied (April 3, 2026)
+
+### 5. Stack-Allocated Payload Buffers in `publishWeatherdata()`
+
+**Files changed**: `src/mqtt_comm.h`, `src/mqtt_comm.cpp` (all 3 variants)
+
+**Problem**: `publishWeatherdata()` allocated three `String` objects (`payloadSensor`, `payloadExtra`, `payloadCombined`) on every call. Each sensor iteration caused repeated heap alloc/free cycles, increasing fragmentation over time on the ESP32's heap.
+
+**Solution (Option A — stack char[])**: Replace `String` payloads with stack-allocated `char[]` buffers. Use the size-limited overload of `serializeJson()` to write directly into the fixed arrays. Detect truncation via the return value.
+
+**Changes to `mqtt_comm.h`**:
+
+```cpp
+#define PAYLOAD_SIZE 400
+// Worst-case extra payload estimate:
+//   wind_dir_txt(20) + wind_gust_bft(18) + wind_avg_bft(17) + dewpoint_c(22) +
+//   perceived_temp_c(29) + wgbt(15) + JSON overhead(7) = 128 B.
+//   160 provides a ~25% safety margin. Increase if new fields are added to jsonExtra.
+#define PAYLOAD_EXTRA_SIZE 160  // maximum size for extra (derived) payload
+```
+
+**Changes to `mqtt_comm.cpp`** inside `publishWeatherdata()`:
+
+```cpp
+// Before
+String payloadSensor;
+String payloadExtra;
+String payloadCombined;
+// ...
+serializeJson(jsonSensor, payloadSensor);
+client.publish(mqtt_topic, payloadSensor.c_str(), retain, 0);
+if (payloadExtra != "null") { ... }
+
+// After
+char payloadSensor[PAYLOAD_SIZE];
+char payloadExtra[PAYLOAD_EXTRA_SIZE];
+char payloadCombined[PAYLOAD_SIZE];
+// ...
+size_t json_size   = serializeJson(jsonSensor,    payloadSensor,    sizeof(payloadSensor));
+size_t extra_size  = serializeJson(jsonExtra,     payloadExtra,     sizeof(payloadExtra));
+// Overflow detection
+if (json_size  >= PAYLOAD_SIZE       - 1) { log_e("payloadSensor truncated!"); }
+if (extra_size >= PAYLOAD_EXTRA_SIZE - 1) { log_e("payloadExtra truncated!"); }
+// ...
+client.publish(mqtt_topic, payloadSensor, retain, 0);  // char* passed directly
+if (strcmp(payloadExtra, "null") != 0) { ... }         // strcmp replaces String !=
+```
+
+**Stack cost**: `PAYLOAD_SIZE*2 + PAYLOAD_EXTRA_SIZE = 960 B`. Safe on ESP32 (8 KB default stack). Do not increase `PAYLOAD_SIZE` when compiling for ESP8266 (4 KB stack limit).
+
+**Benefit**: Eliminates per-publish-cycle heap allocation for the three largest runtime buffers. Reduces long-term heap fragmentation on both ESP32 and ESP8266.
+
+---
+
+## Changes Applied (March 12, 2026)
+
+### 6. Bug Fix: `sensorData` → `jsonSensor` in `DATA_TIMESTAMP` block
+
+**Files changed**: `src/mqtt_comm.cpp` (all 3 variants)
+
+**Problem**: In the `#ifdef DATA_TIMESTAMP` block inside `publishWeatherdata()`, `sensorData["timestamp"]` referenced an undefined variable (`sensorData`). The correct local `JsonDocument` variable is `jsonSensor`. The bug was latent — the `DATA_TIMESTAMP` feature was presumably never tested with active timestamps.
+
+**Fix**:
+```cpp
+// Before
+sensorData["timestamp"] = ...;
+
+// After
+jsonSensor["timestamp"] = ...;
+```
+
+---
+
+### 7. Cleanup: Unused `topic` Variable in `haAutoDiscovery()`
+
+**Files changed**: `src/mqtt_comm.cpp` (all 3 variants)
+
+**Problem**: An outer `String topic;` declaration in `haAutoDiscovery()` was shadowed by an inner `String topic` declared in nested blocks. The outer declaration was never read or written to.
+
+**Fix**: Removed the unused outer `String topic;` declaration.
+
+---
+
+### 8. Cleanup: Redundant `payload.clear()` in `publishRadio()`
+
+**Files changed**: `src/mqtt_comm.cpp` (all 3 variants)
+
+**Problem**: `publishRadio()` contained `payload = ""; payload.clear();` — the `clear()` call is a no-op because `payload` was already set to the empty string on the preceding line.
+
+**Fix**: Removed the redundant `payload.clear();` call.
+
+---
+
+## Changes Applied (February 21, 2026)
 
 ### 1. Struct-Based MQTT Topics Organization
 
@@ -172,24 +268,43 @@ Apply these changes to the following example sketches:
 
 ## Memory Optimization History
 
-This refactoring builds on previous optimizations:
+This section tracks all memory-related improvements to `mqtt_comm.cpp`:
 
-1. **Issue 1 (20260221)**: Refactored `publishWeatherdata()` - replaced String concatenation with snprintf
+1. **Issue 1 (20260221)**: Refactored `publishWeatherdata()` — replaced String concatenation with snprintf
    - Reduced per-sensor temporaries from 5+ to 0
    - Benefit: Reduced heap fragmentation in sensor loop
 
-2. **Issue 2 (20260221)**: Refactored discovery functions - replaced raw string concatenation with JsonDocument
-   - Reduced temporaries from 12-15 per call to 1-2
+2. **Issue 2 (20260221)**: Refactored discovery functions — replaced raw string concatenation with JsonDocument
+   - Reduced temporaries from 12–15 per call to 1–2
    - Benefit: Significantly reduced fragmentation in discovery
 
-3. **Issue 3 (20260221)**: Converted global String topics to const char*
-   - Eliminated 14 String objects (~40-50 bytes each)
-   - Benefit: ~560-700 bytes persistent heap savings
+3. **Issue 3 (20260221)**: Converted global String topics to `const char*`
+   - Eliminated 14 `String` objects (~40–50 bytes each)
+   - Benefit: ~560–700 bytes persistent heap savings
 
-4. **Latest (20260221)**: Struct organization
-   - Improved code clarity and maintainability
-   - No memory impact (same const char* pointers, just organized)
-   - Benefit: Easier future maintenance
+4. **Issue 4 (20260221)**: Struct organization (`MQTTTopics`)
+   - Grouped 13 individual `const char*` topic variables into one struct
+   - No runtime memory impact; improves maintainability
+
+5. **Issue 5 (20260312)**: Bug fix — `sensorData` → `jsonSensor` in `DATA_TIMESTAMP` block
+   - Latent undefined-variable bug in conditional timestamp code path
+   - Applied to all 3 MQTT variants
+
+6. **Issue 6 (20260312)**: Removed unused outer `String topic` in `haAutoDiscovery()`
+   - Eliminated a shadowed `String` allocation that was never read
+   - Applied to all 3 MQTT variants
+
+7. **Issue 7 (20260312)**: Removed redundant `payload.clear()` in `publishRadio()`
+   - No-op call after `payload = ""`; pure cleanup
+   - Applied to all 3 MQTT variants
+
+8. **Issue 8 (20260403)**: Stack-allocated `char[]` payloads in `publishWeatherdata()`
+   - Replaced `String payloadSensor/Extra/Combined` with `char payloadSensor[PAYLOAD_SIZE]`, `char payloadExtra[PAYLOAD_EXTRA_SIZE]`, `char payloadCombined[PAYLOAD_SIZE]`
+   - Added `PAYLOAD_EXTRA_SIZE 160` constant (with worst-case size estimate comment) to `mqtt_comm.h`
+   - Added overflow detection via `serializeJson()` return value comparison
+   - Replaced `payloadExtra != "null"` with `strcmp(payloadExtra, "null") != 0`
+   - Benefit: Eliminates per-publish heap alloc/free for the three largest runtime buffers; reduces long-term heap fragmentation
+   - Applied to all 3 MQTT variants
 
 ---
 

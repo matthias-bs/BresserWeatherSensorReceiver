@@ -168,7 +168,6 @@
 // BEGIN User specific options
 // #define LED_EN                  // Enable LED indicating successful data reception
 #define LED_GPIO LED_BUILTIN  // LED pin
-#define PAYLOAD_SIZE 300      // maximum MQTT message size
 #define TOPIC_SIZE 60         // maximum MQTT topic size (debug output only)
 #define HOSTNAME_SIZE 30      // maximum hostname size
 #define RX_TIMEOUT 90000      // sensor receive timeout [ms]

@@ -40,6 +40,7 @@
 // 20250227 Added publishControlDiscovery()
 // 20250420 removed AUTO_DISCOVERY here, as it is defined in sketch
 // 20250811 Increased PAYLOAD_SIZE
+// 20260403 Added PAYLOAD_EXTRA_SIZE for stack-allocated payloadExtra buffer
 //
 // ToDo:
 // -
@@ -50,6 +51,10 @@
 #define MQTT_COMM_H
 
 #define PAYLOAD_SIZE 400      // maximum MQTT message size
+// Worst-case extra payload: wind_dir_txt(20) + wind_gust_bft(18) + wind_avg_bft(17) +
+// dewpoint_c(22) + perceived_temp_c(29) + wgbt(15) + JSON overhead(7) = 128 B.
+// 160 provides a ~25% safety margin. Increase if new fields are added to jsonExtra.
+#define PAYLOAD_EXTRA_SIZE 160 // maximum size for extra (derived) payload
 
 #include <Arduino.h>
 #include <string>

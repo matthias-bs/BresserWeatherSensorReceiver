@@ -57,6 +57,8 @@
 // 20260312 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
 //          Removed unused/shadowed outer 'String topic' in haAutoDiscovery()
 //          Removed redundant payload.clear() in publishRadio() (local JsonDocument auto-destroyed)
+// 20260403 Replaced String payloadSensor/Extra/Combined with stack-allocated char[] to eliminate
+//          heap fragmentation from repeated substring() copies on every publish cycle
 //
 // ToDo:
 // -
@@ -137,9 +139,15 @@ void publishWeatherdata(bool complete, bool retain)
     JsonDocument jsonSensor;
     JsonDocument jsonExtra;
 
-    String payloadSensor;   // sensor data
-    String payloadExtra;    // calculated extra data
-    String payloadCombined; // combined payload for ESP32-e-Paper-Weather-Display
+    // Stack-allocated buffers avoid heap fragmentation from repeated String alloc/free.
+    // Constraints:
+    //   - Stack usage: PAYLOAD_SIZE*2 + PAYLOAD_EXTRA_SIZE bytes (~960 B). Safe on ESP32 (8 KB stack).
+    //     Do not increase PAYLOAD_SIZE when compiling for ESP8266 (4 KB stack limit).
+    //   - Adding fields to jsonExtra must not exceed PAYLOAD_EXTRA_SIZE. See estimate in mqtt_comm.h.
+    //   - serializeJson() with a size-limited buffer truncates silently; overflow detected via return value.
+    char payloadSensor[PAYLOAD_SIZE];           // sensor data
+    char payloadExtra[PAYLOAD_EXTRA_SIZE];      // calculated extra data (wind/temp/dewpoint derived values)
+    char payloadCombined[PAYLOAD_SIZE];         // combined payload for ESP32-e-Paper-Weather-Display
     char mqtt_topic[256];   // MQTT topic including ID/name (increased size for all uses)
 
     bool none_valid = true;
@@ -365,19 +373,19 @@ void publishWeatherdata(bool complete, bool retain)
                 jsonCombined["ws_rain_monthly_mm"] = rainGauge.currentMonth();
             }
         }
-        size_t json_size = serializeJson(jsonSensor, payloadSensor);
+        size_t json_size = serializeJson(jsonSensor, payloadSensor, sizeof(payloadSensor));
         if (json_size < 5) {
             log_e("Failed to serialize JSON: size = %d", json_size);
         }
-        serializeJson(jsonExtra, payloadExtra);
+        size_t extra_size = serializeJson(jsonExtra, payloadExtra, sizeof(payloadExtra));
 
-        if (payloadSensor.length() >= PAYLOAD_SIZE)
+        if (json_size >= PAYLOAD_SIZE - 1)
         {
-            log_e("payloadSensor (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadSensor.length(), PAYLOAD_SIZE);
+            log_e("payloadSensor (%d) >= PAYLOAD_SIZE (%d). Payload truncated!", json_size, PAYLOAD_SIZE);
         }
-        if (payloadExtra.length() >= PAYLOAD_SIZE)
+        if (extra_size >= PAYLOAD_EXTRA_SIZE - 1)
         {
-            log_e("payloadExtra (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadExtra.length(), PAYLOAD_SIZE);
+            log_e("payloadExtra (%d) >= PAYLOAD_EXTRA_SIZE (%d). Payload truncated!", extra_size, PAYLOAD_EXTRA_SIZE);
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
@@ -388,8 +396,8 @@ void publishWeatherdata(bool complete, bool retain)
         // sensor data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s", 
                  Hostname.c_str(), sensor_str.c_str(), mqttTopics.pubData);
-        log_i("%s: %s\n", mqtt_topic, payloadSensor.c_str());
-        client.publish(mqtt_topic, payloadSensor.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+        log_i("%s: %s\n", mqtt_topic, payloadSensor);
+        client.publish(mqtt_topic, payloadSensor, retain, 0);
 
         // sensor specific RSSI
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s",
@@ -400,23 +408,23 @@ void publishWeatherdata(bool complete, bool retain)
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
                  Hostname.c_str(), mqttTopics.pubExtra);
 
-        if (payloadExtra != "null")
+        if (strcmp(payloadExtra, "null") != 0)
         {
             // extra data
-            log_i("%s: %s\n", mqtt_topic, payloadExtra.c_str());
-            client.publish(mqtt_topic, payloadExtra.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+            log_i("%s: %s\n", mqtt_topic, payloadExtra);
+            client.publish(mqtt_topic, payloadExtra, retain, 0);
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 
-    serializeJson(jsonCombined, payloadCombined);
-    if (payloadCombined.length() >= PAYLOAD_SIZE)
+    size_t combined_size = serializeJson(jsonCombined, payloadCombined, sizeof(payloadCombined));
+    if (combined_size >= PAYLOAD_SIZE - 1)
     {
-        log_e("payloadCombined (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadCombined.length(), PAYLOAD_SIZE);
+        log_e("payloadCombined (%d) >= PAYLOAD_SIZE (%d). Payload truncated!", combined_size, PAYLOAD_SIZE);
     }
     snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
              Hostname.c_str(), mqttTopics.pubCombined);
-    log_i("%s: %s\n", mqtt_topic, payloadCombined.c_str());
-    client.publish(mqtt_topic, payloadCombined.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+    log_i("%s: %s\n", mqtt_topic, payloadCombined);
+    client.publish(mqtt_topic, payloadCombined, retain, 0);
 }
 
 // Publish radio receiver info as JSON string via MQTT

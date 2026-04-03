@@ -41,6 +41,9 @@
 // 20250420 removed AUTO_DISCOVERY here, as it is defined in sketch
 // 20250811 Increased PAYLOAD_SIZE
 // 20260403 Added PAYLOAD_EXTRA_SIZE for stack-allocated payloadExtra buffer
+// 20260403 Changed sensor_info members from String to const char* to avoid heap allocation
+//          in haAutoDiscovery(); changed publishStatusDiscovery/publishControlDiscovery
+//          parameters from String to const char*
 //
 // ToDo:
 // -
@@ -107,15 +110,15 @@ extern void mqtt_setup(void);
 // Sensor information for Home Assistant auto discovery
 struct sensor_info
 {
-    String manufacturer;
-    String model;
-    String identifier;
+    const char* manufacturer;
+    const char* model;
+    const char* identifier;
 };
 
 /*!
  * \brief (Re-)Connect to WLAN and connect MQTT broker
  */
-//void mqtt_connect(void)
+void mqtt_connect(void);
 
 /*!
  * \brief MQTT message received callback
@@ -166,7 +169,7 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
  * \param name  Control name
  * \param topic MQTT topic
  */
-void publishStatusDiscovery(String name, String topic);
+void publishStatusDiscovery(const char* name, const char* topic);
 
 /*!
  * \brief Publish Home Assistant auto discovery for receiver control
@@ -174,7 +177,7 @@ void publishStatusDiscovery(String name, String topic);
  * \param name  Control name
  * \param topic MQTT topic
  */
-void publishControlDiscovery(String name, String topic);
+void publishControlDiscovery(const char* name, const char* topic);
 
 extern MQTTTopics mqttTopics;
 extern String Hostname;

@@ -54,6 +54,9 @@
 //          persistent heap memory usage (~600-750 bytes savings)
 //          Refactored MQTT topic declarations using MQTTTopics struct for cleaner
 //          organization and maintainability
+// 20260403 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
+//          Removed unused/shadowed outer 'String topic' in haAutoDiscovery()
+//          Removed redundant payload.clear() in publishRadio() (local JsonDocument auto-destroyed)
 //
 // ToDo:
 // -
@@ -169,7 +172,7 @@ void publishWeatherdata(bool complete, bool retain)
             gmtime_r(&now, &timeinfo); // Convert to UTC time
             char tbuf[25];
             strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
-            sensorData["timestamp"] = tbuf;
+            jsonSensor["timestamp"] = tbuf;
         }
 #endif // DATA_TIMESTAMP
 
@@ -407,14 +410,11 @@ void publishRadio(void)
     serializeJson(payload, mqtt_payload);
     log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload.c_str());
     client.publish(mqttTopics.pubRadio, mqtt_payload, false, 0);
-    payload.clear();
 }
 
 // Home Assistant Auto-Discovery
 void haAutoDiscovery(void)
 {
-    String topic;
-
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
         uint32_t sensor_id = weatherSensor.sensor[i].sensor_id;

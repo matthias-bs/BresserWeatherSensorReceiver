@@ -54,6 +54,9 @@
 //          persistent heap memory usage (~600-750 bytes savings)
 //          Refactored MQTT topic declarations using MQTTTopics struct for cleaner
 //          organization and maintainability
+// 20260312 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
+//          Removed unused/shadowed outer 'String topic' in haAutoDiscovery()
+//          Removed redundant payload.clear() in publishRadio() (local JsonDocument auto-destroyed)
 //
 // ToDo:
 // -
@@ -139,6 +142,21 @@ void publishWeatherdata(bool complete, bool retain)
     String payloadCombined; // combined payload for ESP32-e-Paper-Weather-Display
     char mqtt_topic[256];   // MQTT topic including ID/name (increased size for all uses)
 
+    bool none_valid = true;
+    for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
+    {
+        if (weatherSensor.sensor[i].valid)
+        {
+            none_valid = false;
+            break;
+        }
+    }
+    if (none_valid)
+    {
+        log_w("No valid sensor data available to publish");
+        return;
+    }
+
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
 
@@ -169,7 +187,7 @@ void publishWeatherdata(bool complete, bool retain)
             gmtime_r(&now, &timeinfo); // Convert to UTC time
             char tbuf[25];
             strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
-            sensorData["timestamp"] = tbuf;
+            jsonSensor["timestamp"] = tbuf;
         }
 #endif // DATA_TIMESTAMP
 
@@ -347,7 +365,10 @@ void publishWeatherdata(bool complete, bool retain)
                 jsonCombined["ws_rain_monthly_mm"] = rainGauge.currentMonth();
             }
         }
-        serializeJson(jsonSensor, payloadSensor);
+        size_t json_size = serializeJson(jsonSensor, payloadSensor);
+        if (json_size < 5) {
+            log_e("Failed to serialize JSON: size = %d", json_size);
+        }
         serializeJson(jsonExtra, payloadExtra);
 
         if (payloadSensor.length() >= PAYLOAD_SIZE)
@@ -409,14 +430,11 @@ void publishRadio(void)
     serializeJson(payload, mqtt_payload);
     log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload.c_str());
     client.publish(mqttTopics.pubRadio, mqtt_payload, false, 0);
-    payload.clear();
 }
 
 // Home Assistant Auto-Discovery
 void haAutoDiscovery(void)
 {
-    String topic;
-
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
         uint32_t sensor_id = weatherSensor.sensor[i].sensor_id;

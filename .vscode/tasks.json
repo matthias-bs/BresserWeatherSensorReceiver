@@ -1,0 +1,167 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile Arduino Sketch",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/.vscode/arduino-compile-runner.sh",
+                "compile"
+            ],
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                {
+                    "owner": "arduino",
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^Sketch uses",
+                        "endsPattern": "^(Used library|Compilation complete|Error)"
+                    },
+                    "fileLocation": [
+                        "relative",
+                        "${workspaceFolder}"
+                    ],
+                    "pattern": {
+                        "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ],
+            "detail": "Compile current sketch (fqbn read from .vscode/arduino.json or autodetected)."
+        },
+        {
+            "label": "Upload Arduino Sketch",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/.vscode/arduino-compile-runner.sh",
+                "upload",
+                "--port",
+                "${input:serialPort}"
+            ],
+            "isBackground": true,
+            "group": "build",
+            "problemMatcher": [
+                {
+                    "owner": "arduino",
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^Uploading",
+                        "endsPattern": "^(Upload complete|Error)"
+                    },
+                    "fileLocation": ["relative", "${workspaceFolder}"],
+                    "pattern": {
+                        "regexp": "^(.*):(\\d+):(\\d+):\\s+(error|warning):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                }
+            ],
+            "detail": "Upload sketch to board (fqbn and sketch read from .vscode/sketch.json)."
+        },
+        {
+            "label": "Serial Reset (DTR)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/.vscode/serial_reset_monitor.py",
+                "${input:serialPort}"
+            ],
+            "isBackground": false,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "detail": "Toggle DTR to reset the board only (no monitoring). For monitoring+logging use the Serial Logger tasks."
+        },
+        {
+            "label": "Serial Logger (monitor + log to extras/logs/)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/.vscode/serial_logger.py",
+                "--port",
+                "${input:serialPort}",
+                "--baud",
+                "${input:serialBaud}",
+                "--timeout",
+                "${input:loggerTimeout}",
+                "--stop-on",
+                "${input:stopPattern}"
+            ],
+            "isBackground": false,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "detail": "Monitor serial port and write timestamped log to extras/logs/ (compatible with read_serial_log.py)."
+        },
+        {
+            "label": "Serial Logger with Reset (monitor + log to extras/logs/)",
+            "type": "shell",
+            "command": "python3",
+            "args": [
+                "${workspaceFolder}/.vscode/serial_logger.py",
+                "--port",
+                "${input:serialPort}",
+                "--baud",
+                "${input:serialBaud}",
+                "--reset",
+                "--timeout",
+                "${input:loggerTimeout}",
+                "--stop-on",
+                "${input:stopPattern}"
+            ],
+            "isBackground": false,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "detail": "Reset board via DTR, then monitor and log to extras/logs/."
+        },
+    ],
+    "inputs": [
+    {
+        "id": "serialPort",
+        "type": "promptString",
+        "description": "Enter the serial port (e.g., /dev/ttyACM0 or /dev/ttyUSB0)",
+        "default": "/dev/ttyACM0"
+    },
+    {
+        "id": "serialBaud",
+        "type": "promptString",
+        "description": "Enter baud rate for serial monitor",
+        "default": "115200"
+    },
+    {
+        "id": "loggerTimeout",
+        "type": "promptString",
+        "description": "Serial logger timeout in seconds (0 = run until Ctrl-C; agent sessions: use max_expected_duration × 3, min 30)",
+        "default": "0"
+    },
+    {
+        "id": "stopPattern",
+        "type": "promptString",
+        "description": "Stop logging when a line matches this Python regex (e.g. PASS|FAIL|DONE); leave empty to disable",
+        "default": ""
+    }
+    ]
+}

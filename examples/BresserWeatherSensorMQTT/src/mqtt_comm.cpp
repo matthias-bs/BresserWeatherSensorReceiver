@@ -80,19 +80,17 @@ extern RainGauge rainGauge;
 extern Lightning lightning;
 extern std::vector<SensorMap> sensor_map;
 
-String sensorName(uint32_t sensor_id)
+void sensorName(uint32_t sensor_id, char* buf, size_t buf_size)
 {
-    String sensor_str = String(sensor_id, HEX);
-
+    snprintf(buf, buf_size, "%x", (unsigned)sensor_id);
     for (size_t n = 0; n < sensor_map.size(); n++)
     {
         if (sensor_map[n].id == sensor_id)
         {
-            sensor_str = sensor_map[n].name;
+            snprintf(buf, buf_size, "%s", sensor_map[n].name.c_str());
             break;
         }
     }
-    return sensor_str;
 }
 
 // MQTT message received callback
@@ -216,8 +214,11 @@ void publishWeatherdata(bool complete, bool retain)
         {
             jsonSensor["lightning_count"] = weatherSensor.sensor[i].lgt.strike_count;
             jsonSensor["lightning_distance_km"] = weatherSensor.sensor[i].lgt.distance_km;
-            jsonSensor["lightning_unknown1"] = String("0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX);
-            jsonSensor["lightning_unknown2"] = String("0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX);
+            char lgtUnknown1[12], lgtUnknown2[12];
+            snprintf(lgtUnknown1, sizeof(lgtUnknown1), "0x%x", weatherSensor.sensor[i].lgt.unknown1);
+            snprintf(lgtUnknown2, sizeof(lgtUnknown2), "0x%x", weatherSensor.sensor[i].lgt.unknown2);
+            jsonSensor["lightning_unknown1"] = lgtUnknown1;
+            jsonSensor["lightning_unknown2"] = lgtUnknown2;
 
             struct tm timeinfo;
             time_t now = time(nullptr);
@@ -393,20 +394,23 @@ void publishWeatherdata(bool complete, bool retain)
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
-        String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
+        char sensor_str[32];
+        sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
 
         // use outer mqtt_topic declaration
 
         // sensor data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s", 
-                 Hostname.c_str(), sensor_str.c_str(), mqttTopics.pubData);
+                 Hostname.c_str(), sensor_str, mqttTopics.pubData);
         log_i("%s: %s\n", mqtt_topic, payloadSensor);
         client.publish(mqtt_topic, payloadSensor, retain, 0);
 
         // sensor specific RSSI
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s",
-                 Hostname.c_str(), sensor_str.c_str(), mqttTopics.pubRssi);
-        client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+                 Hostname.c_str(), sensor_str, mqttTopics.pubRssi);
+        char rssiStr[12];
+        snprintf(rssiStr, sizeof(rssiStr), "%.1f", weatherSensor.sensor[i].rssi);
+        client.publish(mqtt_topic, rssiStr, false, 0);
 
         // extra data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
@@ -436,11 +440,11 @@ void publishWeatherdata(bool complete, bool retain)
 void publishRadio(void)
 {
     JsonDocument payload;
-    String mqtt_payload;
+    char mqtt_payload[32]; // {"rssi":-XXX.X} fits comfortably in 32 bytes
 
     payload["rssi"] = weatherSensor.rssi;
-    serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload.c_str());
+    serializeJson(payload, mqtt_payload, sizeof(mqtt_payload));
+    log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload);
     client.publish(mqttTopics.pubRadio, mqtt_payload, false, 0);
 }
 
@@ -454,11 +458,12 @@ void haAutoDiscovery(void)
         if (!weatherSensor.sensor[i].valid)
             continue;
 
-        String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
+        char sensor_str[32];
+        sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
         // Stack-allocated topic buffers avoid heap fragmentation from String concatenation.
         char topicData[128], topicRssi[128], topicExtra[128];
-        snprintf(topicData,  sizeof(topicData),  "%s/%s/data",  Hostname.c_str(), sensor_str.c_str());
-        snprintf(topicRssi,  sizeof(topicRssi),  "%s/%s/rssi",  Hostname.c_str(), sensor_str.c_str());
+        snprintf(topicData,  sizeof(topicData),  "%s/%s/data",  Hostname.c_str(), sensor_str);
+        snprintf(topicRssi,  sizeof(topicRssi),  "%s/%s/rssi",  Hostname.c_str(), sensor_str);
         snprintf(topicExtra, sizeof(topicExtra), "%s/extra",    Hostname.c_str());
         if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||

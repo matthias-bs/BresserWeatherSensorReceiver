@@ -71,23 +71,6 @@
 #include "RainGauge.h"
 #include "Lightning.h"
 
-// See
-// https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
-// and
-// https://stackoverflow.com/questions/35709595/why-would-you-use-a-string-in-json-to-represent-a-decimal-number
-//
-// Summary:
-// A string representation of a float (e.g. "temp_c":"21.5") is recommended if the value shall displayed with the specified number of decimals.
-// Otherwise the float value can be output as a numerical value (e.g. "temp_c":21.5).
-//
-// #define JSON_FLOAT_AS_STRING
-
-#if defined(JSON_FLOAT_AS_STRING)
-#define JSON_FLOAT(x) String("\"") + String(x) + String("\"")
-#else
-#define JSON_FLOAT(x) x
-#endif
-
 // MQTT topics structure for organized access
 struct MQTTTopics {
     const char* pubStatus;

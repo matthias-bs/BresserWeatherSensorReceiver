@@ -625,7 +625,12 @@ void publishStatusDiscovery(const char* name, const char* topic)
     device["name"] = "Weather Sensor Receiver";
 
     char discoveryPayload[512];
-    serializeJson(doc, discoveryPayload);
+    size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload))
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
     log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, false, 0);
 }

@@ -364,13 +364,13 @@ void publishWeatherdata(bool complete, bool retain)
         size_t json_size = serializeJson(jsonSensor, payloadSensor, sizeof(payloadSensor));
         size_t extra_size = serializeJson(jsonExtra, payloadExtra, sizeof(payloadExtra));
 
-        if (json_size >= PAYLOAD_SIZE - 1)
+        if (json_size >= sizeof(payloadSensor) - 1)
         {
-            log_e("payloadSensor (%zu) >= PAYLOAD_SIZE (%zu). Payload truncated!", json_size, (size_t)PAYLOAD_SIZE);
+            log_e("payloadSensor (%zu) >= sizeof(payloadSensor) (%zu). Payload truncated!", json_size, sizeof(payloadSensor));
         }
-        if (extra_size >= PAYLOAD_EXTRA_SIZE - 1)
+        if (extra_size >= sizeof(payloadExtra) - 1)
         {
-            log_e("payloadExtra (%zu) >= PAYLOAD_EXTRA_SIZE (%zu). Payload truncated!", extra_size, (size_t)PAYLOAD_EXTRA_SIZE);
+            log_e("payloadExtra (%zu) >= sizeof(payloadExtra) (%zu). Payload truncated!", extra_size, sizeof(payloadExtra));
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
@@ -403,9 +403,9 @@ void publishWeatherdata(bool complete, bool retain)
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 
     size_t combined_size = serializeJson(jsonCombined, payloadCombined, sizeof(payloadCombined));
-    if (combined_size >= PAYLOAD_SIZE - 1)
+    if (combined_size >= sizeof(payloadCombined) - 1)
     {
-        log_e("payloadCombined (%zu) >= PAYLOAD_SIZE (%zu). Payload truncated!", combined_size, (size_t)PAYLOAD_SIZE);
+        log_e("payloadCombined (%zu) >= sizeof(payloadCombined) (%zu). Payload truncated!", combined_size, sizeof(payloadCombined));
     }
     snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
              Hostname.c_str(), mqttTopics.pubCombined);
@@ -626,7 +626,7 @@ void publishStatusDiscovery(const char* name, const char* topic)
 
     char discoveryPayload[512];
     size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
-    if (payloadLen >= sizeof(discoveryPayload))
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
     {
         log_e("Discovery payload truncated for topic %s", discoveryTopic);
         return;
@@ -662,7 +662,7 @@ void publishControlDiscovery(const char* name, const char* topic)
 
     char discoveryPayload[512];
     size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
-    if (payloadLen >= sizeof(discoveryPayload))
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
     {
         log_e("Discovery payload truncated for topic %s", discoveryTopic);
         return;
@@ -693,7 +693,7 @@ void publishControlDiscovery(const char* name, const char* topic)
     deviceBtn["name"] = "Weather Sensor Receiver";
 
     payloadLen = serializeJson(docButton, discoveryPayload, sizeof(discoveryPayload));
-    if (payloadLen >= sizeof(discoveryPayload))
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
     {
         log_e("Discovery payload truncated for topic %s", discoveryTopic);
         return;
@@ -754,7 +754,7 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
 
     char buffer[512];
     size_t bufferLen = serializeJson(doc, buffer, sizeof(buffer));
-    if (bufferLen >= sizeof(buffer))
+    if (bufferLen >= sizeof(buffer) - 1)
     {
         log_e("Auto-discovery payload truncated for %s", sensor_name);
         return;

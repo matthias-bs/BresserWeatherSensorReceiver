@@ -647,7 +647,12 @@ void publishStatusDiscovery(const char* name, const char* topic)
     device["name"] = "Weather Sensor Receiver";
 
     char discoveryPayload[512];
-    serializeJson(doc, discoveryPayload);
+    size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload))
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
     log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, false, 0);
 }
@@ -678,7 +683,12 @@ void publishControlDiscovery(const char* name, const char* topic)
     device["name"] = "Weather Sensor Receiver";
 
     char discoveryPayload[512];
-    serializeJson(doc, discoveryPayload);
+    size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload))
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
     log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, true, 0);
 
@@ -704,7 +714,12 @@ void publishControlDiscovery(const char* name, const char* topic)
     deviceBtn["identifiers"] = identifiers;
     deviceBtn["name"] = "Weather Sensor Receiver";
 
-    serializeJson(docButton, discoveryPayload);
+    payloadLen = serializeJson(docButton, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload))
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
     log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, false, 0);
 }
@@ -760,7 +775,12 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
         device["manufacturer"] = info.manufacturer;
 
     char buffer[512];
-    serializeJson(doc, buffer);
+    size_t bufferLen = serializeJson(doc, buffer, sizeof(buffer));
+    if (bufferLen >= sizeof(buffer))
+    {
+        log_e("Auto-discovery payload truncated for %s", sensor_name);
+        return;
+    }
 
     char discTopic[128];
     snprintf(discTopic, sizeof(discTopic), "homeassistant/sensor/%08x_%s/config", (unsigned)sensor_id, value_json);

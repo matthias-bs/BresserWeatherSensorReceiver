@@ -405,7 +405,7 @@ void publishWeatherdata(bool complete, bool retain)
     size_t combined_size = serializeJson(jsonCombined, payloadCombined, sizeof(payloadCombined));
     if (combined_size >= PAYLOAD_SIZE - 1)
     {
-        log_e("payloadCombined (%d) >= PAYLOAD_SIZE (%d). Payload truncated!", combined_size, PAYLOAD_SIZE);
+        log_e("payloadCombined (%zu) >= PAYLOAD_SIZE (%zu). Payload truncated!", combined_size, (size_t)PAYLOAD_SIZE);
     }
     snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
              Hostname.c_str(), mqttTopics.pubCombined);

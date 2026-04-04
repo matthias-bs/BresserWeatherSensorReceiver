@@ -54,14 +54,16 @@
 //          persistent heap memory usage (~600-750 bytes savings)
 //          Refactored MQTT topic declarations using MQTTTopics struct for cleaner
 //          organization and maintainability
-// 20260403 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
+// 20260312 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
 //          Removed unused/shadowed outer 'String topic' in haAutoDiscovery()
 //          Removed redundant payload.clear() in publishRadio() (local JsonDocument auto-destroyed)
-//          Replaced String payloadSensor/Extra/Combined with stack-allocated char[] to eliminate
-//          heap fragmentation from repeated substring() copies on every publish cycle// 20260403 Issue 9: Eliminated all String heap allocations in haAutoDiscovery() and helper
+// 20260403 Replaced String payloadSensor/Extra/Combined with stack-allocated char[] to eliminate
+//          heap fragmentation from repeated substring() copies on every publish cycle
+// 20260403 Issue 9: Eliminated all String heap allocations in haAutoDiscovery() and helper
 //          functions (publishAutoDiscovery, publishStatusDiscovery, publishControlDiscovery).
 //          Replaced String topic/rssi with stack char[]+snprintf, changed sensor_info members
-//          to const char*, updated function signatures to const char* where applicable.//
+//          to const char*, updated function signatures to const char* where applicable.
+//
 // ToDo:
 // -
 //
@@ -376,6 +378,8 @@ void publishWeatherdata(bool complete, bool retain)
         // Try to map sensor ID to name to make MQTT topic explanatory
         char sensor_str[32];
         sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
+
+        // use outer mqtt_topic declaration
 
         // sensor data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s", 

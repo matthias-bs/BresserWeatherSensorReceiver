@@ -423,11 +423,13 @@ void publishRadio(void)
 {
     JsonDocument payload;
     char mqtt_payload[32]; // {"rssi":-XXX.X} fits comfortably in 32 bytes
+    char mqtt_topic[256];  // same size as used in publishWeatherdata()
 
+    snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s", Hostname.c_str(), mqttTopics.pubRadio);
     payload["rssi"] = weatherSensor.rssi;
     serializeJson(payload, mqtt_payload, sizeof(mqtt_payload));
-    log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload);
-    client.publish(mqttTopics.pubRadio, mqtt_payload, false, 0);
+    log_i("%s: %s\n", mqtt_topic, mqtt_payload);
+    client.publish(mqtt_topic, mqtt_payload, false, 0);
 }
 
 // Home Assistant Auto-Discovery

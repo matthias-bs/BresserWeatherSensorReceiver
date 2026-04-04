@@ -366,11 +366,11 @@ void publishWeatherdata(bool complete, bool retain)
 
         if (json_size >= PAYLOAD_SIZE - 1)
         {
-            log_e("payloadSensor (%d) >= PAYLOAD_SIZE (%d). Payload truncated!", json_size, PAYLOAD_SIZE);
+            log_e("payloadSensor (%zu) >= PAYLOAD_SIZE (%zu). Payload truncated!", json_size, (size_t)PAYLOAD_SIZE);
         }
         if (extra_size >= PAYLOAD_EXTRA_SIZE - 1)
         {
-            log_e("payloadExtra (%d) >= PAYLOAD_EXTRA_SIZE (%d). Payload truncated!", extra_size, PAYLOAD_EXTRA_SIZE);
+            log_e("payloadExtra (%zu) >= PAYLOAD_EXTRA_SIZE (%zu). Payload truncated!", extra_size, (size_t)PAYLOAD_EXTRA_SIZE);
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
@@ -405,7 +405,7 @@ void publishWeatherdata(bool complete, bool retain)
     size_t combined_size = serializeJson(jsonCombined, payloadCombined, sizeof(payloadCombined));
     if (combined_size >= PAYLOAD_SIZE - 1)
     {
-        log_e("payloadCombined (%d) >= PAYLOAD_SIZE (%d). Payload truncated!", combined_size, PAYLOAD_SIZE);
+        log_e("payloadCombined (%zu) >= PAYLOAD_SIZE (%zu). Payload truncated!", combined_size, (size_t)PAYLOAD_SIZE);
     }
     snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
              Hostname.c_str(), mqttTopics.pubCombined);

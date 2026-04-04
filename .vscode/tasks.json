@@ -136,7 +136,7 @@
                 "panel": "shared"
             },
             "detail": "Reset board via DTR, then monitor and log to extras/logs/."
-        },
+        }
     ],
     "inputs": [
     {

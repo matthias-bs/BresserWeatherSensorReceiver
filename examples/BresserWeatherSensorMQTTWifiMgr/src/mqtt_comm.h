@@ -40,6 +40,10 @@
 // 20250227 Added publishControlDiscovery()
 // 20250420 removed AUTO_DISCOVERY here, as it is defined in sketch
 // 20250811 Increased PAYLOAD_SIZE
+// 20260403 Added PAYLOAD_EXTRA_SIZE for stack-allocated payloadExtra buffer
+// 20260403 Changed sensor_info members from String to const char* to avoid heap allocation
+//          in haAutoDiscovery(); changed publishStatusDiscovery/publishControlDiscovery
+//          parameters from String to const char*
 //
 // ToDo:
 // -
@@ -50,6 +54,10 @@
 #define MQTT_COMM_H
 
 #define PAYLOAD_SIZE 400      // maximum MQTT message size
+// Worst-case extra payload: wind_dir_txt(20) + wind_gust_bft(18) + wind_avg_bft(17) +
+// dewpoint_c(22) + perceived_temp_c(29) + wgbt(15) + JSON overhead(7) = 128 B.
+// 160 provides a ~25% safety margin. Increase if new fields are added to jsonExtra.
+#define PAYLOAD_EXTRA_SIZE 160 // maximum size for extra (derived) payload
 
 #include <Arduino.h>
 #include <string>
@@ -62,23 +70,6 @@
 #include "WeatherUtils.h"
 #include "RainGauge.h"
 #include "Lightning.h"
-
-// See
-// https://stackoverflow.com/questions/19554972/json-standard-floating-point-numbers
-// and
-// https://stackoverflow.com/questions/35709595/why-would-you-use-a-string-in-json-to-represent-a-decimal-number
-//
-// Summary:
-// A string representation of a float (e.g. "temp_c":"21.5") is recommended if the value shall displayed with the specified number of decimals.
-// Otherwise the float value can be output as a numerical value (e.g. "temp_c":21.5).
-//
-// #define JSON_FLOAT_AS_STRING
-
-#if defined(JSON_FLOAT_AS_STRING)
-#define JSON_FLOAT(x) String("\"") + String(x) + String("\"")
-#else
-#define JSON_FLOAT(x) x
-#endif
 
 // MQTT topics structure for organized access
 struct MQTTTopics {
@@ -102,15 +93,15 @@ extern void mqtt_setup(void);
 // Sensor information for Home Assistant auto discovery
 struct sensor_info
 {
-    String manufacturer;
-    String model;
-    String identifier;
+    const char* manufacturer;
+    const char* model;
+    const char* identifier;
 };
 
 /*!
  * \brief (Re-)Connect to WLAN and connect MQTT broker
  */
-//void mqtt_connect(void)
+void mqtt_connect(void);
 
 /*!
  * \brief MQTT message received callback
@@ -161,7 +152,7 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
  * \param name  Control name
  * \param topic MQTT topic
  */
-void publishStatusDiscovery(String name, String topic);
+void publishStatusDiscovery(const char* name, const char* topic);
 
 /*!
  * \brief Publish Home Assistant auto discovery for receiver control
@@ -169,7 +160,7 @@ void publishStatusDiscovery(String name, String topic);
  * \param name  Control name
  * \param topic MQTT topic
  */
-void publishControlDiscovery(String name, String topic);
+void publishControlDiscovery(const char* name, const char* topic);
 
 extern MQTTTopics mqttTopics;
 extern String Hostname;

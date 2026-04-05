@@ -54,6 +54,15 @@
 //          persistent heap memory usage (~600-750 bytes savings)
 //          Refactored MQTT topic declarations using MQTTTopics struct for cleaner
 //          organization and maintainability
+// 20260312 Fixed latent bug: DATA_TIMESTAMP block used undefined 'sensorData' instead of 'jsonSensor'
+//          Removed unused/shadowed outer 'String topic' in haAutoDiscovery()
+//          Removed redundant payload.clear() in publishRadio() (local JsonDocument auto-destroyed)
+// 20260403 Replaced String payloadSensor/Extra/Combined with stack-allocated char[] to eliminate
+//          heap fragmentation from repeated substring() copies on every publish cycle
+// 20260403 Issue 9: Eliminated all String heap allocations in haAutoDiscovery() and helper
+//          functions (publishAutoDiscovery, publishStatusDiscovery, publishControlDiscovery).
+//          Replaced String topic/rssi with stack char[]+snprintf, changed sensor_info members
+//          to const char*, updated function signatures to const char* where applicable.
 //
 // ToDo:
 // -
@@ -71,19 +80,17 @@ extern RainGauge rainGauge;
 extern Lightning lightning;
 extern std::vector<SensorMap> sensor_map;
 
-String sensorName(uint32_t sensor_id)
+void sensorName(uint32_t sensor_id, char* buf, size_t buf_size)
 {
-    String sensor_str = String(sensor_id, HEX);
-
+    snprintf(buf, buf_size, "%x", (unsigned)sensor_id);
     for (size_t n = 0; n < sensor_map.size(); n++)
     {
         if (sensor_map[n].id == sensor_id)
         {
-            sensor_str = sensor_map[n].name;
+            snprintf(buf, buf_size, "%s", sensor_map[n].name.c_str());
             break;
         }
     }
-    return sensor_str;
 }
 
 // MQTT message received callback
@@ -134,9 +141,15 @@ void publishWeatherdata(bool complete, bool retain)
     JsonDocument jsonSensor;
     JsonDocument jsonExtra;
 
-    String payloadSensor;   // sensor data
-    String payloadExtra;    // calculated extra data
-    String payloadCombined; // combined payload for ESP32-e-Paper-Weather-Display
+    // Stack-allocated buffers avoid heap fragmentation from repeated String alloc/free.
+    // Constraints:
+    //   - Stack usage: PAYLOAD_SIZE*2 + PAYLOAD_EXTRA_SIZE bytes (~960 B). Safe on ESP32 (8 KB stack).
+    //     Do not increase PAYLOAD_SIZE when compiling for ESP8266 (4 KB stack limit).
+    //   - Adding fields to jsonExtra must not exceed PAYLOAD_EXTRA_SIZE. See estimate in mqtt_comm.h.
+    //   - serializeJson() with a size-limited buffer truncates silently; overflow detected via return value.
+    char payloadSensor[PAYLOAD_SIZE];           // sensor data
+    char payloadExtra[PAYLOAD_EXTRA_SIZE];      // calculated extra data (wind/temp/dewpoint derived values)
+    char payloadCombined[PAYLOAD_SIZE];         // combined payload for ESP32-e-Paper-Weather-Display
     char mqtt_topic[256];   // MQTT topic including ID/name (increased size for all uses)
 
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
@@ -169,7 +182,7 @@ void publishWeatherdata(bool complete, bool retain)
             gmtime_r(&now, &timeinfo); // Convert to UTC time
             char tbuf[25];
             strftime(tbuf, sizeof(tbuf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo); // Format as ISO 8601
-            sensorData["timestamp"] = tbuf;
+            jsonSensor["timestamp"] = tbuf;
         }
 #endif // DATA_TIMESTAMP
 
@@ -186,8 +199,11 @@ void publishWeatherdata(bool complete, bool retain)
         {
             jsonSensor["lightning_count"] = weatherSensor.sensor[i].lgt.strike_count;
             jsonSensor["lightning_distance_km"] = weatherSensor.sensor[i].lgt.distance_km;
-            jsonSensor["lightning_unknown1"] = String("0x") + String(weatherSensor.sensor[i].lgt.unknown1, HEX);
-            jsonSensor["lightning_unknown2"] = String("0x") + String(weatherSensor.sensor[i].lgt.unknown2, HEX);
+            char lgtUnknown1[12], lgtUnknown2[12];
+            snprintf(lgtUnknown1, sizeof(lgtUnknown1), "0x%x", weatherSensor.sensor[i].lgt.unknown1);
+            snprintf(lgtUnknown2, sizeof(lgtUnknown2), "0x%x", weatherSensor.sensor[i].lgt.unknown2);
+            jsonSensor["lightning_unknown1"] = lgtUnknown1;
+            jsonSensor["lightning_unknown2"] = lgtUnknown2;
 
             struct tm timeinfo;
             time_t now = time(nullptr);
@@ -347,55 +363,58 @@ void publishWeatherdata(bool complete, bool retain)
                 jsonCombined["ws_rain_monthly_mm"] = rainGauge.currentMonth();
             }
         }
-        serializeJson(jsonSensor, payloadSensor);
-        serializeJson(jsonExtra, payloadExtra);
+        size_t json_size = serializeJson(jsonSensor, payloadSensor, sizeof(payloadSensor));
+        size_t extra_size = serializeJson(jsonExtra, payloadExtra, sizeof(payloadExtra));
 
-        if (payloadSensor.length() >= PAYLOAD_SIZE)
+        if (json_size >= sizeof(payloadSensor) - 1)
         {
-            log_e("payloadSensor (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadSensor.length(), PAYLOAD_SIZE);
+            log_e("payloadSensor (%zu) >= sizeof(payloadSensor) (%zu). Payload truncated!", json_size, sizeof(payloadSensor));
         }
-        if (payloadExtra.length() >= PAYLOAD_SIZE)
+        if (extra_size >= sizeof(payloadExtra) - 1)
         {
-            log_e("payloadExtra (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadExtra.length(), PAYLOAD_SIZE);
+            log_e("payloadExtra (%zu) >= sizeof(payloadExtra) (%zu). Payload truncated!", extra_size, sizeof(payloadExtra));
         }
 
         // Try to map sensor ID to name to make MQTT topic explanatory
-        String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
+        char sensor_str[32];
+        sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
 
         // use outer mqtt_topic declaration
 
         // sensor data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s", 
-                 Hostname.c_str(), sensor_str.c_str(), mqttTopics.pubData);
-        log_i("%s: %s\n", mqtt_topic, payloadSensor.c_str());
-        client.publish(mqtt_topic, payloadSensor.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+                 Hostname.c_str(), sensor_str, mqttTopics.pubData);
+        log_i("%s: %s\n", mqtt_topic, payloadSensor);
+        client.publish(mqtt_topic, payloadSensor, retain, 0);
 
         // sensor specific RSSI
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s/%s",
-                 Hostname.c_str(), sensor_str.c_str(), mqttTopics.pubRssi);
-        client.publish(mqtt_topic, String(weatherSensor.sensor[i].rssi, 1), false, 0);
+                 Hostname.c_str(), sensor_str, mqttTopics.pubRssi);
+        char rssiStr[12];
+        snprintf(rssiStr, sizeof(rssiStr), "%.1f", weatherSensor.sensor[i].rssi);
+        client.publish(mqtt_topic, rssiStr, false, 0);
 
         // extra data
         snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
                  Hostname.c_str(), mqttTopics.pubExtra);
 
-        if (payloadExtra != "null")
+        if (strcmp(payloadExtra, "null") != 0)
         {
             // extra data
-            log_i("%s: %s\n", mqtt_topic, payloadExtra.c_str());
-            client.publish(mqtt_topic, payloadExtra.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+            log_i("%s: %s\n", mqtt_topic, payloadExtra);
+            client.publish(mqtt_topic, payloadExtra, retain, 0);
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 
-    serializeJson(jsonCombined, payloadCombined);
-    if (payloadCombined.length() >= PAYLOAD_SIZE)
+    size_t combined_size = serializeJson(jsonCombined, payloadCombined, sizeof(payloadCombined));
+    if (combined_size >= sizeof(payloadCombined) - 1)
     {
-        log_e("payloadCombined (%d) > PAYLOAD_SIZE (%d). Payload will be truncated!", payloadCombined.length(), PAYLOAD_SIZE);
+        log_e("payloadCombined (%zu) >= sizeof(payloadCombined) (%zu). Payload truncated!", combined_size, sizeof(payloadCombined));
     }
     snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s",
              Hostname.c_str(), mqttTopics.pubCombined);
-    log_i("%s: %s\n", mqtt_topic, payloadCombined.c_str());
-    client.publish(mqtt_topic, payloadCombined.substring(0, PAYLOAD_SIZE - 1), retain, 0);
+    log_i("%s: %s\n", mqtt_topic, payloadCombined);
+    client.publish(mqtt_topic, payloadCombined, retain, 0);
 }
 
 // Publish radio receiver info as JSON string via MQTT
@@ -403,20 +422,19 @@ void publishWeatherdata(bool complete, bool retain)
 void publishRadio(void)
 {
     JsonDocument payload;
-    String mqtt_payload;
+    char mqtt_payload[32]; // {"rssi":-XXX.X} fits comfortably in 32 bytes
+    char mqtt_topic[256];  // same size as used in publishWeatherdata()
 
+    snprintf(mqtt_topic, sizeof(mqtt_topic), "%s/%s", Hostname.c_str(), mqttTopics.pubRadio);
     payload["rssi"] = weatherSensor.rssi;
-    serializeJson(payload, mqtt_payload);
-    log_i("%s: %s\n", mqttTopics.pubRadio, mqtt_payload.c_str());
-    client.publish(mqttTopics.pubRadio, mqtt_payload, false, 0);
-    payload.clear();
+    serializeJson(payload, mqtt_payload, sizeof(mqtt_payload));
+    log_i("%s: %s\n", mqtt_topic, mqtt_payload);
+    client.publish(mqtt_topic, mqtt_payload, false, 0);
 }
 
 // Home Assistant Auto-Discovery
 void haAutoDiscovery(void)
 {
-    String topic;
-
     for (size_t i = 0; i < weatherSensor.sensor.size(); i++)
     {
         uint32_t sensor_id = weatherSensor.sensor[i].sensor_id;
@@ -424,9 +442,13 @@ void haAutoDiscovery(void)
         if (!weatherSensor.sensor[i].valid)
             continue;
 
-        String sensor_str = sensorName(weatherSensor.sensor[i].sensor_id);
-        String topic = Hostname + "/" + sensor_str + "/data";
-        String rssi = Hostname + "/" + sensor_str + "/rssi";
+        char sensor_str[32];
+        sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
+        // Stack-allocated topic buffers avoid heap fragmentation from String concatenation.
+        char topicData[128], topicRssi[128], topicExtra[128];
+        snprintf(topicData,  sizeof(topicData),  "%s/%s/data",  Hostname.c_str(), sensor_str);
+        snprintf(topicRssi,  sizeof(topicRssi),  "%s/%s/rssi",  Hostname.c_str(), sensor_str);
+        snprintf(topicExtra, sizeof(topicExtra), "%s/extra",    Hostname.c_str());
         if ((weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER0) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER1) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
@@ -437,51 +459,49 @@ void haAutoDiscovery(void)
                 .model = "Weather Sensor",
                 .identifier = "weather_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Outside Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Outside Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Outside Temperature", sensor_id, "temperature", "°C", topicData, "temp_c");
+            publishAutoDiscovery(info, "Outside Humidity", sensor_id, "humidity", "%", topicData, "humidity");
             if (weatherSensor.sensor[i].w.tglobe_ok)
             {
-                publishAutoDiscovery(info, "Globe Temperature", sensor_id, "temperature", "°C", topic.c_str(), "tglobe_c");
+                publishAutoDiscovery(info, "Globe Temperature", sensor_id, "temperature", "°C", topicData, "tglobe_c");
             }
             if (weatherSensor.sensor[i].w.uv_ok)
             {
-                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV", topic.c_str(), "uv");
+                publishAutoDiscovery(info, "UV Index", sensor_id, NULL, "UV", topicData, "uv");
             }
             if (weatherSensor.sensor[i].w.light_ok)
             {
-                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topic.c_str(), "light_lx");
+                publishAutoDiscovery(info, "Light Lux", sensor_id, "illuminance", "lx", topicData, "light_lx");
             }
             if (weatherSensor.sensor[i].w.rain_ok)
             {
-                publishAutoDiscovery(info, "Rainfall", sensor_id, "precipitation", "mm", topic.c_str(), "rain");
-                publishAutoDiscovery(info, "Rainfall Hourly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_h");
-                publishAutoDiscovery(info, "Rainfall 24h", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d24h");
-                publishAutoDiscovery(info, "Rainfall Daily", sensor_id, "precipitation", "mm", topic.c_str(), "rain_d");
-                publishAutoDiscovery(info, "Rainfall Weekly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_w");
-                publishAutoDiscovery(info, "Rainfall Monthly", sensor_id, "precipitation", "mm", topic.c_str(), "rain_m");
+                publishAutoDiscovery(info, "Rainfall", sensor_id, "precipitation", "mm", topicData, "rain");
+                publishAutoDiscovery(info, "Rainfall Hourly", sensor_id, "precipitation", "mm", topicData, "rain_h");
+                publishAutoDiscovery(info, "Rainfall 24h", sensor_id, "precipitation", "mm", topicData, "rain_d24h");
+                publishAutoDiscovery(info, "Rainfall Daily", sensor_id, "precipitation", "mm", topicData, "rain_d");
+                publishAutoDiscovery(info, "Rainfall Weekly", sensor_id, "precipitation", "mm", topicData, "rain_w");
+                publishAutoDiscovery(info, "Rainfall Monthly", sensor_id, "precipitation", "mm", topicData, "rain_m");
             }
             if (weatherSensor.sensor[i].w.wind_ok)
             {
-                publishAutoDiscovery(info, "Wind Direction", sensor_id, "wind_direction", "°", topic.c_str(), "wind_dir");
-                publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_gust");
-                publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topic.c_str(), "wind_avg");
-                String topic = Hostname + "/extra";
-                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_gust_bft");
-                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, NULL, "Beaufort", topic.c_str(), "wind_avg_bft");
-                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, NULL, NULL, topic.c_str(), "wind_dir_txt");
+                publishAutoDiscovery(info, "Wind Direction", sensor_id, "wind_direction", "°", topicData, "wind_dir");
+                publishAutoDiscovery(info, "Wind Gust Speed", sensor_id, "wind_speed", "m/s", topicData, "wind_gust");
+                publishAutoDiscovery(info, "Wind Average Speed", sensor_id, "wind_speed", "m/s", topicData, "wind_avg");
+                publishAutoDiscovery(info, "Wind Gust Speed (Beaufort)", sensor_id, NULL, "Beaufort", topicExtra, "wind_gust_bft");
+                publishAutoDiscovery(info, "Wind Average Speed (Beaufort)", sensor_id, NULL, "Beaufort", topicExtra, "wind_avg_bft");
+                publishAutoDiscovery(info, "Wind Direction (Cardinal)", sensor_id, NULL, NULL, topicExtra, "wind_dir_txt");
             }
             if (weatherSensor.sensor[i].w.wind_ok &&
                 weatherSensor.sensor[i].w.temp_ok &&
                 weatherSensor.sensor[i].w.humidity_ok)
             {
-                String topic = Hostname + "/extra";
-                publishAutoDiscovery(info, "Dewpoint", sensor_id, "temperature", "°C", topic.c_str(), "dewpoint_c");
-                publishAutoDiscovery(info, "Perceived Temperature", sensor_id, "temperature", "°C", topic.c_str(), "perceived_temp_c");
+                publishAutoDiscovery(info, "Dewpoint", sensor_id, "temperature", "°C", topicExtra, "dewpoint_c");
+                publishAutoDiscovery(info, "Perceived Temperature", sensor_id, "temperature", "°C", topicExtra, "perceived_temp_c");
                 if (weatherSensor.sensor[i].w.tglobe_ok)
                 {
-                    publishAutoDiscovery(info, "WGBT", sensor_id, "temperature", "°C", topic.c_str(), "wgbt");
+                    publishAutoDiscovery(info, "WGBT", sensor_id, "temperature", "°C", topicExtra, "wgbt");
                 }
             }
         }
@@ -492,10 +512,10 @@ void haAutoDiscovery(void)
                 .model = "Soil Sensor",
                 .identifier = "soil_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Soil Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Soil Moisture", sensor_id, "moisture", "%", topic.c_str(), "moisture");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Soil Temperature", sensor_id, "temperature", "°C", topicData, "temp_c");
+            publishAutoDiscovery(info, "Soil Moisture", sensor_id, "moisture", "%", topicData, "moisture");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO)
         {
@@ -504,10 +524,10 @@ void haAutoDiscovery(void)
                 .model = "Thermo-Hygrometer Sensor",
                 .identifier = "thermo_hygrometer_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
-            publishAutoDiscovery(info, "Humidity", sensor_id, "humidity", "%", topic.c_str(), "humidity");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Temperature", sensor_id, "temperature", "°C", topicData, "temp_c");
+            publishAutoDiscovery(info, "Humidity", sensor_id, "humidity", "%", topicData, "humidity");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO)
         {
@@ -516,9 +536,9 @@ void haAutoDiscovery(void)
                 .model = "Pool Thermometer",
                 .identifier = "pool_thermometer_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Pool Temperature", sensor_id, "temperature", "°C", topic.c_str(), "temp_c");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Pool Temperature", sensor_id, "temperature", "°C", topicData, "temp_c");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
         {
@@ -527,11 +547,11 @@ void haAutoDiscovery(void)
                 .model = "Air Quality (PM) Sensor",
                 .identifier = "air_quality_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "PM1.0", sensor_id, "pm1", "µg/m³", topic.c_str(), "pm1_0_ug_m3");
-            publishAutoDiscovery(info, "PM2.5", sensor_id, "pm25", "µg/m³", topic.c_str(), "pm2_5_ug_m3");
-            publishAutoDiscovery(info, "PM10", sensor_id, "pm10", "µg/m³", topic.c_str(), "pm10_ug_m3");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "PM1.0", sensor_id, "pm1", "µg/m³", topicData, "pm1_0_ug_m3");
+            publishAutoDiscovery(info, "PM2.5", sensor_id, "pm25", "µg/m³", topicData, "pm2_5_ug_m3");
+            publishAutoDiscovery(info, "PM10", sensor_id, "pm10", "µg/m³", topicData, "pm10_ug_m3");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
@@ -540,11 +560,11 @@ void haAutoDiscovery(void)
                 .model = "Lightning Sensor",
                 .identifier = "lightning_sensor"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Lightning Count", sensor_id, NULL, "", topic.c_str(), "lightning_count");
-            publishAutoDiscovery(info, "Lightning Distance", sensor_id, "distance", "km", topic.c_str(), "lightning_distance_km");
-            publishAutoDiscovery(info, "Lightning Hour", sensor_id, NULL, "", topic.c_str(), "lightning_hr");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Lightning Count", sensor_id, NULL, "", topicData, "lightning_count");
+            publishAutoDiscovery(info, "Lightning Distance", sensor_id, "distance", "km", topicData, "lightning_distance_km");
+            publishAutoDiscovery(info, "Lightning Hour", sensor_id, NULL, "", topicData, "lightning_hr");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
         {
@@ -553,9 +573,9 @@ void haAutoDiscovery(void)
                 .model = "Leakage Sensor",
                 .identifier = "leakage_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "Leakage Alarm", sensor_id, "enum", "", topic.c_str(), "leakage");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "Leakage Alarm", sensor_id, "enum", "", topicData, "leakage");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
         {
@@ -564,9 +584,9 @@ void haAutoDiscovery(void)
                 .model = "CO2 Sensor",
                 .identifier = "co2_sensor_1"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "CO2", sensor_id, "co2", "ppm", topic.c_str(), "co2_ppm");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "CO2", sensor_id, "co2", "ppm", topicData, "co2_ppm");
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
         {
@@ -575,10 +595,10 @@ void haAutoDiscovery(void)
                 .model = "Air Quality (HCHO/VOC) Sensor",
                 .identifier = "air_quality_sensor_2"};
 
-            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topic.c_str(), "battery_ok");
-            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", rssi.c_str(), "rssi");
-            publishAutoDiscovery(info, "HCHO", sensor_id, "hcho", "ppb", topic.c_str(), "hcho_ppb");
-            publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topic.c_str(), "voc");
+            publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
+            publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
+            publishAutoDiscovery(info, "HCHO", sensor_id, "hcho", "ppb", topicData, "hcho_ppb");
+            publishAutoDiscovery(info, "VOC", sensor_id, "voc", "", topicData, "voc");
         }
     } // for (int i=0; i<weatherSensor.sensor.size(); i++)
 
@@ -588,71 +608,103 @@ void haAutoDiscovery(void)
 }
 
 // Publish discovery message for MQTT node status
-void publishStatusDiscovery(String name, String topic)
+void publishStatusDiscovery(const char* name, const char* topic)
 {
     char discoveryTopic[256];
     snprintf(discoveryTopic, sizeof(discoveryTopic), "homeassistant/sensor/%s/%s/config",
-             Hostname.c_str(), topic.c_str());
-    
+             Hostname.c_str(), topic);
+
     JsonDocument doc;
     doc["name"] = name;
-    doc["unique_id"] = String(Hostname + "_" + topic);
-    doc["state_topic"] = String(Hostname + "/" + topic);
+    char uniqueId[80];
+    snprintf(uniqueId, sizeof(uniqueId), "%s_%s", Hostname.c_str(), topic);
+    doc["unique_id"] = uniqueId;
+    char stateTopic[80];
+    snprintf(stateTopic, sizeof(stateTopic), "%s/%s", Hostname.c_str(), topic);
+    doc["state_topic"] = stateTopic;
     doc["value_template"] = "{{ value }}";
     doc["icon"] = "mdi:wifi";
     JsonObject device = doc["device"].to<JsonObject>();
-    device["identifiers"] = String(Hostname + "_1");
+    char identifiers[48];
+    snprintf(identifiers, sizeof(identifiers), "%s_1", Hostname.c_str());
+    device["identifiers"] = identifiers;
     device["name"] = "Weather Sensor Receiver";
-    
-    String discoveryPayload;
-    serializeJson(doc, discoveryPayload);
-    log_d("%s: %s", discoveryTopic, discoveryPayload.c_str());
+
+    char discoveryPayload[512];
+    size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
+    log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, false, 0);
 }
 
 // Publish discovery messages for receiver control
-void publishControlDiscovery(String name, String topic)
+void publishControlDiscovery(const char* name, const char* topic)
 {
     char discoveryTopic[256];
-    
+
     // Sensor discovery
     snprintf(discoveryTopic, sizeof(discoveryTopic), "homeassistant/sensor/%s/%s/config",
-             Hostname.c_str(), topic.c_str());
-    
+             Hostname.c_str(), topic);
+
     JsonDocument doc;
     doc["name"] = name;
-    doc["unique_id"] = String(Hostname + "_" + topic);
-    doc["state_topic"] = String(Hostname + "/" + topic);
+    char uniqueId[80];
+    snprintf(uniqueId, sizeof(uniqueId), "%s_%s", Hostname.c_str(), topic);
+    doc["unique_id"] = uniqueId;
+    char stateTopic[80];
+    snprintf(stateTopic, sizeof(stateTopic), "%s/%s", Hostname.c_str(), topic);
+    doc["state_topic"] = stateTopic;
     doc["value_template"] = "{{ value_json.ids }}";
     doc["icon"] = "mdi:code-array";
     JsonObject device = doc["device"].to<JsonObject>();
-    device["identifiers"] = String(Hostname + "_1");
+    char identifiers[48];
+    snprintf(identifiers, sizeof(identifiers), "%s_1", Hostname.c_str());
+    device["identifiers"] = identifiers;
     device["name"] = "Weather Sensor Receiver";
-    
-    String discoveryPayload;
-    serializeJson(doc, discoveryPayload);
-    log_d("%s: %s", discoveryTopic, discoveryPayload.c_str());
+
+    char discoveryPayload[512];
+    size_t payloadLen = serializeJson(doc, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
+    log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, true, 0);
 
     // Button discovery
     snprintf(discoveryTopic, sizeof(discoveryTopic), "homeassistant/button/%s/get_%s/config",
-             Hostname.c_str(), topic.c_str());
-    
+             Hostname.c_str(), topic);
+
     JsonDocument docButton;
-    String buttonName = "Get " + name;
+    char buttonName[80];
+    snprintf(buttonName, sizeof(buttonName), "Get %s", name);
     docButton["name"] = buttonName;
     docButton["platform"] = "button";
-    docButton["unique_id"] = String(Hostname + "_get_" + topic);
-    docButton["command_topic"] = String(Hostname + "/get_" + topic);
+    char buttonUniqueId[80];
+    snprintf(buttonUniqueId, sizeof(buttonUniqueId), "%s_get_%s", Hostname.c_str(), topic);
+    docButton["unique_id"] = buttonUniqueId;
+    char buttonCmdTopic[80];
+    snprintf(buttonCmdTopic, sizeof(buttonCmdTopic), "%s/get_%s", Hostname.c_str(), topic);
+    docButton["command_topic"] = buttonCmdTopic;
     docButton["icon"] = "mdi:information";
     docButton["retain"] = true;
     docButton["qos"] = 1;
     JsonObject deviceBtn = docButton["device"].to<JsonObject>();
-    deviceBtn["identifiers"] = String(Hostname + "_1");
+    deviceBtn["identifiers"] = identifiers;
     deviceBtn["name"] = "Weather Sensor Receiver";
-    
-    serializeJson(docButton, discoveryPayload);
-    log_d("%s: %s", discoveryTopic, discoveryPayload.c_str());
+
+    payloadLen = serializeJson(docButton, discoveryPayload, sizeof(discoveryPayload));
+    if (payloadLen >= sizeof(discoveryPayload) - 1)
+    {
+        log_e("Discovery payload truncated for topic %s", discoveryTopic);
+        return;
+    }
+    log_d("%s: %s", discoveryTopic, discoveryPayload);
     client.publish(discoveryTopic, discoveryPayload, false, 0);
 }
 
@@ -664,17 +716,23 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     doc["name"] = sensor_name;
     if (device_class != NULL)
         doc["device_class"] = device_class;
-    doc["unique_id"] = String(sensor_id, HEX) + String("_") + String(value_json);
+    char uniqueId[64];
+    snprintf(uniqueId, sizeof(uniqueId), "%08x_%s", (unsigned)sensor_id, value_json);
+    doc["unique_id"] = uniqueId;
     doc["state_topic"] = state_topic;
-    doc["availability_topic"] = Hostname + "/status";
+    char availTopic[64];
+    snprintf(availTopic, sizeof(availTopic), "%s/status", Hostname.c_str());
+    doc["availability_topic"] = availTopic;
     doc["payload_not_available"] = "dead"; // default: "offline"
     if (unit != NULL)
         doc["unit_of_measurement"] = unit;
+    char valTmpl[128];
     if (device_class != NULL)
     {
         if (strcmp(device_class, "battery") == 0)
         {
-            doc["value_template"] = String("{{ (value_json.") + value_json + " | float) * 100.0 }}";
+            snprintf(valTmpl, sizeof(valTmpl), "{{ (value_json.%s | float) * 100.0 }}", value_json);
+            doc["value_template"] = valTmpl;
         }
         else if (strcmp(device_class, "signal_strength") == 0)
         {
@@ -682,25 +740,35 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
         }
         else
         {
-            doc["value_template"] = String("{{ value_json.") + value_json + " }}";
+            snprintf(valTmpl, sizeof(valTmpl), "{{ value_json.%s }}", value_json);
+            doc["value_template"] = valTmpl;
         }
     } else {
-        doc["value_template"] = String("{{ value_json.") + value_json + " }}";
+        snprintf(valTmpl, sizeof(valTmpl), "{{ value_json.%s }}", value_json);
+        doc["value_template"] = valTmpl;
     }
-    
+
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
-    device["name"] = info.manufacturer + " " + info.model;
-    if (info.model != "")
+    char deviceName[80];
+    snprintf(deviceName, sizeof(deviceName), "%s %s", info.manufacturer, info.model);
+    device["name"] = deviceName;
+    if (info.model[0] != '\0')
         device["model"] = info.model;
-    if (info.manufacturer != "")
+    if (info.manufacturer[0] != '\0')
         device["manufacturer"] = info.manufacturer;
 
     char buffer[512];
-    serializeJson(doc, buffer);
+    size_t bufferLen = serializeJson(doc, buffer, sizeof(buffer));
+    if (bufferLen >= sizeof(buffer) - 1)
+    {
+        log_e("Auto-discovery payload truncated for %s", sensor_name);
+        return;
+    }
 
-    String topic = String("homeassistant/sensor/") + String(sensor_id, HEX) + "_" + String(value_json) + "/config";
-    log_d("Publishing auto-discovery configuration: %s: %s", topic.c_str(), buffer);
-    client.publish(topic, buffer, true /* retained */, 0 /* qos */);
+    char discTopic[128];
+    snprintf(discTopic, sizeof(discTopic), "homeassistant/sensor/%08x_%s/config", (unsigned)sensor_id, value_json);
+    log_d("Publishing auto-discovery configuration: %s: %s", discTopic, buffer);
+    client.publish(discTopic, buffer, true /* retained */, 0 /* qos */);
     log_d("Published auto-discovery configuration for %s", sensor_name);
 }

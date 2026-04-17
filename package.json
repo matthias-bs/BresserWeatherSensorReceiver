@@ -22,7 +22,7 @@
     "RadioLib": "jgromes/RadioLib#semver:^7.6.0"
   },
   "optionalDependencies": {
-    "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.2",
+    "arduino-mqtt": "256dpi/arduino-mqtt#semver:^2.5.3",
     "ArduinoJson": "bblanchon/ArduinoJson#semver:^7.4.3",
     "WiFiManager": "tzapu/WiFiManager#semver:2.0.17",
     "ESP_DoubleResetDetector": "khoih-prog/ESP_DoubleResetDetector#semver:1.3.2",

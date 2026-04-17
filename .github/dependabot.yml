@@ -3,9 +3,13 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
+# Note: package.json is a PlatformIO/Arduino library manifest, not an npm package.
+# The npm ecosystem is intentionally omitted to avoid Dependabot trying to resolve
+# Arduino library names (which may contain spaces) as npm packages.
+
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"

@@ -25,6 +25,7 @@ var class_weather_sensor =
     [ "getSensorsIncJson", "class_weather_sensor.html#a68b2d87f2b1781a000f1fc7a52654f5f", null ],
     [ "getSensorsJson", "class_weather_sensor.html#a85315b1e223b9b2ad86f5558a41b71ee", null ],
     [ "radioReset", "class_weather_sensor.html#a2cb2e1d7ffb2aa6b641563772c72be20", null ],
+    [ "setRxCfg", "class_weather_sensor.html#aa75c7ac1897ca9a2207d44d2413eb930", null ],
     [ "setSensorsCfg", "class_weather_sensor.html#a62203c24af7924cc8e86bdff40fb9281", null ],
     [ "setSensorsExc", "class_weather_sensor.html#affeca257b06518b29519756a9e85a006", null ],
     [ "setSensorsExcJson", "class_weather_sensor.html#ab04af1949e91b6ca76d913306ff6674c", null ],

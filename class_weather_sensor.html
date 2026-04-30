@@ -170,6 +170,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sleep</b> (void)</td>
 <tr class="separator:affeca257b06518b29519756a9e85a006"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62203c24af7924cc8e86bdff40fb9281" id="r_a62203c24af7924cc8e86bdff40fb9281"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#a62203c24af7924cc8e86bdff40fb9281">setSensorsCfg</a> (uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders=0xFF)</td></tr>
 <tr class="separator:a62203c24af7924cc8e86bdff40fb9281"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa75c7ac1897ca9a2207d44d2413eb930" id="r_aa75c7ac1897ca9a2207d44d2413eb930"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#aa75c7ac1897ca9a2207d44d2413eb930">setRxCfg</a> (uint8_t rx_flags, uint8_t en_decoders=0xFF)</td></tr>
+<tr class="separator:aa75c7ac1897ca9a2207d44d2413eb930"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6f489c26a476d658c2ce5161ea48441" id="r_ac6f489c26a476d658c2ce5161ea48441"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#ac6f489c26a476d658c2ce5161ea48441">getSensorsInc</a> (uint8_t *payload)</td></tr>
 <tr class="separator:ac6f489c26a476d658c2ce5161ea48441"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6ffcbf06bb5aea95203fbb3a53aaf3d" id="r_af6ffcbf06bb5aea95203fbb3a53aaf3d"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_weather_sensor.html#af6ffcbf06bb5aea95203fbb3a53aaf3d">getSensorsExc</a> (uint8_t *payload)</td></tr>
@@ -705,6 +707,42 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
 
 </div>
 </div>
+<a id="aa75c7ac1897ca9a2207d44d2413eb930" name="aa75c7ac1897ca9a2207d44d2413eb930"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa75c7ac1897ca9a2207d44d2413eb930">&#9670;&#160;</a></span>setRxCfg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void WeatherSensor::setRxCfg </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>rx_flags</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>en_decoders</em> = <code>0xFF</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Set rx_flags and enabled decoders and store it in Preferences</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">rx_flags</td><td>receive flags (see <a class="el" href="class_weather_sensor.html#a558191760f9d9b9bf12f79f6f3e5370a" title="Wait for reception of data or occurrence of timeout. With BRESSER_6_IN_1, data is distributed across ...">getData()</a>) </td></tr>
+    <tr><td class="paramname">en_decoders</td><td>enabled decoders </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a62203c24af7924cc8e86bdff40fb9281" name="a62203c24af7924cc8e86bdff40fb9281"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a62203c24af7924cc8e86bdff40fb9281">&#9670;&#160;</a></span>setSensorsCfg()</h2>
 
@@ -736,7 +774,7 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>enDecoders</b> = 0
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Set maximum number of sensors and store it in Preferences</p>
+<p>Set maximum number of sensors, rx_flags and enabled decoders and store it in Preferences</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">max_sensors</td><td>maximum number of sensors </td></tr>

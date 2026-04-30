@@ -438,7 +438,7 @@ class WeatherSensor {
          * \param rx_flags receive flags (see getData())
          * \param en_decoders enabled decoders
          */
-        void setSensorsCfg(uint8_t rx_flags, uint8_t en_decoders = 0xFF);
+        void setRxCfg(uint8_t rx_flags, uint8_t en_decoders = 0xFF);
 
         /*!
          * Get sensors include list (Preferences/defaults)

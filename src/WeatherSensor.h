@@ -22,7 +22,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -88,6 +88,7 @@
 // 20251222 Added SENSOR_TYPE_WEATHER3 (3-in-1 Professional Rain Gauge)
 // 20260202 Added forward declaration of WeatherSensorReceiver namespace
 // 20260221 Improved memory safety
+// 20260430 Added setSensorsCfg() variant with rx_flags and enabled decoders
 //
 // ToDo:
 // -
@@ -423,13 +424,21 @@ class WeatherSensor {
         void setSensorsExc(uint8_t *bytes, uint8_t size);
 
         /*!
-         * Set maximum number of sensors and store it in Preferences
+         * Set maximum number of sensors, rx_flags and enabled decoders and store it in Preferences
          * 
          * \param max_sensors maximum number of sensors
          * \param rx_flags receive flags (see getData())
          * \param en_decoders enabled decoders
          */
         void setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t en_decoders = 0xFF);
+
+        /*!
+         * Set rx_flags and enabled decoders and store it in Preferences
+         * 
+         * \param rx_flags receive flags (see getData())
+         * \param en_decoders enabled decoders
+         */
+        void setRxCfg(uint8_t rx_flags, uint8_t en_decoders = 0xFF);
 
         /*!
          * Get sensors include list (Preferences/defaults)

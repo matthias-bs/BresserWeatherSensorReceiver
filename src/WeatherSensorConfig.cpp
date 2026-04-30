@@ -14,7 +14,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2024 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@
 // 20240609 Fixed implementation of maximum number of sensors
 // 20240702 Fixed handling of empty list of IDs / 0x00000000 in Preferences
 // 20241113 Added getting/setting of sensor include/exclude list from JSON strings
+// 20260430 Added setSensorsCfg() variant with rx_flags and enabled decoders
 //
 //
 // ToDo:
@@ -257,6 +258,19 @@ void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t
     log_d("rx_flags: %u", rxFlags);
     log_d("enabled_decoders: %u", enDecoders);
     sensor.resize(max_sensors);
+}
+
+// Set sensor configuration and store in Preferences
+void WeatherSensor::setRxCfg(uint8_t rx_flags, uint8_t en_decoders)
+{
+    rxFlags = rx_flags;
+    enDecoders = en_decoders;
+    cfgPrefs.begin("BWS-CFG", false);
+    cfgPrefs.putUChar("rxflags", rx_flags);
+    cfgPrefs.putUChar("endec", en_decoders);
+    cfgPrefs.end();
+    log_d("rx_flags: %u", rxFlags);
+    log_d("enabled_decoders: %u", enDecoders);
 }
 
 // Get sensor configuration from Preferences

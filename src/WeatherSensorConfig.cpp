@@ -261,7 +261,7 @@ void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t
 }
 
 // Set sensor configuration and store in Preferences
-void WeatherSensor::setSensorsCfg(uint8_t rx_flags, uint8_t en_decoders)
+void WeatherSensor::setRxCfg(uint8_t rx_flags, uint8_t en_decoders)
 {
     rxFlags = rx_flags;
     enDecoders = en_decoders;

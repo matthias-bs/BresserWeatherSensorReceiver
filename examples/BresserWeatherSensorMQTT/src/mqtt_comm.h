@@ -44,6 +44,7 @@
 // 20260403 Changed sensor_info members from String to const char* to avoid heap allocation
 //          in haAutoDiscovery(); changed publishStatusDiscovery/publishControlDiscovery
 //          parameters from String to const char*
+// 20260510 Added display_name to sensor_info for user-defined HA device names
 //
 // ToDo:
 // -
@@ -96,6 +97,7 @@ struct sensor_info
     const char* manufacturer;
     const char* model;
     const char* identifier;
+    const char* display_name; // optional: overrides "manufacturer model" as HA device name
 };
 
 /*!

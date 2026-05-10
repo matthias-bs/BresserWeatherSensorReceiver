@@ -65,6 +65,7 @@
 //          to const char*, updated function signatures to const char* where applicable.
 // 20260510 Fixed HA device identifier collision: multiple sensors of the same type now each
 //          get a unique identifier derived from sensor_id.
+//          Added display_name to sensor_info: HA device name now uses sensor_map name when set.
 //
 // ToDo:
 // -
@@ -461,7 +462,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Weather Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -516,7 +518,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Soil Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -530,7 +533,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Thermo-Hygrometer Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -544,7 +548,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Pool Thermometer",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -557,7 +562,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (PM) Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -572,7 +578,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Lightning Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -587,7 +594,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Leakage Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -600,7 +608,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "CO2 Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -613,7 +622,8 @@ void haAutoDiscovery(void)
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (HCHO/VOC) Sensor",
-                .identifier = identifier};
+                .identifier = identifier,
+                .display_name = sensor_str};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -771,7 +781,10 @@ void publishAutoDiscovery(const struct sensor_info info, const char *sensor_name
     JsonObject device = doc["device"].to<JsonObject>();
     device["identifiers"] = info.identifier;
     char deviceName[80];
-    snprintf(deviceName, sizeof(deviceName), "%s %s", info.manufacturer, info.model);
+    if (info.display_name && info.display_name[0] != '\0')
+        snprintf(deviceName, sizeof(deviceName), "%s", info.display_name);
+    else
+        snprintf(deviceName, sizeof(deviceName), "%s %s", info.manufacturer, info.model);
     device["name"] = deviceName;
     if (info.model[0] != '\0')
         device["model"] = info.model;

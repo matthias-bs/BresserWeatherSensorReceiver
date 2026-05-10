@@ -265,6 +265,15 @@
     #define PIN_RECEIVER_GPIO DIO1
     #define PIN_RECEIVER_RST  RST_LoRa
 
+#elif defined(HELTEC_WIRELESS_STICK_LITE_V3)
+    // Heltec Wireless Stick Lite V3
+    #pragma message("HELTEC_WIRELESS_STICK_LITE_V3 defined; using on-board transceiver")
+    #define USE_SX1262
+    #define PIN_RECEIVER_CS   SS
+    #define PIN_RECEIVER_IRQ  DIO0
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
+    #define PIN_RECEIVER_RST  RST_LoRa
+
 #elif defined(ARDUINO_HELTEC_WIRELESS_STICK_V3)
     #pragma message("ARDUINO_HELTEC_WIRELESS_STICK_V3 defined; using on-board transceiver")
     #define USE_SX1276
@@ -382,8 +391,8 @@
     #define PIN_RECEIVER_RST  11
 
 #elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    //#define LORAWAN_NODE
-    #define DFROBOT_COVER_LORA
+    #define LORAWAN_NODE
+    //#define DFROBOT_COVER_LORA
     
     #if defined(DFROBOT_COVER_LORA)
         #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")

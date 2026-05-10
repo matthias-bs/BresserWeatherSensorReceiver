@@ -138,7 +138,7 @@ void haAutoDiscovery(void);
 /*!
  * \brief Publish auto-discovery configuration for Home Assistant
  *
- * \param info          Sensor information (manufacturer, model, identifier)
+ * \param info          Sensor information (manufacturer, model, identifier, optional display_name)
  * \param sensor_name   Sensor name (e.g. "Outside Temperature")
  * \param sensor_id     Sensor ID (unique)
  * \param device_class  Device class (e.g. temperature, humidity, etc.)

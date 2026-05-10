@@ -458,7 +458,7 @@ void haAutoDiscovery(void)
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "weather_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "weather_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Weather Sensor",
@@ -514,7 +514,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "soil_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "soil_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Soil Sensor",
@@ -529,7 +529,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "thermo_hygro_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "thermo_hygro_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Thermo-Hygrometer Sensor",
@@ -544,7 +544,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "pool_thermo_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "pool_thermo_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Pool Thermometer",
@@ -558,7 +558,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "air_pm_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "air_pm_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (PM) Sensor",
@@ -574,7 +574,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "lightning_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "lightning_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Lightning Sensor",
@@ -590,7 +590,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "leakage_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "leakage_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Leakage Sensor",
@@ -604,7 +604,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "co2_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "co2_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "CO2 Sensor",
@@ -618,7 +618,7 @@ void haAutoDiscovery(void)
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
         {
             char identifier[32];
-            snprintf(identifier, sizeof(identifier), "hcho_voc_%08x", sensor_id);
+            snprintf(identifier, sizeof(identifier), "hcho_voc_%08x", (unsigned)sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (HCHO/VOC) Sensor",

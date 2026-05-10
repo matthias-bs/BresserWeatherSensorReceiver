@@ -63,6 +63,8 @@
 //          functions (publishAutoDiscovery, publishStatusDiscovery, publishControlDiscovery).
 //          Replaced String topic/rssi with stack char[]+snprintf, changed sensor_info members
 //          to const char*, updated function signatures to const char* where applicable.
+// 20260510 Fixed HA device identifier collision: multiple sensors of the same type now each
+//          get a unique identifier derived from sensor_id.
 //
 // ToDo:
 // -
@@ -454,10 +456,12 @@ void haAutoDiscovery(void)
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER3) ||
             (weatherSensor.sensor[i].s_type == SENSOR_TYPE_WEATHER8))
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "weather_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Weather Sensor",
-                .identifier = "weather_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -507,10 +511,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_SOIL)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "soil_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Soil Sensor",
-                .identifier = "soil_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -519,10 +525,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_THERMO_HYGRO)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "thermo_hygro_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Thermo-Hygrometer Sensor",
-                .identifier = "thermo_hygrometer_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -531,10 +539,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_POOL_THERMO)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "pool_thermo_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Pool Thermometer",
-                .identifier = "pool_thermometer_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -542,10 +552,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_AIR_PM)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "air_pm_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (PM) Sensor",
-                .identifier = "air_quality_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -555,10 +567,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LIGHTNING)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "lightning_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Lightning Sensor",
-                .identifier = "lightning_sensor"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -568,10 +582,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_LEAKAGE)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "leakage_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Leakage Sensor",
-                .identifier = "leakage_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -579,10 +595,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_CO2)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "co2_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "CO2 Sensor",
-                .identifier = "co2_sensor_1"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -590,10 +608,12 @@ void haAutoDiscovery(void)
         }
         else if (weatherSensor.sensor[i].s_type == SENSOR_TYPE_HCHO_VOC)
         {
+            char identifier[32];
+            snprintf(identifier, sizeof(identifier), "hcho_voc_%08x", sensor_id);
             struct sensor_info info = {
                 .manufacturer = "Bresser",
                 .model = "Air Quality (HCHO/VOC) Sensor",
-                .identifier = "air_quality_sensor_2"};
+                .identifier = identifier};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");

@@ -269,7 +269,11 @@
     // Heltec Wireless Stick Lite V3
     #pragma message("HELTEC_WIRELESS_STICK_LITE_V3 defined; using on-board transceiver")
     #define USE_SX1262
-    #define PIN_RECEIVER_CS   SS
+    #define LORA_CS           8
+    #define LORA_SCK          9
+    #define LORA_MOSI         10
+    #define LORA_MISO         11
+    #define PIN_RECEIVER_CS   LORA_CS
     #define PIN_RECEIVER_IRQ  DIO0
     #define PIN_RECEIVER_GPIO BUSY_LoRa
     #define PIN_RECEIVER_RST  RST_LoRa

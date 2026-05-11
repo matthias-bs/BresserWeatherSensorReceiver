@@ -253,6 +253,10 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 #endif
 
 #if defined(HELTEC_WIRELESS_STICK_LITE_V3)
+    // RF switch is controlled internally by SX1262 DIO2
+    // (SX126X_DIO2_AS_RF_SWITCH in Meshtastic heltec_wsl_v3/variant.h)
+    radio.setDio2AsRfSwitch(true);
+    
     // TCXO voltage according to
     // https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
     radio.setTCXO(1.8);

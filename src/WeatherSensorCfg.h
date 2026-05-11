@@ -70,6 +70,7 @@
 // 20241205 Added pin definitions for Lilygo T3-S3 (SX1262/SX1276/LR1121)
 // 20241227 Improved maintainability of board definitions
 // 20260114 Added pin definitions for Seeed Studio XIAO ESP32S3 with Wio-SX1262
+// 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 //
 // ToDo:
 // -

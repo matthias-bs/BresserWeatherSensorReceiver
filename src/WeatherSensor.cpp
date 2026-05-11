@@ -113,6 +113,7 @@
 // 20260202 Moved radio object to separate namespace
 // 20260309 Fixed Static Initialization Order Fiasco (SIOF) for SPIClass on LilyGo T3S3 boards
 // 20260310 Added support for selecting SPI bus on ESP32 boards
+// 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 //
 // ToDo:
 // -

@@ -244,12 +244,18 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     // set RF switch control configuration
     radio.setRfSwitchPins(38, RADIOLIB_NC);
 
-    // TCXO Voltage according to
+    // TCXO voltage according to
     // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf:
     // 1.7~3.3V
     //
     // Set to 1.7V as recommended by Seeed Studio Support
     radio.setTCXO(1.7);
+#endif
+
+#if defined(HELTEC_WIRELESS_STICK_LITE_V3)
+    // TCXO voltage according to
+    // https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
+    radio.setTCXO(1.8);
 #endif
 
     if (state == RADIOLIB_ERR_NONE)

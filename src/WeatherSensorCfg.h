@@ -70,6 +70,7 @@
 // 20241205 Added pin definitions for Lilygo T3-S3 (SX1262/SX1276/LR1121)
 // 20241227 Improved maintainability of board definitions
 // 20260114 Added pin definitions for Seeed Studio XIAO ESP32S3 with Wio-SX1262
+// 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 //
 // ToDo:
 // -
@@ -159,6 +160,13 @@
 
 // This define is set by selecting "Board: Heltec Wireless Stick" (SX1276) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK
+
+// This define is set by selecting "Board: Heltec Wireless Stick Lite(V3)" (SX1262, ESP32-S3) in the Arduino IDE.
+// See pin definitions in
+// https://github.com/espressif/arduino-esp32/blob/master/variants/heltec_wireless_stick_lite_v3/pins_arduino.h
+// and
+// https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
+//#define HELTEC_WIRELESS_STICK_LITE_V3
 
 // This define is set by selecting "Board: Heltec Wireless Stick(V3)" (SX1262) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK_V3
@@ -263,6 +271,19 @@
     #define PIN_RECEIVER_CS   SS
     #define PIN_RECEIVER_IRQ  DIO0
     #define PIN_RECEIVER_GPIO DIO1
+    #define PIN_RECEIVER_RST  RST_LoRa
+
+#elif defined(HELTEC_WIRELESS_STICK_LITE_V3)
+    // Heltec Wireless Stick Lite V3
+    #pragma message("HELTEC_WIRELESS_STICK_LITE_V3 defined; using on-board transceiver")
+    #define USE_SX1262
+    #define LORA_CS           8
+    #define LORA_SCK          9
+    #define LORA_MOSI         10
+    #define LORA_MISO         11
+    #define PIN_RECEIVER_CS   LORA_CS
+    #define PIN_RECEIVER_IRQ  DIO0
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
     #define PIN_RECEIVER_RST  RST_LoRa
 
 #elif defined(ARDUINO_HELTEC_WIRELESS_STICK_V3)
@@ -382,8 +403,8 @@
     #define PIN_RECEIVER_RST  11
 
 #elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    //#define LORAWAN_NODE
-    #define DFROBOT_COVER_LORA
+    #define LORAWAN_NODE
+    //#define DFROBOT_COVER_LORA
     
     #if defined(DFROBOT_COVER_LORA)
         #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")

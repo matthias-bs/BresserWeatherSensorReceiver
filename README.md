@@ -130,6 +130,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [LILYGO®T3 S3 LR1121](https://lilygo.cc/products/t3-s3-lr1121) | "LilyGo T3-S3" | "Radio-LR1121"                    | ARDUINO_LILYGO_T3S3_LR1121 | LR1121 | - |
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK | SX1276 | - |
    | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK_V3 | SX1262 | - |
+   | [Heltec Wireless Stick **Lite** V3](https://heltec.org/project/wireless-stick-lite-v2/) | "Heltec Wireless Stick Lite(V3)"   | n.a.             | HELTEC_WIRELESS_STICK_LITE_V3 | SX1262 | - |
    | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V2 | SX1276 | - |
    | [Heltec WiFi LoRa 32 V3](https://heltec.org/project/wifi-lora-32-v3/)  | "Heltec WiFi LoRa 32(V3)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V3 | SX1262 | - |
    | [Adafruit Feather ESP32S2 with Adafruit LoRa Radio FeatherWing](https://github.com/matthias-bs/BresserWeatherSensorReceiver#adafruit-feather-esp32s2-with-adafruit-lora-radio-featherwing)                                | "Adafruit Feather ESP32-S2" | n.a.               | ARDUINO_ADAFRUIT_FEATHER_ESP32S2   | SX1276 (RFM95W) | Wiring on the Featherwing:<br>E to IRQ<br>D to CS<br>C to RST<br>A to DI01 |

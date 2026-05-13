@@ -161,6 +161,13 @@
 // This define is set by selecting "Board: Heltec Wireless Stick" (SX1276) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK
 
+// This define is set by selecting "Board: Heltec Wireless Stick Lite(V3)" (SX1262, ESP32-S3) in the Arduino IDE.
+// See pin definitions in
+// https://github.com/espressif/arduino-esp32/blob/master/variants/heltec_wireless_stick_lite_v3/pins_arduino.h
+// and
+// https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
+//#define HELTEC_WIRELESS_STICK_LITE_V3
+
 // This define is set by selecting "Board: Heltec Wireless Stick(V3)" (SX1262) in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIRELESS_STICK_V3
 

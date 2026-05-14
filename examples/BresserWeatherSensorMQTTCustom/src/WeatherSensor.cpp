@@ -112,6 +112,9 @@
 // 20260119 Changed TCXO voltage for Seeed Studio XIAO ESP32S3 with Wio-SX1262 to 1.7V
 // 20260202 Moved radio object to separate namespace
 // 20260309 Fixed Static Initialization Order Fiasco (SIOF) for SPIClass on LilyGo T3S3 boards
+// 20260310 Added support for selecting SPI bus on ESP32 boards
+// 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
+// 20260514 Added RF switch and TCXO configuration for Heltec WiFi LoRa 32(V4)
 //
 // ToDo:
 // -
@@ -123,19 +126,23 @@
 
 namespace WeatherSensorReceiver
 {
-#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
+    defined(HELTEC_WIRELESS_STICK_LITE_V3)
     // Use a statically allocated SPIClass with the integer bus-number constructor instead of
     // copying the global SPI object, to avoid a Static Initialization Order Fiasco (SIOF):
     // the compiler-generated copy constructor copies paramLock from SPI, which may be NULL
     // if SPI's constructor has not run yet. The integer constructor always creates its own
     // paramLock via xSemaphoreCreateMutex().
     SPIClass spi(FSPI);
+#elif defined(LORA_SPI_BUS)
+    SPIClass spi(LORA_SPI_BUS);    
 #endif
 
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
-#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
+      defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
 #else
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
@@ -162,6 +169,26 @@ namespace WeatherSensorReceiver
 }
 
 using namespace WeatherSensorReceiver;
+
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+// Enable FEM (Front-End Module) power supply (VFEM_Ctrl, GPIO7) and FEM chip enable (CSD, GPIO2).
+// The RF path goes through the GC1109/KCT8103L FEM (RF power amplifier / LNA); without these
+// the signal path is blocked and reception does not work.
+// See: https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_v4/variant.h
+static void femEnable(void)
+{
+    pinMode(7, OUTPUT);
+    digitalWrite(7, HIGH);
+    pinMode(2, OUTPUT);
+    digitalWrite(2, HIGH);
+}
+
+static void femDisable(void)
+{
+    digitalWrite(7, LOW);
+    digitalWrite(2, LOW);
+}
+#endif
 
 // Flag to indicate that a packet was received
 static volatile bool receivedFlag = false;
@@ -197,8 +224,13 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         initList(sensor_ids_inc, sensor_ids_inc_def, "inc");
     }
 
-#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121)
+#if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
+    defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+#endif
+
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femEnable();
 #endif
 
     double frequency = 868.3 + frequency_offset;
@@ -237,12 +269,22 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     // set RF switch control configuration
     radio.setRfSwitchPins(38, RADIOLIB_NC);
 
-    // TCXO Voltage according to
+    // TCXO voltage according to
     // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf:
     // 1.7~3.3V
     //
     // Set to 1.7V as recommended by Seeed Studio Support
     radio.setTCXO(1.7);
+#endif
+
+#if defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    // RF switch is controlled internally by SX1262 DIO2
+    // (SX126X_DIO2_AS_RF_SWITCH in Meshtastic heltec_wsl_v3/variant.h)
+    radio.setDio2AsRfSwitch(true);
+    
+    // TCXO voltage according to
+    // https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
+    radio.setTCXO(1.8);
 #endif
 
     if (state == RADIOLIB_ERR_NONE)
@@ -317,12 +359,18 @@ void WeatherSensor::radioReset(void)
 void WeatherSensor::sleep(void)
 {
     radio.sleep();
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femDisable();
+#endif
 }
 
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())
 {
     const uint32_t timestamp = millis();
 
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femEnable();
+#endif
     radio.startReceive();
 
     while ((millis() - timestamp) < timeout)

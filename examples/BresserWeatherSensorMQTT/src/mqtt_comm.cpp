@@ -83,7 +83,7 @@ extern RainGauge rainGauge;
 extern Lightning lightning;
 extern std::vector<SensorMap> sensor_map;
 
-void sensorName(uint32_t sensor_id, char* buf, size_t buf_size)
+bool sensorName(uint32_t sensor_id, char* buf, size_t buf_size)
 {
     snprintf(buf, buf_size, "%x", (unsigned)sensor_id);
     for (size_t n = 0; n < sensor_map.size(); n++)
@@ -91,9 +91,10 @@ void sensorName(uint32_t sensor_id, char* buf, size_t buf_size)
         if (sensor_map[n].id == sensor_id)
         {
             snprintf(buf, buf_size, "%s", sensor_map[n].name.c_str());
-            break;
+            return true;
         }
     }
+    return false;
 }
 
 // MQTT message received callback
@@ -446,7 +447,7 @@ void haAutoDiscovery(void)
             continue;
 
         char sensor_str[32];
-        sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
+        bool named = sensorName(weatherSensor.sensor[i].sensor_id, sensor_str, sizeof(sensor_str));
         // Stack-allocated topic buffers avoid heap fragmentation from String concatenation.
         char topicData[128], topicRssi[128], topicExtra[128];
         snprintf(topicData,  sizeof(topicData),  "%s/%s/data",  Hostname.c_str(), sensor_str);
@@ -463,7 +464,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Weather Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -519,7 +520,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Soil Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -534,7 +535,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Thermo-Hygrometer Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -549,7 +550,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Pool Thermometer",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -563,7 +564,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Air Quality (PM) Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -579,7 +580,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Lightning Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -595,7 +596,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Leakage Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -609,7 +610,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "CO2 Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");
@@ -623,7 +624,7 @@ void haAutoDiscovery(void)
                 .manufacturer = "Bresser",
                 .model = "Air Quality (HCHO/VOC) Sensor",
                 .identifier = identifier,
-                .display_name = sensor_str};
+                .display_name = named ? sensor_str : nullptr};
 
             publishAutoDiscovery(info, "Battery", sensor_id, "battery", "%", topicData, "battery_ok");
             publishAutoDiscovery(info, "RSSI", sensor_id, "signal_strength", "dBm", topicRssi, "rssi");

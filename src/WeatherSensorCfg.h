@@ -319,11 +319,7 @@
     // Heltec WiFi LoRa 32(V4)
     #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V4 defined; using on-board transceiver")
     #define USE_SX1262
-    #define LORA_CS           SS
-    #define LORA_SCK          SCK
-    #define LORA_MOSI         MOSI
-    #define LORA_MISO         MISO
-    #define PIN_RECEIVER_CS   LORA_CS
+    #define PIN_RECEIVER_CS   SS
     #define PIN_RECEIVER_IRQ  DIO0
     #define PIN_RECEIVER_GPIO BUSY_LoRa
     #define PIN_RECEIVER_RST  RST_LoRa

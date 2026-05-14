@@ -127,7 +127,7 @@
 namespace WeatherSensorReceiver
 {
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
-    defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    defined(HELTEC_WIRELESS_STICK_LITE_V3)
     // Use a statically allocated SPIClass with the integer bus-number constructor instead of
     // copying the global SPI object, to avoid a Static Initialization Order Fiasco (SIOF):
     // the compiler-generated copy constructor copies paramLock from SPI, which may be NULL
@@ -142,7 +142,7 @@ namespace WeatherSensorReceiver
 #pragma message("Using CC1101 radio module")
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
 #elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
-      defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V4) || defined(LORA_SPI_BUS)
+      defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);
 #else
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO);
@@ -205,7 +205,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     }
 
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
-    defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V4) || defined(LORA_SPI_BUS)
+    defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
 #endif
 

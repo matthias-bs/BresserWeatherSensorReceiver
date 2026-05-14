@@ -170,6 +170,26 @@ namespace WeatherSensorReceiver
 
 using namespace WeatherSensorReceiver;
 
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+// Enable FEM (Front-End Module) power supply (VFEM_Ctrl, GPIO7) and FEM chip enable (CSD, GPIO2).
+// The RF path goes through the GC1109/KCT8103L FEM (RF power amplifier / LNA); without these
+// the signal path is blocked and reception does not work.
+// See: https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_v4/variant.h
+static void femEnable(void)
+{
+    pinMode(7, OUTPUT);
+    digitalWrite(7, HIGH);
+    pinMode(2, OUTPUT);
+    digitalWrite(2, HIGH);
+}
+
+static void femDisable(void)
+{
+    digitalWrite(7, LOW);
+    digitalWrite(2, LOW);
+}
+#endif
+
 // Flag to indicate that a packet was received
 static volatile bool receivedFlag = false;
 
@@ -207,6 +227,10 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 #if defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
     defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     spi.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_CS);
+#endif
+
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femEnable();
 #endif
 
     double frequency = 868.3 + frequency_offset;
@@ -335,12 +359,18 @@ void WeatherSensor::radioReset(void)
 void WeatherSensor::sleep(void)
 {
     radio.sleep();
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femDisable();
+#endif
 }
 
 bool WeatherSensor::getData(uint32_t timeout, uint8_t flags, uint8_t type, void (*func)())
 {
     const uint32_t timestamp = millis();
 
+#if defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    femEnable();
+#endif
     radio.startReceive();
 
     while ((millis() - timestamp) < timeout)

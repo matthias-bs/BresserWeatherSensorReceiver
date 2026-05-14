@@ -416,8 +416,8 @@
     #define PIN_RECEIVER_RST  11
 
 #elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    #define LORAWAN_NODE
-    //#define DFROBOT_COVER_LORA
+    //#define LORAWAN_NODE
+    #define DFROBOT_COVER_LORA
     
     #if defined(DFROBOT_COVER_LORA)
         #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")

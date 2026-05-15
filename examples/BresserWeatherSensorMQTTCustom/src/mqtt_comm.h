@@ -44,6 +44,7 @@
 // 20260403 Changed sensor_info members from String to const char* to avoid heap allocation
 //          in haAutoDiscovery(); changed publishStatusDiscovery/publishControlDiscovery
 //          parameters from String to const char*
+// 20260510 Added display_name to sensor_info for user-defined HA device names
 //
 // ToDo:
 // -
@@ -96,6 +97,7 @@ struct sensor_info
     const char* manufacturer;
     const char* model;
     const char* identifier;
+    const char* display_name; // optional: overrides "manufacturer model" as HA device name
 };
 
 /*!
@@ -136,7 +138,7 @@ void haAutoDiscovery(void);
 /*!
  * \brief Publish auto-discovery configuration for Home Assistant
  *
- * \param info          Sensor information (manufacturer, model, identifier)
+ * \param info          Sensor information (manufacturer, model, identifier, optional display_name)
  * \param sensor_name   Sensor name (e.g. "Outside Temperature")
  * \param sensor_id     Sensor ID (unique)
  * \param device_class  Device class (e.g. temperature, humidity, etc.)

@@ -71,6 +71,7 @@
 // 20241227 Improved maintainability of board definitions
 // 20260114 Added pin definitions for Seeed Studio XIAO ESP32S3 with Wio-SX1262
 // 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
+// 20260514 Added pin definitions for Heltec WiFi LoRa 32(V4)
 //
 // ToDo:
 // -
@@ -176,6 +177,9 @@
 
 // This define is set by selecting "Board: Heltec WiFi LoRa 32(V2)" in the Arduino IDE:
 //#define ARDUINO_HELTEC_WIFI_LORA_32_V2
+
+// This define is set by selecting "Board: Heltec WiFi LoRa 32(V4)" in the Arduino IDE:
+//#define ARDUINO_HELTEC_WIFI_LORA_32_V4
 
 // Adafruit Feather ESP32S2 with RFM95W "FeatherWing" ADA3232
 // https://github.com/espressif/arduino-esp32/blob/master/variants/adafruit_feather_esp32s2/pins_arduino.h
@@ -311,6 +315,15 @@
     #define PIN_RECEIVER_GPIO BUSY_LoRa
     #define PIN_RECEIVER_RST  RST_LoRa
 
+#elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
+    // Heltec WiFi LoRa 32(V4)
+    #pragma message("ARDUINO_HELTEC_WIFI_LORA_32_V4 defined; using on-board transceiver")
+    #define USE_SX1262
+    #define PIN_RECEIVER_CS   SS
+    #define PIN_RECEIVER_IRQ  DIO0
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
+    #define PIN_RECEIVER_RST  RST_LoRa
+
 #elif defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
     #pragma message("ARDUINO_ADAFRUIT_FEATHER_ESP32S2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
@@ -403,8 +416,8 @@
     #define PIN_RECEIVER_RST  11
 
 #elif defined(ARDUINO_DFROBOT_FIREBEETLE_ESP32)
-    #define LORAWAN_NODE
-    //#define DFROBOT_COVER_LORA
+    //#define LORAWAN_NODE
+    #define DFROBOT_COVER_LORA
     
     #if defined(DFROBOT_COVER_LORA)
         #pragma message("ARDUINO_DFROBOT_FIREBEETLE_ESP32 & DFROBOT_COVER_LORA defined; assuming this is a FireBeetle ESP32 with FireBeetle Cover LoRa")

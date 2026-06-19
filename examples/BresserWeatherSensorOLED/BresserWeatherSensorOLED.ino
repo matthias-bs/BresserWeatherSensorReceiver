@@ -117,7 +117,13 @@ void setup()
     display.println("Receiver");
     display.display(); // Show initial text
 
-    weatherSensor.begin();
+    if (weatherSensor.begin() != RADIOLIB_ERR_NONE)
+    {
+        Serial.printf("Failed to initialize WeatherSensorReceiver\n");
+        while (true)
+            delay(10);
+    }
+    
     weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
     display.clearDisplay();
 }

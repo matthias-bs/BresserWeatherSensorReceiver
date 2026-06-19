@@ -78,7 +78,11 @@ void setup()
     Serial.setDebugOutput(true);
 
     initBoard();
-    ws.begin();
+    if (ws.begin() != RADIOLIB_ERR_NONE) {
+        Serial.printf("Failed to initialize WeatherSensorReceiver\n");
+        while (true)
+            delay(10);
+    }
 }
 
 void loop()

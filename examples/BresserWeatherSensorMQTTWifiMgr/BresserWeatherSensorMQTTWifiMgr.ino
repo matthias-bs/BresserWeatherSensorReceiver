@@ -781,7 +781,14 @@ void setup()
     */
     wifimgr_setup();
     mqtt_setup();
-    weatherSensor.begin();
+
+    if (weatherSensor.begin() != RADIOLIB_ERR_NONE)
+    {
+        Serial.printf("Failed to initialize WeatherSensorReceiver\n");
+        while (true)
+            delay(10);
+    }
+    
     Serial.println(F("\nSetup Completed."));
 }
 

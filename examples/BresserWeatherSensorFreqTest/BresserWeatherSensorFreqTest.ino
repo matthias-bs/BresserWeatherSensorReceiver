@@ -145,7 +145,10 @@ void performFrequencyScan() {
         
         // Initialize receiver with current frequency offset
         // Use MAX_SENSORS_DEFAULT to support multiple sensors during calibration
-        ws.begin(MAX_SENSORS_DEFAULT, true, offset_mhz);
+        if (ws.begin(MAX_SENSORS_DEFAULT, true, offset_mhz) != RADIOLIB_ERR_NONE) {
+            Serial.println("Failed to initialize receiver!");
+            continue;  // Skip to next frequency
+        }
         
         // Clear any previous sensor data
         ws.clearSlots();

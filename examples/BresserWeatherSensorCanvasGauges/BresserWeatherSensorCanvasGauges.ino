@@ -373,7 +373,13 @@ void setup()
       });
   server.addHandler(&events);
 
-  weatherSensor.begin();
+  if (weatherSensor.begin() != RADIOLIB_ERR_NONE)
+  {
+    log_e("Failed to initialize WeatherSensorReceiver");
+    while (true)
+      delay(10);
+  }
+  
   weatherSensor.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
 
   // Start server

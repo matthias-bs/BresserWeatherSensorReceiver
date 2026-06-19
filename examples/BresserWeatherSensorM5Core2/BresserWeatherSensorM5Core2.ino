@@ -114,7 +114,12 @@ void setup()
 
 
     // Note: M5.begin() is called in ws.begin()
-    ws.begin();
+    if (ws.begin() != RADIOLIB_ERR_NONE)
+    {
+        Serial.println("Failed to initialize WeatherSensorReceiver");
+        while (true)
+            delay(10);
+    }
     ws.setSensorsCfg(MAX_SENSORS, RX_FLAGS);
 
     set_rtc();

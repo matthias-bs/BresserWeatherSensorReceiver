@@ -19,6 +19,9 @@ jobs:
       - name: Generate docs
         run: doxygen Doxyfile
 
+      - name: Disable Jekyll processing
+        run: touch docs/html/.nojekyll
+
       - name: Generate keywords.txt
         run: |
           xsltproc doxygen2keywords.xsl docs/xml/index.xml >keywords.txt

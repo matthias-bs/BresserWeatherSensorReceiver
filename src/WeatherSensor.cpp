@@ -116,6 +116,7 @@
 // 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 // 20260514 Added RF switch and TCXO configuration for Heltec WiFi LoRa 32(V4)
 // 20260619 Added returning state in begin() in case of initialization failure
+// 20260620 Fixed SPI pin reset by RadioLib for CC1101 with LORA_SPI_BUS
 //
 // ToDo:
 // -
@@ -141,7 +142,11 @@ namespace WeatherSensorReceiver
 
 #if defined(USE_CC1101)
 #pragma message("Using CC1101 radio module")
+  #if defined(LORA_SPI_BUS)
+    RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO, spi);
+  #else
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, RADIOLIB_NC, PIN_RECEIVER_GPIO);
+  #endif
 #elif defined(ARDUINO_LILYGO_T3S3_SX1262) || defined(ARDUINO_LILYGO_T3S3_SX1276) || defined(ARDUINO_LILYGO_T3S3_LR1121) || \
       defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(LORA_SPI_BUS)
     RADIO_CHIP radio = new Module(PIN_RECEIVER_CS, PIN_RECEIVER_IRQ, PIN_RECEIVER_RST, PIN_RECEIVER_GPIO, spi);

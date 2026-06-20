@@ -117,6 +117,7 @@
 // 20260514 Added RF switch and TCXO configuration for Heltec WiFi LoRa 32(V4)
 // 20260619 Added returning state in begin() in case of initialization failure
 // 20260620 Fixed SPI pin reset by RadioLib for CC1101 with LORA_SPI_BUS
+//          Changed radio initialization to new ConfigFSK_t structure in RadioLib 7.7.x
 //
 // ToDo:
 // -
@@ -246,22 +247,24 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     log_d("%s Initializing ... ", RECEIVER_CHIP);
 
-    // carrier frequency:                   868.3 MHz
-    // bit rate:                            8.22 kbps
-    // frequency deviation:                 57.136417 kHz
-    // Rx bandwidth:                        270.0 kHz (CC1101) / 250 kHz (SX1276) / 234.3 kHz (SX1262)
-    // output power:                        10 dBm
-    // preamble length:                     40 bits
+    ConfigFSK_t config;
+    config.frequency = frequency;          // MHz
+    config.bitRate = 8.21;                 // kBaud
+    config.frequencyDeviation = 57.136417; // kHz
+    config.power = 10;                     // dBm
+    config.preambleLength = 32;            // bits
+
+    // RX bandwidth in kHz, radio chip specific (see RadioLib documentation for details)
 #if defined(USE_CC1101)
-    int state = radio.begin(frequency, 8.21, 57.136417, 270, 10, 32);
+    config.receiverBandwidth = 270;
 #elif defined(USE_SX1276)
-    int state = radio.beginFSK(frequency, 8.21, 57.136417, 250, 10, 32);
-#elif defined(USE_SX1262)
-    int state = radio.beginFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
+    config.receiverBandwidth = 250;
 #else
-    // defined(USE_LR1121)
-    int state = radio.beginGFSK(frequency, 8.21, 57.136417, 234.3, 10, 32);
+    // USE_SX1262 / USE_LR1121
+    config.receiverBandwidth = 234.3;
 #endif
+
+    int state = radio.beginFSK(config);
 
 #if defined(ARDUINO_LILYGO_T3S3_LR1121)
     // set RF switch control configuration

@@ -264,7 +264,11 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     config.receiverBandwidth = 234.3;
 #endif
 
+#if defined(USE_CC1101)
+    int state = radio.begin(config);
+#else
     int state = radio.beginFSK(config);
+#endif
 
 #if defined(ARDUINO_LILYGO_T3S3_LR1121)
     // set RF switch control configuration

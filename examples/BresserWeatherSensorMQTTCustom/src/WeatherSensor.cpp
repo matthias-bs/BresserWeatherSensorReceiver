@@ -266,6 +266,8 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
 
 #if defined(USE_CC1101)
     int state = radio.begin(config);
+#elif defined(USE_LR1121)
+    int state = radio.beginGFSK(config);
 #else
     int state = radio.beginFSK(config);
 #endif

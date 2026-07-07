@@ -13,7 +13,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2025 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,7 @@
 // 20260114 Added pin definitions for Seeed Studio XIAO ESP32S3 with Wio-SX1262
 // 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 // 20260514 Added pin definitions for Heltec WiFi LoRa 32(V4)
+// 20260707 Added pin definitions for Heltec Wireless Paper (SX1262)
 //
 // ToDo:
 // -
@@ -295,6 +296,14 @@
     #define USE_SX1276
     #define PIN_RECEIVER_CS   SS
     #define PIN_RECEIVER_IRQ  DIO0
+    #define PIN_RECEIVER_GPIO BUSY_LoRa
+    #define PIN_RECEIVER_RST  RST_LoRa
+
+#elif defined(ARDUINO_HELTEC_WIRELESS_PAPER)
+    #pragma message("ARDUINO_HELTEC_WIRELESS_PAPER defined; using on-board transceiver")
+    #define USE_SX1262
+    #define PIN_RECEIVER_CS   SS
+    #define PIN_RECEIVER_IRQ  DIO1
     #define PIN_RECEIVER_GPIO BUSY_LoRa
     #define PIN_RECEIVER_RST  RST_LoRa
 

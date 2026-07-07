@@ -131,6 +131,7 @@ If this is not what you need, you have to switch to **Manual Configuration**
    | [Heltec Wireless Stick](https://heltec.org/project/wireless-stick/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK | SX1276 | - |
    | [Heltec Wireless Stick V3](https://heltec.org/project/wireless-stick-v3/) | "Heltec Wireless Stick"   | n.a.             | ARDUINO_HELTEC_WIRELESS_STICK_V3 | SX1262 | - |
    | [Heltec Wireless Stick **Lite** V3](https://heltec.org/project/wireless-stick-lite-v2/) | "Heltec Wireless Stick Lite(V3)"   | n.a.             | HELTEC_WIRELESS_STICK_LITE_V3 | SX1262 | - |
+   | [Heltec Wireless Paper](https://heltec.org/project/wireless-paper/) | "Heltec Wireless Paper"   | n.a.             | ARDUINO_HELTEC_WIRELESS_PAPER  | SX1262 | - |
    | [Heltec WiFi LoRa 32 V2](https://heltec.org/project/wifi-lora-32/)  | "Heltec WiFi LoRa 32(V2)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V2 | SX1276 | - |
    | [Heltec WiFi LoRa 32 V3](https://heltec.org/project/wifi-lora-32-v3/)  | "Heltec WiFi LoRa 32(V3)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V3 | SX1262 | - |
    | [Heltec WiFi LoRa 32 V4](https://heltec.org/project/wifi-lora-32-v4/)  | "Heltec WiFi LoRa 32(V4)" | n.a.             | ARDUINO_HELTEC_WIFI_LORA_32_V4 | SX1262 | - |

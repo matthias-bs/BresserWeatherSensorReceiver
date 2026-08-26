@@ -370,7 +370,7 @@
     #define PIN_RECEIVER_GPIO 35
     #define PIN_RECEIVER_RST  26
 
-#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
+#elif defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
     #pragma message("ARDUINO_ESP32S3_POWERFEATHER defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")

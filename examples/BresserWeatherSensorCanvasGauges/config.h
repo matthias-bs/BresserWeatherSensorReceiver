@@ -54,7 +54,7 @@ const uint8_t KEY_RAINGAUGE_RESET = 0;
       defined(ARDUINO_ADAFRUIT_FEATHER_ESP32S2)
 // Check if this GPIO pin is available/connected to a key on your board
 const uint8_t KEY_RAINGAUGE_RESET = 4;
-#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
+#elif defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
 const uint8_t KEY_RAINGAUGE_RESET = BTN;
 #elif defined(ARDUINO_HELTEC_WIFI_LORA_32_V2) || \
       defined(ARDUINO_HELTEC_WIRELESS_STICK) || \

@@ -73,6 +73,7 @@
 // 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 // 20260514 Added pin definitions for Heltec WiFi LoRa 32(V4)
 // 20260707 Added pin definitions for Heltec Wireless Paper (SX1262)
+// 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 //
 // ToDo:
 // -

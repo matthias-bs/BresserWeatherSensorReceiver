@@ -34,6 +34,7 @@
 // History:
 //
 // 20240504 Created
+// 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 //
 // ToDo:
 // -

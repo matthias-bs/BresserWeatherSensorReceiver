@@ -11,7 +11,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2022 Matthias Prinke
+// Copyright (c) 2026 Matthias Prinke
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@
 // History:
 //
 // 20240504 Created
+// 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 //
 // ToDo:
 // -

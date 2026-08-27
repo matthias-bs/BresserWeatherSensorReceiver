@@ -73,6 +73,7 @@
 // 20260611 Added pin definitions for Heltec Wireless Stick Lite V3 (SX1262)
 // 20260514 Added pin definitions for Heltec WiFi LoRa 32(V4)
 // 20260707 Added pin definitions for Heltec Wireless Paper (SX1262)
+// 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 //
 // ToDo:
 // -
@@ -370,8 +371,8 @@
     #define PIN_RECEIVER_GPIO 35
     #define PIN_RECEIVER_RST  26
 
-#elif defined(ARDUINO_ESP32S3_POWERFEATHER)
-    #pragma message("ARDUINO_ESP32S3_POWERFEATHER defined; assuming RFM95W FeatherWing will be used")
+#elif defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
+    #pragma message("ARDUINO_ESP32S3_POWERFEATHER or ARDUINO_ESP32S3_POWERFEATHER_V2 defined; assuming RFM95W FeatherWing will be used")
     #define USE_SX1276
     #pragma message("Required wiring: A to RST, B to DIO1, D to DIO0, E to CS")
     // Use pinning for ESP32-S3 PowerFeather with RFM95W "FeatherWing" ADA3232

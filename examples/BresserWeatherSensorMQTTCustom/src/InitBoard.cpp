@@ -34,6 +34,7 @@
 // History:
 //
 // 20240504 Created
+// 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 //
 // ToDo:
 // -
@@ -46,7 +47,7 @@
 // Note: Depending on the environment, both variants are used!
 #include <M5Unified.h>
 #endif
-#if defined(ARDUINO_ESP32S3_POWERFEATHER)
+#if defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
 #include <PowerFeather.h>
 using namespace PowerFeather;
 #endif
@@ -64,7 +65,7 @@ void initBoard(void)
     cfg.internal_mic = false; // default=true. use internal microphone.
     M5.begin(cfg);
 #endif
-#if defined(ARDUINO_ESP32S3_POWERFEATHER)
+#if defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
     Board.init();
     // Enable power supply for Adafruit LoRa Radio FeatherWing
     Board.enable3V3(true);

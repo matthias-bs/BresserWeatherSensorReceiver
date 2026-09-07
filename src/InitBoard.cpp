@@ -44,8 +44,7 @@
 #include "InitBoard.h"
 
 #if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-// Note: Depending on the environment, both variants are used!
-#include <M5Unified.h>
+#include <Wire.h>
 #endif
 #if defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
 #include <PowerFeather.h>
@@ -54,16 +53,12 @@ using namespace PowerFeather;
 
 void initBoard(void)
 {
-#if defined(ARDUINO_M5STACK_CORE2) || defined(ARDUINO_M5STACK_Core2)
-    // Note: Depending on the environment, both variants are used!
-    auto cfg = M5.config();
-    cfg.clear_display = true; // default=true. clear the screen when begin.
-    cfg.output_power = true;  // default=true. use external port 5V output.
-    cfg.internal_imu = false; // default=true. use internal IMU.
-    cfg.internal_rtc = true;  // default=true. use internal RTC.
-    cfg.internal_spk = false; // default=true. use internal speaker.
-    cfg.internal_mic = false; // default=true. use internal microphone.
-    M5.begin(cfg);
+#if defined(ARDUINO_M5STACK_CORE2)
+    Wire.begin(32, 33, 400000U);
+    Wire.beginTransmission(0x34);
+    Wire.write(0x90); // AXP192 GPIO0: external 5 V output.
+    Wire.write(0x02); // Enable external 5 V output.
+    Wire.endTransmission();
 #endif
 #if defined(ARDUINO_ESP32S3_POWERFEATHER) || defined(ARDUINO_ESP32S3_POWERFEATHER_V2)
     Board.init();

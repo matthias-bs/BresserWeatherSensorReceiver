@@ -111,7 +111,7 @@ jobs:
         run:
           |
           ps -p "$$"
-          arduino-cli lib install RadioLib@7.7.1
+          arduino-cli lib install RadioLib@7.8.0
           arduino-cli lib install MQTT@2.5.3
           arduino-cli lib install ArduinoJson@7.4.3
           arduino-cli lib install WiFiManager@2.0.17

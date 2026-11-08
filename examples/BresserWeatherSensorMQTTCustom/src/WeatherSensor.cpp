@@ -255,7 +255,8 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, int
     config.power = 10;                                              // dBm
     config.preambleLength = 32;                                     // bits
 
-    // RX bandwidth in kHz, radio chip specific (see RadioLib documentation for details)
+    // RX bandwidth in Hz (double-side band), radio chip specific.
+    // Keep within 234300 to 270000 Hz across supported radio variants.
 #if defined(USE_CC1101)
     config.receiverBandwidth = RADIOLIB_UNIT_KILO(270);
 #elif defined(USE_SX1276)

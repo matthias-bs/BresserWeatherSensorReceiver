@@ -1,9 +1,8 @@
 #if !defined(WEATHER_UTILS_H)
 #define WEATHER_UTILS_H
 
-#ifdef ARDUINO_ARCH_AVR
-  #include <stdint.h>
-#endif
+#include <stddef.h>
+#include <stdint.h>
 
 /*!
  * \brief Calculate dew point

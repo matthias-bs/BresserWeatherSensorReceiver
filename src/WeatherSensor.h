@@ -89,6 +89,7 @@
 // 20260202 Added forward declaration of WeatherSensorReceiver namespace
 // 20260221 Improved memory safety
 // 20260430 Added setSensorsCfg() variant with rx_flags and enabled decoders
+// 20261108 Updated to RadioLib 8.0.0
 //
 // ToDo:
 // -
@@ -198,7 +199,7 @@ class WeatherSensor {
 
         \returns RADIOLIB_ERR_NONE on success (otherwise does never return).
         */
-        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true, double frequency_offset = 0.0);
+        int16_t begin(uint8_t max_sensors_default = MAX_SENSORS_DEFAULT, bool init_filters = true, int32_t frequency_offset = 0);
 
         /*!
         \brief Reset radio transceiver

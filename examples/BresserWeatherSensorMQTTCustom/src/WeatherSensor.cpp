@@ -118,6 +118,7 @@
 // 20260619 Added returning state in begin() in case of initialization failure
 // 20260620 Fixed SPI pin reset by RadioLib for CC1101 with LORA_SPI_BUS
 //          Changed radio initialization to new ConfigFSK_t structure in RadioLib 7.7.x
+// 20261108 Updated to RadioLib 8.0.0
 //
 // ToDo:
 // -
@@ -211,7 +212,7 @@ void setFlag(void)
     receivedFlag = true;
 }
 
-int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, double frequency_offset)
+int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, int32_t frequency_offset)
 {
     uint8_t maxSensors = max_sensors_default;
     getSensorsCfg(maxSensors, rxFlags, enDecoders);
@@ -240,28 +241,28 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     femEnable();
 #endif
 
-    double frequency = 868.3 + frequency_offset;
-    log_d("Setting frequency to %f MHz", 868.3 + frequency_offset);
+    uint32_t frequency = 868300000 + frequency_offset;
+    log_d("Setting frequency to %f MHz", (868300000 + frequency_offset) / 1000000.0);
 
     // https://github.com/RFD-FHEM/RFFHEM/issues/607#issuecomment-830818445
     // Freq: 868.300 MHz, Bandwidth: 203 KHz, rAmpl: 33 dB, sens: 8 dB, DataRate: 8207.32 Baud
     log_d("%s Initializing ... ", RECEIVER_CHIP);
 
     ConfigFSK_t config;
-    config.frequency = frequency;          // MHz
-    config.bitRate = 8.21;                 // kBaud
-    config.frequencyDeviation = 57.136417; // kHz
-    config.power = 10;                     // dBm
-    config.preambleLength = 32;            // bits
+    config.frequency = frequency;                                   // Hz
+    config.bitRate = 8210;                                          // Baud
+    config.frequencyDeviation = RADIOLIB_UNIT_KILO_FLT(57.136417);  // kHz
+    config.power = 10;                                              // dBm
+    config.preambleLength = 32;                                     // bits
 
     // RX bandwidth in kHz, radio chip specific (see RadioLib documentation for details)
 #if defined(USE_CC1101)
-    config.receiverBandwidth = 270;
+    config.receiverBandwidth = RADIOLIB_UNIT_KILO(270);
 #elif defined(USE_SX1276)
-    config.receiverBandwidth = 250;
+    config.receiverBandwidth = RADIOLIB_UNIT_KILO(250);
 #else
     // USE_SX1262 / USE_LR1121
-    config.receiverBandwidth = 234.3;
+    config.receiverBandwidth = 234300;
 #endif
 
 #if defined(USE_CC1101)
@@ -277,7 +278,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     radio.setRfSwitchTable(rfswitch_dio_pins, rfswitch_table);
 
     // LR1121 TCXO Voltage 2.85~3.15V
-    radio.setTCXO(3.0);
+    radio.setTCXO(RadioLibTCXOVoltage_t::Voltage3V0);
 #endif
 
 #if defined(ARDUINO_XIAO_ESP32S3)
@@ -289,7 +290,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     // 1.7~3.3V
     //
     // Set to 1.7V as recommended by Seeed Studio Support
-    radio.setTCXO(1.7);
+    radio.setTCXO(RadioLibTCXOVoltage_t::Voltage1V7);
 #endif
 
 #if defined(HELTEC_WIRELESS_STICK_LITE_V3) || defined(ARDUINO_HELTEC_WIFI_LORA_32_V4)
@@ -299,7 +300,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     
     // TCXO voltage according to
     // https://github.com/meshtastic/firmware/blob/master/variants/esp32s3/heltec_wsl_v3/variant.h
-    radio.setTCXO(1.8);
+    radio.setTCXO(RadioLibTCXOVoltage_t::Voltage1V8);
 #endif
 
     if (state == RADIOLIB_ERR_NONE)
@@ -313,6 +314,8 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
         }
 #if defined(USE_SX1262) || defined(USE_LR1121)
         state = radio.setCRC(0);
+#elif defined(USE_SX1276)
+        state = radio.setCRC(false);
 #else
         state = radio.setCrcFiltering(false);
 #endif
@@ -349,7 +352,7 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, dou
     rssi = radio.getRSSI();
 
     // Set callback function
-    radio.setPacketReceivedAction(setFlag);
+    radio.setIrqAction(setFlag);
 
     state = radio.startReceive();
     if (state != RADIOLIB_ERR_NONE)

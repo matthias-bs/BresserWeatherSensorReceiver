@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "WStringMock.h"
 
 #define RTC_DATA_ATTR static

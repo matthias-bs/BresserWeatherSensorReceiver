@@ -259,6 +259,19 @@ void WeatherSensor::setSensorsCfg(uint8_t max_sensors, uint8_t rx_flags, uint8_t
     sensor.resize(max_sensors);
 }
 
+// Set sensor configuration and store in Preferences
+void WeatherSensor::setRxCfg(uint8_t rx_flags, uint8_t en_decoders)
+{
+    rxFlags = rx_flags;
+    enDecoders = en_decoders;
+    cfgPrefs.begin("BWS-CFG", false);
+    cfgPrefs.putUChar("rxflags", rx_flags);
+    cfgPrefs.putUChar("endec", en_decoders);
+    cfgPrefs.end();
+    log_d("rx_flags: %u", rxFlags);
+    log_d("enabled_decoders: %u", enDecoders);
+}
+
 // Get sensor configuration from Preferences
 void WeatherSensor::getSensorsCfg(uint8_t &max_sensors, uint8_t &rx_flags, uint8_t &en_decoders)
 {

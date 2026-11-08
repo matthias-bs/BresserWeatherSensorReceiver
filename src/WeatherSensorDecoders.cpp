@@ -1057,7 +1057,7 @@ DecodeStatus WeatherSensor::decodeBresserLeakagePayload(const uint8_t *msg, uint
 
     log_d("ID: 0x%08X  CH: %d  TYPE: %d  batt_ok: %d  startup: %d, alarm: %d no_alarm: %d",
           (unsigned int)id_tmp, chan_tmp, type_tmp, sensor[slot].battery_ok, sensor[slot].startup ? 1 : 0, alarm ? 1 : 0, no_alarm ? 1 : 0);
-#if CORE_DEBUG_LEVEL == ARDUHAL_LOG_LEVEL_DEBUG
+#if CORE_DEBUG_LEVEL >= ARDUHAL_LOG_LEVEL_DEBUG
     const int i = slot;
 #endif
     log_d("sensor[%d]: v=%d id=0x%08X t=%d c=%d", i, sensor[i].valid, (unsigned int)sensor[i].sensor_id, sensor[i].s_type, sensor[i].complete);

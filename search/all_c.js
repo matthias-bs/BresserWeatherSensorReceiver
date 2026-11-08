@@ -1,7 +1,7 @@
 var searchData=
 [
   ['past24hours_0',['past24Hours',['../class_rain_gauge.html#adc15547405a5baf1e2a0caf7ab625e7a',1,'RainGauge']]],
-  ['pasthour_1',['pasthour',['../class_lightning.html#a1d20a9e52b13734713b8dc8200233e0e',1,'Lightning::pastHour()'],['../class_rain_gauge.html#a15a0ed2b3a62ce6d2cb021f7a1404dc4',1,'RainGauge::pastHour()']]],
+  ['pasthour_1',['pastHour',['../class_lightning.html#a6f7f1f6cbfd5dcfffeb77edf2d906fc8',1,'Lightning::pastHour()'],['../class_rain_gauge.html#a15a0ed2b3a62ce6d2cb021f7a1404dc4',1,'RainGauge::pastHour()']]],
   ['pm_5f10_2',['pm_10',['../struct_weather_sensor_1_1_air_p_m.html#af739c3f87ea2c1254889a14f719791e2',1,'WeatherSensor::AirPM']]],
   ['pm_5f10_5finit_3',['pm_10_init',['../struct_weather_sensor_1_1_air_p_m.html#a76b65a1f0160e10e0eae62d26f4a05b1',1,'WeatherSensor::AirPM']]],
   ['pm_5f1_5f0_4',['pm_1_0',['../struct_weather_sensor_1_1_air_p_m.html#a54bb8f8b6613525867eb725c05be6640',1,'WeatherSensor::AirPM']]],

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['begin_0',['begin',['../class_weather_sensor.html#ae98957a1cf7cd27aa6f885394553426c',1,'WeatherSensor']]]
+  ['begin_0',['begin',['../class_weather_sensor.html#af8cbde0ba63b969e47a7cabcc2297e88',1,'WeatherSensor']]]
 ];

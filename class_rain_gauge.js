@@ -11,5 +11,5 @@ var class_rain_gauge =
     [ "reset", "class_rain_gauge.html#acc302142458cd82976821b8d277aeef2", null ],
     [ "set_max", "class_rain_gauge.html#a77efc11e951f426af6f9e44ddbfde299", null ],
     [ "setUpdateRate", "class_rain_gauge.html#a70d6b3be637ccb2e84b32c66ad3d6cd3", null ],
-    [ "update", "class_rain_gauge.html#af7f06c6128b652c3ce86d9575eb16ca9", null ]
+    [ "update", "class_rain_gauge.html#a05335146213379f3cf7ab33e90d7bb5e", null ]
 ];

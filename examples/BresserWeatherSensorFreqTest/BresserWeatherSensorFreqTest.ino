@@ -76,7 +76,7 @@
 
 // Structure to store results for each frequency tested
 struct FreqTestResult {
-    double offset_mhz;      // Frequency offset in MHz
+    int32_t offset_hz;      // Frequency offset in Hz
     int message_count;      // Number of messages received
     float max_rssi;         // Maximum RSSI value observed
     float avg_rssi;         // Average RSSI value
@@ -138,14 +138,14 @@ void performFrequencyScan() {
          offset_khz <= SCAN_END_OFFSET_KHZ; 
          offset_khz += SCAN_STEP_KHZ) {
         
-        double offset_mhz = offset_khz / 1000.0;
+        int32_t offset_hz = offset_khz * 1000;
         
         Serial.printf("Testing frequency offset: %+7d kHz (%.3f MHz) ... ",
-                      offset_khz, 868.3 + offset_mhz);
+                      offset_khz, 868.3 + offset_hz / 1000000.0);
         
         // Initialize receiver with current frequency offset
         // Use MAX_SENSORS_DEFAULT to support multiple sensors during calibration
-        if (ws.begin(MAX_SENSORS_DEFAULT, true, offset_mhz) != RADIOLIB_ERR_NONE) {
+        if (ws.begin(MAX_SENSORS_DEFAULT, true, offset_hz) != RADIOLIB_ERR_NONE) {
             Serial.println("Failed to initialize receiver!");
             continue;  // Skip to next frequency
         }
@@ -179,7 +179,7 @@ void performFrequencyScan() {
         }
         
         // Store results
-        scanResults[currentResult].offset_mhz = offset_mhz;
+        scanResults[currentResult].offset_hz = offset_hz;
         scanResults[currentResult].message_count = msg_count;
         scanResults[currentResult].max_rssi = max_rssi;
         scanResults[currentResult].avg_rssi = (msg_count > 0) ? (rssi_sum / msg_count) : -200.0;
@@ -219,8 +219,8 @@ void analyzeResults() {
     
     for (int i = 0; i < scanResultCount; i++) {
         Serial.printf("%+7d      | %11.3f     | %8d | %14.1f | %14.1f\n",
-                      (int)(scanResults[i].offset_mhz * 1000),
-                      868.3 + scanResults[i].offset_mhz,
+                      (int)(scanResults[i].offset_hz / 1000),
+                      868.3 + scanResults[i].offset_hz / 1000000.0,
                       scanResults[i].message_count,
                       scanResults[i].max_rssi,
                       scanResults[i].avg_rssi);
@@ -245,22 +245,22 @@ void analyzeResults() {
     Serial.println();
     
     if (best_idx >= 0 && max_messages > 0) {
-        double best_offset = scanResults[best_idx].offset_mhz;
+        int32_t best_offset_hz = scanResults[best_idx].offset_hz;
         Serial.println("Based on the scan results:");
-        Serial.printf("  Optimal frequency offset: %.3f MHz\n", best_offset);
-        Serial.printf("  Optimal frequency: %.3f MHz\n", 868.3 + best_offset);
+        Serial.printf("  Optimal frequency offset: %+ld Hz\n", (long)best_offset_hz);
+        Serial.printf("  Optimal frequency: %.3f MHz\n", 868.3 + best_offset_hz / 1000000.0);
         Serial.printf("  Messages received: %d\n", scanResults[best_idx].message_count);
         Serial.printf("  Average RSSI: %.1f dBm\n", scanResults[best_idx].avg_rssi);
         Serial.println();
         Serial.println("To use this frequency offset in your sketch:");
-        Serial.printf("  ws.begin(1, true, %.3f);\n", best_offset);
+        Serial.printf("  ws.begin(1, true, %ld);\n", (long)best_offset_hz);
         Serial.println();
         
         // Check if offset is significant
-        if (abs(best_offset) < 0.025) {  // Less than 25 kHz
+        if (best_offset_hz > -25000 && best_offset_hz < 25000) {  // Less than 25 kHz
             Serial.println("Note: The optimal offset is very close to zero.");
             Serial.println("Your transceiver is already well calibrated.");
-        } else if (abs(best_offset) > 0.150) {  // More than 150 kHz
+        } else if (best_offset_hz < -150000 || best_offset_hz > 150000) {  // More than 150 kHz
             Serial.println("Warning: The optimal offset is quite large.");
             Serial.println("This may indicate a hardware issue with your transceiver module.");
         }

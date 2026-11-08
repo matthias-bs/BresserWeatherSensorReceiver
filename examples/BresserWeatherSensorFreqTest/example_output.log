@@ -74,12 +74,12 @@ Recommendation
 ========================================
 
 Based on the scan results:
-  Optimal frequency offset: 0.050 MHz
+  Optimal frequency offset: +50000 Hz
   Optimal frequency: 868.350 MHz
   Messages received: 15
   Average RSSI: -39.8 dBm
 
 To use this frequency offset in your sketch:
-  ws.begin(1, true, 0.050);
+  ws.begin(1, true, 50000);
 
 Scan complete. Reset device to run another scan.

@@ -28,7 +28,7 @@ The method is inspired by the AskSinPP FreqTest example:
 WeatherSensor ws;
 void setup() {
     // Use the frequency offset determined by the FreqTest
-    ws.begin(1, true, 0.050);  // Example: +50 kHz offset
+    ws.begin(1, true, 50000);  // Example: +50 kHz offset
 }
 ```
 
@@ -99,13 +99,13 @@ Recommendation
 ========================================
 
 Based on the scan results:
-  Optimal frequency offset: 0.050 MHz
+  Optimal frequency offset: +50000 Hz
   Optimal frequency: 868.350 MHz
   Messages received: 8
   Average RSSI: -44.5 dBm
 
 To use this frequency offset in your sketch:
-  ws.begin(1, true, 0.050);
+  ws.begin(1, true, 50000);
 ```
 
 ## Troubleshooting

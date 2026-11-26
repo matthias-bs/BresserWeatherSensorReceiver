@@ -75,6 +75,7 @@
 // 20260707 Added pin definitions for Heltec Wireless Paper (SX1262)
 // 20260826 Added ARDUINO_ESP32S3_POWERFEATHER_V2
 // 20261122 Fixed ARDUINO_HELTEC_WIRELESS_STICK_V3 radio definition (SX1262)
+// 20261126 Added pin definitions for Seeed Studio XIAO ESP32C3 with Wio-SX1262
 //
 // ToDo:
 // -
@@ -383,13 +384,22 @@
     #define PIN_RECEIVER_RST  45
 
 #elif defined(ARDUINO_XIAO_ESP32S3)
-    #pragma message("ARDUINO_XIAO_ESP32S3 defined; assuming Wio-SX1262 will be used")
+    #pragma message("ARDUINO_XIAO_ESP32S3 defined; assuming Wio-SX1262 will be used (b2b connector)")
     #define USE_SX1262
-    // Use pinning for Seeed XIAO ESP32S3 with Wio-SX1262
+    // Use pinning for Seeed XIAO ESP32S3 with Wio-SX1262 via board-to-board connector
     #define PIN_RECEIVER_CS   41
     #define PIN_RECEIVER_IRQ  39
     #define PIN_RECEIVER_GPIO 40
     #define PIN_RECEIVER_RST  42
+
+#elif defined(ARDUINO_XIAO_ESP32C3)
+    #pragma message("ARDUINO_XIAO_ESP32C3 defined; assuming Wio-SX1262 will be used")
+    #define USE_SX1262
+    // Use pinning for Seeed XIAO ESP32C3 with Wio-SX1262
+    #define PIN_RECEIVER_CS   5
+    #define PIN_RECEIVER_IRQ  2
+    #define PIN_RECEIVER_GPIO 3
+    #define PIN_RECEIVER_RST  4
 
 #elif defined(ARDUINO_ESP32S3_DEV)
     #pragma message("ARDUINO_ESP32S3_DEV defined; this is a generic (i.e. non-specific) target")

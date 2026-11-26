@@ -119,6 +119,7 @@
 // 20260620 Fixed SPI pin reset by RadioLib for CC1101 with LORA_SPI_BUS
 //          Changed radio initialization to new ConfigFSK_t structure in RadioLib 7.7.x
 // 20261108 Updated to RadioLib 8.0.0
+// 20261126 Added RF switch and TCXO configuration for Seeed Studio XIAO ESP32C3 with Wio-SX1262
 //
 // ToDo:
 // -
@@ -285,6 +286,18 @@ int16_t WeatherSensor::begin(uint8_t max_sensors_default, bool init_filters, int
 #if defined(ARDUINO_XIAO_ESP32S3)
     // set RF switch control configuration
     radio.setRfSwitchPins(38, RADIOLIB_NC);
+
+    // TCXO voltage according to
+    // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf:
+    // 1.7~3.3V
+    //
+    // Set to 1.7V as recommended by Seeed Studio Support
+    radio.setTCXO(RadioLibTCXOVoltage_t::Voltage1V7);
+#endif
+
+#if defined(ARDUINO_XIAO_ESP32C3)
+    // set RF switch control configuration
+    radio.setRfSwitchPins(6, RADIOLIB_NC);
 
     // TCXO voltage according to
     // https://files.seeedstudio.com/products/SenseCAP/Wio_SX1262/Wio-SX1262_Module_Datasheet.pdf:
